@@ -1,5 +1,3 @@
-# scenes/base_scene.py
-
 from pygame import Event , Surface
 from abc import ABC, abstractmethod
 from core.resource_manager import ResourceManager
@@ -9,17 +7,13 @@ from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
 from core.camera import Camera
 class BaseScene(ABC):
-    """
-    Interface abstrata para todas as cenas (telas) do jogo.
-    Define os métodos mínimos que cada cena deve implementar.
-    """
+   
 
     def __init__(self,screen:Surface,world_width:int,world_height:int):
         self.screen=screen
 
         self.camera=Camera(
-            screen.get_width(),
-            screen.get_height(),
+            self.screen,
             world_width,
             world_height
             )

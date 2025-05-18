@@ -1,14 +1,19 @@
 import pygame
-from core.config import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from core.config import  FPS
 from core.event_manager import EventManager
 from core.scene_manager import SceneManager
 from scenes.teste_scene import TestScene
-from scenes.home_scene import HomeScene
 from sys import exit
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen= pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),pygame.FULLSCREEN)
+        info=pygame.display.Info()
+        self.screen_width=info.current_w
+        self.screen_height=info.current_h
+
+        self.screen= pygame.display.set_mode(
+            (self.screen_width, self.screen_height),
+            pygame.FULLSCREEN)
         pygame.display.set_caption("Farol de Alexandria")
         self.clock = pygame.time.Clock()
         

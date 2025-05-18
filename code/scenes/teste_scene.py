@@ -11,7 +11,6 @@ class TestScene(BaseScene):
         img=Surface((30,30))
         self.e = Entity()
         self.e.add(Position(500, 500),Sprite(img))
-       
         self.entities=[self.player,self.e]
         self.camera.follow=self.player
         

@@ -1,16 +1,17 @@
 
-from pygame import Rect
+from pygame import Rect,Surface
 
 from core.components.position import Position
 from core.ecs import Entity
 class Camera:
     def __init__(self,
-                 width:int,
-                 height:int,
+                 screen:Surface,
                  world_width:int,
                  world_height:int
                  ):
-        self.viewport=Rect(0,0,width,height)
+        self.screen=screen
+        w,h=self.screen.get_size()
+        self.viewport=Rect(0,0,w,h)
         self.world_width=world_width
         self.world_height=world_height
         self._target:Entity|None=None

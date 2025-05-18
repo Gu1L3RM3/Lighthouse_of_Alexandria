@@ -1,7 +1,6 @@
 import os
 
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+
 FPS = 60
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
