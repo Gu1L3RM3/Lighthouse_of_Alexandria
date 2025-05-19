@@ -5,6 +5,7 @@ from core.event_manager import EventManager
 from core.ecs import Entity
 from systems.movement_system import MovementSystem
 from systems.render_system import RenderSystem
+from systems.collision_system import CollisionSystem
 from core.camera import Camera
 class BaseScene(ABC):
    
@@ -18,11 +19,11 @@ class BaseScene(ABC):
             world_height
             )
         self.resources = ResourceManager.get()
-        self.events    = EventManager.get()
+        self.event_manager:EventManager= EventManager.get()
         self.entities:list[Entity]
         self.movement_system =MovementSystem()
         self.render_system=RenderSystem(screen,self.camera)
-
+        self.collision_system=CollisionSystem()
 
     @abstractmethod
     def process_input(self, events: list[Event]) -> None:

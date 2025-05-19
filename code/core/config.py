@@ -18,4 +18,18 @@ ASSETS_DIR = os.path.join(PROJECT_ROOT, 'assets')
 def get_asset_path(subdir: str, filename: str) -> str:
     
     return os.path.join(ASSETS_DIR, subdir, filename)
-
+TEST_MAP=[
+    'XXXXXXXXXXXXXXXXXXXXXXX',
+    'X.....................X',
+    'XXXXXX............XXXXX',
+    'X..........P..........X',
+    'X..............XX.....X',
+    'XXXXXXXXXXX...........X',
+    'X..............XXXXXXXX',
+    'X.....................X',
+    'X.....................X',
+    'X.....................X',
+    'X.....................X',
+    'X.....................X',
+    'XXXXXXXXXXXXXXXXXXXXXXX'
+]
