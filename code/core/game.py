@@ -3,6 +3,7 @@ from core.config import  FPS
 from core.event_manager import EventManager
 from core.scene_manager import SceneManager
 from scenes.teste_scene import TestScene
+from scenes.home_scene import HomeScene
 from sys import exit
 class Game:
     def __init__(self):
@@ -19,7 +20,10 @@ class Game:
         
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
-        self.scene_manager.active_scene =TestScene(self.screen)
+        self.scene_manager.register('teste',TestScene(self.screen))
+        self.scene_manager.register('home',HomeScene(self.screen))
+        
+        self.scene_manager.active_scene =HomeScene(self.screen)
 
     def run(self):
         while True:

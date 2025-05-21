@@ -6,7 +6,6 @@ from core.components.collider import Collider
 from core.components.velocity import Velocity
 from core.ecs import Entity
 from entities.player import Player
-from typing import Tuple,List
 from core.config import TEST_MAP
 
 
@@ -32,7 +31,6 @@ class TestScene(BaseScene):
         self.event_manager.subscribe('collision',self.on_collision)
     
     def set_map(self):#para teste
-        print(self.screen.size)
         for row_idx,row in enumerate(TEST_MAP):
             for col_idx, cell in enumerate(row):
                 x=col_idx*self.tile_size+3
@@ -56,11 +54,11 @@ class TestScene(BaseScene):
 
     def on_collision(self, evt):
         #TODO: Melhorar essa função
-        # Desempacota as entidades e os rects do evento
+        
         e1, e2       = evt['entities']
         r1, r2       = evt['rects']
 
-        # Identifica qual é o player e qual é a parede (ou outro obstáculo)
+        
         if e1 is self.player:
             player, wall = e1, e2
             pr, wr       = r1, r2
