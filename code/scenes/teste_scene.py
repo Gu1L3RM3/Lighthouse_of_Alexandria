@@ -23,7 +23,7 @@ class TestScene(BaseScene):
         world_w=cols*self.tile_size
         world_h=rows*self.tile_size
 
-        super().__init__(screen,world_w,world_h)
+        super().__init__(screen,30000,10000)
 
         self.entities=[]
         self.set_map()
