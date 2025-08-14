@@ -31,7 +31,6 @@ class Camera:
 
         x = int(pos.x - self.viewport.w  / 2)
         y = int(pos.y - self.viewport.h / 2)
-        print(x,y)
         x = max(0, min(x, self.world_width  - self.viewport.w))
         y = max(0, min(y, self.world_height - self.viewport.h))
         

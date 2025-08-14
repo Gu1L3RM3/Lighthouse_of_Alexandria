@@ -2,28 +2,34 @@ from pygame import Surface
 from scenes.base_scene import BaseScene
 from core.config import *
 from pygame.locals import *
+from ui.type_writer import TypewriterEffect
 from core.scene_manager import SceneManager
 class HomeScene(BaseScene):
     def __init__(self,screen: Surface):
         screen_w=screen.get_width()
         screen_h=screen.get_height()
         super().__init__(screen,screen_w,screen_h)
+
+        self.type_writer=TypewriterEffect(
+            position=(screen_w//2, screen_h//2),
+            font_color=(255,255,255),
+            font_size=20,
+            font_name="PressStart2P-Regular.ttf",
+            text="Home Page!!"
+        )
+        self.scene_manager=SceneManager.get()
         
-        self.font = self.resources.load_font("PressStart2P-Regular.ttf", 48)
+        
 
-        self.text = "Home Page"
-
-        self.text_surf = self.font.render(self.text, True, (255, 255, 255))
-
-        self.text_rect = self.text_surf.get_rect(center=(screen_w//2, screen_h//2))
     def process_input(self, events):
         for event in events:
             if event.type == KEYDOWN and event.key == K_SPACE:
-                SceneManager.get().change("teste")
+                self.scene_manager.start_fade("teste",duration=1.0)
 
     def update(self, dt: float) -> None:
-        pass
+        self.type_writer.update()
+        self.scene_manager.update_transition()
     def render(self) -> None:
         self.screen.fill((0,100,0))
-        self.screen.blit(self.text_surf,self.text_rect)
-    
+        self.type_writer.draw(self.screen)
+        self.scene_manager.draw_transition(self.screen)

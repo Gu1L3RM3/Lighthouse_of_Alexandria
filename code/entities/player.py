@@ -21,8 +21,8 @@ class Player(Entity):
 
         pos=Position(x,y)
         vel=Velocity(0,0)
-        col=Collider(32,32)
-        image=Surface((32,32))
+        col=Collider(16,16)
+        image=Surface((16,16))
         image.fill((255,0,0))
 
         spr=Sprite(image)
@@ -36,6 +36,7 @@ class Player(Entity):
         if self.is_collided:
             self.__direction.update(0,0)
             vel.vxy=(0,0)
+            
             return 
         keys= get_pressed()
         

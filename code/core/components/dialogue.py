@@ -1,0 +1,99 @@
+import pygame
+from pygame import Surface
+from ui.type_writer import TypewriterEffect
+from core.resource_manager import ResourceManager
+class Dialogue:
+    def __init__(self, lines: list[str]):
+        self.lines = lines
+        self.current_index = 0
+        self.active = False
+        self.typewriter = None
+        
+        self.rm=ResourceManager.get()
+        
+        self.dialog_box_rect = None
+        self.wrapped_lines = [] 
+        self.font = None
+        self.font_color = (255, 255, 255)
+        self.max_text_width = 0
+
+    def _wrap_text(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
+        """
+        Quebra o texto em várias linhas.
+        AGORA RETORNA UMA LISTA DE STRINGS.
+        """
+        words = text.split(' ')
+        lines = []
+        current_line = ""
+        for word in words:
+            test_line = current_line + word + " "
+            if font.size(test_line)[0] < max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line.strip())
+                current_line = word + " "
+        lines.append(current_line.strip())
+        return lines
+
+    def _prepare_dialogue(self, screen_size, font_name, font_size, font_color):
+        """
+        Prepara a caixa de diálogo e o typewriter.
+        """
+        self.font_color = font_color
+        padding = 40
+        self.max_text_width = screen_size[0] - (padding * 3) # Mais padding para um visual melhor
+        
+        
+        self.font = self.rm.load_font(font_name,font_size) 
+
+        raw_text = self.lines[self.current_index]
+        self.wrapped_lines = self._wrap_text(raw_text, self.font, self.max_text_width)
+
+        # Calcula a altura da caixa baseada no número de linhas
+        line_height = self.font.get_linesize()
+        box_height = (len(self.wrapped_lines) * line_height) + padding
+        box_width = self.max_text_width + padding
+        
+        
+        box_x = (screen_size[0] - box_width) / 2
+        box_y = (screen_size[1] - box_height) / 2 
+
+        self.dialog_box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+
+        # Cria o Typewriter com o texto unido por '\n' para o efeito de digitação
+        typewriter_text = "\n".join(self.wrapped_lines)
+        text_center_pos = self.dialog_box_rect.center
+        self.typewriter = TypewriterEffect(
+            text_center_pos, typewriter_text, font_name, font_size, font_color, speed=30
+        )
+
+    def start(self, screen_size, font_name="PressStart2P-Regular.ttf", font_size=16, font_color=(255,255,255)):
+        self.active = True
+        self.current_index = 0
+        self._prepare_dialogue(screen_size, font_name, font_size, font_color)
+
+    def next(self, screen_size, font_name="PressStart2P-Regular.ttf", font_size=16, font_color=(255,255,255)):
+        self.current_index += 1
+        if self.current_index >= len(self.lines):
+            self.active = False
+            return False
+        self._prepare_dialogue(screen_size, font_name, font_size, font_color)
+        return True
+
+    def update(self):
+        if self.typewriter:
+            self.typewriter.update()
+
+    def draw(self, surface: Surface):
+        if not self.active or not self.dialog_box_rect:
+            return
+
+        # Desenha o fundo da caixa
+        pygame.draw.rect(surface, (10, 20, 40), self.dialog_box_rect, border_radius=8)
+        pygame.draw.rect(surface, (200, 220, 255), self.dialog_box_rect, 2, border_radius=8)
+        
+        
+       
+        self.typewriter.draw(surface)
+            
+    
