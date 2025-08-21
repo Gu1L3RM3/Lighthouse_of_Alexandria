@@ -9,7 +9,7 @@ class SceneManager:
         self.scenes: Dict[str, BaseScene] = {}
         self.active_scene: BaseScene = None
 
-        # --- Transição ---
+        
         self.transitioning = False
         self.transition_target: BaseScene = None
         self.transition_alpha = 0

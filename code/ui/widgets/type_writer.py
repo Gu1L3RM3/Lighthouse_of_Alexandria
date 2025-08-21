@@ -1,8 +1,8 @@
 import pygame
 from typing import Callable, Union
 from core.resource_manager import ResourceManager
-
-class TypewriterEffect:
+from ui.widgets.widget import Widget
+class TypewriterEffect(Widget):
     """
     Cria e gerencia um efeito de digitação para um texto.
     O parâmetro 'position' define o PONTO CENTRAL do texto final.
@@ -49,7 +49,7 @@ class TypewriterEffect:
         # A posição de desenho será o canto superior esquerdo (topleft) deste retângulo
         self.draw_position = text_rect.topleft
 
-    def update(self):
+    def update(self,dt):
         """Atualiza a lógica do efeito. Chame isso a cada frame no loop do jogo."""
         if self.finished:
             return
@@ -83,7 +83,7 @@ class TypewriterEffect:
             self.finished = True
             if self.on_finish:
                 self.on_finish()
-
+    
     def set_text(self, new_text: str):
         """Reinicia o efeito com um novo texto e recalcula a posição."""
         self._full_text = new_text

@@ -2,8 +2,9 @@ from pygame import Surface
 from scenes.base_scene import BaseScene
 from core.config import *
 from pygame.locals import *
-from ui.type_writer import TypewriterEffect
+from ui.widgets.type_writer import TypewriterEffect
 from core.scene_manager import SceneManager
+from ui.ui_manager import UIManager
 class HomeScene(BaseScene):
     def __init__(self,screen: Surface):
         screen_w=screen.get_width()
@@ -17,6 +18,8 @@ class HomeScene(BaseScene):
             font_name="PressStart2P-Regular.ttf",
             text="Home Page!!"
         )
+        self.ui_manager=UIManager()
+        self.ui_manager.add(self.type_writer)
         self.scene_manager=SceneManager.get()
         
         
@@ -27,9 +30,9 @@ class HomeScene(BaseScene):
                 self.scene_manager.start_fade("teste",duration=1.0)
 
     def update(self, dt: float) -> None:
-        self.type_writer.update()
+        self.ui_manager.update(dt)
         self.scene_manager.update_transition()
     def render(self) -> None:
         self.screen.fill((0,100,0))
-        self.type_writer.draw(self.screen)
+        self.ui_manager.draw(self.screen)
         self.scene_manager.draw_transition(self.screen)

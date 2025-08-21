@@ -1,8 +1,9 @@
 import pygame
 from pygame import Surface
-from ui.type_writer import TypewriterEffect
+from ui.widgets.type_writer import TypewriterEffect
 from core.resource_manager import ResourceManager
-class Dialogue:
+from core.ecs import Component
+class Dialogue(Component):
     def __init__(self, lines: list[str]):
         self.lines = lines
         self.current_index = 0
@@ -80,9 +81,9 @@ class Dialogue:
         self._prepare_dialogue(screen_size, font_name, font_size, font_color)
         return True
 
-    def update(self):
+    def update(self,dt):
         if self.typewriter:
-            self.typewriter.update()
+            self.typewriter.update(dt)
 
     def draw(self, surface: Surface):
         if not self.active or not self.dialog_box_rect:

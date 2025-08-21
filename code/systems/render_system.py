@@ -9,8 +9,9 @@ class RenderSystem(System):
         self.screen=screen
         self.camera=camera
     #TODO: Verificar dt para camera
-    def update(self, entities:List[Entity]):
+    def update(self,dt):
         self.camera.update()
+    def draw(self, entities:List[Entity]):
         for entity in entities:
             if entity.has(Position) and entity.has(Sprite):
 

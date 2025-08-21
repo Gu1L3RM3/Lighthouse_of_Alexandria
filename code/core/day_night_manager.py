@@ -5,30 +5,28 @@ class DayNightManager:
     Gerencia um ciclo de dia e noite 
     """
     
-    # Cores no formato (R, G, B, Alpha)
-    DAWN_COLOR   = (255, 120, 50, 100) # Amanhecer: Laranja/Rosa
-    DAY_COLOR    = (135, 206, 250, 0)  # Dia: Céu claro, sem overlay de escuridão
-    DUSK_COLOR   = (255, 120, 50, 100) # Entardecer: Laranja/Rosa
-    NIGHT_COLOR  = (10, 5, 40, 160)   # Noite: Azul escuro/Roxo
+    DAWN_COLOR   = (255, 120, 50, 100)
+    DAY_COLOR    = (135, 206, 250, 0)  
+    DUSK_COLOR   = (255, 120, 50, 100) 
+    NIGHT_COLOR  = (10, 5, 40, 160)   
 
     # Pontos-chave do ciclo (Hora, Cor)
     
     KEY_FRAMES = [
         (0,  NIGHT_COLOR),
-        (4,  NIGHT_COLOR),   # A noite profunda permanece até as 4h
-        (6,  DAWN_COLOR),    # O pico do amanhecer é às 6h
-        (8,  DAY_COLOR),     # O dia se estabelece completamente às 8h
-        (17, DAY_COLOR),     # O dia claro dura até as 17h
-        (19, DUSK_COLOR),    # O pico do entardecer é às 19h
-        (21, NIGHT_COLOR),   # A noite se estabelece completamente às 21h
-        (24, NIGHT_COLOR)    # Garante o loop para o próximo dia
+        (4,  NIGHT_COLOR),    
+        (6,  DAWN_COLOR),    
+        (8,  DAY_COLOR),     
+        (17, DAY_COLOR),    
+        (18, DUSK_COLOR),    
+        (21, NIGHT_COLOR),   
+        (24, NIGHT_COLOR)    
     ]
 
-    def __init__(self, screen: pygame.Surface, time_speed: float = 0.5):
+    def __init__(self, screen: pygame.Surface):
         self.screen = screen
         self.overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        self.time_of_day = 8.0  # Começa de manhã
-        self.time_speed = time_speed
+        self.time_of_day = 8.0  
 
     def _lerp_color(self, color1, color2, factor: float) -> tuple:
         """Interpola linearmente entre duas cores (R, G, B, A)."""
@@ -40,8 +38,10 @@ class DayNightManager:
 
     def update(self, dt: float):
         """Atualiza a hora e calcula a cor do overlay por interpolação."""
-        
-        self.time_of_day = (self.time_of_day + self.time_speed * dt) % 24
+        GAME_HOUR_DURATION = 42.0  # segundos reais por hora do jogo
+        game_hours_per_second = 1 / GAME_HOUR_DURATION
+
+        self.time_of_day = (self.time_of_day + game_hours_per_second * dt) % 24
 
         
         # Encontra os dois pontos-chave (keyframes) entre os quais a hora atual está
@@ -60,10 +60,8 @@ class DayNightManager:
         phase_duration = next_time - prev_time
         time_in_phase = self.time_of_day - prev_time
         
-        # Evita divisão por zero se a duração for 0
         progress = time_in_phase / phase_duration if phase_duration > 0 else 0
 
-        # Interpola a cor atual baseada no progresso
         current_color = self._lerp_color(prev_color, next_color, progress)
         self.overlay.fill(current_color)
 

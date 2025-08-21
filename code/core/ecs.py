@@ -5,6 +5,8 @@ class Component:
     """Marca : somente """
     pass
 
+
+
 class Entity:
     '''Objeto do jogo'''
     _next_id=1

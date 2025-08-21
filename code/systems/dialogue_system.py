@@ -2,53 +2,89 @@ import pygame
 from core.components.dialogue import Dialogue
 from core.components.position import Position
 from core.components.collider import Collider
+from core.components.freeze import Freeze
 from core.event_manager import EventManager
-
+from core.ecs import Entity
+from ui.widgets.dialogue_box import DialogueBoxWidget   # novo widget
+from ui.ui_manager import UIManager
 class DialogueSystem:
-    def __init__(self):
+    """
+    Gerencia detecção, início, progressão e término de diálogos.
+    Agora delega a renderização para o DialogueBoxWidget.
+    """
+    def __init__(self, ui_manager:UIManager):
         self.event_manager = EventManager.get()
-        self.active_dialogue = None
+        self.active_dialogue_npc: Entity | None = None
         self.screen_size = pygame.display.get_surface().get_size()
+        self.ui_manager = ui_manager   
 
-    def update(self, entities, player):
-        keys=pygame.key.get_just_pressed()
-        if self.active_dialogue:
-            dialogue = self.active_dialogue.get(Dialogue)
-            dialogue.update()
+    def update(self, entities: list[Entity], player: Entity,dt):
+        """Ponto de entrada principal do sistema, chamado a cada frame."""
+        if self.active_dialogue_npc:
+            self._handle_active_dialogue(dt)
+        else:
+            self._check_for_new_dialogue(entities, player)
 
-            # pular typewriter (mostrar tudo)
-            if keys[pygame.K_e]:
-                if not dialogue.typewriter.finished:
-                    dialogue.typewriter.skip()
-                else:
-                    if not dialogue.next(self.screen_size):
-                        self.active_dialogue = None
-                        self.event_manager.post(
-                            {'type': 'dialogue_end', 'npc': self.active_dialogue}
-                        )
+    def _handle_active_dialogue(self,dt):
+        """Processa a lógica quando um diálogo já está em andamento."""
+        keys = pygame.key.get_just_pressed()
+        dialogue = self.active_dialogue_npc.get(Dialogue)
+
+        dialogue.update(dt)  
+
+        if keys[pygame.K_e]:
+            if not dialogue.typewriter.finished:
+                dialogue.typewriter.skip()
+            else:
+                if not dialogue.next(self.screen_size):
+                    self._end_dialogue()
+
+    def _check_for_new_dialogue(self, entities: list[Entity], player: Entity):
+        """Verifica se o jogador está perto de um NPC para iniciar diálogo."""
+        keys = pygame.key.get_just_pressed()
+        if not keys[pygame.K_e]:
             return
 
-        # checa proximidade do player
         player_pos = player.get(Position)
         player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
 
-        for e in entities:
-            if e.has(Dialogue) and e.has(Position) and e.has(Collider):
-                npc_pos = e.get(Position)
-                npc_col = e.get(Collider).get_rect(npc_pos.x, npc_pos.y)
+        for npc in entities:
+            if npc.has(Dialogue) and npc.has(Collider):
+                npc_pos = npc.get(Position)
+                npc_col = npc.get(Collider).get_rect(npc_pos.x, npc_pos.y)
 
                 if player_col.colliderect(npc_col.inflate(10, 10)):
-                    if keys[pygame.K_e]:
-                        self.active_dialogue = e
-                        
-                        e.get(Dialogue).start(self.screen_size)
-                        self.event_manager.post(
-                            {'type': 'dialogue_start', 'npc': e}
-                        )
-                        break
+                    self._start_dialogue(npc)
+                    break
 
-    def draw(self, screen):
-        if not self.active_dialogue:
-            return
-        dialogue = self.active_dialogue.get(Dialogue)
-        dialogue.draw(screen)
+    def _start_dialogue(self, npc_entity: Entity):
+        """Inicia um novo diálogo, congela NPC e cria widget de UI."""
+        self.active_dialogue_npc = npc_entity
+        dialogue = npc_entity.get(Dialogue)
+        dialogue.start(self.screen_size)
+
+        freeze_comp = npc_entity.get(Freeze)
+        if freeze_comp:
+            freeze_comp.active = True
+
+        # Cria o widget e adiciona ao UIManager
+        dialog_box = DialogueBoxWidget(dialogue)
+        self.ui_manager.add(dialog_box)
+
+        self.event_manager.post({'type': 'dialogue_start', 'npc': npc_entity})
+
+    def _end_dialogue(self):
+        """Finaliza o diálogo, descongela o NPC e remove widget."""
+        npc = self.active_dialogue_npc
+
+        freeze_comp = npc.get(Freeze)
+        if freeze_comp:
+            freeze_comp.active = False
+
+        # Remove widgets de diálogo
+        self.ui_manager.widgets = [
+            w for w in self.ui_manager.widgets if not isinstance(w, DialogueBoxWidget)
+        ]
+
+        self.active_dialogue_npc = None
+        self.event_manager.post({'type': 'dialogue_end', 'npc': npc})

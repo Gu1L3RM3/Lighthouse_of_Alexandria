@@ -27,7 +27,6 @@ class Position(Component):
         self._pos.y = value
     @property
     def xy(self) -> Tuple[float, float]:
-        
         return self._pos.xy
 
     @xy.setter

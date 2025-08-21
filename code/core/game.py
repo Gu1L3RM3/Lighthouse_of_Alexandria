@@ -38,18 +38,14 @@ class Game:
                     pygame.quit()
                     exit()
 
-            # Envia eventos
             self.event_manager.post(events)
 
-            # Atualiza lógica da cena
             scene = self.scene_manager.active_scene
             scene.process_input(events)
             scene.update(dt)
 
-            # Renderiza cena
             scene.render()
 
-            # Atualiza e desenha transição (fade)
             self.scene_manager.update_transition()
             self.scene_manager.draw_transition(self.screen)
 
