@@ -1,5 +1,3 @@
-# No arquivo: ui/widgets/dialogue_box.py
-
 import pygame
 from ui.widgets.widget import Widget
 from core.components.dialogue import Dialogue
