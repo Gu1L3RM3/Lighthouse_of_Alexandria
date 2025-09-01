@@ -1,7 +1,7 @@
 import pygame
 from typing import Dict
 from scenes.base_scene import BaseScene
-
+from core.settings import *
 class SceneManager:
     _instance = None
 
@@ -39,7 +39,6 @@ class SceneManager:
         if name not in self.scenes:
             raise KeyError(f"Scene '{name}' not registered.")
         if not self.active_scene:
-            # Se nenhuma cena ativa, muda imediatamente
             self.change(name)
             return
 
@@ -47,7 +46,7 @@ class SceneManager:
         self.transition_target = self.scenes[name]
         self.transition_phase = "fade_out"
         self.transition_alpha = 0
-        self.transition_speed = 255 / (duration * 60)  # assume 60 FPS
+        self.transition_speed = 255 / (duration * FPS)  
         self.transition_surface = pygame.Surface(self.active_scene.screen.get_size())
         self.transition_surface.fill((0, 0, 0))
 

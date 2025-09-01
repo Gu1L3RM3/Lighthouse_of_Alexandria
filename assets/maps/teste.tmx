@@ -644,11 +644,11 @@
   </object>
  </objectgroup>
  <objectgroup id="6" name="npc">
-  <object id="15" name="professor" x="762" y="1221.27">
+  <object id="15" name="professor" x="765.03" y="1230.36">
    <properties>
     <property name="npc_type" value="professor"/>
-    <property name="route_21" value="RU"/>
-    <property name="route_24" value="casa1"/>
+    <property name="route_19" value="RU"/>
+    <property name="route_21" value="casa1"/>
     <property name="route_8" value="escola"/>
    </properties>
    <point/>

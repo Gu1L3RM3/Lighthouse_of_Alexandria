@@ -12,7 +12,7 @@ class Collider(Component):
         self.offset_x=offset_x
         self.offset_y=offset_y
     
-    def get_rect(self,pos_x:float,pos_y:float):
+    def get_rect(self,pos_x:float,pos_y:float)->Rect:
         return Rect(
             int(pos_x+self.offset_x),
             int(pos_y+self.offset_y),

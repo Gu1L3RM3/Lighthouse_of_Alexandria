@@ -1,9 +1,9 @@
 import pygame
 from pygame import Surface 
 from ui.widgets.widget import Widget
-from core.resource_manager import ResourceManager
-from core.day_night_manager import DayNightManager
-
+from core.managers.resource_manager import ResourceManager
+from core.managers.day_night_manager import DayNightManager
+from core.settings import *
 class Clock(Widget):
     def __init__(self,day_night_manager: DayNightManager):
         
@@ -13,7 +13,7 @@ class Clock(Widget):
         self.minutes:int=0
         self.time_str="00:00"
         self.padding=10
-        self.font = self.rm.load_font("PressStart2P-Regular.ttf", 18)
+        self.font = self.rm.load_font(FONT, 18)
         
     def update(self, dt):
         time_float=self.dn_manager.time_of_day
@@ -22,7 +22,7 @@ class Clock(Widget):
         self.time_str = f"{self.hours:02d}:{self.minutes:02d}" # f-string para formatar com zero à esquerda
 
     def draw(self, surface:Surface):
-        text_surface =self.font.render(self.time_str,True,(255,255,255))
+        text_surface =self.font.render(self.time_str,True,WHITE)
         bg_rect = pygame.Rect(
             0, 0, 
             text_surface.get_width() + self.padding* 2,

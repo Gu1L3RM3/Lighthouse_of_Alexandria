@@ -1,6 +1,6 @@
 import pygame
-from core.config import get_asset_path
-
+import os 
+from core.settings import *
 class ResourceManager:
     _instance = None
 
@@ -14,10 +14,13 @@ class ResourceManager:
         if cls._instance is None:
             cls._instance = ResourceManager()
         return cls._instance
+    
+    def get_asset_path(self,subdir: str, filename: str) -> str:
+        return os.path.join(ASSETS_DIR, subdir, filename)
 
     def load_image(self, filename: str, colorkey=None) -> pygame.Surface:
         if filename not in self._images:
-            path = get_asset_path('images', filename)
+            path = self.get_asset_path('images', filename)
             img = pygame.image.load(path).convert_alpha()
 
             if colorkey is not None:
@@ -28,7 +31,7 @@ class ResourceManager:
 
     def load_sound(self, filename: str) -> pygame.mixer.Sound:
         if filename not in self._sounds:
-            path = get_asset_path('sounds', filename)
+            path = self.get_asset_path('sounds', filename)
             snd = pygame.mixer.Sound(path)
             self._sounds[filename] = snd
         return self._sounds[filename]
@@ -36,7 +39,7 @@ class ResourceManager:
     def load_font(self, filename: str, size: int) -> pygame.font.Font:
         key = f"{filename}-{size}"
         if key not in self._fonts:
-            path = get_asset_path('fonts', filename)
+            path = self.get_asset_path('fonts', filename)
             font = pygame.font.Font(path, size)
             self._fonts[key] = font
         return self._fonts[key]

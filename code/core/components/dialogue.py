@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface
 from ui.widgets.type_writer import TypewriterEffect
-from core.resource_manager import ResourceManager
+from core.managers.resource_manager import ResourceManager
 from core.ecs import Component
 class Dialogue(Component):
     def __init__(self, lines: list[str]):

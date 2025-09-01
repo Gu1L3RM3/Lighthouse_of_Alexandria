@@ -2,7 +2,7 @@ from core.components.npc_routine import NPCRoutine
 from core.components.path_follower import PathFollower
 from core.components.position import Position
 from core.components.freeze import Freeze
-
+from core.managers.entity_manager import EntityManager
 class NPCRouteSystem:
     """
     Verifica a hora (DayNightManager) e gera um PathFollower
@@ -12,12 +12,11 @@ class NPCRouteSystem:
         self.map = map_system
         self.dn  = day_night_manager
 
-    def update(self, entities):
+    def update(self, entity_mn:EntityManager):
         cur_hour = int(self.dn.time_of_day)
 
-        for e in entities:
-            if not e.has(NPCRoutine) or not e.has(Position):
-                continue
+        entities_with_routine=entity_mn.get_entities_with(NPCRoutine,Position)
+        for e in entities_with_routine:
             if e.has(Freeze) and e.get(Freeze).active:
                 continue
 

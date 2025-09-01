@@ -1,11 +1,9 @@
 from pygame import Event , Surface
 from abc import ABC, abstractmethod
-from core.resource_manager import ResourceManager
-from core.event_manager import EventManager
+from core.managers.resource_manager import ResourceManager
+from core.managers.event_manager import EventManager
 from core.ecs import Entity
-from systems.movement_system import MovementSystem
-from systems.render_system import RenderSystem
-from systems.collision_system import CollisionSystem
+
 from core.camera import Camera
 class BaseScene(ABC):
    
@@ -21,9 +19,7 @@ class BaseScene(ABC):
         self.resources = ResourceManager.get()
         self.event_manager:EventManager= EventManager.get()
         self.entities:list[Entity]
-        self.movement_system =MovementSystem()
-        self.render_system=RenderSystem(screen,self.camera)
-        self.collision_system=CollisionSystem()
+        
 
     @abstractmethod
     def process_input(self, events: list[Event]) -> None:

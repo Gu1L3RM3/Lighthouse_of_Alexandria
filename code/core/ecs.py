@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict,Type,List
 
-class Component:
+class Component(ABC):
     """Marca : somente """
     pass
 

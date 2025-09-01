@@ -1,14 +1,11 @@
 import pygame
-
+from core.settings import *
 class DayNightManager:
     """
     Gerencia um ciclo de dia e noite 
     """
     
-    DAWN_COLOR   = (255, 120, 50, 100)
-    DAY_COLOR    = (135, 206, 250, 0)  
-    DUSK_COLOR   = (255, 120, 50, 100) 
-    NIGHT_COLOR  = (10, 5, 40, 160)   
+   
 
     # Pontos-chave do ciclo (Hora, Cor)
     
@@ -37,8 +34,7 @@ class DayNightManager:
         return int(r), int(g), int(b), int(a)
 
     def update(self, dt: float):
-        """Atualiza a hora e calcula a cor do overlay por interpolação."""
-        GAME_HOUR_DURATION = 42.0  # segundos reais por hora do jogo
+        GAME_HOUR_DURATION = 6.0  # segundos reais por hora do jogo
         game_hours_per_second = 1 / GAME_HOUR_DURATION
 
         self.time_of_day = (self.time_of_day + game_hours_per_second * dt) % 24

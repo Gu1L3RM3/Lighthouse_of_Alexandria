@@ -3,6 +3,7 @@ from core.components.path_follower import PathFollower
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
+from core.managers.entity_manager import EntityManager
 
 class PathFollowingSystem:
     """
@@ -13,16 +14,14 @@ class PathFollowingSystem:
         self.g = navgrid
         self.slowing_radius = self.g.tile_width * 2
 
-    def update(self, entities, dt: float):
-        for e in entities:
-            
-            pf = e.get(PathFollower)
-            if not pf or not e.has(Position):
-                continue
+    def update(self, entity_mn:EntityManager, dt: float):
+        entities_with_pf = entity_mn.get_entities_with(PathFollower,Position)
+        for e in entities_with_pf:
 
-            # Adiciona Velocity se não existir
-            if not e.has(Velocity):
-                e.add(Velocity())
+            pf = e.get(PathFollower)
+            
+
+            
             vel: Velocity = e.get(Velocity)
 
             # Se a entidade estiver congelada, zera a velocidade e para

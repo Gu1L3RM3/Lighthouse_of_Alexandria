@@ -26,14 +26,13 @@ class Camera:
     def update(self):
         if self._target is None:
             return 
-        position:Position=self._target.get(Position) 
-        pos=position.pos
+        position: Position = self._target.get(Position)
+        pos = position.pos
 
-        x = int(pos.x - self.viewport.w  / 2)
-        y = int(pos.y - self.viewport.h / 2)
-        x = max(0, min(x, self.world_width  - self.viewport.w))
-        y = max(0, min(y, self.world_height - self.viewport.h))
-        
-        self.viewport.topleft=(x,y)
-    def apply(self,target_rect:Rect)->Rect:
-        return target_rect.move(-self.viewport.x,-self.viewport.y)
+        self.viewport.x = pos.x - self.viewport.w / 2
+        self.viewport.y = pos.y - self.viewport.h / 2
+        self.viewport.x = max(0, min(self.viewport.x, self.world_width - self.viewport.w))
+        self.viewport.y = max(0, min(self.viewport.y, self.world_height - self.viewport.h))
+
+    def apply(self, target_rect: Rect) -> Rect:
+        return target_rect.move(-round(self.viewport.x), -round(self.viewport.y))

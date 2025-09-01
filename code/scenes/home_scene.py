@@ -1,9 +1,9 @@
 from pygame import Surface
 from scenes.base_scene import BaseScene
-from core.config import *
+from core.settings import *
 from pygame.locals import *
 from ui.widgets.type_writer import TypewriterEffect
-from core.scene_manager import SceneManager
+from core.managers.scene_manager import SceneManager
 from ui.ui_manager import UIManager
 class HomeScene(BaseScene):
     def __init__(self,screen: Surface):
@@ -13,9 +13,9 @@ class HomeScene(BaseScene):
 
         self.type_writer=TypewriterEffect(
             position=(screen_w//2, screen_h//2),
-            font_color=(255,255,255),
+            font_color=WHITE,
             font_size=20,
-            font_name="PressStart2P-Regular.ttf",
+            font_name=FONT,
             text="Home Page!!"
         )
         self.ui_manager=UIManager()

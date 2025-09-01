@@ -1,7 +1,7 @@
 import pygame
-from core.config import FPS
-from core.event_manager import EventManager
-from core.scene_manager import SceneManager
+from core.settings import FPS
+from core.managers.event_manager import EventManager
+from core.managers.scene_manager import SceneManager
 from scenes.test_map import TestMap
 from scenes.home_scene import HomeScene
 from sys import exit
@@ -31,6 +31,7 @@ class Game:
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0
+            
             events = pygame.event.get()
 
             for e in events:

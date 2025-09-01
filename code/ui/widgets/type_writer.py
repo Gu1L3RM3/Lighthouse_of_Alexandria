@@ -1,7 +1,9 @@
 import pygame
 from typing import Callable, Union
-from core.resource_manager import ResourceManager
+from core.managers.resource_manager import ResourceManager
+from core.settings import *
 from ui.widgets.widget import Widget
+
 class TypewriterEffect(Widget):
     """
     Cria e gerencia um efeito de digitação para um texto.
@@ -36,21 +38,14 @@ class TypewriterEffect(Widget):
         self.set_text(text)
 
     def _calculate_start_position(self):
-        """
-        Calcula a posição do canto superior esquerdo (top-left) para que o texto
-        completo fique centralizado na self.center_position.
-        """
-        # Renderiza o texto completo para obter suas dimensões
+       
         text_surface = self.font.render(self._full_text, True, self.font_color)
         
-        # Cria um retângulo com as dimensões do texto e define seu centro
         text_rect = text_surface.get_rect(center=self.center_position)
         
-        # A posição de desenho será o canto superior esquerdo (topleft) deste retângulo
         self.draw_position = text_rect.topleft
 
     def update(self,dt):
-        """Atualiza a lógica do efeito. Chame isso a cada frame no loop do jogo."""
         if self.finished:
             return
 
@@ -69,10 +64,10 @@ class TypewriterEffect(Widget):
 
     def draw(self, surface: pygame.Surface):
         """Desenha o texto atual na superfície fornecida."""
-        # Renderiza o texto que está sendo digitado
+       
         rendered_text = self.font.render(self._current_text, True, self.font_color)
         
-        # Usa a posição pré-calculada para o blit
+        
         surface.blit(rendered_text, self.draw_position)
 
     def skip(self):
@@ -93,5 +88,5 @@ class TypewriterEffect(Widget):
         self._interval = 1000 / self.speed
         self._last_update = pygame.time.get_ticks()
         
-        # Recalcula a posição de início para o novo texto
+      
         self._calculate_start_position()
