@@ -1,9 +1,7 @@
 import pygame
 from core.settings import *
 class DayNightManager:
-    """
-    Gerencia um ciclo de dia e noite 
-    """
+    
     
    
 
@@ -34,13 +32,12 @@ class DayNightManager:
         return int(r), int(g), int(b), int(a)
 
     def update(self, dt: float):
-        GAME_HOUR_DURATION = 6.0  # segundos reais por hora do jogo
+        GAME_HOUR_DURATION = 48.0  
         game_hours_per_second = 1 / GAME_HOUR_DURATION
 
         self.time_of_day = (self.time_of_day + game_hours_per_second * dt) % 24
 
         
-        # Encontra os dois pontos-chave (keyframes) entre os quais a hora atual está
         prev_frame = self.KEY_FRAMES[0]
         next_frame = self.KEY_FRAMES[1]
         for i in range(len(self.KEY_FRAMES) - 1):
@@ -52,7 +49,6 @@ class DayNightManager:
         prev_time, prev_color = prev_frame
         next_time, next_color = next_frame
 
-        # Calcula o progresso (fator de 0.0 a 1.0) entre os dois keyframes
         phase_duration = next_time - prev_time
         time_in_phase = self.time_of_day - prev_time
         
@@ -62,9 +58,7 @@ class DayNightManager:
         self.overlay.fill(current_color)
 
     def draw(self):
-        """Desenha o overlay sobre a tela."""
         self.screen.blit(self.overlay, (0, 0))
 
     def set_time(self, hour: float):
-        """Define manualmente a hora do dia."""
         self.time_of_day = hour % 24

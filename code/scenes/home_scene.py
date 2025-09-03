@@ -27,7 +27,7 @@ class HomeScene(BaseScene):
     def process_input(self, events):
         for event in events:
             if event.type == KEYDOWN and event.key == K_SPACE:
-                self.scene_manager.start_fade("teste",duration=1.0)
+                self.scene_manager.start_fade("teste",duration=0.5)
 
     def update(self, dt: float) -> None:
         self.ui_manager.update(dt)

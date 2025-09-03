@@ -12,10 +12,7 @@ from ui.ui_manager import UIManager
 
 
 class DialogueSystem:
-    """
-    Gerencia detecção, início, progressão e término de diálogos.
-    Agora delega a renderização para o DialogueBoxWidget.
-    """
+    
     def __init__(self, ui_manager:UIManager):
         self.event_manager = EventManager.get()
         self.active_dialogue_npc: Entity | None = None
@@ -30,7 +27,6 @@ class DialogueSystem:
         self._check_for_new_dialogue(entity_mn, player)
 
     def _handle_active_dialogue(self,dt):
-        """Processa a lógica quando um diálogo já está em andamento."""
         keys = pygame.key.get_just_pressed()
         dialogue = self.active_dialogue_npc.get(Dialogue)
 
@@ -47,7 +43,6 @@ class DialogueSystem:
             self._end_dialogue()
 
     def _check_for_new_dialogue(self, entity_mn:EntityManager, player: Entity):
-        """Verifica se o jogador está perto de um NPC para iniciar diálogo."""
         keys = pygame.key.get_just_pressed()
         if not keys[KEY_DIALOG]:
             return
@@ -68,7 +63,6 @@ class DialogueSystem:
             self._start_dialogue(npc)
             break
     def _start_dialogue(self, npc_entity: Entity):
-        """Inicia um novo diálogo, congela NPC e cria widget de UI."""
         self.active_dialogue_npc = npc_entity
         dialogue = npc_entity.get(Dialogue)
         dialogue.start(self.screen_size)
@@ -84,7 +78,6 @@ class DialogueSystem:
         self.event_manager.post({'type': 'dialogue_start', 'npc': npc_entity})
 
     def _end_dialogue(self):
-        """Finaliza o diálogo, descongela o NPC e remove widget."""
         npc = self.active_dialogue_npc
 
         freeze_comp = npc.get(Freeze)

@@ -4,6 +4,7 @@ from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from scenes.test_map import TestMap
 from scenes.home_scene import HomeScene
+from scenes.puzzle_map import PuzzleMap
 from sys import exit
 
 class Game:
@@ -24,6 +25,8 @@ class Game:
         self.scene_manager = SceneManager.get()
         self.scene_manager.register('teste', TestMap(self.screen))
         self.scene_manager.register('home', HomeScene(self.screen))
+        self.scene_manager.register('puzzle',PuzzleMap(self.screen))
+
         
         self.scene_manager.active_scene = HomeScene(self.screen)
         self.scene_manager.active_scene.start()

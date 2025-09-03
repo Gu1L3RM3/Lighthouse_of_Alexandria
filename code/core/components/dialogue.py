@@ -3,6 +3,7 @@ from pygame import Surface
 from ui.widgets.type_writer import TypewriterEffect
 from core.managers.resource_manager import ResourceManager
 from core.ecs import Component
+
 class Dialogue(Component):
     def __init__(self, lines: list[str]):
         self.lines = lines
@@ -19,10 +20,7 @@ class Dialogue(Component):
         self.max_text_width = 0
 
     def _wrap_text(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
-        """
-        Quebra o texto em várias linhas.
-        AGORA RETORNA UMA LISTA DE STRINGS.
-        """
+        
         words = text.split(' ')
         lines = []
         current_line = ""
@@ -37,12 +35,10 @@ class Dialogue(Component):
         return lines
 
     def _prepare_dialogue(self, screen_size, font_name, font_size, font_color):
-        """
-        Prepara a caixa de diálogo e o typewriter.
-        """
+        
         self.font_color = font_color
         padding = 40
-        self.max_text_width = screen_size[0] - (padding * 3) # Mais padding para um visual melhor
+        self.max_text_width = screen_size[0] - (padding * 3)
         
         
         self.font = self.rm.load_font(font_name,font_size) 
@@ -50,7 +46,6 @@ class Dialogue(Component):
         raw_text = self.lines[self.current_index]
         self.wrapped_lines = self._wrap_text(raw_text, self.font, self.max_text_width)
 
-        # Calcula a altura da caixa baseada no número de linhas
         line_height = self.font.get_linesize()
         box_height = (len(self.wrapped_lines) * line_height) + padding
         box_width = self.max_text_width + padding
@@ -61,7 +56,6 @@ class Dialogue(Component):
 
         self.dialog_box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 
-        # Cria o Typewriter com o texto unido por '\n' para o efeito de digitação
         typewriter_text = "\n".join(self.wrapped_lines)
         text_center_pos = self.dialog_box_rect.center
         self.typewriter = TypewriterEffect(
@@ -89,7 +83,6 @@ class Dialogue(Component):
         if not self.active or not self.dialog_box_rect:
             return
 
-        # Desenha o fundo da caixa
         pygame.draw.rect(surface, (10, 20, 40), self.dialog_box_rect, border_radius=8)
         pygame.draw.rect(surface, (200, 220, 255), self.dialog_box_rect, 2, border_radius=8)
         

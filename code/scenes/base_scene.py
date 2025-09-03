@@ -16,7 +16,7 @@ class BaseScene(ABC):
             world_width,
             world_height
             )
-        self.resources = ResourceManager.get()
+        self.resources:ResourceManager = ResourceManager.get()
         self.event_manager:EventManager= EventManager.get()
         self.entities:list[Entity]
         

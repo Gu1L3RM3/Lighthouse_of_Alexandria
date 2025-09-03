@@ -19,7 +19,7 @@ class Clock(Widget):
         time_float=self.dn_manager.time_of_day
         self.hours = int(time_float)
         self.minutes = int((time_float - self.hours) * 60)
-        self.time_str = f"{self.hours:02d}:{self.minutes:02d}" # f-string para formatar com zero à esquerda
+        self.time_str = f"{self.hours:02d}:{self.minutes:02d}" 
 
     def draw(self, surface:Surface):
         text_surface =self.font.render(self.time_str,True,WHITE)
@@ -31,5 +31,5 @@ class Clock(Widget):
         )
         bg_rect.topright = (surface.get_width() - 15, 15)
         text_rect = text_surface.get_rect(center=bg_rect.center)
-        pygame.draw.rect(surface, (0, 0, 0, 150), bg_rect, border_radius=5) # Fundo preto semi-transparente
+        pygame.draw.rect(surface, (0, 0, 0, 150), bg_rect, border_radius=5) 
         surface.blit(text_surface, text_rect)

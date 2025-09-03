@@ -1,9 +1,13 @@
 from typing import Type, Dict, List, Optional, Callable
 from core.ecs import Component, Entity
+from entities.player import Player
 
 class EntityManager:
     def __init__(self):
         self._entities: Dict[int, Entity] = {}
+    @property
+    def entities(self):
+        return self._entities
 
     def create(self, *components: Component) -> Entity:
         entity = Entity()
@@ -20,9 +24,17 @@ class EntityManager:
     def remove_component(self, entity: Entity, comp_type: Type[Component]):
         entity.remove(comp_type)
 
+
+
     def remove_entity(self, entity: Entity):
         if entity.id in self._entities:
             del self._entities[entity.id]
+    
+
+    def get_player(self)->Player:
+        for e in self._entities.values():
+            if isinstance(e,Player):
+                return e
 
     def get_entities(self) -> List[Entity]:
         return list(self._entities.values())

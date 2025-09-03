@@ -1,60 +1,55 @@
 import pygame
+from core.ecs import System
+from pygame import Vector2
 from core.components.path_follower import PathFollower
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
 from core.managers.entity_manager import EntityManager
 
-class PathFollowingSystem:
-    """
-    Define a VELOCIDADE de entidades com PathFollower para que se movam
-    em direção ao próximo nó do caminho. Delega o movimento e colisão ao PhysicsSystem.
-    """
-    def __init__(self, navgrid):
-        self.g = navgrid
-        self.slowing_radius = self.g.tile_width * 2
 
-    def update(self, entity_mn:EntityManager, dt: float):
-        entities_with_pf = entity_mn.get_entities_with(PathFollower,Position)
-        for e in entities_with_pf:
-
-            pf = e.get(PathFollower)
-            
-
-            
+class PathFollowingSystem(System):
+    
+    def update(self, entity_mn: EntityManager, dt: float):
+        for e in entity_mn.get_entities_with(PathFollower, Position, Velocity):
+            pf: PathFollower = e.get(PathFollower)
+            pos: Position = e.get(Position)
             vel: Velocity = e.get(Velocity)
 
-            # Se a entidade estiver congelada, zera a velocidade e para
-            if e.has(Freeze) and e.get(Freeze).active:
+            if self._is_blocked(e, pf):
                 vel.vel.update(0, 0)
-                continue
-
-            pos: Position = e.get(Position)
-            
-            # Se o caminho terminou, zera a velocidade e remove o PathFollower
-            if pf.done or pf.current_index >= len(pf.path_tiles):
                 pf.done = True
-                vel.vel.update(0, 0)
-                e.remove(PathFollower)
-                continue
-            
-            target_tile = pf.path_tiles[pf.current_index]
-            target_pos = pygame.Vector2(self.g.pixel_center(*target_tile))
-            
-            entity_center_pos = pygame.Vector2(pos.x + self.g.tile_width / 2, pos.y + self.g.tile_height / 2)
-            direction_vec = target_pos - entity_center_pos
-            dist = direction_vec.length()
-
-            if dist < self.g.tile_width / 2:
-                pf.current_index += 1
                 continue
 
-            if dist > 0:
-                direction_vec.normalize_ip()
+            self._update_path_progress(pf, pos)
+            self._apply_velocity(pf, vel)
 
-            is_last_node = (pf.current_index == len(pf.path_tiles) - 1)
-            if is_last_node and dist < self.slowing_radius:
-                mapped_speed = pf.speed * (dist / self.slowing_radius)
-                vel.vel = direction_vec * mapped_speed
-            else:
-                vel.vel = direction_vec * pf.speed
+    def _is_blocked(self, entity, path_follower: PathFollower) -> bool:
+        frozen = entity.get(Freeze).active if entity.has(Freeze) else False
+        return frozen or path_follower.done or not path_follower.collision_rects
+
+    def _update_path_progress(self, pf: PathFollower, pos: Position):
+        if not pf.collision_rects:
+            pf.done, pf.direction = True, Vector2(0, 0)
+            return
+
+        target_rect = pf.collision_rects[0]
+        center = pos.center_pos()
+
+        if target_rect.collidepoint(center):
+            pf.collision_rects.pop(0)
+            pf.direction = (
+                self._calculate_direction(center, pf.collision_rects[0])
+                if pf.collision_rects else Vector2(0, 0)
+            )
+            pf.done = not bool(pf.collision_rects)
+
+        elif pf.direction.length_squared() == 0:
+            pf.direction = self._calculate_direction(center, target_rect)
+
+    def _calculate_direction(self, start_vec: Vector2, target_rect: pygame.Rect) -> Vector2:
+        direction = Vector2(target_rect.center) - start_vec
+        return direction.normalize() if direction.length_squared() > 0 else Vector2()
+
+    def _apply_velocity(self, pf: PathFollower, vel: Velocity):
+        vel.vel = pf.direction * pf.speed

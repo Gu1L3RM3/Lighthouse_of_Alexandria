@@ -1,6 +1,7 @@
 from core.ecs import Component
 from pygame import Vector2
 from typing import Tuple
+from core.settings import *
 class Position(Component):
     def __init__(self,x: float =0,y:float =0):
         self._pos=Vector2(x,y)
@@ -32,3 +33,9 @@ class Position(Component):
     @xy.setter
     def xy(self, value: Tuple[float, float]):
         self._pos.xy=value
+
+    def center_pos(self)->Vector2:
+        return Vector2(
+            self._pos.x+(TILE_SIZE//2),
+            self._pos.y+(TILE_SIZE//2)
+        )

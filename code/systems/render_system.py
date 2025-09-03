@@ -17,11 +17,9 @@ class RenderSystem(System):
         self.camera.update()
 
     def draw(self):
-        # 1️⃣ Desenha o mapa pré-renderizado
         map_surface = self.map_system.ground_surface
         self.screen.blit(map_surface, (-self.camera.viewport.x, -self.camera.viewport.y))
 
-        # 2️⃣ Desenha entidades visíveis (player, NPCs, objetos interativos)
         entities = self.entity_mn.get_entities_with(Position, Sprite)
         viewport = self.camera.viewport
 

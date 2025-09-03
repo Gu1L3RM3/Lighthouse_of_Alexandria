@@ -20,7 +20,7 @@ class TypewriterEffect(Widget):
                  on_finish: Union[Callable, None] = None):
         
         self.rm = ResourceManager.get()
-        self.center_position = position # Armazenamos a posição central desejada
+        self.center_position = position 
         self.font_color = font_color
         self.speed = speed
         self.on_finish = on_finish
@@ -32,9 +32,8 @@ class TypewriterEffect(Widget):
         self._full_text = ""
         self._current_text = ""
         self._current_index = 0
-        self.draw_position = (0, 0) # Posição real do blit (top-left)
+        self.draw_position = (0, 0) 
         
-        # Chama set_text para configurar o texto inicial e calcular a posição
         self.set_text(text)
 
     def _calculate_start_position(self):
@@ -63,7 +62,6 @@ class TypewriterEffect(Widget):
                     self.on_finish()
 
     def draw(self, surface: pygame.Surface):
-        """Desenha o texto atual na superfície fornecida."""
        
         rendered_text = self.font.render(self._current_text, True, self.font_color)
         
@@ -71,7 +69,6 @@ class TypewriterEffect(Widget):
         surface.blit(rendered_text, self.draw_position)
 
     def skip(self):
-        """Pula o efeito e exibe o texto completo imediatamente."""
         if not self.finished:
             self._current_text = self._full_text
             self._current_index = len(self._full_text)
@@ -80,7 +77,6 @@ class TypewriterEffect(Widget):
                 self.on_finish()
     
     def set_text(self, new_text: str):
-        """Reinicia o efeito com um novo texto e recalcula a posição."""
         self._full_text = new_text
         self._current_text = ""
         self._current_index = 0

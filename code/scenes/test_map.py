@@ -1,3 +1,5 @@
+import pygame
+from core.settings import *
 from pygame import Surface
 from scenes.base_scene import BaseScene
 from entities.player import Player
@@ -10,8 +12,10 @@ from systems.weapon_system import WeaponSystem
 from core.managers.day_night_manager import DayNightManager
 from ui.widgets.hud import HUD
 from ui.ui_manager import UIManager
+from core.managers.time_manager import TimeManager
 from core.managers.entity_manager import EntityManager
 from systems.render_system import RenderSystem
+from core.managers.scene_manager import SceneManager
 
 class TestMap(BaseScene):
     def __init__(self, screen: Surface):
@@ -21,12 +25,12 @@ class TestMap(BaseScene):
 
         self.dn_manager = DayNightManager(screen)
         self.ui_manager = UIManager()
-
+        self.time_manager=TimeManager()
         self.physics_system = PhysicsSystem()
 
         self.dialog_system = DialogueSystem(self.ui_manager)
         self.npc_route_system = NPCRouteSystem(self.map, self.dn_manager)
-        self.path_following_system = PathFollowingSystem(self.map.navgrid)
+        self.path_following_system = PathFollowingSystem()
 
         self.entity_mn=EntityManager()
         self.set_map()
@@ -37,10 +41,8 @@ class TestMap(BaseScene):
         self.hud=HUD(screen,self.dn_manager)
         self.ui_manager.add(self.hud)
 
-        self.entities = []
         
         self.camera.follow = self.player
-        self.show_nav_overlay = True
 
         
     def set_map(self):
@@ -51,20 +53,32 @@ class TestMap(BaseScene):
         self.physics_system.cache_static_colliders(self.entity_mn)
 
     def process_input(self, events):
-       
-        if not self.dialog_system.active_dialogue_npc:
-            self.player.input(events)
+        if self.dialog_system.active_dialogue_npc:
+            return
+
+        if self.time_manager.ready("next_scene"):
+            for event in events:
+                if event.type == pygame.KEYDOWN and event.key == KEY_NEXT_SCENE:
+                    SceneManager.get().start_fade('puzzle', 0.25)
+                    self.time_manager.set("next_scene",0.25)  
+
+                
+
+        
+        self.player.input(events)
 
     def update(self, dt):
         
 
         self.dialog_system.update(self.entity_mn, self.player,dt)
 
-        if not self.dialog_system.active_dialogue_npc:
-            self.physics_system.update(self.entity_mn, dt)
-            self.dn_manager.update(dt)
-            self.npc_route_system.update(self.entity_mn)
-            self.path_following_system.update(self.entity_mn, dt)
+        if self.dialog_system.active_dialogue_npc:
+            return
+
+        self.physics_system.update(self.entity_mn, dt)
+        self.dn_manager.update(dt)
+        self.npc_route_system.update(self.entity_mn)
+        self.path_following_system.update(self.entity_mn, dt)
 
 
         self.ui_manager.update(dt)

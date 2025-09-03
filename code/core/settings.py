@@ -3,6 +3,8 @@ from pygame.locals import *
 
 FPS = 60
 
+TILE_SIZE=16
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CODE_DIR = os.path.dirname(BASE_DIR)
 PROJECT_ROOT = os.path.dirname(CODE_DIR)
@@ -23,6 +25,7 @@ TRANSPARENT  = (0,0,0,0)
 FONT = "PressStart2P-Regular.ttf"
 
 KEY_DIALOG = K_e
+KEY_NEXT_SCENE = K_SPACE
 
 PLAYER_RIGHT = K_d           
 PLAYER_LEFT  = K_a

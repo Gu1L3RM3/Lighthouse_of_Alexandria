@@ -24,6 +24,4 @@ class GuardNPC(Entity):
                 )
        self.props = props or {}
     
-    def update(self, dt):
-        # Futuro: lógica de patrulha/diálogo
-        pass
+    

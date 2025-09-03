@@ -3,19 +3,20 @@ from core.components.path_follower import PathFollower
 from core.components.position import Position
 from core.components.freeze import Freeze
 from core.managers.entity_manager import EntityManager
-class NPCRouteSystem:
-    """
-    Verifica a hora (DayNightManager) e gera um PathFollower
-    do tile atual até o waypoint agendado (nome -> tile via MapSystem).
-    """
-    def __init__(self, map_system, day_night_manager):
+from core.managers.day_night_manager import DayNightManager
+from systems.map_system import MapSystem
+from core.ecs import System
+class NPCRouteSystem(System):
+    
+    def __init__(self, map_system:MapSystem, day_night_manager:DayNightManager):
         self.map = map_system
         self.dn  = day_night_manager
 
     def update(self, entity_mn:EntityManager):
-        cur_hour = int(self.dn.time_of_day)
 
+        cur_hour = int(self.dn.time_of_day)
         entities_with_routine=entity_mn.get_entities_with(NPCRoutine,Position)
+
         for e in entities_with_routine:
             if e.has(Freeze) and e.get(Freeze).active:
                 continue
@@ -31,16 +32,17 @@ class NPCRouteSystem:
 
             wp_name = routine.schedule[cur_hour]
             goal_tile = self.map.get_waypoint_tile(wp_name)
+            
             if not goal_tile:
                 continue
 
             pos: Position = e.get(Position)
-            start_tile = (int(pos.x // self.map.tile_width), int(pos.y // self.map.tile_height))
+            start_tile = (int(pos.x // self.map.tile_width),
+                          int(pos.y // self.map.tile_height))
             path = self.map.pathfinder.find_path(start_tile, goal_tile)
-            if path and len(path) > 1:
-                # first node é o tile atual — mantém para suavizar parada
-                e.add(PathFollower(path, speed=50))
-            else:
-                # já está no destino
-                if e.has(PathFollower):
-                    e.remove(PathFollower)
+            if not path and e.has(PathFollower):
+                e.remove(PathFollower)
+                continue
+            e.add(PathFollower(path,speed=50))
+
+            
