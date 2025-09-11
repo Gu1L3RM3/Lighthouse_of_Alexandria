@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Dict,Type,List
+from typing import Dict,Type,List,TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from core.managers.entity_manager import EntityManager
 class Component(ABC):
     """Marca : somente """
     pass
@@ -31,5 +33,5 @@ class Entity:
 
 class System(ABC):
     @abstractmethod
-    def update(self,entities: List[Entity],dt:float):
+    def update(self,entity_mn :'EntityManager',dt:float):
         pass

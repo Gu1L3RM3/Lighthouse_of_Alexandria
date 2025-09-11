@@ -6,8 +6,9 @@ class UIManager:
     def __init__(self):
         self.widgets :list[Widget]= []
 
-    def add(self, widget: Widget):
-        self.widgets.append(widget)
+    def add(self, *widget: Widget):
+        for w in widget:
+            self.widgets.append(w)
 
     def update(self, dt):
         for w in self.widgets:

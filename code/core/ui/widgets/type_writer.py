@@ -14,7 +14,7 @@ class TypewriterEffect(Widget):
                  text: str,
                  font_name: str,
                  font_size: int,
-                 font_color: tuple[int, int, int] = (255, 255, 255),
+                 font_color: tuple[int, int, int] = WHITE,
                  speed: int = 20,
                  sound_name: Union[str, None] = None,
                  on_finish: Union[Callable, None] = None):

@@ -7,12 +7,11 @@ from core.components.path_follower import PathFollower
 from core.managers.entity_manager import EntityManager
 from core.managers.time_manager import TimeManager
 from entities.player import Player
-from systems.map_system import MapSystem
-
+from core.map.tile_map import TileMap
 class EnemiesFollowSystem(System):
-    def __init__(self, map_system: MapSystem):
+    def __init__(self, tile_map: TileMap):
         super().__init__()
-        self.map = map_system
+        self.tile_map = tile_map
         self.timer = TimeManager()
 
     def _can_update_path(self, entity: Entity, interval: float) -> bool:
@@ -33,19 +32,19 @@ class EnemiesFollowSystem(System):
                 continue
 
             player_pos: Position = player.get(Position)
-            goal_tile = self.map.get_tile_from_position(player_pos)
+            goal_tile = self.tile_map.get_tile_from_position(player_pos)
             if not goal_tile:
                 continue
 
             pos: Position = e.get(Position)
-            start_tile = self.map.get_tile_from_position(pos)
+            start_tile = self.tile_map.get_tile_from_position(pos)
 
             player_follower: PlayerFollower = e.get(PlayerFollower)
 
             if not self._can_update_path(e, player_follower.interval_to_update):
                 continue  
 
-            path = self.map.pathfinder.find_path(start_tile, goal_tile)
+            path = self.tile_map.pathfinder.find_path(start_tile, goal_tile)
 
             if not path or len(path)<=1:
                 if e.has(PathFollower): e.remove(PathFollower)

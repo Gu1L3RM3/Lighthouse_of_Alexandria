@@ -7,8 +7,8 @@ from core.managers.event_manager import EventManager
 from core.managers.entity_manager import EntityManager
 from core.ecs import Entity
 from core.settings import *
-from ui.widgets.dialogue_box import DialogueBoxWidget   # novo widget
-from ui.ui_manager import UIManager
+from core.ui.widgets.dialogue_box import DialogueBoxWidget  
+from core.managers.ui_manager import UIManager
 
 
 class DialogueSystem:

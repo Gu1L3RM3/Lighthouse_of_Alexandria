@@ -18,16 +18,24 @@ class ResourceManager:
     def get_asset_path(self,subdir: str, filename: str) -> str:
         return os.path.join(ASSETS_DIR, subdir, filename)
 
-    def load_image(self, filename: str, colorkey=None) -> pygame.Surface:
-        if filename not in self._images:
+    def load_image(self, filename: str, colorkey=None, size: tuple[int, int] | None = None) -> pygame.Surface:
+        
+        key = (filename, size)  
+        if key not in self._images:
             path = self.get_asset_path('images', filename)
             img = pygame.image.load(path).convert_alpha()
 
             if colorkey is not None:
                 img.set_colorkey(colorkey)
-            self._images[filename] = img
 
-        return self._images[filename]
+            
+            if size is not None:
+                img = pygame.transform.scale(img, size)
+
+            self._images[key] = img
+
+        return self._images[key]
+
 
     def load_sound(self, filename: str) -> pygame.mixer.Sound:
         if filename not in self._sounds:

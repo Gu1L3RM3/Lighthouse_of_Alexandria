@@ -2,6 +2,8 @@ from typing import Type, Dict, List, Optional, Callable
 from core.ecs import Component, Entity
 from entities.player import Player
 
+
+
 class EntityManager:
     def __init__(self):
         self._entities: Dict[int, Entity] = {}

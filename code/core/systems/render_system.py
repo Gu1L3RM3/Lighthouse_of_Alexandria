@@ -4,21 +4,17 @@ from core.components.position import Position
 from core.components.sprite import Sprite
 from core.camera import Camera
 from core.managers.entity_manager import EntityManager
-from systems.map_system import MapSystem 
-
 class RenderSystem(System):
-    def __init__(self, screen: pygame.Surface, camera: Camera, entity_mn: EntityManager, map_system: MapSystem):
+    def __init__(self, screen: pygame.Surface, camera: Camera, entity_mn:EntityManager):
         self.screen = screen
         self.camera = camera
         self.entity_mn = entity_mn
-        self.map_system = map_system
-
-    def update(self, dt):
+    
+    def update(self,entity_mn,dt):
         self.camera.update()
+    
 
     def draw(self):
-        map_surface = self.map_system.ground_surface
-        self.screen.blit(map_surface, (-self.camera.viewport.x, -self.camera.viewport.y))
 
         entities = self.entity_mn.get_entities_with(Position, Sprite)
         viewport = self.camera.viewport

@@ -10,17 +10,17 @@ class HUD(Widget):
     como o relógio, barra de vida, etc. Os elementos desenhados
     aqui são fixos na tela e não seguem a câmera.
     """
-    def __init__(self, screen: pygame.Surface, day_night_manager: DayNightManager):
-        self.screen=screen
+    def __init__(self, day_night_manager: DayNightManager):
+        
         self.clock=Clock(day_night_manager)
-        self.fps=FPSWidget(self.screen)
+        self.fps=FPSWidget()
 
     def update(self, dt):
         self.fps.update(dt)
         self.clock.update(dt)
 
     def draw(self,surface):
-        self.fps.draw()
+        self.fps.draw(surface)
         self.clock.draw(surface)
 
     

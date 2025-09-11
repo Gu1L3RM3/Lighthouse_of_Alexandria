@@ -5,7 +5,6 @@ class DayNightManager:
     
    
 
-    # Pontos-chave do ciclo (Hora, Cor)
     
     KEY_FRAMES = [
         (0,  NIGHT_COLOR),

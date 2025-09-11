@@ -1,6 +1,6 @@
 import pygame
 from pygame import Surface
-from ui.widgets.type_writer import TypewriterEffect
+from core.ui.widgets.type_writer import TypewriterEffect
 from core.managers.resource_manager import ResourceManager
 from core.ecs import Component
 

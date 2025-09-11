@@ -3,53 +3,50 @@ from core.settings import *
 from pygame import Surface
 from scenes.base_scene import BaseScene
 from entities.player import Player
-from systems.map_system import MapSystem
-from systems.physics_system import PhysicsSystem
-from systems.dialogue_system import DialogueSystem
-from systems.npc_route_system import NPCRouteSystem
-from systems.path_following_system import PathFollowingSystem
-from systems.weapon_system import WeaponSystem
-from core.managers.day_night_manager import DayNightManager
-from ui.widgets.hud import HUD
-from ui.ui_manager import UIManager
-from core.managers.time_manager import TimeManager
-from core.managers.entity_manager import EntityManager
-from systems.render_system import RenderSystem
+from core.systems.npc_route_system import NPCRouteSystem
+from core.ui.widgets.hud import HUD
 from core.managers.scene_manager import SceneManager
+from core.map.tile_map_loader import TileMapLoader
+from core.map.map_entity_spawner import MapEntitySpawner
+from core.map.map_renderer import MapRenderer
+from core.map.map_entity_spawner import MapEntitySpawner
 
 class TestMap(BaseScene):
     def __init__(self, screen: Surface):
-        self.map = MapSystem("teste.tmx")  
-        
-        super().__init__(screen, self.map.map_width, self.map.map_height)
+        loader = TileMapLoader()
+        self.tile_map = loader.load("teste.tmx")
 
-        self.dn_manager = DayNightManager(screen)
-        self.ui_manager = UIManager()
-        self.time_manager=TimeManager()
-        self.physics_system = PhysicsSystem()
+        super().__init__(screen, self.tile_map.map_width, self.tile_map.map_height)
 
-        self.dialog_system = DialogueSystem(self.ui_manager)
-        self.npc_route_system = NPCRouteSystem(self.map, self.dn_manager)
-        self.path_following_system = PathFollowingSystem()
+        self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen)
 
-        self.entity_mn=EntityManager()
-        self.set_map()
-        self.render_system=RenderSystem(self.screen,self.camera,self.entity_mn,self.map)
-
-        self.weapon_system=WeaponSystem()
-
-        self.hud=HUD(screen,self.dn_manager)
+        self.hud = HUD(self.dn_manager)
         self.ui_manager.add(self.hud)
 
-        
-        self.camera.follow = self.player
+        self.npc_route_system = NPCRouteSystem(self.tile_map, self.dn_manager)
+
 
         
+        self.set_map()
+
+        self.camera.follow = self.player
+
+        self.systems.update(
+            [self.physics_system,
+            self.npc_route_system,
+            self.path_following_system,
+            self.weapon_system,
+            self.render_system]
+            )
+
     def set_map(self):
-        self.map.load_map(self.entity_mn)
-        px, py = self.map.get_player_spawn()
+        spawner = MapEntitySpawner()
+        spawner.spawn_entities(self.tile_map, self.entity_mn)
+
+        px, py = self.tile_map.get_player_spawn()
         self.player = Player(px, py)
         self.entity_mn.add_entity(self.player)
+
         self.physics_system.cache_static_colliders(self.entity_mn)
 
     def process_input(self, events):
@@ -75,20 +72,18 @@ class TestMap(BaseScene):
         if self.dialog_system.active_dialogue_npc:
             return
 
-        self.physics_system.update(self.entity_mn, dt)
         self.dn_manager.update(dt)
-        self.npc_route_system.update(self.entity_mn)
-        self.path_following_system.update(self.entity_mn, dt)
+        self.update_systems(dt)
 
 
         self.ui_manager.update(dt)
-        self.weapon_system.update(self.entity_mn,dt)
-        self.render_system.update(dt)
+
     def render(self):
         self.screen.fill((0, 0, 50))
+        self.map_renderer.draw()
         self.render_system.draw() 
-        self.ui_manager.draw(self.screen)
         self.dn_manager.draw()
+        self.ui_manager.draw(self.screen)
 
 
         
