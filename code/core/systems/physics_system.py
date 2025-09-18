@@ -12,6 +12,7 @@ class PhysicsSystem(System):
         self.static_colliders: List[pygame.Rect] = []
 
     def cache_static_colliders(self, entity_mn: EntityManager):
+        """Armazena os colisores estáticos (paredes/obstáculos fixos)."""
         collidable_entities = entity_mn.get_entities_with(
             Position, Collider, filter=lambda e: not e.has(Velocity)
         )
@@ -21,62 +22,85 @@ class PhysicsSystem(System):
         ]
 
     def update(self, entity_mn: EntityManager, dt: float):
-        moving_entities = entity_mn.get_entities_with(
-            Position, Velocity,
-            filter=lambda e: e.get(Velocity).vel.length_squared() > 0
-        )
+        """Atualiza posição e colisões das entidades em movimento."""
+        moving_entities = entity_mn.get_entities_with(Position, Velocity)
 
         for entity in moving_entities:
-            
             if not entity.has(Collider):
                 self._move(entity, dt)
                 continue
             
-            self._move_with_collision(entity, entity_mn, dt)
+            # passa lista de entidades móveis para colisão dinâmica
+            self._move_with_collision(entity, moving_entities, dt)
 
     def _move(self, entity: Entity, dt: float):
+        """Movimento sem colisão (entidade livre)."""
         pos: Position = entity.get(Position)
         vel: Velocity = entity.get(Velocity)
 
         pos.x += vel.vx * dt
         pos.y += vel.vy * dt
 
-    def _move_with_collision(self, entity: Entity, entity_mn: EntityManager, dt: float):
+    def _move_with_collision(self, entity: Entity, moving_entities: List[Entity], dt: float):
+        """Movimento com verificação de colisão eixo por eixo."""
+        vel: Velocity = entity.get(Velocity)
+
+        if vel.vx != 0:
+            self._move_axis(entity, vel.vx * dt, 0, moving_entities)
+
+        if vel.vy != 0:
+            self._move_axis(entity, 0, vel.vy * dt, moving_entities)
+
+    def _move_axis(self, entity: Entity, dx: float, dy: float, moving_entities: List[Entity]):
+        """Move a entidade em um eixo e resolve colisões com estáticos e dinâmicos."""
         pos: Position = entity.get(Position)
         vel: Velocity = entity.get(Velocity)
         col: Collider = entity.get(Collider)
 
-        # --- Movimento e Colisão no Eixo X ---
-        pos.x += vel.vx * dt
+        pos.x += dx
+        pos.y += dy
+
         rect = col.get_rect(pos.x, pos.y)
 
-        # Checa colisão com paredes estáticas
+        # --- colisão com estáticos ---
         for wall in self.static_colliders:
             if rect.colliderect(wall):
-                if vel.vx > 0:  # Movendo para a direita
-                    rect.right = wall.left
-                elif vel.vx < 0:  # Movendo para a esquerda
-                    rect.left = wall.right
-                pos.x = rect.x - col.offset_x # Atualiza a posição real da entidade
-                vel.vx = 0 # Opcional: para a velocidade para evitar "grudar"
-                break # Sai do loop assim que uma colisão é resolvida
+                rect, vel = self._resolve_collision(rect, wall, dx, dy, vel, col)
+                pos.x = rect.x - col.offset_x
+                pos.y = rect.y - col.offset_y
+                return  
 
-        # Checa colisão com outras entidades (se necessário)
-        # Nota: Esta parte pode ser complexa dependendo do seu jogo.
-        # Por enquanto, focaremos nos colisores estáticos que é a causa principal do jitter.
+        # --- colisão com outras entidades móveis ---
+        for other in moving_entities:
+            if other is entity or not other.has(Collider):
+                continue
 
+            other_pos = other.get(Position)
+            other_col = other.get(Collider)
+            other_rect = other_col.get_rect(other_pos.x, other_pos.y)
 
-        # --- Movimento e Colisão no Eixo Y ---
-        pos.y += vel.vy * dt
-        rect = col.get_rect(pos.x, pos.y) # Pega o rect com a posição X já corrigida
+            if rect.colliderect(other_rect):
+                rect, vel = self._resolve_collision(rect, other_rect, dx, dy, vel, col)
+                pos.x = rect.x - col.offset_x
+                pos.y = rect.y - col.offset_y
+                return 
 
-        # Checa colisão com paredes estáticas
-        for wall in self.static_colliders:
-            if rect.colliderect(wall):
-                if vel.vy > 0:  # Movendo para baixo
-                    rect.bottom = wall.top
-                elif vel.vy < 0:  # Movendo para cima
-                    rect.top = wall.bottom
-                pos.y = rect.y - col.offset_y # Atualiza a posição real da entidade
-                vel.vy = 0 # Opcional
-                break
+    def _resolve_collision(self, rect, other_rect, dx, dy, vel, col):
+        """Resolve colisão ajustando posição e zerando velocidade."""
+        if dx > 0:  # direita
+            rect.right = other_rect.left
+            vel.vx = 0
+
+        elif dx < 0:  # esquerda
+            rect.left = other_rect.right
+            vel.vx = 0
+
+        elif dy > 0:  # baixo
+            rect.bottom = other_rect.top
+            vel.vy = 0
+
+        elif dy < 0:  # cima
+            rect.top = other_rect.bottom
+            vel.vy = 0
+
+        return rect, vel

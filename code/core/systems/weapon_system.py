@@ -26,7 +26,7 @@ class WeaponSystem(System):
     
     def _handle_input(self, player: Player, entity_mn: EntityManager, dt):
         keys = pygame.key.get_pressed()
-        if not keys[PLAYER_SHOOT]:
+        if not keys[PLAYER_ATTACK]:
             return
         
         if not  self.timer.ready(self.timer_name):

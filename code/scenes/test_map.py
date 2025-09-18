@@ -4,6 +4,7 @@ from pygame import Surface
 from scenes.base_scene import BaseScene
 from entities.player import Player
 from core.systems.npc_route_system import NPCRouteSystem
+from core.systems.animation_system import AnimationSystem
 from core.ui.widgets.hud import HUD
 from core.managers.scene_manager import SceneManager
 from core.map.tile_map_loader import TileMapLoader
@@ -24,7 +25,7 @@ class TestMap(BaseScene):
         self.ui_manager.add(self.hud)
 
         self.npc_route_system = NPCRouteSystem(self.tile_map, self.dn_manager)
-
+        self.animation_system =  AnimationSystem()
 
         
         self.set_map()
@@ -36,12 +37,17 @@ class TestMap(BaseScene):
             self.npc_route_system,
             self.path_following_system,
             self.weapon_system,
+            self.animation_system,
             self.render_system]
             )
 
     def set_map(self):
         spawner = MapEntitySpawner()
         spawner.spawn_entities(self.tile_map, self.entity_mn)
+
+        
+        
+        
 
         px, py = self.tile_map.get_player_spawn()
         self.player = Player(px, py)

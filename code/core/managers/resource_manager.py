@@ -51,3 +51,73 @@ class ResourceManager:
             font = pygame.font.Font(path, size)
             self._fonts[key] = font
         return self._fonts[key]
+    
+    def _cut_sprite_sheet(self,image_path:str,
+                          size_sprite:tuple=(48,48),
+                          offset:tuple[int]=(0,0),
+                          scale:int=1,
+                          trim:bool=True)->list[pygame.Surface]:
+        sprites=[]
+        width_sprite=size_sprite[0]
+        height_sprite=size_sprite[1]
+
+        image=pygame.image.load(image_path).convert_alpha()
+
+        
+
+
+        width,height=image.get_size()
+
+        columns = height//size_sprite[0]
+        lines   = width//size_sprite[1]
+
+
+        for line in range(lines):
+            for column in range(columns):
+
+                posx= line*width_sprite+offset[0]
+                posy= column*height_sprite+offset[1]
+
+                rect= pygame.Rect(posx,posy,width_sprite,height_sprite)
+                sub_surf = image.subsurface(rect).copy()
+
+
+                bounding_box=sub_surf.get_bounding_rect()
+                if bounding_box.width == 0 and bounding_box.height == 0: #totalmente transparente
+                    continue  
+                sub_surf=sub_surf.subsurface(bounding_box).copy()
+
+                if scale != 1:
+                    sub_surf= pygame.transform.scale(sub_surf,size_sprite*scale)
+
+                sprites.append(sub_surf)
+        
+        return sprites
+        
+
+                
+
+    def load_sprite_sheet(self,subdir: str ,size:tuple[int]=(48,48),offset:tuple[int]=(0,0),scale:int=1 ):
+        dict_assets:dict={}
+        main_file =self.get_asset_path('images',subdir)
+        for dirpath, _ , filenames in os.walk(main_file):
+            if not filenames :
+                continue
+
+            name_subdir=os.path.basename(dirpath)
+
+            if  name_subdir == '':
+                continue
+
+            image_path = os.path.join(dirpath,filenames[0])
+            sprites= self._cut_sprite_sheet(image_path,size,offset,scale)
+            dict_assets[name_subdir]=sprites
+        return dict_assets
+
+            
+
+
+
+        
+
+

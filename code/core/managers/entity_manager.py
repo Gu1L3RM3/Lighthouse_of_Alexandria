@@ -1,6 +1,9 @@
 from typing import Type, Dict, List, Optional, Callable
 from core.ecs import Component, Entity
 from entities.player import Player
+from core.components.sprite import Sprite
+from core.components.position import Position
+from core.components.collider import Collider
 
 
 
@@ -39,7 +42,11 @@ class EntityManager:
                 return e
 
     def get_entities(self) -> List[Entity]:
+        
         return list(self._entities.values())
+    
+
+    
 
     def get_entity_by_id(self, eid: int) -> Optional[Entity]:
         return self._entities.get(eid)
