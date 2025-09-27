@@ -3,11 +3,13 @@ from core.settings import *
 from scenes.base_scene import BaseScene
 from entities.player import Player
 from core.systems.enemies_follow_system import EnemiesFollowSystem
+from core.systems.weapon_system import WeaponSystem
 from core.ui.widgets.fps_widget import FPSWidget
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
 from core.map.map_entity_spawner import MapEntitySpawner
+from core.systems.animation_system import AnimationSystem
 class PuzzleMap(BaseScene):
     def __init__(self, screen:Surface):
         loader = TileMapLoader()
@@ -22,7 +24,8 @@ class PuzzleMap(BaseScene):
         self.ui_manager.add(fps)
         self.set_map()
 
-
+        self.weapon_system=WeaponSystem()
+        self.animation_system =  AnimationSystem()
         
         
         self.camera.follow = self.player
@@ -31,6 +34,8 @@ class PuzzleMap(BaseScene):
             [self.physics_system,
             self.enemies_follow_system,
             self.path_following_system,
+            self.animation_system,
+
             self.weapon_system,
             self.render_system]
             )

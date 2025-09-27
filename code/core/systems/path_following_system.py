@@ -1,15 +1,15 @@
 import pygame
-from core.ecs import System
 from pygame import Vector2
+from core.ecs import System
 from core.components.path_follower import PathFollower
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
+from core.components.animation_sprite import AnimateSprite
 from core.managers.entity_manager import EntityManager
 
-
 class PathFollowingSystem(System):
-    
+
     def update(self, entity_mn: EntityManager, dt: float):
         for e in entity_mn.get_entities_with(PathFollower, Position, Velocity):
             pf: PathFollower = e.get(PathFollower)
@@ -23,6 +23,10 @@ class PathFollowingSystem(System):
 
             self._update_path_progress(pf, pos)
             self._apply_velocity(pf, vel)
+
+            if e.has(AnimateSprite):
+                anim_entity = e  
+                anim_entity.set_direction(pf.direction)
 
     def _is_blocked(self, entity, path_follower: PathFollower) -> bool:
         frozen = entity.get(Freeze).active if entity.has(Freeze) else False

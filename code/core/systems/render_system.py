@@ -3,6 +3,7 @@ from core.ecs import System,Entity
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.components.collider import Collider
+from core.components.always_on_top import AlwaysOnTop
 from core.camera import Camera
 from core.managers.entity_manager import EntityManager
 from core.settings import RED,BLUE
@@ -29,22 +30,38 @@ class RenderSystem(System):
         rect_draw=self.camera.apply(rect)
         pygame.draw.rect(self.screen,BLUE,rect_draw,1)
 
-    def draw(self):
-        entities  = self.entity_mn.get_entities_with(Position, Sprite)
 
+    def draw(self, from_center_pos=False):
+        entities = self.entity_mn.get_entities_with(Position, Sprite)
         viewport = self.camera.viewport
 
-        for entity in entities:
-            pos: Position = entity.get(Position)
-            spr: Sprite = entity.get(Sprite)
+        normal_entities = []
+        top_entities = []
 
+        for entity in entities:
+            if entity.has(AlwaysOnTop):
+                top_entities.append(entity)
+            else:
+                normal_entities.append(entity)
+
+        for entity in normal_entities:
+            self._draw_entity(entity, from_center_pos, viewport)
+
+        for entity in top_entities:
+            self._draw_entity(entity, from_center_pos, viewport)
+
+
+    def _draw_entity(self, entity, from_center_pos, viewport):
+        pos: Position = entity.get(Position)
+        spr: Sprite = entity.get(Sprite)
+
+        if from_center_pos:
+            spr.rect.center = (pos.x, pos.y)
+        else:
             spr.rect.topleft = (pos.x + spr.offset_x, pos.y + spr.offset_y)
 
-            if viewport.colliderect(spr.rect):
-                draw_rect = self.camera.apply(spr.rect)
-                self.screen.blit(spr.image, draw_rect)
+        if not viewport.colliderect(spr.rect):
+            return
 
-                self._draw_collider(entity,pos)
-                self._draw_rect_sprites(spr)
-
-                
+        draw_rect = self.camera.apply(spr.rect)
+        self.screen.blit(spr.image, draw_rect)

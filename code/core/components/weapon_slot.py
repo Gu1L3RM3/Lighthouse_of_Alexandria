@@ -1,8 +1,7 @@
 from core.ecs import Component
-from entities.firearm import FireArm
+from entities.weapons.weapon import Weapon
 
 class WeaponSlot(Component):
-    #TODO: criar uma classe abc para armas
-    def __init__(self,weapon:FireArm=None):
+    def __init__(self,weapon:Weapon|None):
         self.weapon=weapon
         

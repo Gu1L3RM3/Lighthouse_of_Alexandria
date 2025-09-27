@@ -31,28 +31,24 @@ class TestMap(BaseScene):
         self.set_map()
 
         self.camera.follow = self.player
-
+        
         self.systems.update(
             [self.physics_system,
             self.npc_route_system,
             self.path_following_system,
-            self.weapon_system,
             self.animation_system,
             self.render_system]
             )
 
     def set_map(self):
         spawner = MapEntitySpawner()
+        
         spawner.spawn_entities(self.tile_map, self.entity_mn)
-
-        
-        
-        
-
         px, py = self.tile_map.get_player_spawn()
-        self.player = Player(px, py)
-        self.entity_mn.add_entity(self.player)
 
+        self.player = Player(px, py)
+
+        self.entity_mn.add_entity(self.player)
         self.physics_system.cache_static_colliders(self.entity_mn)
 
     def process_input(self, events):
@@ -72,7 +68,7 @@ class TestMap(BaseScene):
 
     def update(self, dt):
         
-
+        
         self.dialog_system.update(self.entity_mn, self.player,dt)
 
         if self.dialog_system.active_dialogue_npc:

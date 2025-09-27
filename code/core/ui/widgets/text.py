@@ -5,10 +5,10 @@ from core.managers.resource_manager import ResourceManager
 class Text(Widget):
     def __init__(self,
                  text: str,
-                 font_name: str,
                  font_size: int,
                  font_color: tuple[int, int, int] = (255, 255, 255),
-                 pos_center: tuple[int, int] = (0, 0)
+                 pos_center: tuple[int, int] = (0, 0),
+                 font_name: str="PressStart2P-Regular.ttf",
                  ):
         self.resource_mn = ResourceManager()
         self.font_color = font_color

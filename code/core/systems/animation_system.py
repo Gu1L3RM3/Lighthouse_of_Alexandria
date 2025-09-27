@@ -30,8 +30,12 @@ class AnimationSystem(System):
                     else:
                         anim.current_frame = len(frames) - 1
                         anim.done = True
-                        break 
-            
+                        # chama o callback on_finish se existir
+                        if anim.on_finish:
+                            anim.on_finish()
+                            anim.on_finish = None
+                        break
+
             
             anim.current_frame = min(anim.current_frame, len(frames) - 1)
             spr.image = frames[anim.current_frame]
