@@ -8,8 +8,11 @@ if TYPE_CHECKING:
 class Component(ABC):
     
     def copy(self) -> "Component":
-       
         return copy.deepcopy(self)
+    @abstractmethod
+    def to_dict(self):
+        pass
+    
 
 
 class Entity:
@@ -33,13 +36,27 @@ class Entity:
     
     def get(self, comp_type: Type[Component]):
         return self.components.get(comp_type)
+    def to_dict(self) -> dict:
+        return {
+            'entity_type': self.__class__.__name__,
+            'components': [
+                comp.to_dict() for comp in self.components.values()
+            ]
+        }
+
 
     def copy(self) -> "Entity":
-        new_entity = Entity()
+        new_entity: Entity = type(self).__new__(type(self)) 
+        
+        new_entity.id = Entity._next_id
+        Entity._next_id += 1
+        
+        new_entity.components = {} 
+
         for comp in self.components.values():
             new_entity.add(comp.copy())
+            
         return new_entity
-
 
 class System(ABC):
     @abstractmethod

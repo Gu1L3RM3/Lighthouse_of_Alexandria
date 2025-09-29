@@ -40,9 +40,11 @@ class EntityManager:
                 return e
         
 
-    def get_entities(self) -> List[Entity]:
-        
-        return list(self._entities.values())
+    def get_entities(self, excepts: Optional[List[Entity]] = None) -> List[Entity]:
+        entities = list(self._entities.values())
+        if excepts:
+            entities = [e for e in entities if e not in excepts]
+        return entities
     
     
     def check_collision(self, entity: Entity) -> Entity | None:
@@ -106,3 +108,9 @@ class EntityManager:
             result_set = {e for e in result_set if filter(e)}
 
         return list(result_set)
+    def clear_all_entities(self,excepts:Optional[List[Entity]]=None):
+        if not excepts:
+            self._entities.clear()
+            return
+        self._entities
+        self._entities = {eid: e for eid, e in self._entities.items() if e in excepts}

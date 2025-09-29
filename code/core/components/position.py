@@ -4,6 +4,7 @@ from typing import Tuple
 from core.settings import *
 class Position(Component):
     def __init__(self,x: float =0,y:float =0):
+        
         self._pos=Vector2(x,y)
     @property
     def pos(self)->Vector2:
@@ -39,3 +40,19 @@ class Position(Component):
             self._pos.x+(TILE_SIZE//2),
             self._pos.y+(TILE_SIZE//2)
         )
+    def to_dict(self):
+        return {
+            'type':self.__class__.__name__,
+            'x':self.x,
+            'y':self.y
+
+        }
+    @classmethod
+    def from_dict(cls, data: dict) -> "Position":
+        if data.get('type') != cls.__name__:
+            raise ValueError("Tipo de componente inválido no dicionário de dados.")
+            
+        x = data['x']
+        y = data['y']
+        
+        return cls(x,y)

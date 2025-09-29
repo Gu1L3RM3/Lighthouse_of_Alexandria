@@ -1,4 +1,5 @@
 import pygame
+from pygame import Vector2,Rect,Surface
 from core.ecs import System,Entity
 from core.components.position import Position
 from core.components.sprite import Sprite
@@ -6,6 +7,7 @@ from core.components.collider import Collider
 from core.components.always_on_top import AlwaysOnTop
 from core.camera import Camera
 from core.managers.entity_manager import EntityManager
+from core.components.label_component import LabelComponent
 from core.settings import RED,BLUE
 class RenderSystem(System):
     def __init__(self, screen: pygame.Surface, camera: Camera, entity_mn: EntityManager):
@@ -65,3 +67,18 @@ class RenderSystem(System):
 
         draw_rect = self.camera.apply(spr.rect)
         self.screen.blit(spr.image, draw_rect)
+        self._draw_label(entity,draw_rect)
+    def _draw_label(self, entity: Entity, draw_rect: Rect):
+        if not entity.has(LabelComponent):
+            return
+
+        spr: Sprite = entity.get(Sprite)
+        label_comp: LabelComponent = entity.get(LabelComponent)
+        comp_center = Vector2(draw_rect.center)
+
+        for label_data in label_comp.rendered_labels:
+            rotated_offset = label_data['base_offset'].rotate(-spr.angle)
+            label_pos = comp_center + rotated_offset
+            text_surface: Surface = label_data['surface']
+            text_rect = text_surface.get_rect(center=label_pos)
+            self.screen.blit(text_surface, text_rect)

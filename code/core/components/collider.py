@@ -19,4 +19,12 @@ class Collider(Component):
             self.width,
             self.height
         )
+    def to_dict(self):
+        return {
+            'type':self.__class__.__name__,
+            'width':self.width,
+            'height':self.height,
+            'offset_x':self.offset_x,
+            'offset_y':self.offset_y,
+        }
         

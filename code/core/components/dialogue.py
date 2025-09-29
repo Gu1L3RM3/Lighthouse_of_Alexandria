@@ -89,5 +89,10 @@ class Dialogue(Component):
         
        
         self.typewriter.draw(surface)
+    def to_dict(self):
+        return {
+            'type':self.__class__.__name__,
+            'lines':self.lines
+        }
             
     

@@ -28,4 +28,10 @@ class Velocity(Component):
     @vxy.setter
     def vxy(self,value:Tuple[float,float]):
         self._vel.xy=value
+    def to_dict(self):
+        return {
+            'type':self.__class__.__name__,
+            'vx':self.vx,
+            'vy':self.vy
+        }
     

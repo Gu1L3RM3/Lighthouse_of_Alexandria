@@ -38,3 +38,9 @@ class PathFollower(Component):
         self.done = not bool(self.path)
         self.direction = Vector2(0, 0) 
         self.create_collision_rects()
+    def to_dict(self):
+        return {
+            'type':self.__class__.__name__,
+            'path':self.path,
+            'speed':self.speed
+        }

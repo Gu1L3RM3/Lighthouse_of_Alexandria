@@ -43,3 +43,5 @@ class AnimateSprite(Component):
     def is_playing(self) -> bool:
         """Retorna True se a animação ainda não terminou."""
         return not self.done
+    def to_dict(self):
+        pass

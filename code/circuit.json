@@ -1,0 +1,306 @@
+[
+    {
+        "entity_type": "Wire",
+        "components": [
+            {
+                "type": "Position",
+                "x": 768.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/wire.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "left",
+                    "right"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Wire",
+        "components": [
+            {
+                "type": "Position",
+                "x": 640.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/wire.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "left",
+                    "right"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Wire",
+        "components": [
+            {
+                "type": "Position",
+                "x": 704.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/wire.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "left",
+                    "right"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Wire",
+        "components": [
+            {
+                "type": "Position",
+                "x": 576.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/wire.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "left",
+                    "right"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Resistor",
+        "components": [
+            {
+                "type": "Position",
+                "x": 256.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/resistor.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 90.0
+            },
+            {
+                "type": "LabelComponent",
+                "font_path": "PressStart2P-Regular.ttf",
+                "labels_data": [
+                    {
+                        "text": "R1",
+                        "color": "black",
+                        "base_offset": [
+                            0,
+                            -40
+                        ]
+                    },
+                    {
+                        "text": "10k\u03a9",
+                        "color": "blue",
+                        "base_offset": [
+                            0,
+                            40
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "bottom",
+                    "right",
+                    "up",
+                    "down",
+                    "top"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Node",
+        "components": [
+            {
+                "type": "Position",
+                "x": 256.0,
+                "y": 448.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/node/node_all.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "up",
+                    "right"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Node",
+        "components": [
+            {
+                "type": "Position",
+                "x": 256.0,
+                "y": 256.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/node/node_all.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "down"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Node",
+        "components": [
+            {
+                "type": "Position",
+                "x": 320.0,
+                "y": 320.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/node/node_all.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "down",
+                    "left"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Node",
+        "components": [
+            {
+                "type": "Position",
+                "x": 320.0,
+                "y": 384.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/node/node_all.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "up",
+                    "down"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    },
+    {
+        "entity_type": "Node",
+        "components": [
+            {
+                "type": "Position",
+                "x": 320.0,
+                "y": 448.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/node/node_all.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "up",
+                    "left"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
+            }
+        ]
+    }
+]

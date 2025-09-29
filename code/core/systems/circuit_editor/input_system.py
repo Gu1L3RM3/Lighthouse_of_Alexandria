@@ -1,5 +1,6 @@
 import pygame
 from pygame import Rect
+from core.managers.serialization_manager import SerializationManager
 from core.ecs import System, Entity
 from core.managers.entity_manager import EntityManager
 from entities.circuit_editor.eletric_components import *
@@ -8,16 +9,19 @@ from core.components.position import Position
 from core.components.dropped import Dropped
 from core.components.always_on_top import AlwaysOnTop
 from core.components.sprite import Sprite
-
+from core.managers.node_manager import NodeManager
 
 class InputSystem(System):
-    def __init__(self, entity_manager: EntityManager, grid_rects: list[Rect]):
+    def __init__(self, entity_manager: EntityManager, grid_rects: list[Rect],node_mn:NodeManager,save_file:str):
+
         super().__init__()
+        self.save_file=save_file
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
         self.active_tool: str | None = None
         self.entity_manager = entity_manager
+        self.node_manager   = node_mn
         self.grid_rects = grid_rects
 
     def set_brush(self, brush_type: str | None):
@@ -32,6 +36,7 @@ class InputSystem(System):
             "gnd": Ground,
             "sourceI": CurrentSource,
             "sourceV": VoutageSource,
+            "node":Node,
             "select": Select,
             "rotate": Rotate,
             "delete": Delete,
@@ -77,7 +82,13 @@ class InputSystem(System):
         target = self.entity_manager.check_collision(self.brush)
         if target:
             self.entity_manager.remove_entity(target)
-
+            entities=self.entity_manager.get_entities()
+            self.node_manager.refresh_after_remove(target,entities)
+    def rotate_brush(self):
+        if not self.brush:
+            return
+        spr:Sprite = self.brush.get(Sprite)
+        spr.rotate(90)
     def rotate_entity(self):
         if not isinstance(self.brush, Rotate):
             return
@@ -87,7 +98,16 @@ class InputSystem(System):
             return
 
         sprite: Sprite = target.get(Sprite)
-        sprite.rotate(90)
+        connectable: Connectable = target.get(Connectable)
+
+        angle_deg = 90
+        sprite.rotate(angle_deg)
+        connectable.set_connections(angle_deg)
+
+        # delega atualização dos nodes
+        entities = self.entity_manager.get_entities()
+        self.node_manager.refresh_after_entity_rotated(target, entities)
+
 
     def handle_canvas_actions(self):
         self.drop_entity()
@@ -101,8 +121,8 @@ class InputSystem(System):
 
         entities = self.entity_manager.get_entities()
         entities.remove(self.brush)
-        rects = [e.get(Sprite).rect for e in entities if e.has(Sprite)]
 
+        rects = [e.get(Sprite).rect for e in entities if e.has(Sprite)]
         sprite: Sprite = self.brush.get(Sprite)
         if sprite.rect.collidelist(rects) != -1:
             return
@@ -111,12 +131,16 @@ class InputSystem(System):
         new_entity.remove(AlwaysOnTop)
         self.entity_manager.add_entity(new_entity)
 
+        self.node_manager.handle_new_entity(new_entity, entities)
+
         if not self.select_mode:
             return
         self.select_mode = False
 
-        if  self.active_tool == "select":
-            self.set_brush('select')
+        if self.active_tool == "select":
+            self.set_brush("select")
+
+
         
         
     def exit_current_tool(self, set_mouse: bool = True):
@@ -139,3 +163,11 @@ class InputSystem(System):
             if rect.collidepoint((mouse_x, mouse_y)):
                 pos.xy = rect.topleft
                 return
+    def save_circuit(self):
+        entities_to_save = self.entity_manager.get_entities(excepts=[self.brush])
+        SerializationManager.save_entities_to_json(entities_to_save,self.save_file)
+    def load_circuit(self):
+        self.entity_manager.clear_all_entities(excepts=[self.brush]) 
+        loaded_entities = SerializationManager.load_entities_from_json(self.save_file)
+        for entity in loaded_entities:
+            self.entity_manager.add_entity(entity)

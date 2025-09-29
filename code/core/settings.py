@@ -36,8 +36,29 @@ PLAYER_ATTACK = K_l
 
 
 
+CELL_SIZE = 64
+NODE_OPPOSITE = {"up": "down", "down": "up", "left": "right", "right": "left"}
+NODE_DEFAULT = "eletric_components/node/node_all.png"
+NODE_SPRITE_MAP = {
+    frozenset({"up", "down", "left", "right"}): "eletric_components/node/node_all.png",
+    frozenset({"left", "right"}): "eletric_components/node/node_horizontal.png",
+    frozenset({"up", "down"}): "eletric_components/node/node_vertical.png",
+    frozenset({"right", "down"}): "eletric_components/node/node_right_bottom.png",
+    frozenset({"right", "up"}): "eletric_components/node/node_right_top.png",
+    frozenset({"left", "up"}): "eletric_components/node/node_left_top.png",
+    frozenset({"left", "down"}): "eletric_components/node/node_left_bottom.png",
+    frozenset({"left", "right", "up"}): "eletric_components/node/node_t_top.png",
+    frozenset({"left", "right", "down"}): "eletric_components/node/node_t_bottom.png",
+    frozenset({"up", "down", "left"}): "eletric_components/node/node_t_left.png",
+    frozenset({"up", "down", "right"}): "eletric_components/node/node_t_right.png",
+    frozenset({"up"}): "eletric_components/node/node_top.png",
+    frozenset({"down"}): "eletric_components/node/node_bottom.png",
+    frozenset({"left"}): "eletric_components/node/node_left.png",
+    frozenset({"right"}): "eletric_components/node/node_right.png",
+    frozenset(): "eletric_components/node/node_single.png",
+}
 
-
+LABEL_OFFSET=40
 
 
 
