@@ -11,8 +11,11 @@ class NodeManager:
         self.rm = ResourceManager.get()
         
     def add_node(self, node: Node):
+        
         if isinstance(node, Node):
             self.nodes.append(node)
+    def clear_all_nodes(self):
+        self.nodes.clear()
 
 
     def remove_node(self, node: Node):
@@ -21,13 +24,15 @@ class NodeManager:
 
     def refresh_after_remove(self, entity, entities: list):
         
-        if not isinstance(entity,Node):
+        if not isinstance(entity, Node):
+            
             for node in self.nodes:
-                self.update_nodes_around(node,entities)
+                self.update_nodes_around(node, entities)
             return
-        
         self.remove_node(entity)
-        self.update_nodes_around(entity, entities)
+        for node in self.nodes:
+            
+            self.update_nodes_around(node, entities)
 
 
 
@@ -45,34 +50,41 @@ class NodeManager:
         spr: Sprite = node.get(Sprite)
         image_path = NODE_SPRITE_MAP.get(frozenset(connections), NODE_DEFAULT)
         spr.image = self.rm.load_image(image_path)
+        spr.image_path =  image_path
 
     def find_neighbors(self, node: Node, entities: list[Entity]) -> dict[str, Entity]:
         neighbors = {}
         spr_node: Sprite = node.get(Sprite)
-        rect = spr_node.rect
+        node_rect = spr_node.rect
 
         for other in entities:
-            if other is node or not other.has(Connectable) or not other.has(Sprite):
+            if other is node or not other.has(Connectable):
                 continue
 
             spr_other: Sprite = other.get(Sprite)
-            o_rect = spr_other.rect
-
-            if rect.top == o_rect.bottom and rect.left == o_rect.left:
-                neighbors["up"] = other
-            elif rect.bottom == o_rect.top and rect.left == o_rect.left:
-                neighbors["down"] = other
-            elif rect.left == o_rect.right and rect.top == o_rect.top:
-                neighbors["left"] = other
-            elif rect.right == o_rect.left and rect.top == o_rect.top:
-                neighbors["right"] = other
-
+            other_rect = spr_other.rect
+            conn_other :Connectable=other.get(Connectable)
+            
+            
+            if node_rect.top == other_rect.bottom and node_rect.left == other_rect.left:
+                if 'bottom'in conn_other.base_connections or isinstance(other,Node):
+                    neighbors["up"] = other
+            elif node_rect.bottom == other_rect.top and node_rect.left == other_rect.left:
+                if 'top' in conn_other.base_connections or isinstance(other,Node):
+                    neighbors["down"] = other
+            elif node_rect.left == other_rect.right and node_rect.top == other_rect.top:
+                if 'right' in conn_other.base_connections or isinstance(other,Node):
+                    neighbors["left"] = other
+            elif node_rect.right == other_rect.left and node_rect.top == other_rect.top:
+                if 'left' in conn_other.base_connections or isinstance(other,Node):
+                    neighbors["right"] = other
+        
         return neighbors
 
     def update_nodes_around(self, node: Node, entities: list[Entity]):
+        
         if not isinstance(node, Node):
             return
-
         current_conn: Connectable = node.get(Connectable)
         neighbors = self.find_neighbors(node, entities)
 
@@ -87,7 +99,6 @@ class NodeManager:
                 self.update_node_sprite(neighbor, conn_neighbor.base_connections)
 
     def handle_new_entity(self, entity: Entity, entities: list[Entity]):
-
         if not isinstance(entity,Node):
             for node in self.nodes:
                 self.update_nodes_around(node, entities + [entity])

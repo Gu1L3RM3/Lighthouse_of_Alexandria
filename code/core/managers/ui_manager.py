@@ -18,7 +18,9 @@ class UIManager:
         for w in self.widgets:
             
             w.draw(surface)
+    def remove(self,widget:Widget):
+        self.widgets.remove(widget)
 
     def handle_event(self, event:pygame.event.Event):
         for w in self.widgets:
-            w.handle_event(event)
+            w.handle_events(event)

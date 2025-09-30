@@ -38,8 +38,9 @@ class EntityManager:
         for e in self._entities.values():
             if isinstance(e,Player):
                 return e
+    def get_entities_by_class(self, entity_class: Type[Entity]) -> List[Entity]:
+        return [e for e in self._entities.values() if isinstance(e, entity_class)]
         
-
     def get_entities(self, excepts: Optional[List[Entity]] = None) -> List[Entity]:
         entities = list(self._entities.values())
         if excepts:

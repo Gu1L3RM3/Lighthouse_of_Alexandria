@@ -10,6 +10,7 @@ from core.components.dropped import Dropped
 from core.components.always_on_top import AlwaysOnTop
 from core.components.sprite import Sprite
 from core.managers.node_manager import NodeManager
+from typing import Type
 
 class InputSystem(System):
     def __init__(self, entity_manager: EntityManager, grid_rects: list[Rect],node_mn:NodeManager,save_file:str):
@@ -24,18 +25,20 @@ class InputSystem(System):
         self.node_manager   = node_mn
         self.grid_rects = grid_rects
 
-    def set_brush(self, brush_type: str | None):
+        self.angle_deg=90
+
+    def set_brush(self, brush_type: str | None ,value:str|None=None):
         if self.brush:
             self.entity_manager.remove_entity(self.brush)
             self.brush = None
         self.active_tool=brush_type
 
         brush_map = {
-            "resistor": Resistor,
+            "Resistor": Resistor,
             "wire": Wire,
             "gnd": Ground,
-            "sourceI": CurrentSource,
-            "sourceV": VoutageSource,
+            "CurrentSource": CurrentSource,
+            "VoutageSource": VoutageSource,
             "node":Node,
             "select": Select,
             "rotate": Rotate,
@@ -47,13 +50,22 @@ class InputSystem(System):
             raise Exception(f"Invalid brush type: {brush_type}")
 
         x, y = pygame.mouse.get_pos()
-        entity: Entity = cls(x, y)
+        entity: Entity = self.set_label(cls,x,y,value)
+        
         entity.add(AlwaysOnTop())
+
+        
 
         self.entity_manager.add_entity(entity)
         self.brush = entity
         self.show_mouse = False
+    def set_label(self,obj:Type[Entity],x,y,value:str)->Entity:
+        if not obj in {Resistor,CurrentSource,VoutageSource}:
+            return obj(x,y)
+        entities = self.entity_manager.get_entities_by_class(obj)
+        id   =  len(entities)
 
+        return obj(x,y,id=id,value=value)
     def update(self, entity_manager, dt):
         self.update_brush_position()
 
@@ -83,12 +95,15 @@ class InputSystem(System):
         if target:
             self.entity_manager.remove_entity(target)
             entities=self.entity_manager.get_entities()
+            
             self.node_manager.refresh_after_remove(target,entities)
     def rotate_brush(self):
         if not self.brush:
             return
         spr:Sprite = self.brush.get(Sprite)
-        spr.rotate(90)
+        con:Connectable = self.brush.get(Connectable)
+        con.set_connections(self.angle_deg)
+        spr.rotate(self.angle_deg)
     def rotate_entity(self):
         if not isinstance(self.brush, Rotate):
             return
@@ -100,9 +115,9 @@ class InputSystem(System):
         sprite: Sprite = target.get(Sprite)
         connectable: Connectable = target.get(Connectable)
 
-        angle_deg = 90
-        sprite.rotate(angle_deg)
-        connectable.set_connections(angle_deg)
+        
+        sprite.rotate(self.angle_deg)
+        connectable.set_connections(self.angle_deg)
 
         # delega atualização dos nodes
         entities = self.entity_manager.get_entities()
@@ -168,6 +183,8 @@ class InputSystem(System):
         SerializationManager.save_entities_to_json(entities_to_save,self.save_file)
     def load_circuit(self):
         self.entity_manager.clear_all_entities(excepts=[self.brush]) 
+        self.node_manager.clear_all_nodes()
         loaded_entities = SerializationManager.load_entities_from_json(self.save_file)
         for entity in loaded_entities:
             self.entity_manager.add_entity(entity)
+            self.node_manager.add_node(entity)

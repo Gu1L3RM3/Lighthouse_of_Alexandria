@@ -3,7 +3,6 @@ from core.settings import FPS
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from scenes.test_map import TestMap
-from scenes.home_scene import HomeScene
 from scenes.puzzle_map import PuzzleMap
 from scenes.circuit_editor import CircuitEditor
 from sys import exit

@@ -56,4 +56,3 @@ class ProfessorNPC(Entity):
             return "right" if direction.x > 0 else "left"
         return "front"
 
-

@@ -1,5 +1,6 @@
 from scenes.base_scene import BaseScene
 from core.ui.widgets.gesture_detector import GestureDetector, ClickType
+from core.ui.widgets.eletric_list import EletricList
 from core.ui.widgets.menu_edit_circuit import MenuEditCircuit
 from core.ui.widgets.fps_widget import FPSWidget
 from pygame import Surface, Rect
@@ -23,16 +24,22 @@ class CircuitEditor(BaseScene):
 
         self.save_file= save_file
 
+        
+
 
         self.set_gesture_canvas()
         self.set_rects_grid()
         self.node_manager=NodeManager()
-        self.input_system = InputSystem(self.entity_mn, self.rects_grid,self.node_manager,self.save_file)
+        self.input_system = InputSystem(self.entity_mn,
+                                        self.rects_grid,self.node_manager,
+                                        self.save_file)
         self.set_canvas()
 
+        
         self.ui_manager.add(
             FPSWidget(),
-            MenuEditCircuit(self.input_system, self.screen, self.cell_size)
+            MenuEditCircuit(self.input_system, self.screen, self.cell_size,self.ui_manager),
+            
         )
 
         self.systems.update([
@@ -46,18 +53,23 @@ class CircuitEditor(BaseScene):
         self.inputs:dict[int,callable] ={
             pygame.K_n:lambda:self.input_system.set_brush("node"),
             pygame.K_w:lambda:self.input_system.set_brush("wire"),
-            pygame.K_r:lambda:self.input_system.set_brush("rotate"),
+            pygame.K_r:lambda:self.input_system.rotate_brush(),
             pygame.K_s:lambda:self.input_system.set_brush("select"),
             pygame.K_DELETE:lambda:self.input_system.set_brush("delete"),
             pygame.K_ESCAPE:self.input_system.exit_current_tool,
 
         }
+    
     def set_entities(self):
         initial_entities = SerializationManager.load_entities_from_json(self.save_file)
         if not initial_entities:
             return
         for entity in initial_entities:
             self.entity_mn.add_entity(entity)
+            self.node_manager.add_node(entity)
+    def on_close(self):
+        self.ui_manager.remove(self.eletric_list)
+
     
     def set_gesture_canvas(self):
         canvas_width = self.cell_size * 20
@@ -96,6 +108,7 @@ class CircuitEditor(BaseScene):
 
     def process_input(self, events):
         for event in events:
+            self.ui_manager.handle_event(event)
             if event.type == pygame.KEYDOWN:
                 func = self.inputs.get(event.key)
                 if func : func()

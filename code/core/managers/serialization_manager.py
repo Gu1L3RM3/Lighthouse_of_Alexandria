@@ -27,6 +27,18 @@ class SerializationManager:
         'Dropped': Dropped,
     }
     @staticmethod
+    def load_eletric_storage(filepath:str)->dict:
+        try:
+            with open(filepath, 'r') as f:
+                eletric_storage_data = json.load(f)
+            
+            print(f"Eletric Storage carregado de {filepath}")
+            return eletric_storage_data
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Arquivo de salvamento não encontrado: {filepath}")
+            
+    
+    @staticmethod
     def reconstruct_entity(data: dict) -> Entity:
         """
         Reconstrói uma única entidade a partir de seu dicionário de dados.
@@ -67,7 +79,7 @@ class SerializationManager:
                 entities_data = json.load(f)
             
             reconstructed_entities = [SerializationManager.reconstruct_entity(data) for data in entities_data]
-            print(f"Circuito carregada de {filepath}")
+            print(f"Circuito carregado de {filepath}")
             return reconstructed_entities
         except FileNotFoundError:
             print(f"Arquivo de salvamento não encontrado: {filepath}")

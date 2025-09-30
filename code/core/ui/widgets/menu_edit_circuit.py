@@ -3,20 +3,49 @@ from core.ui.widgets.widget import Widget
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import *
 from core.systems.circuit_editor.input_system import InputSystem
+from core.managers.ui_manager import UIManager
+from core.ui.widgets.eletric_list import EletricList
+from core.managers.serialization_manager import SerializationManager
 
 class MenuEditCircuit(Widget):
-    def __init__(self, input_system: InputSystem,screen:Surface,cell_size:int):
+    def __init__(self, input_system: InputSystem,screen:Surface,cell_size:int,ui_manager:UIManager):
         super().__init__()
         self.input_system = input_system
-
+        self.ui_manager=ui_manager
         self.cell_size = cell_size
+        self.screen_size=screen.size
+        
         self.color_background= (0,0,0)
-        self.screen_width, self.screen_height = screen.size
+        self.screen_width, self.screen_height = self.screen_size
         self.buttons = []  
-
+        self.set_eletric_lists()
         self.set_menu_top()
         self.set_menu_right()
+    def set_eletric_lists(self):
+        data=SerializationManager.load_eletric_storage("eletric_storage.json")
+        self.resistor_list = EletricList(data,"Resistor",
+                                         screen_size=self.screen_size,
+                                         action=self.on_eletric_list_click,
+                                         on_close=self.on_close)
+        self.v_source_list = EletricList(data,"VoutageSource",
+                                         screen_size=self.screen_size,
+                                         action=self.on_eletric_list_click,
+                                         on_close=self.on_close)
+        self.c_source_list = EletricList(data,"CurrentSource",
+                                         screen_size=self.screen_size,
+                                         action=self.on_eletric_list_click,
+                                         on_close=self.on_close)
 
+    
+    def on_close(self,widget:Widget):
+        self.ui_manager.remove(widget)
+        
+
+    def on_eletric_list_click(self,list_type, value):
+        self.input_system.set_brush(list_type,value)
+    def to_eletric_list_click(self,eletric_list:Widget):
+        self.input_system.exit_current_tool()
+        self.ui_manager.add(eletric_list)
     def set_menu_top(self):
         self.surface_top = Surface((self.screen_width,self.cell_size*2))
         self.surface_top.fill(self.color_background)
@@ -46,7 +75,7 @@ class MenuEditCircuit(Widget):
         )
         self.source_V_button = Button(
             click_type=ClickType.AFTER_PRESSED,
-            action=lambda: self.input_system.set_brush("sourceV"),
+            action=lambda: self.to_eletric_list_click(self.v_source_list),
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*3, pos_y),
@@ -56,7 +85,7 @@ class MenuEditCircuit(Widget):
         )
         self.resistor_button = Button(
             click_type=ClickType.AFTER_PRESSED,
-            action=lambda: self.input_system.set_brush("resistor"),
+            action=lambda: self.to_eletric_list_click(self.resistor_list),
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*6, pos_y),
@@ -66,7 +95,7 @@ class MenuEditCircuit(Widget):
         )
         self.source_I_button = Button(
             click_type=ClickType.AFTER_PRESSED,
-            action=lambda: self.input_system.set_brush("sourceI"),
+            action=lambda: self.to_eletric_list_click(self.c_source_list),
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*9, pos_y),

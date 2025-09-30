@@ -8,27 +8,20 @@ from core.managers.resource_manager import ResourceManager
 from core.settings import FONT,LABEL_OFFSET
 
 class Resistor(Entity):
-    def __init__(self,x,y):
+    def __init__(self,x,y,id,value:str):
         super().__init__()
         rm=ResourceManager.get()
         img_path="eletric_components/resistor.png"
         surf=rm.load_image(img_path)
-        labels = [
-            {
-                'text': 'R1', 
-                'color': 'black', 
-                'base_offset': (0, -LABEL_OFFSET) 
-            },
-            {
-                'text': '10kΩ', 
-                'color': 'blue', 
-                'base_offset': (0, LABEL_OFFSET)
-            }
-        ]
+
+        name = f'R{id}'
+
+        
+
         self.add(
             Position(x,y),
             Sprite(surf,image_path=img_path),
-            LabelComponent(labels,FONT),
+            LabelComponent(name,value,FONT),
             Connectable({'left','right'}),
             Dropped(),
            
@@ -51,28 +44,17 @@ class Node(Entity):
         
 
 class VoutageSource(Entity):
-    def __init__(self,x,y):
+    def __init__(self,x,y,id,value:str="10"):
         super().__init__()
         rm=ResourceManager.get()
         img_path="eletric_components/voltage_source.png"
         surf=rm.load_image(img_path)
-        labels = [
-            {
-                'text': 'V1', 
-                'color': 'black', 
-                'base_offset': (0, -LABEL_OFFSET) 
-            },
-            {
-                'text': '12V', 
-                'color': 'blue', 
-                'base_offset': (0, LABEL_OFFSET)
-            }
-        ]
-        
+
+        name=f'V{id}'
         self.add(
             Position(x,y),
             Sprite(surf,image_path=img_path),
-            LabelComponent(labels,FONT),
+            LabelComponent(name,value,FONT),
             Connectable({'left','right'}),
 
             Dropped(),
@@ -80,28 +62,17 @@ class VoutageSource(Entity):
         )
 
 class CurrentSource(Entity):
-    def __init__(self,x,y):
+    def __init__(self,x,y,id,value:str="10"):
         super().__init__()
         rm=ResourceManager.get()
         img_path="eletric_components/current_source.png"
         surf=rm.load_image(img_path)
-        labels = [
-            {
-                'text': 'I1', 
-                'color': 'black', 
-                'base_offset': (0, -LABEL_OFFSET) 
-            },
-            {
-                'text': '5A', 
-                'color': 'blue', 
-                'base_offset': (0, LABEL_OFFSET)
-            }
-        ]
 
+        name = f'I{id}'
         self.add(
             Position(x,y),
             Sprite(surf,image_path=img_path),
-            LabelComponent(labels,FONT),
+            LabelComponent(name,value,FONT),
             Connectable({'left','right'}),
             Dropped(),
            
@@ -116,7 +87,7 @@ class Ground(Entity):
 
         self.add(
             Position(x,y),
-            Sprite(surf,img_path),
+            Sprite(surf,image_path=img_path),
             Connectable({'up'}),
             Dropped(),
            

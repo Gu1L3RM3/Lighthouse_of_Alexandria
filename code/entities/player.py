@@ -10,6 +10,7 @@ from entities.weapons.sword import Sword
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
 from pygame.key import get_pressed
+from core.components.always_on_top import AlwaysOnTop
 
 class Player(Entity):
     def __init__(self, x: float = 100, y: float = 100):
@@ -37,7 +38,7 @@ class Player(Entity):
         anim = AnimateSprite(animations, fps=8, loop=True)
 
         weapon_slot = WeaponSlot(weapon=Sword())  
-        self.add(pos, vel, spr, col, anim, weapon_slot)
+        self.add(pos, vel, spr, col, anim, weapon_slot,AlwaysOnTop())
 
         self._set_animation("idle_front")
 
