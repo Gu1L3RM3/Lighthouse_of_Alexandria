@@ -7,7 +7,7 @@ class Connectable(Component):
         normalized = angle_deg % 360
         mapping = {
             0:   {"top": "top", "bottom": "bottom", "left": "left", "right": "right"},
-            90:  {"top": "right", "bottom": "left", "left": "top", "right": "bottom"},
+            90:  {"top": "left", "bottom": "right", "left": "bottom", "right": "top"},
             180: {"top": "bottom", "bottom": "top", "left": "right", "right": "left"},
             270: {"top": "left", "bottom": "right", "left": "bottom", "right": "top"},
         }

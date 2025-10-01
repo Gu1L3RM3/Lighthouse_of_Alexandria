@@ -10,6 +10,7 @@ from core.components.dropped import Dropped
 from core.components.always_on_top import AlwaysOnTop
 from core.components.sprite import Sprite
 from core.managers.node_manager import NodeManager
+from core.managers.lt_spice_generate import LtSpiceGenerate
 from typing import Type
 
 class InputSystem(System):
@@ -103,6 +104,7 @@ class InputSystem(System):
         spr:Sprite = self.brush.get(Sprite)
         con:Connectable = self.brush.get(Connectable)
         con.set_connections(self.angle_deg)
+
         spr.rotate(self.angle_deg)
     def rotate_entity(self):
         if not isinstance(self.brush, Rotate):
@@ -179,7 +181,9 @@ class InputSystem(System):
                 pos.xy = rect.topleft
                 return
     def save_circuit(self):
-        entities_to_save = self.entity_manager.get_entities(excepts=[self.brush])
+        self.exit_current_tool()
+        entities_to_save = self.entity_manager.get_entities()
+        LtSpiceGenerate(self.entity_manager).run()
         SerializationManager.save_entities_to_json(entities_to_save,self.save_file)
     def load_circuit(self):
         self.entity_manager.clear_all_entities(excepts=[self.brush]) 

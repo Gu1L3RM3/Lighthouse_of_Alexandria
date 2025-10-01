@@ -37,7 +37,7 @@ class Node(Entity):
         self.add(
             Position(x,y),
             Sprite(surf,image_path=img_path),
-            Connectable({'up','down','left','right'}),
+            Connectable({'top','bottom','left','right'}),
             Dropped(),
         )
 
@@ -56,7 +56,6 @@ class VoutageSource(Entity):
             Sprite(surf,image_path=img_path),
             LabelComponent(name,value,FONT),
             Connectable({'left','right'}),
-
             Dropped(),
            
         )
@@ -88,10 +87,11 @@ class Ground(Entity):
         self.add(
             Position(x,y),
             Sprite(surf,image_path=img_path),
-            Connectable({'up'}),
+            Connectable({'top'}),
             Dropped(),
            
         )
+        
 class Wire(Entity):
     def __init__(self,x,y):
         super().__init__()

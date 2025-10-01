@@ -6,7 +6,6 @@ from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.ui_manager import UIManager
 from core.ui.widgets.eletric_list import EletricList
 from core.managers.serialization_manager import SerializationManager
-
 class MenuEditCircuit(Widget):
     def __init__(self, input_system: InputSystem,screen:Surface,cell_size:int,ui_manager:UIManager):
         super().__init__()
@@ -21,6 +20,8 @@ class MenuEditCircuit(Widget):
         self.set_eletric_lists()
         self.set_menu_top()
         self.set_menu_right()
+
+
     def set_eletric_lists(self):
         data=SerializationManager.load_eletric_storage("eletric_storage.json")
         self.resistor_list = EletricList(data,"Resistor",
@@ -149,9 +150,9 @@ class MenuEditCircuit(Widget):
 
         
         pos_x = pos_x_menu_right+32
-        start_y = self.cell_size*3
+        start_y = self.cell_size
 
-        
+
         self.rotate_button = Button(
             click_type=ClickType.AFTER_PRESSED,
             action=lambda: self.input_system.set_brush('rotate'),  
@@ -205,7 +206,6 @@ class MenuEditCircuit(Widget):
 
 
         self.buttons.extend([
-
             self.rotate_button,
             self.delete_button,
             self.select_button,

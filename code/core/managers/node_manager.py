@@ -67,7 +67,7 @@ class NodeManager:
             
             
             if node_rect.top == other_rect.bottom and node_rect.left == other_rect.left:
-                if 'bottom'in conn_other.base_connections or isinstance(other,Node):
+                if 'bottom'in conn_other.base_connections or 'top' in conn_other.base_connections or isinstance(other,Node):
                     neighbors["up"] = other
             elif node_rect.bottom == other_rect.top and node_rect.left == other_rect.left:
                 if 'top' in conn_other.base_connections or isinstance(other,Node):
