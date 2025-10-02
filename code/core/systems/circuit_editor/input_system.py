@@ -184,7 +184,7 @@ class InputSystem(System):
         self.exit_current_tool()
         entities_to_save = self.entity_manager.get_entities()
         SerializationManager.save_entities_to_json(entities_to_save,self.save_file)
-        LtSpiceGenerate("circuit.json").run()
+        LtSpiceGenerate("circuit.json",self.entity_manager).run()
     def load_circuit(self):
         self.entity_manager.clear_all_entities(excepts=[self.brush]) 
         self.node_manager.clear_all_nodes()
