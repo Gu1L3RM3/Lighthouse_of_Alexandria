@@ -1,0 +1,8 @@
+* C:\Users\cavaz\OneDrive\Documentos\Projetos\Projetos_Python\IC\Alexandria\code\circuit.asc
+R0 N002 N001 200
+V0 N001 0 20
+V1 N002 0 10
+I0 0 N001 30
+.tran 1
+.backanno
+.end
