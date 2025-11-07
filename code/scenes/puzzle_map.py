@@ -35,7 +35,6 @@ class PuzzleMap(BaseScene):
             self.enemies_follow_system,
             self.path_following_system,
             self.animation_system,
-
             self.weapon_system,
             self.render_system]
             )
@@ -45,15 +44,14 @@ class PuzzleMap(BaseScene):
         spawner = MapEntitySpawner()
         spawner.spawn_entities(self.tile_map, self.entity_mn)
 
-        px, py = self.tile_map.get_player_spawn()
-        self.player = Player(px, py)
-        self.entity_mn.add_entity(self.player)
+        self.player = self.entity_mn.get_player()
+        
 
         self.physics_system.cache_static_colliders(self.entity_mn)
 
     def process_input(self, events):
 
-        if not self.dialog_system.active_dialogue_npc:
+        if not self.dialog_system.active_dialogue:
             self.player.input(events)
 
     def update(self, dt):

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="19" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="16">
+ <tileset firstgid="1" name="tiles and items" tilewidth="16" tileheight="16" tilecount="144" columns="12">
+  <image source="../../../../../../../../Downloads/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
+ </tileset>
+ <tileset firstgid="145" source="obj.tsx"/>
+ <layer id="1" name="ground" width="19" height="11">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="3" name="obj" width="19" height="11">
+  <data encoding="csv">
+0,15,16,16,16,16,16,16,16,16,46,16,16,16,16,16,16,17,0,
+26,27,100,0,0,0,0,0,0,0,0,0,76,77,0,0,112,29,30,
+38,0,112,0,0,0,0,0,0,0,0,0,88,89,90,0,0,0,42,
+38,0,0,0,102,103,104,0,0,0,0,0,117,0,0,0,0,0,42,
+38,0,0,101,114,115,116,91,0,0,0,0,0,0,0,0,98,99,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,111,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+50,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,54,
+0,63,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,65,0
+</data>
+ </layer>
+ <objectgroup id="2" name="player">
+  <object id="1" name="player" x="145.167" y="29.8333">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="attention_point">
+  <object id="7" name="1" type="attention" x="167" y="127">
+   <properties>
+    <property name="positions" value="[{&quot;x&quot;:40,&quot;y&quot;:73.5}]"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="attention_points">
+  <object id="8" name="2" type="attention" x="64" y="80">
+   <properties>
+    <property name="positions" value="[{&quot;x&quot;:40,&quot;y&quot;:73.5}]"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="areas_dialog">
+  <object id="5" name="dialog_1" x="141.5" y="89" width="48" height="47.5">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="dialogo" value="Nossa,que curso chato!!;Eu não entendo nada nas aulas;Parece que os professores falam grego!;Acho que o curso de engenharia elétrica não é para mim;Vou dar uma olhada nos meus livros"/>
+   </properties>
+  </object>
+  <object id="12" name="dialog_2" x="51" y="67" width="50.5" height="42.5">
+   <properties>
+    <property name="active_status" type="bool" value="false"/>
+    <property name="dialogo" value="Minha mãe sempre me disse para nunca desistir;Ela me dizia: 'É melhor receber pedras do que flores.Recebendo pedras,você se adapta, melhora e se torna uma pessoa mais forte.Já recebendo flores, você continua como está, nunca vai melhorar.';Ela está certa. Mas como posso fazer isso?;Como posso aprender todos esses conceitos de circuitos elétricos?;É a matéria mais importante do curso!!;Queria que meu pai estivesse aqui.Ele era um cientista muito inteligente;Minha mãe me disse que ele desapareceu 10 anos atrás;Mesmo antes de sumir vivia ausente. Minha mãe disse que ele trabalhava em um equipamento para viajar no tempo. Mas , não houveram avanços depois que ele sumiu."/>
+   </properties>
+  </object>
+  <object id="14" name="dialog_3" x="126" y="46.5" width="89.5" height="70">
+   <properties>
+    <property name="active_status" type="bool" value="false"/>
+    <property name="dialogo" value="Que papél é esse???"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="9" name="itens">
+  <object id="13" name="old_paper" x="150" y="70.5">
+   <properties>
+    <property name="active_status" type="bool" value="false"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <layer id="4" name="ground2" width="19" height="11">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,46,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,81,82,83,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,93,94,95,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

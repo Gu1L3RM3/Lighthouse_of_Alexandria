@@ -2,25 +2,24 @@ import pygame
 from core.components.dialogue import Dialogue
 from core.components.position import Position
 from core.components.collider import Collider
-from core.components.freeze import Freeze
 from core.managers.event_manager import EventManager
 from core.managers.entity_manager import EntityManager
 from core.ecs import Entity
 from core.settings import *
-from core.ui.widgets.dialogue_box import DialogueBoxWidget  
+from core.ui.widgets.dialog_box import DialogueBoxWidget  
 from core.managers.ui_manager import UIManager
 
 
+
 class DialogueSystem:
-    
     def __init__(self, ui_manager:UIManager):
         self.event_manager = EventManager.get()
-        self.active_dialogue_npc: Entity | None = None
+        self.active_dialogue: Entity | None = None
         self.screen_size = pygame.display.get_surface().get_size()
-        self.ui_manager = ui_manager   
+        self.ui_manager = ui_manager 
 
     def update(self, entity_mn: EntityManager, player: Entity,dt):
-        if self.active_dialogue_npc:
+        if self.active_dialogue:
             self._handle_active_dialogue(dt)
             return
         
@@ -28,7 +27,7 @@ class DialogueSystem:
 
     def _handle_active_dialogue(self,dt):
         keys = pygame.key.get_just_pressed()
-        dialogue = self.active_dialogue_npc.get(Dialogue)
+        dialogue = self.active_dialogue.get(Dialogue)
 
         dialogue.update(dt)  
 
@@ -42,52 +41,61 @@ class DialogueSystem:
         if not dialogue.next(self.screen_size):
             self._end_dialogue()
 
+
+        
+        
     def _check_for_new_dialogue(self, entity_mn:EntityManager, player: Entity):
         keys = pygame.key.get_just_pressed()
-        if not keys[KEY_DIALOG]:
-            return
+
 
         player_pos = player.get(Position)
         player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
 
-        npcs=entity_mn.get_entities_with(Dialogue,Collider)
+        entities=entity_mn.get_entities_with(Dialogue)
         
         
-        for npc in npcs:
-            npc_pos = npc.get(Position)
-            npc_col = npc.get(Collider).get_rect(npc_pos.x, npc_pos.y)
-
-            if not player_col.colliderect(npc_col.inflate(10, 10)):
+        for entity in entities:
+            entity_pos :Position= entity.get(Position)
+            entity_dialogue :Dialogue= entity.get(Dialogue)
+            entity_area_dialogue = entity_dialogue.get_area(entity_pos.x,entity_pos.y)
+     
+            if not player_col.colliderect(entity_area_dialogue.inflate(10, 10)):
                 continue
-            
-            self._start_dialogue(npc)
-            break
-    def _start_dialogue(self, npc_entity: Entity):
-        self.active_dialogue_npc = npc_entity
-        dialogue = npc_entity.get(Dialogue)
+            if not entity_dialogue.active_status:
+                continue
+
+            if entity_dialogue.auto_start and not entity_dialogue.triggered:
+                entity_dialogue.triggered = True
+                self._start_dialogue(entity,player)
+                break
+
+            elif not entity_dialogue.auto_start and keys[KEY_DIALOG]:
+                self._start_dialogue(entity,player)
+                break
+    
+
+    def _start_dialogue(self, entity: Entity,player:Entity):
+        player.stay_idle()
+
+        self.active_dialogue= entity
+
+        dialogue = entity.get(Dialogue)
         dialogue.start(self.screen_size)
 
-        freeze_comp = npc_entity.get(Freeze)
-        
-        if freeze_comp:
-            freeze_comp.active = True
+        self.event_manager.post({'type':'request_freeze','type_request':'dialogue'})
 
         dialog_box = DialogueBoxWidget(dialogue)
         self.ui_manager.add(dialog_box)
 
-        self.event_manager.post({'type': 'dialogue_start', 'npc': npc_entity})
-
+        self.event_manager.post({'type': 'dialogue_start', 'entity': entity})
     def _end_dialogue(self):
-        npc = self.active_dialogue_npc
+        entity = self.active_dialogue
 
-        freeze_comp = npc.get(Freeze)
-        
-        if freeze_comp:
-            freeze_comp.active = False
+        self.event_manager.post({'type':'release_freeze'})
 
         self.ui_manager.widgets = [
             w for w in self.ui_manager.widgets if not isinstance(w, DialogueBoxWidget)
         ]
 
-        self.active_dialogue_npc = None
-        self.event_manager.post({'type': 'dialogue_end', 'npc': npc})
+        self.active_dialogue = None
+        self.event_manager.post({'type': 'dialogue_end', 'entity': entity})

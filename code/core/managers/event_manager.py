@@ -12,7 +12,9 @@ class EventManager:
         if cls._instance is None:
             cls._instance = EventManager()
         return cls._instance
-
+    def clear(self):
+        print("Limpou Liteners")
+        self._listeners.clear()
     def subscribe(self, event_type: str, listener: callable):
         self._listeners[event_type].append(listener)
 

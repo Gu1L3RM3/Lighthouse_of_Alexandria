@@ -16,8 +16,7 @@ class TileMap:
         self.solid_colliders: list[pygame.Rect] = []
         self.navgrid = NavGrid(self.tmx_data, self.tile_width, self.tile_height, walk_layer_name="ground2")
         self.pathfinder = PathFinder(self.navgrid)
-    def get_player_spawn(self) -> tuple[int, int]:
-        return self.spawn_points.get("player", (0, 0))
+
 
     def get_tile_from_position(self, pos) -> tuple[int, int]:
         tx = int(pos.x // self.tile_width)

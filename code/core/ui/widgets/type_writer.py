@@ -1,6 +1,6 @@
 import pygame
 from typing import Callable, Union
-from core.managers import ResourceManager
+from core.managers.resource_manager import ResourceManager
 from core.settings import *
 from core.ui.widgets.widget import Widget
 

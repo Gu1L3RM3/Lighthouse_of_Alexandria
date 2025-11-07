@@ -5,7 +5,7 @@ from core.components.dropped import Dropped
 from core.components.connectable import Connectable
 from core.components.label_component import LabelComponent
 from core.managers.resource_manager import ResourceManager
-from core.settings import FONT,LABEL_OFFSET
+from core.settings import FONT
 
 class Resistor(Entity):
     def __init__(self,x,y,id,value:str):

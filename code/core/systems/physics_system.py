@@ -2,9 +2,11 @@ from core.ecs import System, Entity
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.collider import Collider
+from core.components.freeze import Freeze
 from core.managers.entity_manager import EntityManager
 from typing import List
 import pygame
+
 
 
 class PhysicsSystem(System):
@@ -26,9 +28,15 @@ class PhysicsSystem(System):
         moving_entities = entity_mn.get_entities_with(Position, Velocity)
 
         for entity in moving_entities:
+            if entity.has(Freeze):
+                freeze: Freeze = entity.get(Freeze)
+                if freeze.active:
+                    continue
+
             if not entity.has(Collider):
                 self._move(entity, dt)
                 continue
+
             
             # passa lista de entidades móveis para colisão dinâmica
             self._move_with_collision(entity, moving_entities, dt)

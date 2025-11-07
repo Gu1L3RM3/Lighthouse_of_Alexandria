@@ -5,14 +5,17 @@ from core.components.position import Position
 class Camera:
     def __init__(self, screen: Surface, world_width: int, world_height: int):
         self.screen = screen
+
         w, h = self.screen.get_size()
         
         self.viewport = Rect(0, 0, w, h)
-        
         self.position = Vector2(0, 0)
         
         self.world_width = world_width
         self.world_height = world_height
+        
+        self.scale = 1.0 
+
         self._target: Entity | None = None
 
     @property
@@ -29,25 +32,37 @@ class Camera:
     def _center_on_target(self):
         if self._target is None:
             return
-            
+
         player_pos: Position = self._target.get(Position)
 
-        self.position.x = player_pos.x - self.viewport.w / 2
-        self.position.y = player_pos.y - self.viewport.h / 2
+        # 1. Calcula a posição ideal da câmera para centralizar o jogador (considerando a escala)
+        target_center_x = player_pos.x * self.scale
+        target_center_y = player_pos.y * self.scale
 
-        if self.world_width <= self.viewport.w:
-            self.position.x = (self.world_width - self.viewport.w) / 2
-        else:
-            self.position.x = max(0, min(self.position.x, self.world_width - self.viewport.w))
+        x = target_center_x - self.viewport.w / 2
+        y = target_center_y - self.viewport.h / 2
 
-        if self.world_height <= self.viewport.h:
-            self.position.y = (self.world_height - self.viewport.h) / 2
+        # 2. Verifica se o mundo é maior ou menor que a tela e ajusta a posição da câmera
+
+        # Ajuste horizontal
+        if self.world_width > self.viewport.w:
+            # Mundo é LARGO: prende a câmera nas bordas do mundo
+            x = max(0, min(x, self.world_width - self.viewport.w))
         else:
-            self.position.y = max(0, min(self.position.y, self.world_height - self.viewport.h))
-            
-      
-        self.viewport.x = round(self.position.x)
-        self.viewport.y = round(self.position.y)
+            # Mundo é ESTREITO: centraliza o mundo na tela
+            x = (self.world_width - self.viewport.w) / 2
+
+        # Ajuste vertical
+        if self.world_height > self.viewport.h:
+            # Mundo é ALTO: prende a câmera nas bordas do mundo
+            y = max(0, min(y, self.world_height - self.viewport.h))
+        else:
+            # Mundo é BAIXO: centraliza o mundo na tela
+            y = (self.world_height - self.viewport.h) / 2
+
+        # 3. Define a posição final da câmera
+        self.viewport.x = round(x)
+        self.viewport.y = round(y)
 
     def update(self):
         """

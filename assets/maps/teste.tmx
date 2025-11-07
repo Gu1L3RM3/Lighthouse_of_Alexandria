@@ -638,8 +638,8 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="5" name="entities">
-  <object id="2" name="player" type="player" x="768" y="1500">
+ <objectgroup id="5" name="player">
+  <object id="2" name="player" type="player" x="1546.79" y="2206.06">
    <point/>
   </object>
  </objectgroup>

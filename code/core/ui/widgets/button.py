@@ -46,7 +46,8 @@ class Button(Widget):
                 function=self.action,
                 click_type=self.click_type,
             )
-
+    def change_text(self,text:str):
+        self.text_widget.set_text(text,self._rect.center)
     def set_text(self):
         if self.text_widget == None:
             self.text_widget = Text(

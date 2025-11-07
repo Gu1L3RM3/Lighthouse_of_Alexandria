@@ -58,7 +58,7 @@ NODE_SPRITE_MAP = {
     frozenset(): "eletric_components/node/node_single.png",
 }
 
-LABEL_OFFSET=40
+LABEL_OFFSET=45
 
 
 

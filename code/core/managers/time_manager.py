@@ -7,7 +7,7 @@ class TimeManager:
     def set(self, name, interval):
         self.timers[name] = pygame.time.get_ticks() + int(interval * 1000)
 
-    def ready(self, name):
+    def ready(self, name)->bool:
         return pygame.time.get_ticks() >= self.timers.get(name, 0)
 
     def reset(self, name, interval):

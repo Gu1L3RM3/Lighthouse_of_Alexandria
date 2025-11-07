@@ -9,6 +9,7 @@ from pygame import Rect
 class EntityManager:
     def __init__(self):
         self._entities: Dict[int, Entity] = {}
+
     
     @property
     def entities(self):
@@ -27,12 +28,16 @@ class EntityManager:
 
     def remove_component(self, entity: Entity, comp_type: Type[Component]):
         entity.remove(comp_type)
+    def remove_entity_by_id(self,id:int):
+        self._entities.pop(id)
 
     
     def remove_entity(self, entity: Entity):
         if entity.id in self._entities:
             del self._entities[entity.id]
     
+    def clear_all(self):
+        self._entities.clear()
 
     def get_player(self)->Player:
         for e in self._entities.values():

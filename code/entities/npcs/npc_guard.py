@@ -27,7 +27,7 @@ class GuardNPC(Entity):
             anim,
             Velocity(),
             Freeze(),
-            Dialogue(["Tenho que estudar para a prova de amanhã"])
+            Dialogue(["Tenho que estudar para a prova de amanhã"],(20,16))
         )
         self.props = props or {}
         self._direction = Vector2(0, 1)

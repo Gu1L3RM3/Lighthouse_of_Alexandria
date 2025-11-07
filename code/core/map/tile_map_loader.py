@@ -25,10 +25,7 @@ class TileMapLoader:
 
         tilemap.ground_surface = ground_surface
 
-        for layer in self._iter_layers(tmx_data, "entities", pytmx.TiledObjectGroup):
-            for obj in layer:
-                if (obj.name or "").lower().startswith("player"):
-                    tilemap.spawn_points["player"] = (int(obj.x), int(obj.y))
+
 
         for layer in self._iter_layers(tmx_data, "waypoints", pytmx.TiledObjectGroup):
             for obj in layer:

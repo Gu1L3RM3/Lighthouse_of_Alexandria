@@ -1,50 +1,42 @@
 from core.ecs import Entity
 from core.components.position import Position
 from core.components.sprite import Sprite
-from pygame import Surface
-
+from core.managers.resource_manager import ResourceManager
 
 class Delete(Entity):
     def __init__(self,x,y):
         super().__init__()
-        surf = Surface((64,64))
-        surf.fill((200,50,50))
+        rm=ResourceManager.get()
+        img_path="eletric_components/delete.png"
+        surf=rm.load_image(img_path)
+
 
         self.add(
-            Sprite(surf),
+            Sprite(surf,image_path=img_path),
             Position(x,y)
         )
 
 class Rotate(Entity):
     def __init__(self,x,y):
         super().__init__()
-        surf = Surface((64,64))
-        surf.fill((200, 120, 50))
-
+        rm=ResourceManager.get()
+        img_path="eletric_components/rotate.png"
+        surf=rm.load_image(img_path)
         self.add(
-            Sprite(surf),
+            Sprite(surf,image_path=img_path),
             Position(x,y)
         )
 
 
-class Rotate(Entity):
-    def __init__(self,x,y):
-        super().__init__()
-        surf = Surface((64,64))
-        surf.fill((200, 120, 50))
-
-        self.add(
-            Sprite(surf),
-            Position(x,y)
-        )
 
 class Select(Entity):
     def __init__(self,x,y):
         super().__init__()
-        surf = Surface((64,64))
-        surf.fill((200, 150, 150))
+        rm=ResourceManager.get()
+        img_path="eletric_components/select.png"
+        surf=rm.load_image(img_path)
 
         self.add(
-            Sprite(surf),
+            Sprite(surf,image_path=img_path),
             Position(x,y)
         )

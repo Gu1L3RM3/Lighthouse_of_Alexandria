@@ -35,6 +35,10 @@ class Entity:
         return comp_type in self.components
     
     def get(self, comp_type: Type[Component]):
+        component = self.components.get(comp_type)
+        if not component :
+            raise Exception(f"There is no {comp_type.__name__} in {self.__class__.__name__}")
+
         return self.components.get(comp_type)
     def to_dict(self) -> dict:
         return {

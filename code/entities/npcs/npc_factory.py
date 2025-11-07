@@ -1,10 +1,11 @@
 from entities.npcs.npc_guard import GuardNPC
 from entities.npcs.npc_professor import ProfessorNPC
-
+from entities.npcs.arquimedes import Arquimedes
 class NPCFactory:
     registry = {
         "guard": GuardNPC,
         "professor": ProfessorNPC,
+        "arquimedes": Arquimedes
     }
 
     @classmethod

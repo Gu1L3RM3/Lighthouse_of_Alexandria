@@ -1,6 +1,7 @@
 import pygame
 from typing import Dict
 from scenes.base_scene import BaseScene
+from core.managers.event_manager import EventManager
 from core.settings import *
 class SceneManager:
     _instance = None
@@ -8,6 +9,7 @@ class SceneManager:
     def __init__(self):
         self.scenes: Dict[str, BaseScene] = {}
         self.active_scene: BaseScene = None
+
 
         
         self.transitioning = False
@@ -26,11 +28,14 @@ class SceneManager:
     def register(self, name: str, scene: BaseScene):
         self.scenes[name] = scene
 
+
     def change(self, name: str):
         if name not in self.scenes:
             raise KeyError(f"Scene '{name}' not registered.")
         if self.active_scene:
             self.active_scene.end()
+
+        EventManager.get().clear()
         self.active_scene = self.scenes[name]
         self.active_scene.start()
 
@@ -41,7 +46,7 @@ class SceneManager:
         if not self.active_scene:
             self.change(name)
             return
-
+        EventManager.get().clear()
         self.transitioning = True
         self.transition_target = self.scenes[name]
         self.transition_phase = "fade_out"

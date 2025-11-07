@@ -11,7 +11,6 @@ from core.systems.dialogue_system import DialogueSystem
 from core.systems.path_following_system import PathFollowingSystem
 from core.systems.weapon_system import WeaponSystem
 from core.systems.render_system import RenderSystem
-
 from core.ecs import System
 from core.camera import Camera
 
@@ -26,17 +25,17 @@ class BaseScene(ABC):
             world_width,
             world_height
             )
-        self.resources:ResourceManager = ResourceManager.get()
-        self.event_manager:EventManager= EventManager.get()
-        self.entity_mn = EntityManager()
-        self.time_manager = TimeManager()
-        self.dn_manager = DayNightManager(screen)
-        self.ui_manager = UIManager()
-        self.time_manager = TimeManager()
+        self.resources     = ResourceManager.get()
+        self.event_manager = EventManager.get()
+        self.entity_mn     = EntityManager()
+        self.time_manager  = TimeManager()
+        self.dn_manager    = DayNightManager(screen)
+        self.ui_manager    = UIManager()
+        self.time_manager  = TimeManager()
 
-        self.render_system=RenderSystem(self.screen,self.camera,self.entity_mn)
-        self.physics_system = PhysicsSystem()
-        self.dialog_system = DialogueSystem(self.ui_manager)
+        self.render_system         = RenderSystem(self.screen,self.camera,self.entity_mn)
+        self.physics_system        = PhysicsSystem()
+        self.dialog_system         = DialogueSystem(self.ui_manager)
         self.path_following_system = PathFollowingSystem()
         
 

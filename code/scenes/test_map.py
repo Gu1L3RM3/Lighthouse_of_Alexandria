@@ -2,7 +2,6 @@ import pygame
 from core.settings import *
 from pygame import Surface
 from scenes.base_scene import BaseScene
-from entities.player import Player
 from core.systems.npc_route_system import NPCRouteSystem
 from core.systems.animation_system import AnimationSystem
 from core.ui.widgets.hud import HUD
@@ -44,15 +43,12 @@ class TestMap(BaseScene):
         spawner = MapEntitySpawner()
         
         spawner.spawn_entities(self.tile_map, self.entity_mn)
-        px, py = self.tile_map.get_player_spawn()
 
-        self.player = Player(px, py)
-
-        self.entity_mn.add_entity(self.player)
+        self.player = self.entity_mn.get_player()
         self.physics_system.cache_static_colliders(self.entity_mn)
 
     def process_input(self, events):
-        if self.dialog_system.active_dialogue_npc:
+        if self.dialog_system.active_dialogue:
             return
 
         if self.time_manager.ready("next_scene"):
@@ -71,7 +67,7 @@ class TestMap(BaseScene):
         
         self.dialog_system.update(self.entity_mn, self.player,dt)
 
-        if self.dialog_system.active_dialogue_npc:
+        if self.dialog_system.active_dialogue:
             return
 
         self.dn_manager.update(dt)

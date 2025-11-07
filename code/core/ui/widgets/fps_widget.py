@@ -18,10 +18,7 @@ class FPSWidget(Widget):
         self._frame_count = 0
 
     def update(self, dt: float):
-        """
-        Acumula o tempo e os frames, e atualiza o FPS exibido
-        quando o intervalo de tempo é atingido.
-        """
+
         if dt <= 0:
             return
 
@@ -35,7 +32,6 @@ class FPSWidget(Widget):
             self._frame_count = 0
 
     def draw(self,screen:Surface):
-        """Desenha o valor de FPS estável na tela."""
         text_surface = self.font.render(f"FPS: {int(self.display_fps)}", True, self.color)
         
         bg_rect = text_surface.get_rect()

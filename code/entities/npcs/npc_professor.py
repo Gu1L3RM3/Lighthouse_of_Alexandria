@@ -31,7 +31,9 @@ class ProfessorNPC(Entity):
                 "Você sabe o que é a Lei de Ohm?",
                 "É uma lei muito famosa e utilizada em diversas áreas da física e da engenharia elétrica.",
                 "Mas exige bastante da sua inteligencia e disposição para aprendê-la! Está disposto a adquirir esse conhecimento?"
-            ]),
+            ],
+            (20,16)
+            ),
             Velocity()
         )
         self.props = props or {}

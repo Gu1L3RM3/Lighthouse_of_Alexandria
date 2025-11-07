@@ -1,24 +1,33 @@
 import pygame
+from pygame import Rect
 from pygame import Surface
 from core.ui.widgets.type_writer import TypewriterEffect
 from core.managers.resource_manager import ResourceManager
 from core.ecs import Component
 
 class Dialogue(Component):
-    def __init__(self, lines: list[str]):
+    def __init__(self, lines: list[str],size_dialogue:tuple[int,int],auto_start:bool=False,active_status:bool=True):
         self.lines = lines
         self.current_index = 0
+        self.active_status =  active_status
         self.active = False
         self.typewriter = None
-        
+        self.size_dialogue=size_dialogue
+        self.auto_start =  auto_start
         self.rm=ResourceManager.get()
-        
+        self.triggered=False
         self.dialog_box_rect = None
         self.wrapped_lines = [] 
         self.font = None
         self.font_color = (255, 255, 255)
         self.max_text_width = 0
-
+    def get_area(self,x:int,y:int):
+        return Rect(
+            x,
+            y,
+            self.size_dialogue[0],
+            self.size_dialogue[1]
+        )
     def _wrap_text(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
         
         words = text.split(' ')
@@ -57,6 +66,7 @@ class Dialogue(Component):
         self.dialog_box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 
         typewriter_text = "\n".join(self.wrapped_lines)
+        
         text_center_pos = self.dialog_box_rect.center
         self.typewriter = TypewriterEffect(
             text_center_pos, typewriter_text, font_name, font_size, font_color, speed=30

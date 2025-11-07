@@ -1,0 +1,102 @@
+import pygame
+from pygame import Surface, Rect
+from core.ui.widgets.widget import Widget
+from core.ui.widgets.gesture_detector import  ClickType
+from core.ui.widgets.button import Button
+from core.managers.event_manager import EventManager
+from typing import Callable, Optional
+
+
+class AlertDialog(Widget):
+    def __init__(self,
+                title:str,
+                on_close: Optional[Callable] = None,
+                dialog_size:tuple[int,int] = (200,300),
+                surface:Surface|None = None,
+                parent:Widget|None=None,
+                ):
+        super().__init__()
+        self.title    = title
+        self.parent   = parent
+        self.surface  = surface
+        self.on_close = on_close
+        self.buttons: list[Button] = []
+        self.screen_size=pygame.display.get_window_size()
+
+        self.set_dialog_rect(dialog_size)
+
+        self.em = EventManager.get()
+        self.em.post({'type':'request_freeze'})
+
+        
+
+
+        self.set_close_button()
+    def set_dialog_rect(self,dialog_size:tuple[int,int]):
+        if not self.surface:
+            self.dialog_rect = Rect(
+                (self.screen_size[0] // 2 - dialog_size[0] // 2,
+                self.screen_size[1] // 2 - dialog_size[1] // 2),
+                (dialog_size[0], dialog_size[1])
+                )
+            return
+        self.dialog_rect =  self.surface.get_rect(center=(self.screen_size[0]//2,
+                                                          self.screen_size[1]//2))
+
+    def set_close_button(self):
+        close_size = 30
+        surf = Surface((close_size, close_size))
+        surf.fill((200, 50, 50))
+        surf_pressed = Surface((close_size, close_size))
+        surf_pressed.fill((255, 80, 80))
+
+        self.close_button = Button(
+            init_surface=surf,
+            surface_pressed=surf_pressed,
+            pos_center=(self.dialog_rect.right - close_size//2 -5,
+                        self.dialog_rect.top +  close_size // 2 +10),
+            click_type=ClickType.AFTER_RELEASED,
+            action=self._close,
+            text="X",
+            color_text=(255, 255, 255),
+            font_size=10
+        )
+
+
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if not self.dialog_rect.collidepoint(event.pos):
+                self._close()
+
+
+
+    def _close(self):
+        self.em.post({'type':'release_freeze'})
+        if self.parent:
+            self.on_close(self.parent)
+            return
+        self.on_close(self)
+
+    def update(self, dt):
+        self.close_button.update(dt)
+    def draw_surface(self,surface:Surface):
+        if self.surface:
+            surface.blit(self.surface,self.dialog_rect)
+            return
+        
+        pygame.draw.rect(surface, (255, 255, 255), self.dialog_rect, border_radius=12)
+        pygame.draw.rect(surface, (0, 0, 0), self.dialog_rect, 2, border_radius=12)
+        font = pygame.font.SysFont(None, 28)
+        title_surf = font.render(f"{self.title}", True, (0, 0, 0))
+        surface.blit(title_surf, (self.dialog_rect.centerx - title_surf.get_width() // 2,
+                                  self.dialog_rect.top + 15))
+
+    def draw(self, surface: Surface):
+        overlay = Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 150))
+        surface.blit(overlay, (0, 0))
+
+        self.draw_surface(surface)
+
+
+        self.close_button.draw(surface)

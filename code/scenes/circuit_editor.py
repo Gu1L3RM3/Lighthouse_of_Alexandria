@@ -1,17 +1,22 @@
 from scenes.base_scene import BaseScene
 from core.ui.widgets.gesture_detector import GestureDetector, ClickType
-from core.ui.widgets.eletric_list import EletricList
 from core.ui.widgets.menu_edit_circuit import MenuEditCircuit
 from core.ui.widgets.fps_widget import FPSWidget
 from pygame import Surface, Rect
 from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.node_manager import NodeManager
-from core.managers.serialization_manager import SerializationManager
+from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 import pygame
 from core.settings import CELL_SIZE
 
 class CircuitEditor(BaseScene):
-    def __init__(self, screen: Surface, save_file:str='circuit.json'):
+    def __init__(self, screen: Surface,
+                 json_file:str='circuit.json',
+                 net_file :str= "circuit.net",
+                 lt_spice_file:str = 'circuit.asc',
+                 ):
+        
         self.screen = screen
         self.width_screen = screen.get_width()
         self.height_screen = screen.get_height()
@@ -22,23 +27,31 @@ class CircuitEditor(BaseScene):
         self.gesture_canvas = None
         self.rects_grid = []
 
-        self.save_file= save_file
-
-        
-
+        self.json_file= json_file
+        self.net_file = net_file
+        self.lt_spice_file = lt_spice_file
+ 
 
         self.set_gesture_canvas()
         self.set_rects_grid()
-        self.node_manager=NodeManager()
+        self.node_manager = NodeManager()
+        self.storage_circuit_manager = StorageCircuitManager()
         self.input_system = InputSystem(self.entity_mn,
-                                        self.rects_grid,self.node_manager,
-                                        self.save_file)
+                                        self.rects_grid,
+                                        self.node_manager,
+                                        self.json_file,
+                                        self.net_file,
+                                        self.lt_spice_file,
+                                        self.storage_circuit_manager)
         self.set_canvas()
 
         
         self.ui_manager.add(
             FPSWidget(),
-            MenuEditCircuit(self.input_system, self.screen, self.cell_size,self.ui_manager),
+            MenuEditCircuit(self.input_system,
+                            self.screen,
+                            self.cell_size,
+                            self.ui_manager),
             
         )
 
@@ -61,7 +74,7 @@ class CircuitEditor(BaseScene):
         }
     
     def set_entities(self):
-        initial_entities = SerializationManager.load_entities_from_json(self.save_file)
+        initial_entities = SerializationManager.load_entities_from_json(self.json_file)
         if not initial_entities:
             return
         for entity in initial_entities:

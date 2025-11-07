@@ -52,52 +52,50 @@ class ResourceManager:
             self._fonts[key] = font
         return self._fonts[key]
     
-    def _cut_sprite_sheet(self,image_path:str,
-                          size_sprite:tuple=(48,48),
-                          offset:tuple[int]=(0,0),
-                          scale:int=1,
-                          trim:bool=True)->list[pygame.Surface]:
-        sprites=[]
-        width_sprite=size_sprite[0]
-        height_sprite=size_sprite[1]
+    def _cut_sprite_sheet(self, 
+                        image_path: str,
+                        size_sprite: tuple = (48, 48),
+                        offset: tuple[int, int] = (0, 0),
+                        scale: float = 1.0,
+                        trim_transparent: bool = True) -> list[pygame.Surface]:
+        sprites = []
+        width_sprite, height_sprite = size_sprite
 
-        image=pygame.image.load(image_path).convert_alpha()
+        image = pygame.image.load(image_path).convert_alpha()
+        width, height = image.get_size()
 
-        
-
-
-        width,height=image.get_size()
-
-        columns = height//size_sprite[0]
-        lines   = width//size_sprite[1]
-
+        columns = width // width_sprite
+        lines = height // height_sprite
 
         for line in range(lines):
             for column in range(columns):
+                posx = column * width_sprite + offset[0]
+                posy = line * height_sprite + offset[1]
 
-                posx= line*width_sprite+offset[0]
-                posy= column*height_sprite+offset[1]
-
-                rect= pygame.Rect(posx,posy,width_sprite,height_sprite)
+                rect = pygame.Rect(posx, posy, width_sprite, height_sprite)
                 sub_surf = image.subsurface(rect).copy()
 
+                bounding_box = sub_surf.get_bounding_rect()
+                if bounding_box.width == 0 and bounding_box.height == 0:
+                    continue
 
-                bounding_box=sub_surf.get_bounding_rect()
-                if bounding_box.width == 0 and bounding_box.height == 0: #totalmente transparente
-                    continue  
-                sub_surf=sub_surf.subsurface(bounding_box).copy()
+                if trim_transparent:
+                    sub_surf = sub_surf.subsurface(bounding_box).copy()
 
-                if scale != 1:
-                    sub_surf= pygame.transform.scale(sub_surf,size_sprite*scale)
+                if scale != 1.0:
+                    new_width = max(1, int(sub_surf.get_width() * scale))
+                    new_height = max(1, int(sub_surf.get_height() * scale))
+                    sub_surf = pygame.transform.smoothscale(sub_surf, (new_width, new_height))
 
                 sprites.append(sub_surf)
-        
+
         return sprites
+
         
 
                 
 
-    def load_sprite_sheet(self,subdir: str ,size:tuple[int]=(48,48),offset:tuple[int]=(0,0),scale:int=1 ):
+    def load_sprite_sheet(self,subdir: str ,size:tuple[int]=(48,48),offset:tuple[int]=(0,0),scale:float=1.0,trim_transparent:bool=True ):
         dict_assets:dict={}
         main_file =self.get_asset_path('images',subdir)
         for dirpath, _ , filenames in os.walk(main_file):
@@ -110,14 +108,6 @@ class ResourceManager:
                 continue
 
             image_path = os.path.join(dirpath,filenames[0])
-            sprites= self._cut_sprite_sheet(image_path,size,offset,scale)
+            sprites= self._cut_sprite_sheet(image_path,size,offset,scale,trim_transparent)
             dict_assets[name_subdir]=sprites
         return dict_assets
-
-            
-
-
-
-        
-
-

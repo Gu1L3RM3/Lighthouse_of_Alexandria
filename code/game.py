@@ -2,9 +2,10 @@ import pygame
 from core.settings import FPS
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
+from scenes.home_scene import HomeScene
 from scenes.test_map import TestMap
-from scenes.puzzle_map import PuzzleMap
-from scenes.circuit_editor import CircuitEditor
+from scenes.fases.level_1 import Level1
+from scenes.fases.level_2 import Level2
 from sys import exit
 
 class Game:
@@ -23,14 +24,12 @@ class Game:
         
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
-        self.scene_manager.register('teste', TestMap(self.screen))
-        #self.scene_manager.register('home', HomeScene(self.screen))
-        self.scene_manager.register('puzzle',PuzzleMap(self.screen))
-
-        
-        self.scene_manager.active_scene = CircuitEditor(self.screen)
+        #self.register_fases()
+        self.scene_manager.active_scene = Level2(self.screen)
         self.scene_manager.active_scene.start()
-
+    def register_fases(self):
+        self.scene_manager.register('level_1',Level1(self.screen))
+        self.scene_manager.register('level_2',Level2(self.screen))
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0

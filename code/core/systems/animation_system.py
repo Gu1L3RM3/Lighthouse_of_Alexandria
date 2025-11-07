@@ -1,8 +1,13 @@
 from core.ecs import System
 from core.components.sprite import Sprite
 from core.components.animation_sprite import AnimateSprite
+from core.managers.entity_manager import EntityManager
 
 class AnimationSystem(System):
+    
+        
+
+
     def update(self, entity_mn, dt: float):
         entities = entity_mn.get_entities_with(Sprite, AnimateSprite)
 

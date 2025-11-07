@@ -1,5 +1,5 @@
 import pygame
-from core.managers import DayNightManager
+from core.managers.day_night_manager import DayNightManager
 from core.ui.widgets.widget import Widget
 from core.ui.widgets import Clock,FPSWidget
 

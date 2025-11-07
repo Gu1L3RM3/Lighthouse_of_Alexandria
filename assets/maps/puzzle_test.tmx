@@ -90,7 +90,7 @@
 366,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,367,368
 </data>
  </layer>
- <objectgroup id="2" name="entities">
+ <objectgroup id="2" name="player">
   <object id="1" name="player" type="player" x="428" y="284">
    <point/>
   </object>

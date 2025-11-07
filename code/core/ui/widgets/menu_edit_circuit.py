@@ -5,7 +5,7 @@ from core.ui.widgets.gesture_detector import *
 from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.ui_manager import UIManager
 from core.ui.widgets.eletric_list import EletricList
-from core.managers.serialization_manager import SerializationManager
+from core.managers.resource_manager import ResourceManager
 class MenuEditCircuit(Widget):
     def __init__(self, input_system: InputSystem,screen:Surface,cell_size:int,ui_manager:UIManager):
         super().__init__()
@@ -13,7 +13,7 @@ class MenuEditCircuit(Widget):
         self.ui_manager=ui_manager
         self.cell_size = cell_size
         self.screen_size=screen.size
-        
+        self.rm=ResourceManager.get()
         self.color_background= (0,0,0)
         self.screen_width, self.screen_height = self.screen_size
         self.buttons = []  
@@ -23,21 +23,24 @@ class MenuEditCircuit(Widget):
 
 
     def set_eletric_lists(self):
-        data=SerializationManager.load_eletric_storage("eletric_storage.json")
-        self.resistor_list = EletricList(data,"Resistor",
-                                         screen_size=self.screen_size,
-                                         action=self.on_eletric_list_click,
-                                         on_close=self.on_close)
-        self.v_source_list = EletricList(data,"VoutageSource",
-                                         screen_size=self.screen_size,
-                                         action=self.on_eletric_list_click,
-                                         on_close=self.on_close)
-        self.c_source_list = EletricList(data,"CurrentSource",
-                                         screen_size=self.screen_size,
-                                         action=self.on_eletric_list_click,
-                                         on_close=self.on_close)
+        storage = self.input_system.storage_manager
+        data = storage.storage_circuit
 
-    
+        self.resistor_list = EletricList(data, "Resistor",
+                                        storage_manager=storage,
+                                        action=self.on_eletric_list_click,
+                                        on_close=self.on_close)
+
+        self.v_source_list = EletricList(data, "VoutageSource",
+                                        storage_manager=storage,
+                                        action=self.on_eletric_list_click,
+                                        on_close=self.on_close)
+
+        self.c_source_list = EletricList(data, "CurrentSource",
+                                        storage_manager=storage,
+                                        action=self.on_eletric_list_click,
+                                        on_close=self.on_close)
+
     def on_close(self,widget:Widget):
         self.ui_manager.remove(widget)
         
@@ -55,13 +58,10 @@ class MenuEditCircuit(Widget):
 
 
         
-        surf1 = Surface(((self.cell_size/2)*4, self.cell_size))
-        surf1.fill('blue')
-        surf2 = Surface(((self.cell_size/2)*4, self.cell_size))
-        surf2.fill((50, 50, 50))
-
+        surf1 = pygame.transform.scale2x(self.rm.load_image('buttons/wide.png'),)
+        surf2 = pygame.transform.scale2x(self.rm.load_image('buttons/wide_pressed.png'))
         init_pos_x = self.cell_size*2
-        pos_y = self.cell_size+(self.cell_size/2)
+        pos_y = self.cell_size+(self.cell_size/2)-15
         font_size = 15
         
         self.node_button =Button(
@@ -70,7 +70,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x, pos_y),
-            color=(50, 50, 100),
             text="Node",
             font_size=font_size,
         )
@@ -80,7 +79,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*3, pos_y),
-            color=(0, 100, 188),
             text="V Source",
             font_size=font_size,
         )
@@ -90,7 +88,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*6, pos_y),
-            color=(200, 170, 10),
             text="Resistor",
             font_size=font_size,
         )
@@ -100,7 +97,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*9, pos_y),
-            color=(20, 100, 10),
             text="I Source",
             font_size=font_size,
         )
@@ -110,7 +106,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*12, pos_y),
-            color=(100, 150, 200),
             text="GND",
             font_size=font_size,
         )
@@ -120,7 +115,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(init_pos_x+self.cell_size*15, pos_y),
-            color=(30, 60, 70),
             text="Wire",
             font_size=font_size,
         )
@@ -141,15 +135,13 @@ class MenuEditCircuit(Widget):
         pos_x_menu_right=self.screen_width - self.cell_size -22
         self.rect_right =  self.surface_right.get_rect(topleft=(pos_x_menu_right,0))
 
-        surf1 = Surface((self.cell_size, self.cell_size))
-        surf1.fill('blue')
-        surf2 = Surface((self.cell_size, self.cell_size))
-        surf2.fill((50, 50, 50))
+        surf1 =  pygame.transform.scale2x(self.rm.load_image('buttons/short.png'))
+        surf2 =  pygame.transform.scale2x(self.rm.load_image('buttons/short_pressed.png'),)
 
         font_size = 15
 
         
-        pos_x = pos_x_menu_right+32
+        pos_x = pos_x_menu_right+40
         start_y = self.cell_size
 
 
@@ -159,7 +151,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x,start_y),
-            color=(200, 120, 50),
             text="R",
             font_size=font_size,
         )
@@ -169,7 +160,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x, start_y + self.cell_size*2),
-            color=(200, 50, 50),
             text="D",
             font_size=font_size,
         )
@@ -179,7 +169,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x, start_y + self.cell_size*4),
-            color=(200, 150, 150),
             text="S",
             font_size=font_size,
         )
@@ -189,7 +178,6 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x, start_y + self.cell_size*6),
-            color=(150, 110, 110),
             text="Save",
             font_size=font_size,
         )
@@ -199,9 +187,17 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x, start_y + self.cell_size*8),
-            color=(100, 50, 20),
             text="Load",
             font_size=font_size,
+        )
+        self.clear_button = Button(
+            click_type=ClickType.AFTER_PRESSED,
+            action=self.input_system.clear_all,  
+            init_surface=surf1.copy(),
+            surface_pressed=surf2.copy(),
+            pos_center=(pos_x, start_y + self.cell_size*10),
+            text="Clear",
+            font_size=font_size-2,
         )
 
 
@@ -211,6 +207,7 @@ class MenuEditCircuit(Widget):
             self.select_button,
             self.save_button,
             self.load_button,
+            self.clear_button
         ])
 
     def set_mouse(self):
