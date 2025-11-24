@@ -4,22 +4,31 @@ from core.managers.resource_manager import ResourceManager
 from core.settings import FONT, LABEL_OFFSET
 
 class LabelComponent(Component):
-    def __init__(self, name: str, value: str, font_path: str = FONT):
+    def __init__(self, name: str, value: str, font_path: str = FONT,font_size= 10,offset_x = 50,offset_y=LABEL_OFFSET):
         super().__init__()
         self._name = name  
-        self.value = value
+        self._value = value
         self.font_path = font_path
 
+        self.font_size =  font_size
+        self.offset_x  = offset_x
+        self.offset_y  = offset_y
         self._current =  ""
         self._voltage =  ""
 
         rm = ResourceManager.get()
-        self.font_object = rm.load_font(self.font_path, 10)
+        self.font_object = rm.load_font(self.font_path, self.font_size)
 
         self.rendered_labels = []
         self._render_surfaces()
 
-    
+    @property
+    def value(self)->str:
+        return self._value
+    @value.setter
+    def value(self,value:str):
+        self._value = value
+        self._render_surfaces()
     @property
     def name(self) -> str:
         return self._name
@@ -50,37 +59,37 @@ class LabelComponent(Component):
         self.rendered_labels.append({
             'text': self._name,
             'color': 'black',
-            'base_offset': Vector2(0, -LABEL_OFFSET),
+            'base_offset': Vector2(0, -self.offset_y),
             'surface': self.font_object.render(self._name, True, 'black')
         })
         self.rendered_labels.append({
-            'text': self.value,
+            'text': self._value,
             'color': 'blue',
-            'base_offset': Vector2(0, LABEL_OFFSET),
-            'surface': self.font_object.render(self.value, True, 'blue')
+            'base_offset': Vector2(0, self.offset_y),
+            'surface': self.font_object.render(self._value, True, 'blue')
         })
         self.rendered_labels.append({
             'text':self._voltage,
             'color':'red',
-            'base_offset':Vector2(50,LABEL_OFFSET),
+            'base_offset':Vector2(self.offset_x,self.offset_y),
             'surface': self.font_object.render(self._voltage, True, 'red')
         })
         self.rendered_labels.append({
             'text':self._current,
             'color':'red',
-            'base_offset':Vector2(50,-LABEL_OFFSET),
+            'base_offset':Vector2(self.offset_x,-self.offset_y),
             'surface': self.font_object.render(self._current, True, 'red')
         })
 
     def copy(self) -> "LabelComponent":
-        return LabelComponent(self.name, self.value, self.font_path)
+        return LabelComponent(self._name, self._value, self.font_path)
 
     def to_dict(self) -> dict:
         return {
             'type': self.__class__.__name__,
             'font_path': self.font_path,
-            'name': self.name,
-            'value': self.value
+            'name': self._name,
+            'value': self._value
         }
 
     @classmethod

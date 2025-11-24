@@ -1,4 +1,5 @@
 from pygame import Surface
+from core.components.position import Position
 from core.settings import *
 from scenes.base_scene import BaseScene
 from entities.dialogue_area import DialogueArea
@@ -14,6 +15,9 @@ from core.map.map_entity_spawner import MapEntitySpawner
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
+from core.systems.eletrons_system import EletronSystem
+from core.systems.path_following_system import PathFollowingSystem
+from core.systems.light_system import LightSystem
 from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
 
@@ -24,12 +28,12 @@ class Level2(BaseScene):
         self.scale = 2
 
 
-        super().__init__(screen, self.tile_map.map_width*self.scale+100, self.tile_map.map_height*self.scale+100)
+        super().__init__(screen, self.tile_map.map_width*self.scale, self.tile_map.map_height*self.scale)
 
         
         self.camera.scale=self.scale
         
-        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen,self.scale)
+        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen,self.scale,(32,32))
 
         self.set_ui()
         self.set_map()
@@ -39,27 +43,44 @@ class Level2(BaseScene):
         self.player =  self.entity_mn.get_player()
         self.camera.follow = self.player
 
-        
+        self.set_door()
+
+        self.index_dialog_for_old_paper = '5'
+        self.key:Key= self.entity_mn.get_entities_by_class(Key)[0]
+        self.old_paper:OldPaper =  self.entity_mn.get_entities_by_class(OldPaper)[0]
+
 
         self.attention_manager = AttentionManager(self.entity_mn)
         
         self.scene_manager     = SceneManager.get() 
+    def set_door(self):
+        self.door:Door = self.entity_mn.get_entities_by_class(Door)[0]
+        pos :Position= self.door.get(Position)
+        pos.x +=16
+        pos.y +=16
+
+
+        self.door.next_scene = 'level_3'
     def set_systems(self):
         self.animation_system  =  AnimationSystem()
-        self.area_trigger_system       = AreaTriggerSystem()
+        self.area_trigger_system  = AreaTriggerSystem()
         self.freeze_system     = FreezeSystem()
+        self.eletron_system = EletronSystem(self.tile_map)
+        self.light_system   = LightSystem(self.screen,self.camera,debug=True)
+        self.path_following_system =  PathFollowingSystem()
         self.systems.update(
+
             [self.freeze_system,
             self.physics_system,
+            self.eletron_system,
+            self.path_following_system,
             self.animation_system,
             self.area_trigger_system,
-            self.render_system]
+            self.render_system,
+            
+            ]
             )
-        self.index_dialog_for_old_paper = '1'
-        self.key:Key= self.entity_mn.get_entities_by_class(Key)[0]
-        self.old_paper:OldPaper =  self.entity_mn.get_entities_by_class(OldPaper)[0]
-        self.door:Door = self.entity_mn.get_entities_by_class(Door)[0]
-        self.door.next_scene = 'level_2'
+
     def set_ui(self):
         fps=FPSWidget()
         self.ui_manager.add(fps)
@@ -132,4 +153,5 @@ class Level2(BaseScene):
         self.screen.fill(BLACK)
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
+        #self.light_system.update(self.entity_mn,0)
         self.ui_manager.draw(self.screen)

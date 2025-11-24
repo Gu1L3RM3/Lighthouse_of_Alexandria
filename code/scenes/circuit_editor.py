@@ -12,12 +12,12 @@ from core.settings import CELL_SIZE
 
 class CircuitEditor(BaseScene):
     def __init__(self, screen: Surface,
-                 json_file:str='circuit.json',
-                 net_file :str= "circuit.net",
-                 lt_spice_file:str = 'circuit.asc',
+                 file:str='circuit',
+                 debug_mode =  False,
                  ):
         
         self.screen = screen
+        self.debug_mode =  debug_mode
         self.width_screen = screen.get_width()
         self.height_screen = screen.get_height()
         super().__init__(self.screen, self.width_screen, self.height_screen)
@@ -27,9 +27,7 @@ class CircuitEditor(BaseScene):
         self.gesture_canvas = None
         self.rects_grid = []
 
-        self.json_file= json_file
-        self.net_file = net_file
-        self.lt_spice_file = lt_spice_file
+        self.file =  file
  
 
         self.set_gesture_canvas()
@@ -39,10 +37,10 @@ class CircuitEditor(BaseScene):
         self.input_system = InputSystem(self.entity_mn,
                                         self.rects_grid,
                                         self.node_manager,
-                                        self.json_file,
-                                        self.net_file,
-                                        self.lt_spice_file,
-                                        self.storage_circuit_manager)
+                                        self.file,
+                                        self.storage_circuit_manager,
+                                        self.debug_mode,
+                                        )
         self.set_canvas()
 
         
@@ -74,7 +72,7 @@ class CircuitEditor(BaseScene):
         }
     
     def set_entities(self):
-        initial_entities = SerializationManager.load_entities_from_json(self.json_file)
+        initial_entities = SerializationManager.load_entities_from_json(f'{self.file}.json')
         if not initial_entities:
             return
         for entity in initial_entities:

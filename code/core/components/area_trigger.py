@@ -1,6 +1,6 @@
 import pygame
-from core.ecs import Component
-from pygame import Rect, Surface
+from core.ecs import Component, Entity
+from pygame import Rect
 from typing import Callable, Optional
 
 
@@ -14,9 +14,9 @@ class AreaTrigger(Component):
         self,
         area: Rect,
         once: bool = False,
-        active : bool =True,
-        on_entered:Optional[Callable[[object], None]]=None,
-        on_exit:Optional[Callable[[object], None]]=None,
+        active: bool = True,
+        on_entered: Optional[Callable[[object], None]] = None,
+        on_exit: Optional[Callable[[object], None]] = None,
     ):
         super().__init__()
         self.area = area
@@ -26,40 +26,30 @@ class AreaTrigger(Component):
         self.once = once
 
         self.on_entered = on_entered
-        self.on_exit    = on_exit
+        self.on_exit = on_exit
 
+    def get_rect(self, x, y)->Rect:
+        r = self.area.copy()
+        r.topleft = (x + self.area.x, y + self.area.y)
+        return r
 
-
-
-
-    def check_collision(self, entity_id: int, entity_rect: Rect):
-        """Verifica se a entidade entrou ou saiu da área."""
+    def check_collision(self, entity: Entity, entity_rect: Rect):
         if not self.active:
             return
 
         in_area = self.area.colliderect(entity_rect)
 
-        
-        if in_area and entity_id not in self.triggered_entities:
-            self.triggered_entities.add(entity_id)
-
+        if in_area and entity not in self.triggered_entities:
+            self.triggered_entities.add(entity)
             if self.on_entered:
-                self.on_entered(entity_id)
-
-
-
+                self.on_entered(entity)
             if self.once:
                 self.active = False
 
-
-        elif not in_area and entity_id in self.triggered_entities:
-            self.triggered_entities.remove(entity_id)
-
+        elif not in_area and entity in self.triggered_entities:
+            self.triggered_entities.remove(entity)
             if self.on_exit:
-                self.on_exit(entity_id)
-
-
+                self.on_exit(entity)
 
     def to_dict(self):
         return super().to_dict()
-    

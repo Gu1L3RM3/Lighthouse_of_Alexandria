@@ -14,19 +14,21 @@ class AlertDialog(Widget):
                 dialog_size:tuple[int,int] = (200,300),
                 surface:Surface|None = None,
                 parent:Widget|None=None,
+                make_freeze:bool= True
                 ):
         super().__init__()
         self.title    = title
         self.parent   = parent
         self.surface  = surface
         self.on_close = on_close
+        self.make_freeze = make_freeze
         self.buttons: list[Button] = []
         self.screen_size=pygame.display.get_window_size()
 
         self.set_dialog_rect(dialog_size)
-
-        self.em = EventManager.get()
-        self.em.post({'type':'request_freeze'})
+        if self.make_freeze:
+            self.em = EventManager.get()
+            self.em.post({'type':'request_freeze','type_request':'AlertDialog'})
 
         
 
@@ -71,7 +73,8 @@ class AlertDialog(Widget):
 
 
     def _close(self):
-        self.em.post({'type':'release_freeze'})
+        if self.make_freeze:
+            self.em.post({'type':'release_freeze'})
         if self.parent:
             self.on_close(self.parent)
             return

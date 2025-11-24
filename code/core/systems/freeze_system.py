@@ -12,7 +12,8 @@ class FreezeSystem(System):
 
     def request_freeze(self, event):
         """Incrementa o contador de solicitações de congelamento."""
-        print(event.get('type_request',''))
+        print("Chamou o Freeze")
+        print(event['type_request'])
         self._freeze_requests += 1
 
     def release_freeze(self, event):

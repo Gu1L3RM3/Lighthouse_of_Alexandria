@@ -428,16 +428,33 @@ class LtSpiceGenerate:
 
             return netlist_lines
         
-    def save_netlist(self ):
-        """Salva a netlist gerada em um arquivo."""
+    def save_netlist(self):
+        """Salva a netlist gerada em um arquivo dentro da pasta ltspice."""
+        # garante que a pasta ltspice existe
+        folder = Path("ltspice")
+        folder.mkdir(exist_ok=True)
+
+        # força o caminho final dentro de ltspice/
+        filepath = folder / Path(self.net_filepath).name
+
         netlist = self.generate_netlist()
         header = ["* Netlist gerada automaticamente a partir do circuit.json", ".tran 1", ""]
         content = "\n".join(header + netlist + ["", ".end"])
-        Path(self.net_filepath).write_text(content, encoding="utf-8")
-        print(f".net salvo em {self.net_filepath}")
-    def save_asc(self, ):
-        Path(self.lt_spice_filepath).write_text("\n".join(self.lines), encoding="utf-8")
-        print(f".asc salvo em {self.lt_spice_filepath}")
+
+        filepath.write_text(content, encoding="utf-8")
+        print(f".net salvo em {filepath}")
+
+
+    def save_asc(self):
+        """Salva o arquivo .asc dentro da pasta ltspice."""
+        folder = Path("ltspice")
+        folder.mkdir(exist_ok=True)
+
+        # força o caminho final dentro de ltspice/
+        filepath = folder / Path(self.lt_spice_filepath).name
+
+        filepath.write_text("\n".join(self.lines), encoding="utf-8")
+        print(f".asc salvo em {filepath}")
     def run(self):
         """
         Ponto de entrada principal para executar o processo de geração da netlist.

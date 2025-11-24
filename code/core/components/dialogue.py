@@ -61,7 +61,7 @@ class Dialogue(Component):
         
         
         box_x = (screen_size[0] - box_width) / 2
-        box_y = (screen_size[1] - box_height) / 2 
+        box_y = (screen_size[1]+600 - box_height) / 2 
 
         self.dialog_box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
 

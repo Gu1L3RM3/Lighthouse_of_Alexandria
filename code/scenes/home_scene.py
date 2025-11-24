@@ -24,7 +24,7 @@ class HomeScene(BaseScene):
 
         
         
-        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen)
+        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen,self.scale)
         fps=FPSWidget()
         self.ui_manager.add(fps)
         self.set_map()
@@ -33,7 +33,7 @@ class HomeScene(BaseScene):
         self.area_trigger_system = AreaTriggerSystem()
         self.freeze_system = FreezeSystem()
         
-        
+        self.camera.scale =  self.scale
         self.camera.follow = self.player
         self.index_dialog_for_old_paper = '2'
     
@@ -48,6 +48,7 @@ class HomeScene(BaseScene):
         self.attention_manager = AttentionManager(self.entity_mn)
         self.scene_manager     = SceneManager.get() 
 
+    def start(self):
         self.set_subscribes()
        
 
@@ -63,7 +64,7 @@ class HomeScene(BaseScene):
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
     def after_close_old_paper(self,event):
         self.event_manager.post({'type':'release_freeze'})
-        self.scene_manager.start_fade('level_2')
+        self.scene_manager.start_fade('level_1')
     def set_old_paper(self,event):
         dialogue :DialogueArea= event['entity']
         if not isinstance(dialogue,DialogueArea):
@@ -76,7 +77,7 @@ class HomeScene(BaseScene):
 
 
     def open_old_paper(self,event):
-        self.event_manager.post({'type':'request_freeze'})
+        self.event_manager.post({'type':'request_freeze','type_request':'teste'})
         def close_old_paper(widget):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
@@ -109,6 +110,6 @@ class HomeScene(BaseScene):
     def render(self):
     
         self.screen.fill(BLACK)
-        self.map_renderer.draw(scale=self.scale)
+        self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
         self.ui_manager.draw(self.screen)

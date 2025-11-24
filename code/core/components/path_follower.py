@@ -3,16 +3,20 @@ from pygame import Vector2
 from core.ecs import Component
 from core.settings import *
 class PathFollower(Component):
-    def __init__(self,path: list[tuple[int, int]],speed: float = 40):
+    def __init__(self,path: list[tuple[int, int]],speed: float = 40,loop:bool=False):
     
         
         self.path:list[tuple[int,int]]=[]
         self.current_index = 0
         self.speed = speed  
         self.done = len(self.path) == 0
+        self.loop = loop
         self.direction = Vector2(0, 0)
+        self.original_path =  path
         self.set_path(path)
-
+    def restart_path(self):
+        self.set_path(self.original_path)
+        self.done =  False
     def create_collision_rects(self):
         if not self.path:
             return

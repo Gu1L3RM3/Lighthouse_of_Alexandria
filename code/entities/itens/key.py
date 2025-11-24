@@ -7,11 +7,11 @@ from core.components.position import Position
 from core.components.always_on_top import AlwaysOnTop
 from core.managers.resource_manager import ResourceManager
 from core.managers.event_manager import EventManager
-
+from entities.player import Player
 
 class Key(Item):
-    def __init__(self, x, y, active):
-        super().__init__(x, y, active)
+    def __init__(self, x, y, active,props):
+        super().__init__(x, y, active,props)
         self.animations =  ResourceManager.get().load_sprite_sheet('itens/key',(16,16),trim_transparent=False)
         self.em =  EventManager.get()
         self.animate_sprite =  AnimateSprite(self.animations,fps=10)
@@ -30,8 +30,9 @@ class Key(Item):
     def after_collected(self):
         self.em.post(events={'type':'get_key'})
         self.em.post(events={'type':'kill_entity','id':self.id})
-    def on_collect(self, id):
-        print('coletou a chave')
+    def on_collect(self, entity):
+        if not isinstance(entity,Player):
+            return
         self.animate_sprite.play("collected",
                                  loop=False,
                                  on_finish=self.after_collected,)

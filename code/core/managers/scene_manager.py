@@ -2,6 +2,7 @@ import pygame
 from typing import Dict
 from scenes.base_scene import BaseScene
 from core.managers.event_manager import EventManager
+
 from core.settings import *
 class SceneManager:
     _instance = None
@@ -10,7 +11,7 @@ class SceneManager:
         self.scenes: Dict[str, BaseScene] = {}
         self.active_scene: BaseScene = None
 
-
+        self.scene_preview =  'level_3'
         
         self.transitioning = False
         self.transition_target: BaseScene = None
@@ -27,6 +28,9 @@ class SceneManager:
 
     def register(self, name: str, scene: BaseScene):
         self.scenes[name] = scene
+        if not self.active_scene :
+            self.active_scene =  self.scenes[name]
+            self.active_scene.start()
 
 
     def change(self, name: str):
@@ -38,7 +42,8 @@ class SceneManager:
         EventManager.get().clear()
         self.active_scene = self.scenes[name]
         self.active_scene.start()
-
+    def back_with_fade(self,duration:float=0.5):
+        self.start_fade(self.scene_preview,duration)
     def start_fade(self, name: str, duration: float = 0.5):
         """Inicia a transição fade sem bloquear o loop do jogo."""
         if name not in self.scenes:
@@ -54,6 +59,38 @@ class SceneManager:
         self.transition_speed = 255 / (duration * FPS)  
         self.transition_surface = pygame.Surface(self.active_scene.screen.get_size())
         self.transition_surface.fill((0, 0, 0))
+    def restart_with_fade(self, duration: float = 0.5):
+        """Reinicia a cena ativa com fade, recriando a instância da cena."""
+        if not self.active_scene:
+            return
+        self.active_scene.end()
+        # Descobre o nome da cena atual
+        scene_name = None
+        for name, scene in self.scenes.items():
+            if scene is self.active_scene:
+                scene_name = name
+                break
+        if scene_name is None:
+            return
+
+        # Marca a cena nova que vai substituir a atual após fade
+        SceneClass = type(self.active_scene)
+        screen = self.active_scene.screen
+        new_scene = SceneClass(screen)
+
+        # Substitui no dicionário (mas só ativa após fade)
+        self.scenes[scene_name] = new_scene
+        self.transition_target = new_scene
+
+        # Prepara transição
+        EventManager.get().clear()
+        self.transitioning = True
+        self.transition_phase = "fade_out"
+        self.transition_alpha = 0
+        self.transition_speed = 255 / (duration * FPS)
+        self.transition_surface = pygame.Surface(self.active_scene.screen.get_size())
+        self.transition_surface.fill((0, 0, 0))
+
 
     def update_transition(self):
         """Chamar a cada frame antes de renderizar a cena ativa."""

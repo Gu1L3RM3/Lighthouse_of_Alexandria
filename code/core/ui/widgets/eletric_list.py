@@ -39,6 +39,7 @@ class EletricList(Widget):
             on_close=self.on_close,
             title=f"{self.list_type} List",
             parent=self,
+            make_freeze=False
         )
 
     def _create_buttons(self):

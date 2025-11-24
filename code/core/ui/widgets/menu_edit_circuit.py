@@ -6,6 +6,7 @@ from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.ui_manager import UIManager
 from core.ui.widgets.eletric_list import EletricList
 from core.managers.resource_manager import ResourceManager
+from core.managers.scene_manager import SceneManager
 class MenuEditCircuit(Widget):
     def __init__(self, input_system: InputSystem,screen:Surface,cell_size:int,ui_manager:UIManager):
         super().__init__()
@@ -40,6 +41,7 @@ class MenuEditCircuit(Widget):
                                         storage_manager=storage,
                                         action=self.on_eletric_list_click,
                                         on_close=self.on_close)
+        
 
     def on_close(self,widget:Widget):
         self.ui_manager.remove(widget)
@@ -119,15 +121,31 @@ class MenuEditCircuit(Widget):
             font_size=font_size,
         )
 
+        surf1 =  pygame.transform.scale2x(self.rm.load_image('buttons/short.png'))
+        surf2 =  pygame.transform.scale2x(self.rm.load_image('buttons/short_pressed.png'),)
+        self.close_button =Button(
+            click_type=ClickType.AFTER_PRESSED,
+            action=self.exit,
+            init_surface=surf1.copy(),
+            surface_pressed=surf2.copy(),
+            pos_center=(init_pos_x+self.cell_size*17, pos_y-5),
+            text="X",
+            font_size=font_size,
+        )
+
         self.buttons.extend([
             self.node_button,
             self.source_V_button,
             self.resistor_button,
             self.source_I_button,
             self.ground_button,
-            self.wire_button
+            self.wire_button,
+            self.close_button
         ])
 
+    def exit(self):
+        
+        SceneManager.get().back_with_fade()
     def set_menu_right(self):
         self.surface_right = Surface((self.cell_size*2,self.screen_height))
         

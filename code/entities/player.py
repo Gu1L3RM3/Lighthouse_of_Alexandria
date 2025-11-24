@@ -7,6 +7,7 @@ from core.components.animation_sprite import AnimateSprite
 from core.settings import *
 from core.ecs import Entity
 from core.components.weapon_slot import WeaponSlot
+from core.components.light_component import LightComponent
 from entities.weapons.sword import Sword   
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
@@ -31,9 +32,9 @@ class Player(Entity):
 
         pos = Position(x, y)
         vel = Velocity(0, 0)
-        col = Collider(10, 6, offset_x=20, offset_y=36)
+        col = Collider(8, 6,offset_x=4,offset_y=10)
 
-        self.animations = self.rm.load_sprite_sheet("player",trim_transparent=False)
+        self.animations = self.rm.load_sprite_sheet("player copy",size=(16,16),trim_transparent=False)
         spr = Sprite(self.animations["idle_front"][0])
         anim = AnimateSprite(self.animations, fps=8, loop=True)
 
@@ -41,6 +42,7 @@ class Player(Entity):
         self.add(pos, vel, spr, col,
                  anim, weapon_slot,
                  Freeze(),AlwaysOnTop(),
+                 LightComponent(radius=20)
                  )
 
         self._set_animation("idle_front")
@@ -64,7 +66,7 @@ class Player(Entity):
     def input(self, events: list[Event]):
         freeze:Freeze = self.get(Freeze)
         if freeze.active:
-            return
+             return
         
         vel: Velocity = self.get(Velocity)
         keys = get_pressed()

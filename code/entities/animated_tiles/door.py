@@ -6,7 +6,8 @@ from core.components.position import Position
 from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
 from core.components.area_trigger import AreaTrigger
-
+from core.components.always_on_top import AlwaysOnTop
+from core.components.light_component import LightComponent
 class Door(Entity):
     def __init__(self,x,y):
         super().__init__()
@@ -32,11 +33,12 @@ class Door(Entity):
                 
 
             ),
+            LightComponent(),
+            AlwaysOnTop()
         )
 
 
     def enter(self,id):
-        print("Entrou na porta")
         SceneManager.get().start_fade(self.next_scene)
         
     def active_door(self):

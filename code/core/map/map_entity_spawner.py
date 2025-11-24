@@ -17,6 +17,7 @@ class MapEntitySpawner:
         self._register_default_spawners()
 
     def _register_default_spawners(self):
+        self.register_spawner("circuito",CircuitSpawner())
         self.register_spawner("npc", NPCSpawner())
         self.register_spawner("enemies", EnemySpawner())
         self.register_spawner("areas_dialog",DialogueAreaSpawner())
@@ -24,6 +25,8 @@ class MapEntitySpawner:
         self.register_spawner("itens",ItemSpawner())
         self.register_spawner("door",DoorSpawner())
         self.register_spawner("player",PlayerSpawn())
+        self.register_spawner("fall_ground",FallGroundSpawner())
+        self.register_spawner("iron_gate",IronGateSpawner())
 
     def register_spawner(self, layer_name: str, spawner: EntitySpawner):
         self._spawners[layer_name.lower()] = spawner
@@ -32,6 +35,8 @@ class MapEntitySpawner:
         
         for layer in tilemap.tmx_data.visible_layers:
             if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj":
+                self._spawn_from_tile_layer(layer, tilemap, entity_mn)
+            if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj2":
                 self._spawn_from_tile_layer(layer, tilemap, entity_mn)
 
         for layer in tilemap.tmx_data.objectgroups:

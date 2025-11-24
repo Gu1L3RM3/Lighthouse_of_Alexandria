@@ -17,7 +17,7 @@ class TileMapLoader:
         ground_surface = pygame.Surface((tilemap.map_width, tilemap.map_height)).convert_alpha()
         ground_surface.fill((0, 0, 0, 0))
 
-        for layer in self._iter_visible_layers(tmx_data, ("ground", "ground2"), pytmx.TiledTileLayer):
+        for layer in self._iter_visible_layers(tmx_data, ("ground", "ground2","ground3"), pytmx.TiledTileLayer):
             for x, y, gid in layer:
                 img = tmx_data.get_tile_image_by_gid(gid)
                 if img:

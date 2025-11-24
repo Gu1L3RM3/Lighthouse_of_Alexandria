@@ -2,6 +2,8 @@ import pytmx
 import json
 from typing import Type
 from entities.animated_tiles.door import Door
+from entities.animated_tiles.fall_ground import FallGround
+from entities.animated_tiles.iron_gate import IronGate
 from entities.player import Player
 from entities.enemies.enemie import Enemie
 from entities.dialogue_area import DialogueArea
@@ -9,6 +11,9 @@ from entities.attention_point import AttentionPoint
 from entities.itens.item import Item
 from entities.itens.old_paper import OldPaper
 from entities.itens.key import Key
+from entities.itens.control_pannel import ControlPannel
+from entities.itens.resistor_item import ResistorItem
+from entities.animate_circuit.circuit_components import *
 from entities.npcs.npc_factory import NPCFactory
 from core.components.npc_routine import NPCRoutine
 from core.managers.entity_manager import EntityManager
@@ -32,6 +37,8 @@ class ItemSpawner(EntitySpawner):
         self.itens: dict[str, Type[Item]] = {
             'old_paper': OldPaper,
             'key': Key,
+            'control_pannel':ControlPannel,
+            'resistor':ResistorItem,
         }
 
     def spawn(self, obj, entity_mn: "EntityManager", tilemap):
@@ -44,10 +51,37 @@ class ItemSpawner(EntitySpawner):
         item: Item = item_class(
             obj.x,
             obj.y,
-            active=active
+            active,
+            obj.properties,
+            
         )
 
         entity_mn.add_entity(item)
+
+
+class FallGroundSpawner(EntitySpawner):
+    def spawn(self, obj, entity_mn, tilemap):
+        fall_ground = FallGround(obj.x,obj.y)
+        entity_mn.add_entity(fall_ground)
+
+class IronGateSpawner(EntitySpawner):
+    def spawn(self, obj, entity_mn, tilemap):
+        iron_gate = IronGate(obj.x,obj.y,props=obj.properties)
+        entity_mn.add_entity(iron_gate)
+
+
+class CircuitSpawner(EntitySpawner):
+    def __init__(self):
+        self.components= {
+            'eletron':Eletron,
+            'voltage_source':VoltageSource,
+            'resistor':Resistor,
+            'light':Light
+        }
+    def spawn(self, obj, entity_mn, tilemap):
+        component =  self.components.get(obj.name)
+        entity_mn.add_entity(component(obj.x,obj.y))
+
 
 class DialogueAreaSpawner(EntitySpawner):
     def spawn(self, obj, entity_mn, tilemap):

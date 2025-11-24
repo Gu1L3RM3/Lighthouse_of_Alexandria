@@ -1,12 +1,13 @@
 from core.circuit_tools.SMNA import smna ,get_part_values
+from core.settings import PREFIXES
 import sympy
 import pandas as pd
 from typing import Dict, Optional, Tuple
+from utils.setter_values import SetterValues
 
 class CircuitSolver:
     
     def __init__(self, netlist_path: str):
-        # ... (O construtor e outras funções permanecem os mesmos) ...
         self.netlist_path = netlist_path
         self.report: Optional[str] = None
         self.circuit_df: Optional[pd.DataFrame] = None
@@ -15,33 +16,7 @@ class CircuitSolver:
 
         self._solve_circuit()
 
-    @staticmethod
-    def format_eng(value: float, unit: str) -> str:
-        """
-        Formata um número float em uma string com notação de engenharia.
-
-        Args:
-            value: O número a ser formatado.
-            unit: A unidade base (ex: 'V', 'A', 'Hz').
-
-        Returns:
-            Uma string formatada (ex: "1.23 kV", "500.00 µA").
-        """
-        if value == 0:
-            return f"0.00{unit}"
-
-        prefixes = [
-            (1e12, 'T'), (1e9, 'G'), (1e6, 'M'), (1e3, 'k'),
-            (1, ''),
-            (1e-3, 'm'), (1e-6, 'µ'), (1e-9, 'n'), (1e-12, 'p')
-        ]
-
-        for multiplier, prefix in prefixes:
-            if abs(value) >= multiplier:
-                scaled_value = value / multiplier
-                return f"{scaled_value:.2f}{prefix}{unit}"
-        
-        return f"{value:.2e}{unit}"
+    
 
     def _load_and_clean_netlist(self) -> str:
         circuit_str = ''
@@ -98,7 +73,7 @@ class CircuitSolver:
         
         Returns:
             Um dicionário no formato: 
-            {'R0': {'voltage': '10.00 V', 'current': '100.00 µA'}}
+            {'R0': {'voltage': '10.00 V', 'current': '100.00 µA','power': '1.0 mW'}}
         """
         if not self.is_solved or self.circuit_df is None:
             return {}
@@ -113,12 +88,12 @@ class CircuitSolver:
 
                 voltage_p = 0 if p_node == 0 else self.solution.get(sympy.Symbol(f'v{p_node}'), 0)
                 voltage_n = 0 if n_node == 0 else self.solution.get(sympy.Symbol(f'v{n_node}'), 0)
-                
-                voltage_across =  voltage_p +  voltage_n
-                current_through = -voltage_across / resistance if resistance != 0 else 0
-
+                voltage_across =  -voltage_p  + voltage_n
+                current_through = voltage_across / resistance if resistance != 0 else 0
+                power =  voltage_across*current_through
                 resistor_results[element_name] = {
-                    'voltage': self.format_eng(float(voltage_across), 'V'),
-                    'current': self.format_eng(float(current_through), 'A')
+                    'voltage': {'label':SetterValues.format_eng(float(voltage_across), 'V'),'value':voltage_across},
+                    'current': {'label':SetterValues.format_eng(float(current_through), 'A'),'value':current_through},
+                    'power'  : {'label':SetterValues.format_eng(float(power),'W'),'value':power}
                 }
         return resistor_results

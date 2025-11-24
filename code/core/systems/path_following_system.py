@@ -13,8 +13,8 @@ class PathFollowingSystem(System):
     def update(self, entity_mn: EntityManager, dt: float):
         for e in entity_mn.get_entities_with(PathFollower, Position, Velocity):
             pf: PathFollower = e.get(PathFollower)
-            pos: Position = e.get(Position)
-            vel: Velocity = e.get(Velocity)
+            pos: Position    = e.get(Position)
+            vel: Velocity    = e.get(Velocity)
 
             if self._is_blocked(e, pf):
                 vel.vel.update(0, 0)
@@ -24,6 +24,9 @@ class PathFollowingSystem(System):
             self._update_path_progress(pf, pos)
             self._apply_velocity(pf, vel)
 
+            if pf.done and pf.loop:
+                pf.restart_path()
+                continue
             if e.has(AnimateSprite):
                 anim_entity = e  
                 anim_entity.set_direction(pf.direction)

@@ -9,12 +9,15 @@ class ResourceManager:
         self._sounds = {}
         self._fonts = {}
 
+    
+
     @classmethod
     def get(cls):
         if cls._instance is None:
             cls._instance = ResourceManager()
         return cls._instance
     
+ 
     def get_asset_path(self,subdir: str, filename: str) -> str:
         return os.path.join(ASSETS_DIR, subdir, filename)
 

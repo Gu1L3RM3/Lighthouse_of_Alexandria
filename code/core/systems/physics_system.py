@@ -25,6 +25,7 @@ class PhysicsSystem(System):
 
     def update(self, entity_mn: EntityManager, dt: float):
         """Atualiza posição e colisões das entidades em movimento."""
+        
         moving_entities = entity_mn.get_entities_with(Position, Velocity)
 
         for entity in moving_entities:

@@ -26,7 +26,7 @@ class RenderSystem(System):
         
         viewport_color = (255, 255, 0) 
         
-        pygame.draw.rect(self.screen, viewport_color, self.camera.viewport)
+        pygame.draw.rect(self.screen, viewport_color, self.camera.viewport,1)
 
     def _draw_dialogues_areas(self,entity:Entity,pos:Position,scale:float):
         if entity.has(Dialogue):
@@ -66,7 +66,7 @@ class RenderSystem(System):
         """Desenha a área de trigger (debug) levando em conta posição e escala."""
         if not entity.has(AreaTrigger):
             return
-
+        
         area_trigger: AreaTrigger = entity.get(AreaTrigger)
         area_rect = area_trigger.area
 
@@ -109,14 +109,17 @@ class RenderSystem(System):
         for entity in entities:
             self._draw_entity(entity, from_center_pos, viewport, scale)
 
-        if self.debug_mode:
-            for entity in entities:
-                pos: Position = entity.get(Position)
-                self._draw_collider(entity, pos, scale)
-                self._draw_area_triggers(entity, pos, scale)
-                self._draw_dialogues_areas(entity, pos, scale)
-            self._draw_camera_viewport()
+        self._draw_debug_info(entities,scale)
 
+    def _draw_debug_info(self,entities:list[Entity],scale:float):
+        if not self.debug_mode:
+            return
+        for entity in entities:
+            pos: Position = entity.get(Position)
+            self._draw_collider(entity, pos, scale)
+            self._draw_area_triggers(entity, pos, scale)
+            self._draw_dialogues_areas(entity, pos, scale)
+        self._draw_camera_viewport()
 
     def _draw_entity(self, entity, from_center_pos, viewport, scale: float):
         pos: Position = entity.get(Position)
@@ -138,12 +141,7 @@ class RenderSystem(System):
         if not viewport.colliderect(scaled_entity_rect):
             return
 
-        image = spr.image
-        
-        if scale != 1.0:
-            w, h = image.get_size()
-            image = pygame.transform.scale(image, (int(w * scale), int(h * scale)))
-
+        image = spr.get_image_for_drawing(scale)
         draw_rect = self.camera.apply(scaled_entity_rect)
 
 

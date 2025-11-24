@@ -26,25 +26,25 @@ class Level1(BaseScene):
 
         
         
-        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen)
+        self.map_renderer=MapRenderer(self.tile_map,self.camera,self.screen,self.scale)
 
         self.set_ui()
         self.set_map()
         self.set_systems()
 
-      
+        self.camera.scale = self.scale
         self.player =  self.entity_mn.get_player()
         self.camera.follow = self.player
 
         
 
-        self.attention_manager = AttentionManager(self.entity_mn)
+        self.attention_manager       = AttentionManager(self.entity_mn)
         
-        self.scene_manager     = SceneManager.get() 
+        self.scene_manager           = SceneManager.get() 
     def set_systems(self):
-        self.animation_system  =  AnimationSystem()
-        self.area_trigger_system       = AreaTriggerSystem()
-        self.freeze_system     = FreezeSystem()
+        self.animation_system        =  AnimationSystem()
+        self.area_trigger_system     = AreaTriggerSystem()
+        self.freeze_system           = FreezeSystem()
         self.systems.update(
             [self.freeze_system,
             self.physics_system,
@@ -127,6 +127,6 @@ class Level1(BaseScene):
     def render(self):
     
         self.screen.fill(BLACK)
-        self.map_renderer.draw(scale=self.scale)
+        self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
         self.ui_manager.draw(self.screen)

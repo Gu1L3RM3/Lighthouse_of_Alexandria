@@ -1,5 +1,6 @@
 import pygame
 from pygame import Rect
+from pathlib import Path
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.ecs import System, Entity
 from core.managers.entity_manager import EntityManager
@@ -14,22 +15,29 @@ from core.managers.node_manager import NodeManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
 from core.circuit_tools.solve_circuit import CircuitSolver
+from core.managers.circuit_manager import CircuitManager
 from typing import Type
+
 
 class InputSystem(System):
     def __init__(self,
                  entity_manager: EntityManager,
                  grid_rects: list[Rect],
                  node_mn:NodeManager,
-                 json_file:str,
-                 net_file:str,
-                 lt_spice_file:str,
-                 storage_manager:StorageCircuitManager):
+                 file:str,
+             
+                 storage_manager:StorageCircuitManager,
+                 debug_mode:bool,
+                 ):
 
         super().__init__()
-        self.json_file=json_file
-        self.net_file=net_file
-        self.lt_spice_file = lt_spice_file
+        Path("circuitos").mkdir(exist_ok=True)
+        Path("ltspice").mkdir(exist_ok=True)
+
+        self.file = file
+        self.json_file       = str(Path("circuitos") / Path(f'{self.file}.json').name)
+        self.net_file        = str(Path("ltspice")   / Path(f'{self.file}.net').name)
+        self.lt_spice_file   = str(Path("ltspice")   / Path(f'{self.file}.asc').name)
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
@@ -39,9 +47,9 @@ class InputSystem(System):
         self.grid_rects = grid_rects
         self.storage_manager=storage_manager
 
+        self.debug_mode= debug_mode
         self.angle_deg=90
 
-        self.storage_data = SerializationManager.load_eletric_storage()
 
     def set_brush(self, brush_type: str | None ,value:str|None=None):
         if self.brush:
@@ -132,6 +140,16 @@ class InputSystem(System):
         label :LabelComponent=target.get(LabelComponent)
         self.storage_manager.add_component(target.__class__.__name__,label.value)    
     def clear_all(self):
+        if self.debug_mode:
+            for entity in self.entity_manager.get_entities_with(Dropped,
+                                                                ):
+                self.entity_manager.remove_entity(entity)
+                if entity.has(LabelComponent):
+                    label:LabelComponent = entity.get(LabelComponent)
+                    self.storage_manager.add_component(entity.__class__.__name__,label.value)
+            return
+                
+                
         for entity in self.entity_manager.get_entities_with(Dropped,
                                                             filter=lambda e: self.can_change(e)):
             self.entity_manager.remove_entity(entity)
@@ -166,7 +184,6 @@ class InputSystem(System):
         sprite.rotate(self.angle_deg)
         connectable.set_connections(self.angle_deg)
 
-        # delega atualização dos nodes
         entities = self.entity_manager.get_entities()
         self.node_manager.refresh_after_entity_rotated(target, entities)
 
@@ -252,26 +269,41 @@ class InputSystem(System):
         resistors = self.entity_manager.get_entities_by_class(Resistor)
         for resistor in resistors:
             label:LabelComponent = resistor.get(LabelComponent)
-            label.voltage = str(self.resistor_results[label.name]['voltage'])
-            label.current = str(self.resistor_results[label.name]['current'])
+            label.voltage = str(self.resistor_results[label.name]['voltage']['label'])
+            label.current = str(self.resistor_results[label.name]['current']['label'])
 
 
     def solve_circuit(self):
         try:
             circuit_solver= CircuitSolver(self.net_file)
             self.resistor_results = circuit_solver.get_resistor_results()
+            CircuitManager.get().add_circuit_values(self.file,self.resistor_results)
             self.set_voltage_current_resistors()
+
+            return True
         except Exception as e:
             print(f"Cannot solve circuit")
+            return False
 
+    def _is_debug_mode(self):
+        if not self.debug_mode:
+            return
+        entities_with_dropped = self.entity_manager.get_entities_with(Dropped)
+        for entity in entities_with_dropped:
+            dropped:Dropped=entity.get(Dropped)
+            dropped.can_dropped=False
 
     def save_circuit(self):
         self.exit_current_tool()
+        self._is_debug_mode()
         entities_to_save = self.entity_manager.get_entities()
+        
         SerializationManager.save_entities_to_json(entities_to_save,self.json_file)
         LtSpiceGenerate(self.json_file,self.net_file,self.lt_spice_file,self.entity_manager).run()
         self.storage_manager.save_eletric_storage()
         self.solve_circuit()
+        
+
     def load_circuit(self):
         self.entity_manager.clear_all_entities(excepts=[self.brush]) 
         self.node_manager.clear_all_nodes()
