@@ -2,7 +2,7 @@
 <tileset version="1.10" tiledversion="1.11.2" name="obj" tilewidth="200" tileheight="200" tilecount="11" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
-  <image source="../../../../../../../../Downloads/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
+  <image source="../images/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
  </tile>
  <tile id="1">
   <image source="../images/house/tapete1.png" width="36" height="22"/>
