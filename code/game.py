@@ -6,6 +6,8 @@ from scenes.home_scene           import HomeScene
 from scenes.fases.level_1        import Level1
 from scenes.fases.level_2        import Level2
 from scenes.fases.level_3        import Level3
+from scenes.fases.level_4        import Level4
+from scenes.fases.level_5        import Level5
 from scenes.circuit_editor       import CircuitEditor
 from sys import exit
 
@@ -26,15 +28,18 @@ class Game:
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
 
-        #self.scene_manager.active_scene = CircuitEditor(self.screen,'pannel3',debug_mode=True)
+        #self.scene_manager.active_scene = CircuitEditor(self.screen,'fase_5/pannel3',debug_mode=True)
     
         self.register_fases()
         
     def register_fases(self):
+        self.scene_manager.register('level_5',Level5(self.screen))
+        self.scene_manager.register('level_4',Level4(self.screen))
         self.scene_manager.register('level_3',Level3(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))
         self.scene_manager.register('level_2',Level2(self.screen))
+
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0

@@ -5,7 +5,8 @@ class StorageCircuitManager:
         self.storage_circuit = SerializationManager.load_eletric_storage()
         self.old_storage_circuit = self.storage_circuit.copy()
         self.revision = 0  # contador de atualizações
-
+    def reload_storage(self):
+        self.storage_circuit =  SerializationManager.load_eletric_storage()
     def add_component(self, type: str, value: str):
         self.storage_circuit.setdefault(type, {})
         self.storage_circuit[type].setdefault(value, 0)

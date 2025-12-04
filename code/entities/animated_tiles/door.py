@@ -33,7 +33,7 @@ class Door(Entity):
                 
 
             ),
-            LightComponent(),
+            
             AlwaysOnTop()
         )
 
@@ -51,7 +51,10 @@ class Door(Entity):
         self.add(
             Sprite(
                 self.animations['idle'][0]
-            )
+            ),
+            LightComponent(),
+
+
         ),
         animate_sprite.play("idle",loop=False,on_finish=self.active_door)
 

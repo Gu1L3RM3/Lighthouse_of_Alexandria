@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="19" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="16">
  <tileset firstgid="1" name="tiles and items" tilewidth="16" tileheight="16" tilecount="144" columns="12">
-  <image source="../../../../../../../../Downloads/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
+  <image source="../images/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
  </tileset>
  <tileset firstgid="145" source="obj.tsx"/>
  <layer id="1" name="ground" width="19" height="11">

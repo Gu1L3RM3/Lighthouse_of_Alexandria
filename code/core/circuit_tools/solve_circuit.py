@@ -1,3 +1,4 @@
+from pathlib import Path
 from core.circuit_tools.SMNA import smna ,get_part_values
 from core.settings import PREFIXES
 import sympy
@@ -8,11 +9,14 @@ from utils.setter_values import SetterValues
 class CircuitSolver:
     
     def __init__(self, netlist_path: str):
-        self.netlist_path = netlist_path
+        self.netlist_path = Path(netlist_path)
+
         self.report: Optional[str] = None
         self.circuit_df: Optional[pd.DataFrame] = None
         self.solution: Dict[sympy.Symbol, float] = {}
         self.is_solved = False
+
+        
 
         self._solve_circuit()
 
@@ -57,6 +61,139 @@ class CircuitSolver:
             print(f"ERRO: Falha ao analisar ou resolver o circuito '{self.netlist_path}'.")
             print(f"Detalhe: {e}")
             self.is_solved = False
+    def get_total_values(self) -> dict:
+        if not self.is_solved:
+            return None
+
+        source_results = self.get_source_results()
+        if not source_results:
+            return None
+
+        # assume uma fonte por painel (ou usa a primeira)
+        _, src_info = next(iter(source_results.items()))
+        V = float(src_info['voltage']['value'])
+        I = float(src_info['current']['value'])
+        if abs(I) < 1e-12:
+            return None
+        
+        total_power =  abs(V*I)
+        Req =  abs(V/I)
+
+
+        
+
+
+        return { 'voltage': {
+                        'label': SetterValues.format_eng(V, 'V'),
+                        'value': V
+                    },
+                    'current': {
+                        'label': SetterValues.format_eng(I, 'A'),
+                        'value': I
+                    },
+                    'power': {
+                        'label': SetterValues.format_eng(total_power, 'W'),
+                        'value': total_power
+                    },
+                    'resistance':{
+                        'label': SetterValues.format_eng(Req,''),
+                        'value': Req
+                    }
+                    }
+
+    def get_equivalent_resistance(self) -> Optional[float]:
+        
+        if not self.is_solved:
+            return None
+
+        source_results = self.get_source_results()
+        if not source_results:
+            return None
+
+        # assume uma fonte por painel (ou usa a primeira)
+        _, src_info = next(iter(source_results.items()))
+        V = float(src_info['voltage']['value'])
+        I = float(src_info['current']['value'])
+
+        if abs(I) < 1e-12:
+            return None
+
+        return abs(V / I)
+
+    def get_source_results(self):
+            """
+            Retorna infos sobre as fontes (tensão e corrente), independente do circuito:
+            - Fontes de tensão: usa corrente da MNA (I_Vx) e tensão pelos nós.
+            - Fontes de corrente: usa o valor da fonte e a tensão pelos nós.
+
+            Formato:
+            {
+                'V1': {
+                    'type': 'voltage',
+                    'voltage': {'label': '10.0 V', 'value': 10.0},
+                    'current': {'label': '100 mA', 'value': 0.1},
+                    'power'  : {'label': '1.0 W', 'value': 1.0}
+                },
+                'I1': {
+                    'type': 'current',
+                    'voltage': {...},
+                    'current': {...},
+                    'power'  : {...}
+                }
+            }
+            """
+            if not self.is_solved or self.circuit_df is None:
+                return {}
+
+            results = {}
+
+            for _, comp in self.circuit_df.iterrows():
+                element_name = comp['element']   
+                first_letter = element_name[0].lower()
+
+                if first_letter not in ('v', 'i'):
+                    continue
+
+                p_node = int(comp['p node'])
+                n_node = int(comp['n node'])
+                value  = comp['value'] 
+
+                v_p = 0.0 if p_node == 0 else float(self.solution.get(sympy.Symbol(f'v{p_node}'), 0.0))
+                v_n = 0.0 if n_node == 0 else float(self.solution.get(sympy.Symbol(f'v{n_node}'), 0.0))
+
+         
+                voltage_across = -v_p + v_n
+
+                if first_letter == 'v':
+                    I_symbol = sympy.Symbol(f'I_{element_name}')
+                    current = float(self.solution.get(I_symbol, 0.0))
+
+                    src_type = 'voltage'
+
+                else:
+                    current = float(value)
+                    src_type = 'current'
+
+                power = voltage_across * current  
+
+                results[element_name] = {
+                    'type': src_type,
+                    'voltage': {
+                        'label': SetterValues.format_eng(voltage_across, 'V'),
+                        'value': voltage_across
+                    },
+                    'current': {
+                        'label': SetterValues.format_eng(current, 'A'),
+                        'value': current
+                    },
+                    'power': {
+                        'label': SetterValues.format_eng(power, 'W'),
+                        'value': power
+                    }
+                }
+
+            return results
+
 
     def get_node_voltages(self) -> Dict[str, float]:
         if not self.is_solved:

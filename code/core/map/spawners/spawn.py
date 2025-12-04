@@ -40,8 +40,14 @@ class ItemSpawner(EntitySpawner):
             'control_pannel':ControlPannel,
             'resistor':ResistorItem,
         }
+     
 
     def spawn(self, obj, entity_mn: "EntityManager", tilemap):
+
+        properties = obj.properties.copy()
+        properties['tmx_file'] = tilemap.tmx_file
+        
+
         active = obj.properties.get('active_status', True)
 
         item_class = self.itens.get(obj.name)
@@ -52,7 +58,7 @@ class ItemSpawner(EntitySpawner):
             obj.x,
             obj.y,
             active,
-            obj.properties,
+            properties,
             
         )
 

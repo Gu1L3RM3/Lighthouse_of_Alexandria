@@ -1,5 +1,6 @@
 import json
 from collections import deque
+import os
 from pathlib import Path
 
 from core.components.position import Position
@@ -17,16 +18,19 @@ class LtSpiceGenerate:
     Esta classe é autônoma e processa diretamente a estrutura de dados do JSON.
     """
     def __init__(self, json_filepath: str,net_filepath:str,lt_spice_filepath,entity_manager:EntityManager):
+        
+        json_path = os.path.join('circuitos', json_filepath)
+        
         self.net_filepath= net_filepath
         self.lt_spice_filepath=lt_spice_filepath
         try:
-            json_content_string = Path(json_filepath).read_text(encoding="utf-8")
+            json_content_string = Path(json_path).read_text(encoding="utf-8")
             self.circuit_data = json.loads(json_content_string)
         except FileNotFoundError:
-            print(f"ERRO: O arquivo de circuito '{json_filepath}' não foi encontrado.")
+            print(f"ERRO: O arquivo de circuito '{json_path}' não foi encontrado.")
             self.circuit_data = [] # Inicializa com dados vazios para evitar mais erros
         except json.JSONDecodeError as e:
-            print(f"ERRO: O arquivo '{json_filepath}' não contém um JSON válido. {e}")
+            print(f"ERRO: O arquivo '{json_path}' não contém um JSON válido. {e}")
             self.circuit_data = []
         self.entity_manager = entity_manager
         self.lines = []
@@ -428,33 +432,31 @@ class LtSpiceGenerate:
 
             return netlist_lines
         
-    def save_netlist(self):
-        """Salva a netlist gerada em um arquivo dentro da pasta ltspice."""
-        # garante que a pasta ltspice existe
-        folder = Path("ltspice")
-        folder.mkdir(exist_ok=True)
 
-        # força o caminho final dentro de ltspice/
-        filepath = folder / Path(self.net_filepath).name
+
+    def save_netlist(self):
+        """Salva a netlist dentro da pasta definida em net_filepath."""
+        filepath = Path(self.net_filepath)
+
+        filepath.parent.mkdir(parents=True, exist_ok=True)
 
         netlist = self.generate_netlist()
         header = ["* Netlist gerada automaticamente a partir do circuit.json", ".tran 1", ""]
         content = "\n".join(header + netlist + ["", ".end"])
 
         filepath.write_text(content, encoding="utf-8")
-        print(f".net salvo em {filepath}")
+        print(f".net salvo em {filepath.resolve()}")
 
 
     def save_asc(self):
-        """Salva o arquivo .asc dentro da pasta ltspice."""
-        folder = Path("ltspice")
-        folder.mkdir(exist_ok=True)
+        """Salva o arquivo .asc dentro da pasta definida em lt_spice_filepath."""
+        filepath = Path(self.lt_spice_filepath)
 
-        # força o caminho final dentro de ltspice/
-        filepath = folder / Path(self.lt_spice_filepath).name
+        filepath.parent.mkdir(parents=True, exist_ok=True)
 
         filepath.write_text("\n".join(self.lines), encoding="utf-8")
-        print(f".asc salvo em {filepath}")
+        print(f".asc salvo em {filepath.resolve()}")
+
     def run(self):
         """
         Ponto de entrada principal para executar o processo de geração da netlist.

@@ -1,6 +1,4 @@
-import random
 from pygame import Surface
-from core.components.position import Position
 from core.components.animation_sprite import AnimateSprite
 from core.components.label_component import LabelComponent
 from core.settings import *
@@ -19,7 +17,7 @@ from core.map.map_renderer import MapRenderer
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
-from core.systems.circuit_validator_system import CircuitValidatorSystem
+from core.systems.circuit_validators.circuit_validator_system import CircuitValidatorSystem
 from core.systems.freeze_system import FreezeSystem
 from core.systems.light_system import LightSystem
 from core.managers.scene_manager import SceneManager
@@ -32,7 +30,8 @@ from utils.setter_values import SetterValues
 class Level3(BaseScene):
     def __init__(self, screen:Surface):
         loader = TileMapLoader()
-        self.tile_map=loader.load("fases/fase_3.tmx")
+        self.level_path =  'fase_3'
+        self.tile_map=loader.load(f"fases/{self.level_path}.tmx")
         self.scale = 2
 
 
@@ -64,15 +63,14 @@ class Level3(BaseScene):
         self.circuit_manager = CircuitManager.get()
     def set_door(self):
         self.door:Door = self.entity_mn.get_entities_by_class(Door)[0]
-
-        self.door.next_scene = 'level_2'
+        self.door.next_scene = 'level_4'
     def fall_player(self,event):
         self.can_set_resistors = True
-        self.event_manager.post({'type':'request_freeze','type_request':'player fall'})
         anim:AnimateSprite =  self.player.get(AnimateSprite)
         anim.play('fall',loop=False,on_finish=self.scene_manager.restart_with_fade)
    
     def start(self):
+        print("oi")
         self.set_subscribes()
         self.set_resistors()
         
@@ -89,7 +87,7 @@ class Level3(BaseScene):
         amount_pannels =  len(self.entity_mn.get_entities_by_class(ControlPannel))
 
         for i in range(amount_pannels):
-            file_name = f'circuitos/pannel{i+1}.json'
+            file_name = f'circuitos/{self.level_path}/pannel{i+1}.json'
             SerializationManager.remove_droppable_entities(file_name)
        
 
@@ -133,10 +131,10 @@ class Level3(BaseScene):
 
     def set_systems(self):
         self.animation_system         =  AnimationSystem()
-        self.area_trigger_system      = AreaTriggerSystem()
-        self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen,self.camera,debug=False)
-        self.circuit_validator_system = CircuitValidatorSystem()
+        self.area_trigger_system      =  AreaTriggerSystem()
+        self.freeze_system            =  FreezeSystem()
+        self.light_system             =  LightSystem(self.screen,self.camera,debug=False,enabled=True,ambient_alpha=0)
+        self.circuit_validator_system =  CircuitValidatorSystem(level_path=self.level_path)
         self.systems.update(
 
             [self.freeze_system,
@@ -226,6 +224,7 @@ class Level3(BaseScene):
     
     def update_storage_circuit(self,event):
         value =  event['value']
+        self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type='Resistor',value=value)
         self.storage_circuit.save_eletric_storage()
     def kill_entity_event(self,event):

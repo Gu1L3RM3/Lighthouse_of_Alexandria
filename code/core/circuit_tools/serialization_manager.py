@@ -1,6 +1,9 @@
 import json
 import os
-from typing import Type
+from pathlib import Path
+from typing import Any, List, Type, Dict
+
+
 from core.ecs import Entity, Component
 from entities.circuit_editor.eletric_components import *
 from core.components.position import Position
@@ -104,50 +107,95 @@ class SerializationManager:
         except Exception as e:
             print(f"Erro ao limpar: {e}")
 
+
     @staticmethod
     def save_entities_to_json(entities: list[Entity], filename: str):
         """
-        Salva entities SEMPRE dentro da pasta circuitos.
-        filename deve ser apenas o nome, ex: 'meu_circuito.json'
-        """
-        
-        if not filename.endswith(".json"):
-            filename += ".json"
+        Salva entities SEMPRE dentro da pasta 'circuitos', a menos que o caminho
+        já comece com 'circuitos/' ou seja absoluto.
 
-        filepath = os.path.join( filename)
+        Aceita:
+            'pannel_1'
+            'pannel_1.json'
+            'fase_4/pannel_1'
+            'fase_4/pannel_1.json'
+            'circuitos/pannel_1.json'  (nesse caso não duplica a pasta)
+        """
+
+        # garante extensão .json
+        my_filename = filename if filename.endswith(".json") else filename + ".json"
+
+        base_folder = Path(SerializationManager.STORAGE_FOLDER)
+        path_obj = Path(my_filename)
+
+        # Se já é absoluto ou já começa com 'circuitos', não prefixa de novo
+        if path_obj.is_absolute() or (
+            len(path_obj.parts) > 0 and path_obj.parts[0] == SerializationManager.STORAGE_FOLDER
+        ):
+            final_path = path_obj
+        else:
+            final_path = base_folder / path_obj
+
+        # cria as pastas necessárias
+        final_path.parent.mkdir(parents=True, exist_ok=True)
 
         entities_data = [entity.to_dict() for entity in entities]
 
-        with open(filepath, 'w') as f:
-            json.dump(entities_data, f, indent=4)
+        final_path.write_text(
+            json.dumps(entities_data, indent=4),
+            encoding="utf-8"
+        )
 
-        print(f"Circuito salvo em {filepath}")
+        print(f"Circuito salvo em {final_path.resolve()}")
 
     @staticmethod
     def load_entities_from_json(filename: str) -> list[Entity]:
         """
-        Carrega circuitos SEMPRE da pasta circuitos/.
-        filename deve ser apenas o nome, ex: 'meu_circuito.json'
+        Carrega circuitos SEMPRE da pasta circuitos/, a menos que o caminho
+        já venha absoluto ou começando com 'circuitos/'.
+
+        Aceita:
+            'pannel_1'
+            'pannel_1.json'
+            'fase_4/pannel_1'
+            'fase_4/pannel_1.json'
+            'circuitos/pannel_1.json'
         """
+
+        # força extensão .json
         if not filename.endswith(".json"):
             filename += ".json"
 
-        filepath = os.path.join(SerializationManager.STORAGE_FOLDER, filename)
+        base_folder = Path(SerializationManager.STORAGE_FOLDER)
+        path_obj = Path(filename)
+
+        if path_obj.is_absolute() or (
+            len(path_obj.parts) > 0 and path_obj.parts[0] == SerializationManager.STORAGE_FOLDER
+        ):
+            filepath = path_obj
+        else:
+            filepath = base_folder / path_obj
+
+        # não precisa criar pasta pra load, mas não machuca:
+        filepath.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            with open(filepath, 'r') as f:
-                entities_data = json.load(f)
+            entities_data = json.loads(filepath.read_text(encoding="utf-8"))
 
             reconstructed = [
                 SerializationManager.reconstruct_entity(data)
                 for data in entities_data
             ]
 
-            print(f"Circuito carregado de {filepath}")
+            print(f"Circuito carregado de {filepath.resolve()}")
             return reconstructed
 
         except FileNotFoundError:
-            print(f"Circuito não encontrado: {filepath}")
+            print(f"ERRO: O arquivo de circuito '{filepath}' não foi encontrado.")
+            return []
+
+        except json.JSONDecodeError:
+            print(f"Arquivo corrompido ou inválido: {filepath.resolve()}")
             return []
     @staticmethod
     def update_component_value(netlist_path: str, component_name: str, new_value: str):
@@ -193,7 +241,74 @@ class SerializationManager:
 
         with open(netlist_path, "w") as f:
             f.writelines(updated_lines)
+    def update_resistor_labels_in_file(
+        self,
+        json_file: str | Path,
+        label_map: Dict[str, str],
+    ) -> None:
+        """
+        Atualiza o 'value' do LabelComponent de todos os resistores
+        com base em um dict {nome_resistor: novo_valor}.
 
+        Ex.: label_map = {"R1": "1k", "R2": "2k2"}
+        """
+        json_path = (self.base_path / json_file).resolve()
+
+        # Carrega o JSON
+        with json_path.open("r", encoding="utf-8") as f:
+            data: List[Dict[str, Any]] = json.load(f)
+
+        # Atualiza os resistores
+        for entity in data:
+            if entity.get("entity_type") != "Resistor":
+                continue
+
+            for comp in entity.get("components", []):
+                if comp.get("type") != "LabelComponent":
+                    continue
+
+                name = comp.get("name")
+                if name in label_map:
+                    comp["value"] = label_map[name]
+
+        # Salva de volta
+        with json_path.open("w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+    @staticmethod
+    def remove_resistor_by_name(json_file_path: str, resistor_name: str):
+        if not os.path.exists(json_file_path):
+            print(f"[Serialization] Arquivo '{json_file_path}' não encontrado para remover resistor {resistor_name}.")
+            return
+
+        try:
+            with open(json_file_path, 'r', encoding='utf-8') as f:
+                entities = json.load(f)
+
+            if not isinstance(entities, list):
+                print(f"[Serialization] JSON raiz de '{json_file_path}' não é uma lista.")
+                return
+
+            def is_target_resistor(entity: dict) -> bool:
+                if entity.get("entity_type") != "Resistor":
+                    return False
+
+                for comp in entity.get("components", []):
+                    if comp.get("type") == "LabelComponent" and comp.get("name") == resistor_name:
+                        return True
+                return False
+
+            filtered = [e for e in entities if not is_target_resistor(e)]
+
+            with open(json_file_path, 'w', encoding='utf-8') as f:
+                json.dump(filtered, f, indent=4, ensure_ascii=False)
+
+            print(f"[Serialization] Removido resistor '{resistor_name}' de '{json_file_path}' (se existia).")
+
+        except json.JSONDecodeError:
+            print(f"[Serialization] Falha ao decodificar o arquivo JSON '{json_file_path}'.")
+        except Exception as e:
+            print(f"[Serialization] Erro inesperado ao remover resistor '{resistor_name}' de '{json_file_path}': {e}")
 
     @staticmethod
     def reconstruct_entity(data: dict) -> Entity:

@@ -9,8 +9,9 @@ from core.circuit_tools.solve_circuit         import CircuitSolver
 
 
 class CircuitValidatorSystem(System):
-    def __init__(self):
+    def __init__(self,level_path):
         super().__init__()
+        self.level_path =  level_path
         self.circuit_manager = CircuitManager.get()
         self.event_manager   = EventManager.get()
 
@@ -31,14 +32,14 @@ class CircuitValidatorSystem(System):
                     f"Nenhum resistor disponível para a área {area} (painel {control_pannel.pannel_id})"
                 )
 
-            resistors_list = resistors_per_area[area]
+            resistors_list  = resistors_per_area[area]
             resistor_chosen = choice(resistors_list)
             resistors_list.remove(resistor_chosen)
 
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
 
-            netlist_path = f'ltspice/pannel{control_pannel.pannel_id}_solution.net'
+            netlist_path = f'ltspice/{self.level_path}/pannel{control_pannel.pannel_id}_solution.net'
 
             SerializationManager.update_component_value(
                 netlist_path,
@@ -87,7 +88,7 @@ class CircuitValidatorSystem(System):
 
             answer = float(resistor_results[target_component][solution_type]['value'])
         
-            tolerance_percent = 2 #value%
+            tolerance_percent = 2 
             is_correct_answer = self._float_equals_percent(answer,solution_value,tolerance_percent)
 
             if  is_correct_answer:

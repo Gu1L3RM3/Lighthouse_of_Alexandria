@@ -1,14 +1,14 @@
 import pytmx
-from core.ecs import Entity
+from core.ecs                     import Entity
 
-from core.components.collider import Collider
-from core.components.position import Position
-from core.components.sprite import Sprite
+from core.components.collider     import Collider
+from core.components.position     import Position
+from core.components.sprite       import Sprite
 
 from core.managers.entity_manager import EntityManager
-from core.map.tile_map import TileMap
-from core.map.spawners.spawn import *
-from typing import  Dict
+from core.map.tile_map            import TileMap
+from core.map.spawners.spawn      import *
+from typing                       import  Dict
 
 
 class MapEntitySpawner:

@@ -1,0 +1,254 @@
+from core.circuit_tools.serialization_manager import SerializationManager
+from utils.setter_values import SetterValues
+from core.ecs import System
+from core.managers.entity_manager import EntityManager
+from core.managers.event_manager import EventManager
+from core.managers.circuit_manager import CircuitManager
+from entities.itens.control_pannel import ControlPannel
+from entities.itens.resistor_item import ResistorItem
+from core.components.label_component import LabelComponent
+from core.circuit_tools.solve_circuit import CircuitSolver
+
+from core.settings import COMERCIAL_RESISTORS
+
+from pathlib import Path   
+from typing import Dict    
+import random
+
+
+class ResistorAssotiationValidatorSystem(System):
+    def __init__(self, level_path: str):
+        super().__init__()
+        self.level_path = level_path
+        self.event_manager   = EventManager.get()
+        self.circuit_manager = CircuitManager.get()
+        
+        self.tolerance_percent = 2.0  
+
+        self.serialization_manager = SerializationManager()
+        self.serialization_manager.base_path = Path(".")
+
+
+    def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
+        if a == 0 and b == 0:
+            return True
+        reference = max(abs(a), abs(b))
+        diff = abs(a - b)
+        allowed = reference * (percent_tol / 100.0)
+        return diff <= allowed
+
+
+    def _closest_comercial_resistor(self, value: float) -> tuple[str, float]:
+        """
+        Retorna (label, valor) do resistor comercial mais próximo de 'value'.
+        Ex: 1030 -> ('1.0k', 1000.0)
+        """
+        best_key, best_val = min(
+            COMERCIAL_RESISTORS.items(),
+            key=lambda kv: abs(kv[1] - value)
+        )
+        return best_key, best_val
+
+    def _random_comercial_value(self) -> tuple[str, float]:
+        key = random.choice(list(COMERCIAL_RESISTORS.keys()))
+        return key, COMERCIAL_RESISTORS[key]
+
+    def _random_comercial_value_different_from(
+        self,
+        excluded_val: float,
+        used_vals: set[float],
+    ) -> tuple[str, float]:
+        """
+        Escolhe um valor comercial:
+        - diferente de excluded_val
+        - diferente de qualquer valor em used_vals
+        - se não houver mais opções, pega o valor comercial mais distante de excluded_val
+        """
+
+        valid_items = [
+            (k, v) for k, v in COMERCIAL_RESISTORS.items()
+            if v not in used_vals and abs(v - excluded_val) > 1e-12
+        ]
+
+        if valid_items:
+            return random.choice(valid_items)
+
+        farthest_key, farthest_val = max(
+            COMERCIAL_RESISTORS.items(),
+            key=lambda kv: abs(kv[1] - excluded_val)
+        )
+
+        return farthest_key, farthest_val
+
+    # ------------ Randomização do netlist ------------
+
+    def _randomize_resistors_in_netlist(self, netlist_path: str) -> Dict[str, str]:
+        """
+        Lê o .net, sorteia novos valores COMERCIAIS para TODOS os resistores
+        (linhas começando com 'r'), grava de volta e
+        RETORNA um dict { 'R1': '560k', 'R2': '1k', ... }
+        para ser usado na atualização dos JSONs.
+        """
+        label_map: Dict[str, str] = {}
+
+        try:
+            with open(netlist_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+        except FileNotFoundError:
+            print(f"[ResAssoc] Netlist não encontrado: {netlist_path}")
+            return label_map
+
+        resistor_line_indices: list[int] = []
+        for i, line in enumerate(lines):
+            stripped = line.strip().lower()
+            if stripped.startswith('r'):  
+                resistor_line_indices.append(i)
+
+        if not resistor_line_indices:
+            return label_map
+
+        for idx in resistor_line_indices:
+            parts = lines[idx].split()
+            if len(parts) < 4:
+                continue
+
+            comp_name = parts[0] 
+            _, new_val = self._random_comercial_value()
+            formatted = SetterValues.format_eng(new_val, "")
+
+            parts[3] = formatted
+            lines[idx] = " ".join(parts) + "\n"
+
+            label_map[comp_name] = formatted
+
+            
+
+        with open(netlist_path, "w", encoding="utf-8") as f:
+            f.writelines(lines)
+
+        return label_map
+
+
+    def set_solutions(self, event: dict, entity_manager: EntityManager):
+        """
+        Fase 4:
+        - randomiza resistores dos netlists com valores comerciais;
+        - atualiza os JSONs de circuito com os mesmos valores;
+        - usa CircuitSolver.get_equivalent_resistance() para obter Req;
+        - quantiza Req para o valor comercial mais próximo;
+        - escolhe 1 ResistorItem da área como correto;
+        - randomiza os outros ResistorItems da área com outros valores comerciais.
+        """
+        resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
+        resistors_by_area: dict[int, list[ResistorItem]] = {}
+
+        for r in resistor_items:
+            area = r.area_id
+            if area not in resistors_by_area:
+                resistors_by_area[area] = []
+            resistors_by_area[area].append(r)
+
+        control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
+
+        for control_pannel in control_pannels:
+            area = control_pannel.component_for_area
+            area_res_items = resistors_by_area.get(area, [])
+
+            if not area_res_items:
+                print(f"[ResAssoc] Nenhum ResistorItem para área {area} (painel {control_pannel.pannel_id})")
+                continue
+
+            netlist_path = f"ltspice/{self.level_path}/pannel{control_pannel.pannel_id}_solution.net"
+
+            json_solution_path = Path("circuitos") / self.level_path / f"pannel{control_pannel.pannel_id}.json"
+
+            label_updates = self._randomize_resistors_in_netlist(netlist_path)
+
+            if label_updates:
+                try:
+                    self.serialization_manager.update_resistor_labels_in_file(
+                        json_solution_path,
+                        label_updates
+                    )
+                except FileNotFoundError:
+                    print(f"[ResAssoc] JSON de circuito não encontrado: {json_solution_path}")
+                except Exception as e:
+                    print(f"[ResAssoc] Erro ao atualizar JSON '{json_solution_path}': {e}")
+
+            solver = CircuitSolver(netlist_path)
+            if not solver.is_solved:
+                print(f"[ResAssoc] Falha ao resolver circuito do painel {control_pannel.pannel_id}")
+                continue
+
+            Req_real = solver.get_equivalent_resistance()
+            if Req_real is None:
+                print(f"[ResAssoc] Não foi possível calcular Req no painel {control_pannel.pannel_id}")
+                continue
+
+            comercial_label, Req_com = self._closest_comercial_resistor(Req_real)
+
+            control_pannel.solution_value = Req_com
+
+            correct_item: ResistorItem = random.choice(area_res_items)
+            used_values = {Req_com}
+
+            correct_item.value = SetterValues.format_eng(Req_com,'')
+            label: LabelComponent = correct_item.get(LabelComponent)
+            if label:
+                label.value = SetterValues.format_eng(Req_com, '')
+
+            for item in area_res_items:
+                if item is correct_item:
+                    continue
+
+                fake_label, fake_val = self._random_comercial_value_different_from(
+                    excluded_val=Req_com,
+                    used_vals=used_values
+                )
+                used_values.add(fake_val)
+
+                item.value = fake_val
+                lbl = item.get(LabelComponent)
+                if lbl:
+                    lbl.value = SetterValues.format_eng(fake_val, "")
+
+        self.event_manager.post({'type': 'solutions_done'})
+
+
+    def update(self, entity_mn, dt):
+        """
+        Aqui você compara o Req que o jogador montou no editor
+        com o solution_value (Req_com) calculado em set_solutions.
+
+        O CircuitEditor deve usar também CircuitSolver.get_equivalent_resistance()
+        para calcular o Req do circuito do jogador e salvar em CircuitManager:
+            CircuitManager.get().add_circuit_values(
+                control_pannel.name_file,
+                {"Req": valor_req_do_jogador}
+            )
+        """
+        control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
+
+        for control_pannel in control_pannels:
+            if control_pannel.done:
+                continue
+
+            target_req = control_pannel.solution_value
+            if target_req is None:
+                continue
+
+            circuit_data = self.circuit_manager.get_total_values(control_pannel.name_file)
+            if not circuit_data:
+                continue
+
+            req_player = circuit_data.get("resistance", None)
+            if req_player is None:
+                continue
+
+            answer = float(req_player["value"])
+
+            is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
+
+            if is_correct:
+                print('FUNCIONOUUUUUUU')
+                control_pannel.action()

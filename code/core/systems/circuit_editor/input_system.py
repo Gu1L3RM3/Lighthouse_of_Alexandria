@@ -34,10 +34,17 @@ class InputSystem(System):
         Path("circuitos").mkdir(exist_ok=True)
         Path("ltspice").mkdir(exist_ok=True)
 
+        
         self.file = file
-        self.json_file       = str(Path("circuitos") / Path(f'{self.file}.json').name)
-        self.net_file        = str(Path("ltspice")   / Path(f'{self.file}.net').name)
-        self.lt_spice_file   = str(Path("ltspice")   / Path(f'{self.file}.asc').name)
+
+       
+        self.json_file = f"{self.file}.json"         
+
+     
+        filename_only = Path(self.file).name         
+
+        self.net_file      = str(Path("ltspice") / f"{filename_only}.net")
+        self.lt_spice_file = str(Path("ltspice") / f"{filename_only}.asc")
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
@@ -277,12 +284,14 @@ class InputSystem(System):
         try:
             circuit_solver= CircuitSolver(self.net_file)
             self.resistor_results = circuit_solver.get_resistor_results()
+            self.total_values = circuit_solver.get_total_values()
             CircuitManager.get().add_circuit_values(self.file,self.resistor_results)
+            CircuitManager.get().add_total_values(self.file,self.total_values)
             self.set_voltage_current_resistors()
 
             return True
         except Exception as e:
-            print(f"Cannot solve circuit")
+            print(f"Cannot solve circuit {e}")
             return False
 
     def _is_debug_mode(self):

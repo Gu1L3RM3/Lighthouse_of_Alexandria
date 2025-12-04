@@ -24,19 +24,20 @@ class ControlPannel(Item):
         
 
 
-
         self.animate = AnimateSprite(self.animations)
 
         self.area = Rect(x,y,32,48)
 
-        self.solution_value :float|None=  None
+        self.solution_value =  None
         self.active =  active
+        self.pannel_id  = props['pannel_id']
         self.solution_type =  props['type_solution']
         self.target_component =  props['target_component']
         self.component_for_area = int(props['component_for_area'])
-        self.pannel_id = props['pannel_id'] # Deve ser diferente de qualquer outro dentre todas as fases
-        self.name_file = 'pannel'+self.pannel_id
-        self.action_type = 'pannel_'+ props['action']+self.pannel_id
+        self.name_file =f"{props['tmx_file']}/pannel{self.pannel_id}"
+        
+        self.action_type =f"pannel_{props['action']}{self.pannel_id}" 
+        print(self.action_type)
         
         self.add(
             Position(x,y),
@@ -59,6 +60,7 @@ class ControlPannel(Item):
     
     def on_collect(self,entity:Entity):
         if isinstance(entity,Player):
+            print(self.name_file)
             SceneManager.get().active_scene = CircuitEditor(pygame.display.get_surface(),file=self.name_file)
             
             
