@@ -70,7 +70,7 @@ class Level3(BaseScene):
         anim.play('fall',loop=False,on_finish=self.scene_manager.restart_with_fade)
    
     def start(self):
-        print("oi")
+        
         self.set_subscribes()
         self.set_resistors()
         
@@ -78,9 +78,11 @@ class Level3(BaseScene):
         self.old_paper.on_active()
     
     def end(self):
+        print("[LEVEL3.END] chamado! JSON será limpo!")
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels_json()
+        self.circuit_manager.clear_phase(self.level_path)
 
         
     def clear_all_pannels_json(self):
@@ -133,7 +135,13 @@ class Level3(BaseScene):
         self.animation_system         =  AnimationSystem()
         self.area_trigger_system      =  AreaTriggerSystem()
         self.freeze_system            =  FreezeSystem()
-        self.light_system             =  LightSystem(self.screen,self.camera,debug=False,enabled=True,ambient_alpha=0)
+        self.light_system             =  LightSystem(
+            self.screen,
+            self.camera,
+            debug=False,
+            enabled=True,
+            ambient_alpha=0
+            )
         self.circuit_validator_system =  CircuitValidatorSystem(level_path=self.level_path)
         self.systems.update(
 
@@ -164,7 +172,7 @@ class Level3(BaseScene):
         self.event_manager.subscribe("resistor_collected",self.update_storage_circuit)
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
-        self.event_manager.subscribe("pannel_luz1",lambda event : self.light_system.toggle)
+        self.event_manager.subscribe("pannel_luz1",lambda event : self.light_system.toggle())
         self.event_manager.subscribe("pannel_door3",self.door.open)
         self.subscribe_iron_gates()
     def subscribe_iron_gates(self):

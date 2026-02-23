@@ -45,7 +45,6 @@ class SerializationManager:
             with open(SerializationManager.STORAGE_FILE, 'r') as f:
                 eletric_storage_data = json.load(f)
 
-            print(f"Eletric Storage carregado de {SerializationManager.STORAGE_FILE}")
             return eletric_storage_data
 
         except FileNotFoundError:
@@ -92,7 +91,6 @@ class SerializationManager:
             with open(SerializationManager.STORAGE_FILE, 'w') as f:
                 json.dump(data, f, indent=4)
 
-            print(f"Estoque elétrico salvo em {SerializationManager.STORAGE_FILE}")
 
         except Exception as e:
             print(f"Erro ao salvar: {e}")
@@ -103,7 +101,6 @@ class SerializationManager:
             with open(SerializationManager.STORAGE_FILE, 'w') as f:
                 json.dump({}, f, indent=4)
 
-            print("Eletric Storage limpo com sucesso.")
         except Exception as e:
             print(f"Erro ao limpar: {e}")
 
@@ -136,9 +133,8 @@ class SerializationManager:
         else:
             final_path = base_folder / path_obj
 
-        # cria as pastas necessárias
         final_path.parent.mkdir(parents=True, exist_ok=True)
-
+        print(f"[SAVE] Salvando em: {final_path}")
         entities_data = [entity.to_dict() for entity in entities]
 
         final_path.write_text(
@@ -146,7 +142,6 @@ class SerializationManager:
             encoding="utf-8"
         )
 
-        print(f"Circuito salvo em {final_path.resolve()}")
 
     @staticmethod
     def load_entities_from_json(filename: str) -> list[Entity]:
@@ -187,7 +182,6 @@ class SerializationManager:
                 for data in entities_data
             ]
 
-            print(f"Circuito carregado de {filepath.resolve()}")
             return reconstructed
 
         except FileNotFoundError:

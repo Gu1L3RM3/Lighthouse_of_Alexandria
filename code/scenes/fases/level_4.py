@@ -190,7 +190,7 @@ class Level4(BaseScene):
         self.event_manager.subscribe("open_old_paper", self.open_old_paper)
         self.event_manager.subscribe("close_old_paper", self.after_close_old_paper)
 
-        self.event_manager.subscribe("pannel_luz3", lambda event: self.light_system.toggle)
+        self.event_manager.subscribe("pannel_luz3", lambda event: self.light_system.toggle())
         self.event_manager.subscribe("pannel_door4", self.door.open)
 
         self.subscribe_iron_gates()

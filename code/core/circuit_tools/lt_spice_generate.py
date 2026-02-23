@@ -436,6 +436,8 @@ class LtSpiceGenerate:
 
     def save_netlist(self):
         """Salva a netlist dentro da pasta definida em net_filepath."""
+        print(f"FILE: {self.net_filepath}")
+
         filepath = Path(self.net_filepath)
 
         filepath.parent.mkdir(parents=True, exist_ok=True)

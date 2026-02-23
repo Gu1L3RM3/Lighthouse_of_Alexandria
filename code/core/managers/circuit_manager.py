@@ -35,6 +35,15 @@ class CircuitManager:
             return None
             
         return circuit_data['resistor_values']
+
+    def clear_phase(self, level_path: str):
+        """Remove todos os resultados de circuito de uma fase específica.
+        Ex: clear_phase('fase_5') remove 'fase_5/pannel1', 'fase_5/pannel2', etc.
+        """
+        prefix = f"{level_path}/"
+        keys_to_remove = [k for k in self._circuits_values if k.startswith(prefix)]
+        for k in keys_to_remove:
+            del self._circuits_values[k]
     
     def random_list_resistors(self,amount:int)->list[str]:
         resistors_list:list[str] =  list(COMERCIAL_RESISTORS.keys())

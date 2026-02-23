@@ -33,12 +33,12 @@ class Game:
         self.register_fases()
         
     def register_fases(self):
-        self.scene_manager.register('level_3',Level3(self.screen))
         self.scene_manager.register('level_5',Level5(self.screen))
-        self.scene_manager.register('level_4',Level4(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))
         self.scene_manager.register('level_2',Level2(self.screen))
+        self.scene_manager.register('level_3',Level3(self.screen))
+        self.scene_manager.register('level_4',Level4(self.screen))
 
     def run(self):
         while True:

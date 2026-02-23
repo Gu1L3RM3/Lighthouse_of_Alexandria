@@ -18,6 +18,7 @@ class DialogueArea(Entity):
                 lines=self.list_dialogue,
                 size_dialogue=size,
                 auto_start=True,
+                
                 active_status=active_status,
             )
         )

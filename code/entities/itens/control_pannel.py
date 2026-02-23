@@ -37,7 +37,6 @@ class ControlPannel(Item):
         self.name_file =f"{props['tmx_file']}/pannel{self.pannel_id}"
         
         self.action_type =f"pannel_{props['action']}{self.pannel_id}" 
-        print(self.action_type)
         
         self.add(
             Position(x,y),
@@ -60,7 +59,6 @@ class ControlPannel(Item):
     
     def on_collect(self,entity:Entity):
         if isinstance(entity,Player):
-            print(self.name_file)
             SceneManager.get().active_scene = CircuitEditor(pygame.display.get_surface(),file=self.name_file)
             
             

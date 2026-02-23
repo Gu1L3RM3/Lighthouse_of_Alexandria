@@ -34,17 +34,19 @@ class InputSystem(System):
         Path("circuitos").mkdir(exist_ok=True)
         Path("ltspice").mkdir(exist_ok=True)
 
-        
-        self.file = file
+        self.file_list =  file.split('/')
+        self.file = self.file_list[1]
 
-       
-        self.json_file = f"{self.file}.json"         
+        level =  Path(self.file_list[0])
 
-     
-        filename_only = Path(self.file).name         
+        self.full_file = f"{self.file_list[0]}/{self.file}"  # ex: "fase_3/pannel1"
+        self.json_file = str(level / f"{self.file}.json")
 
-        self.net_file      = str(Path("ltspice") / f"{filename_only}.net")
-        self.lt_spice_file = str(Path("ltspice") / f"{filename_only}.asc")
+        filename_only = Path(self.file).name
+                 
+
+        self.net_file      = str(Path("ltspice") /  level / f"{filename_only}.net")
+        self.lt_spice_file = str(Path("ltspice") / level / f"{filename_only}.asc")
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
@@ -90,13 +92,29 @@ class InputSystem(System):
         self.entity_manager.add_entity(entity)
         self.brush = entity
         self.show_mouse = False
-    def set_label(self,obj:Type[Entity],x,y,value:str)->Entity:
-        if not obj in {Resistor,CurrentSource,VoutageSource}:
-            return obj(x,y)
-        entities = self.entity_manager.get_entities_by_class(obj)
-        id   =  len(entities)+1
+    def set_label(self, obj: Type[Entity], x, y, value: str) -> Entity:
+        if obj not in {Resistor, CurrentSource, VoutageSource}:
+            return obj(x, y)
 
-        return obj(x,y,id=id,value=value)
+        entities = self.entity_manager.get_entities_by_class(obj)
+
+        # Coleta todos os IDs já usados para este tipo de componente
+        used_ids = set()
+        for e in entities:
+            label: LabelComponent = e.get(LabelComponent)
+            if label and label.name:
+                try:
+                    # nome é do tipo "R1", "V2", "I3" — extrai o número
+                    used_ids.add(int(''.join(filter(str.isdigit, label.name))))
+                except ValueError:
+                    pass
+
+        # Menor inteiro positivo não usado
+        new_id = 1
+        while new_id in used_ids:
+            new_id += 1
+
+        return obj(x, y, id=new_id, value=value)
     def update(self, entity_manager, dt):
         self.update_brush_position()
     def can_change(self,target:Entity):
@@ -285,8 +303,8 @@ class InputSystem(System):
             circuit_solver= CircuitSolver(self.net_file)
             self.resistor_results = circuit_solver.get_resistor_results()
             self.total_values = circuit_solver.get_total_values()
-            CircuitManager.get().add_circuit_values(self.file,self.resistor_results)
-            CircuitManager.get().add_total_values(self.file,self.total_values)
+            CircuitManager.get().add_circuit_values(self.full_file,self.resistor_results)
+            CircuitManager.get().add_total_values(self.full_file,self.total_values)
             self.set_voltage_current_resistors()
 
             return True

@@ -52,6 +52,7 @@ class Level5(BaseScene):
         self.set_door()
 
         self.can_set_resistors = True
+        self.can_reset_pannels = True
 
         self.player = self.entity_mn.get_player()
         self.camera.follow = self.player
@@ -110,7 +111,9 @@ class Level5(BaseScene):
 
     def start(self):
         self.scene_manager.scene_preview = 'level_5'
-        self.clear_all_pannels_json()
+        if self.can_reset_pannels:
+            self.clear_all_pannels_json()
+            self.can_reset_pannels = False
         self.set_subscribes()
         self.set_resistors()
 
@@ -121,6 +124,8 @@ class Level5(BaseScene):
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels_json()
+        self.can_reset_pannels = True
+        self.circuit_manager.clear_phase(self.level_path)
 
     def clear_all_pannels_json(self):
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
@@ -128,7 +133,6 @@ class Level5(BaseScene):
         for i in range(amount_pannels):
             file_name = f'circuitos/{self.level_path}/pannel{i+1}.json'
             SerializationManager.remove_droppable_entities(file_name)
-            SerializationManager.remove_resistor_by_name(file_name, "R3")
 
 
 
@@ -179,7 +183,7 @@ class Level5(BaseScene):
         self.event_manager.subscribe("resistor_collected", self.update_storage_circuit)
         self.event_manager.subscribe("open_old_paper", self.open_old_paper)
         self.event_manager.subscribe("close_old_paper", self.after_close_old_paper)
-        self.event_manager.subscribe("pannel_luz1", lambda event: self.light_system.toggle)
+        self.event_manager.subscribe("pannel_luz1", lambda event: self.light_system.toggle())
         self.event_manager.subscribe("pannel_door3", self.door.open)
         self.subscribe_iron_gates()
 
