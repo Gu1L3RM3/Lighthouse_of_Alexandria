@@ -57,7 +57,11 @@
 </data>
  </layer>
  <objectgroup id="9" name="door">
-  <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16"/>
+  <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16">
+   <properties>
+    <property name="next_scene" value="level_2"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="player">
   <object id="1" name="player" x="218.5" y="273.5">

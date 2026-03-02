@@ -13,6 +13,9 @@ class TileMapLoader:
         tmx_data: pytmx.TiledMap = load_pygame(tmx_path, pixelalpha=True)
 
         tilemap = TileMap(tmx_data)
+        
+        rel_path = tmx_filename.replace('fases/', '').replace('.tmx', '')
+        tilemap.tmx_file = rel_path
 
         ground_surface = pygame.Surface((tilemap.map_width, tilemap.map_height)).convert_alpha()
         ground_surface.fill((0, 0, 0, 0))

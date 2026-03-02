@@ -9,9 +9,10 @@ from core.components.area_trigger import AreaTrigger
 from core.components.always_on_top import AlwaysOnTop
 from core.components.light_component import LightComponent
 class Door(Entity):
-    def __init__(self,x,y):
+    def __init__(self,x,y,props=None):
         super().__init__()
-        self.next_scene =  ''
+        self.props = props or {}
+        self.next_scene = self.props.get('next_scene', '')
         self.animations =  ResourceManager.get().load_sprite_sheet('door',(48,32))
         
         

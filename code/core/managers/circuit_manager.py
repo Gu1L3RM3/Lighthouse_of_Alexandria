@@ -4,13 +4,15 @@ class CircuitManager:
     _instance = None
     def __init__(self):
         self._circuits_values = {}
-    
+
+
 
     @classmethod
     def get(cls):
         if cls._instance is None:
             cls._instance = CircuitManager()
         return cls._instance
+    
     def add_total_values(self,name:str,total_values:dict):
         if name not in self._circuits_values:
             self._circuits_values[name] = {}

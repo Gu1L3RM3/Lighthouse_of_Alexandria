@@ -13,6 +13,8 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.key import Key
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
+from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.current_source_item import CurrentSourceItem
 from entities.animate_circuit.circuit_components import *
 from entities.npcs.npc_factory import NPCFactory
 from core.components.npc_routine import NPCRoutine
@@ -39,6 +41,8 @@ class ItemSpawner(EntitySpawner):
             'key': Key,
             'control_pannel':ControlPannel,
             'resistor':ResistorItem,
+            'voltage_source':VoutageSourceItem,
+            'current_source':CurrentSourceItem,
         }
      
 
@@ -109,7 +113,7 @@ class DoorSpawner(EntitySpawner):
     def spawn(self, obj, entity_mn, tilemap):
         if obj.name !='door':
             return
-        entity_mn.add_entity(Door(obj.x,obj.y))
+        entity_mn.add_entity(Door(obj.x, obj.y, obj.properties))
         
 class AttetionSpawner(EntitySpawner):
 

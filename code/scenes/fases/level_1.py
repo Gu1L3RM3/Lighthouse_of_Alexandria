@@ -1,3 +1,4 @@
+import pygame
 from pygame import Surface
 from core.settings import *
 from scenes.base_scene import BaseScene
@@ -16,6 +17,8 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
 from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
+from core.ui.widgets.button import Button
+from core.ui.widgets.gesture_detector import ClickType
 
 class Level1(BaseScene):
     def __init__(self, screen:Surface):
@@ -60,6 +63,19 @@ class Level1(BaseScene):
     def set_ui(self):
         fps=FPSWidget()
         self.ui_manager.add(fps)
+        idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
+        pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
+        self.menu_button = Button(
+            init_surface=idle,
+            surface_pressed=pressed,
+            pos_center=(self.screen.get_width() - 92, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=lambda: SceneManager.get().open_menu(0.35),
+            text="MENU",
+            font_size=11,
+            color_text=(245, 230, 170),
+        )
+        self.ui_manager.add(self.menu_button)
 
         
     def start(self):
@@ -116,6 +132,8 @@ class Level1(BaseScene):
         self.entity_mn.remove_entity_by_id(event['id'])
 
     def process_input(self, events):
+        for event in events:
+            self.ui_manager.handle_event(event)
         self.player.input(events)
 
     def update(self, dt):

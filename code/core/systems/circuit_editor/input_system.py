@@ -35,17 +35,17 @@ class InputSystem(System):
         Path("ltspice").mkdir(exist_ok=True)
 
         self.file_list =  file.split('/')
-        self.file = self.file_list[1]
+        self.file = self.file_list[-1]
 
-        level =  Path(self.file_list[0])
+        level = Path(*self.file_list[:-1])
 
-        self.full_file = f"{self.file_list[0]}/{self.file}"  # ex: "fase_3/pannel1"
+        self.full_file = file  # ex: "generic_levels_3/fase_3/pannel1"
         self.json_file = str(level / f"{self.file}.json")
 
         filename_only = Path(self.file).name
                  
 
-        self.net_file      = str(Path("ltspice") /  level / f"{filename_only}.net")
+        self.net_file      = str(Path("ltspice") / level / f"{filename_only}.net")
         self.lt_spice_file = str(Path("ltspice") / level / f"{filename_only}.asc")
         self.show_mouse = True
         self.select_mode = False

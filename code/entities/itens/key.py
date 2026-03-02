@@ -16,6 +16,7 @@ class Key(Item):
         self.em =  EventManager.get()
         self.animate_sprite =  AnimateSprite(self.animations,fps=10)
         self.area_trigger = Rect(x,y,16,16)
+        self.hidden_surface = self._build_hidden_surface()
         self.add(
             Position(x,y),
             AreaTrigger(self.area_trigger,active=active,on_entered=self.on_collect),
@@ -24,9 +25,26 @@ class Key(Item):
             self.animate_sprite,
         )
         self.animate_sprite.play('idle')
+
+    def _build_hidden_surface(self):
+        surf = self.animations['idle'][0].copy()
+        surf.fill((255, 255, 255, 0))
+        return surf
+
     def on_active(self):
         area_trigger:AreaTrigger =  self.get(AreaTrigger)
         area_trigger.active = True
+        sprite: Sprite = self.get(Sprite)
+        sprite.image = self.animations['idle'][0]
+        self.animate_sprite.play('idle', reset=True)
+
+    def on_deactive(self):
+        area_trigger: AreaTrigger = self.get(AreaTrigger)
+        area_trigger.active = False
+        self.animate_sprite.stop()
+        self.animate_sprite.current_animation = None
+        sprite: Sprite = self.get(Sprite)
+        sprite.image = self.hidden_surface
     def after_collected(self):
         self.em.post(events={'type':'get_key'})
         self.em.post(events={'type':'kill_entity','id':self.id})

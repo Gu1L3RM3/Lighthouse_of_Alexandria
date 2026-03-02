@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="44" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="26">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
@@ -38,7 +38,11 @@
 </data>
  </layer>
  <objectgroup id="7" name="door">
-  <object id="2" name="door" gid="31" x="64" y="48" width="16" height="16"/>
+  <object id="2" name="door" gid="31" x="64" y="48" width="16" height="16">
+    <properties>
+      <property name='next_scene' value='fase_3'/>
+    </properties>
+  </object>
  </objectgroup>
  <objectgroup id="11" name="npc">
   <object id="5" name="arquimedes" x="515.334" y="288">
@@ -210,3 +214,4 @@
   </object>
  </objectgroup>
 </map>
+

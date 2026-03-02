@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8'?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="23" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="21">
+ <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="100" columns="10">
+  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160" />
+ </tileset>
+ <tileset firstgid="101" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
+  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208" />
+ </tileset>
+ <layer id="1" name="ground" width="23" height="21">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,240,215,216,216,216,217,240,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,240,240,240,240,240,240,240,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,240,240,240,240,240,240,240,0,0,0,0,0,0,0,0,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,239,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,251,252,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,239,240,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,251,252,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,239,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,251,252,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,239,240,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,251,252,240,
+240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240,240
+</data>
+ </layer>
+ <layer id="7" name="obj" width="23" height="21">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,137,138,138,138,138,138,142,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,149,174,131,132,133,175,154,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,185,186,143,144,145,187,166,0,0,0,0,0,0,0,0,
+101,102,102,105,102,102,102,103,175,0,0,0,0,0,174,102,102,104,102,102,102,102,106,
+113,114,114,117,114,114,114,115,177,0,0,0,0,0,176,114,114,116,114,114,114,114,118,
+125,126,126,129,126,126,126,127,189,0,0,0,0,0,188,126,126,128,126,126,126,126,130,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,178,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,190,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,195,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+209,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,214,
+221,222,222,222,222,225,222,222,222,222,222,222,222,223,223,223,223,223,223,225,223,223,226
+</data>
+ </layer>
+ <objectgroup id="9" name="door">
+  <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16">
+   <properties>
+    <property name="next_scene" value="fase_3" />
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="player">
+  <object id="1" name="player" x="218.5" y="273.5">
+   <point />
+  </object>
+ </objectgroup>
+ <objectgroup id="5" name="attention_point" locked="1">
+  <object id="5" name="1" x="171" y="281">
+   <properties>
+    <property name="positions" value="[]" />
+   </properties>
+   <point />
+  </object>
+ </objectgroup>
+ <objectgroup id="4" name="attention_points" />
+ <objectgroup id="3" name="areas_dialog">
+  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+   <properties>
+    <property name="active_status" type="bool" value="true" />
+    <property name="dialogo" value="Arquimedes: Nesta etapa vamos dominar a Lei de Ohm com calma e de forma pratica.;Arquimedes: Tensao e a forca que empurra as cargas corrente e o fluxo resistencia e a oposicao ao fluxo.;Arquimedes: A relacao central e V igual a R vezes I e ela conecta as tres grandezas.;Arquimedes: Se voce conhece V e R calcule I usando I igual a V dividido por R.;Arquimedes: Se voce conhece V e I calcule R usando R igual a V dividido por I.;Arquimedes: Em serie as resistencias se somam primeiro ache Req e depois aplique a Lei de Ohm.;Arquimedes: GND e a sigla de Ground e representa a referencia de zero volt do circuito.;Arquimedes: Sem conectar o GND o circuito pode nao funcionar e as medicoes ficam incorretas.;Arquimedes: No grafico V por I de resistor ohmico voce ve uma reta que passa pela origem.;Arquimedes: Quanto maior a inclinacao da reta maior a resistencia do componente.;Arquimedes: Agora voce esta pronto pegue a chave e va para a fase 3 resolver os desafios." />
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="2" name="itens">
+  <object id="15" name="key" x="40" y="217">
+   <properties>
+    <property name="active_status" type="bool" value="false" />
+   </properties>
+   <point />
+  </object>
+  <object id="19" name="old_paper" x="169" y="190">
+   <properties>
+    <property name="active_status" type="bool" value="false" />
+   </properties>
+   <point />
+  </object>
+ </objectgroup>
+ <layer id="8" name="ground2" width="23" height="21">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+<objectgroup id="10" name="npc"><object id="20" name="arquimedes" type="arquimedes" x="152" y="228"><point /></object></objectgroup></map>
