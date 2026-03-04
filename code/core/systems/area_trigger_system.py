@@ -17,7 +17,7 @@ class AreaTriggerSystem(System):
         for e in entities_with_area:
             area = e.get(AreaTrigger)
             pos = e.get(Position)
-            rect = area.area
+            rect = area.get_rect(pos.x, pos.y)
             self.spatial.insert(e, rect)
 
         for entity in entities_with_collider:
@@ -38,4 +38,4 @@ class AreaTriggerSystem(System):
 
 
 
-                trigger.check_collision(entity, col_rect)
+                trigger.check_collision(entity, col_rect, trigger_rect)

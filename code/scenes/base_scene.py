@@ -13,11 +13,29 @@ from core.systems.render_system import RenderSystem
 from core.ecs import System
 from core.camera import Camera
 
+
+class OrderedSystems:
+    def __init__(self):
+        self._items: list[System] = []
+
+    def update(self, systems):
+        for system in systems:
+            if system in self._items:
+                continue
+            self._items.append(system)
+
+    def __iter__(self):
+        return iter(self._items)
+
+    def __bool__(self):
+        return bool(self._items)
+
+
 class BaseScene(ABC):
     def __init__(self,screen:Surface,world_width:int,world_height:int):
         self.screen=screen
 
-        self.systems:set[System]=set()
+        self.systems = OrderedSystems()
         
         self.camera=Camera(
             self.screen,

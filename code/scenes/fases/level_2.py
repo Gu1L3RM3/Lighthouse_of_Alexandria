@@ -75,9 +75,9 @@ class Level2(BaseScene):
         self.systems.update(
 
             [self.freeze_system,
-            self.physics_system,
             self.eletron_system,
             self.path_following_system,
+            self.physics_system,
             self.animation_system,
             self.area_trigger_system,
             self.render_system,

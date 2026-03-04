@@ -107,7 +107,7 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change('fase_4')
+        self.scene_manager.change('level_2')
         
         
     def register_fases(self):

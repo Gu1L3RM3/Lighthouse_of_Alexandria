@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="44" height="26" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="26">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
@@ -39,9 +39,9 @@
  </layer>
  <objectgroup id="7" name="door">
   <object id="2" name="door" gid="31" x="64" y="48" width="16" height="16">
-    <properties>
-      <property name='next_scene' value='fase_3'/>
-    </properties>
+   <properties>
+    <property name="next_scene" value="fase_3"/>
+   </properties>
   </object>
  </objectgroup>
  <objectgroup id="11" name="npc">
@@ -54,7 +54,7 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="4" name="attention_point" locked="1">
+ <objectgroup id="4" name="attention_point">
   <object id="6" name="1" x="536" y="314">
    <properties>
     <property name="positions" value="[{&quot;x&quot;:239.33333333333331,&quot;y&quot;:364.66666666666663},{&quot;x&quot;:557.9996666666666,&quot;y&quot;:287.33366666666666}]"/>
@@ -62,8 +62,8 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="5" name="attention_points" locked="1">
-  <object id="23" name="2" x="239.333" y="364.667">
+ <objectgroup id="5" name="attention_points">
+  <object id="23" name="2" x="256" y="336">
    <point/>
   </object>
   <object id="24" name="3" x="551.333" y="305.334">
@@ -80,7 +80,7 @@
     <property name="dialogo" value="Arquimedes: Olá meu jovem;Arquimedes: Você é um viajante do tempo,estou   certo?;Arquimedes: Seja bem vindo ao Farol de Alexandria!;Kevin: Olá! Vim aqui para procurar meu pai.Acredito que tenho que subir até o último andar para encontrá-lo;Kevin: Pode me ajudar com isso?;Arquimedes: Claro meu jovem!;Arquimedes: Mas antes de iniciar sua jornada, é necessario aprender os conceitos básicos de circuitos elétricos. Já que para chegar até o topo do farol não será nada fácil;Arquimedes: Ao contrário do que muitos pensam, aqui em Alexandria já utilizamos energia elétrica para tudo!;Arquimedes: Mas, infelizmente um homem quase destruiu todo o Farol e alguns andares ficaram inacessíveis devido ao alto perigo!;Arquimedes: Por sorte, conseguimos prendê-lo!;Arquimedes: Antes de mais nada, que tal dar uma olhada neste circuito ein?"/>
    </properties>
   </object>
-  <object id="22" name="dialog_2" x="224.667" y="334.667" width="61.3333" height="32.6667">
+  <object id="22" name="dialog_2" x="224" y="336" width="61.3333" height="32.6667">
    <properties>
     <property name="active_status" type="bool" value="false"/>
     <property name="dialogo" value="Hmmm;Que interessante!;É o que eu vi nas aulas!;O circuito possui uma bateria, um resistor e uma lampada;Vejo que quando o eletron passa pela lâmpada, ela ascende;A , e os elétrons aceleram quando passam pela bateria; E desaceleram quando passam pelo resistor e pela lâmpada;Outro fato é que o sentido da corrente é a convencional.Interessante!;Ok, vamos ver o que ele tem a me ensinar"/>
@@ -214,4 +214,3 @@
   </object>
  </objectgroup>
 </map>
-

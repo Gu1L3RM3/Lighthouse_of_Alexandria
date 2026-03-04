@@ -21,7 +21,7 @@ class PathFollowingSystem(System):
                 pf.done = True
                 continue
 
-            self._update_path_progress(pf, pos)
+            self._update_path_progress(pf, pos, dt)
             self._apply_velocity(pf, vel)
 
             if pf.done and pf.loop:
@@ -35,24 +35,30 @@ class PathFollowingSystem(System):
         frozen = entity.get(Freeze).active if entity.has(Freeze) else False
         return frozen or path_follower.done or not path_follower.collision_rects
 
-    def _update_path_progress(self, pf: PathFollower, pos: Position):
+    def _update_path_progress(self, pf: PathFollower, pos: Position, dt: float):
         if not pf.collision_rects:
             pf.done, pf.direction = True, Vector2(0, 0)
             return
 
-        target_rect = pf.collision_rects[0]
         center = pos.center_pos()
+        dynamic_reach = max(pf.reach_radius, pf.speed * dt + 1.0)
 
-        if target_rect.collidepoint(center):
+        while pf.collision_rects:
+            target_rect = pf.collision_rects[0]
+            target_center = Vector2(target_rect.center)
+            to_target = target_center - center
+            if to_target.length_squared() > (dynamic_reach * dynamic_reach):
+                break
             pf.collision_rects.pop(0)
-            pf.direction = (
-                self._calculate_direction(center, pf.collision_rects[0])
-                if pf.collision_rects else Vector2(0, 0)
-            )
-            pf.done = not bool(pf.collision_rects)
 
-        elif pf.direction.length_squared() == 0:
-            pf.direction = self._calculate_direction(center, target_rect)
+        if not pf.collision_rects:
+            pf.done = True
+            pf.direction = Vector2(0, 0)
+            return
+
+        target_rect = pf.collision_rects[0]
+        pf.done = False
+        pf.direction = self._calculate_direction(center, target_rect)
 
     def _calculate_direction(self, start_vec: Vector2, target_rect: pygame.Rect) -> Vector2:
         direction = Vector2(target_rect.center) - start_vec

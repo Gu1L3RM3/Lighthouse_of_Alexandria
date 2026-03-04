@@ -636,7 +636,7 @@
     <property name="enemy_type" value="spider"/>
     <property name="hp" type="int" value="3"/>
     <property name="route_id" value="route_a"/>
-    <property name="speed" type="float" value="100"/>
+    <property name="speed" type="float" value="80"/>
    </properties>
    <point/>
   </object>
@@ -646,7 +646,7 @@
     <property name="enemy_type" value="spider"/>
     <property name="hp" type="int" value="4"/>
     <property name="route_id" value="route_b"/>
-    <property name="speed" type="float" value="48"/>
+    <property name="speed" type="float" value="90"/>
    </properties>
    <point/>
   </object>

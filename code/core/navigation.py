@@ -30,16 +30,36 @@ class PathFinder:
     def __init__(self,navgrid:NavGrid):
         self.walkable=navgrid.walkable
         self.grid=Grid(matrix=self.walkable)
+        
+    def _in_bounds(self, tile: tuple[int, int]) -> bool:
+        x, y = tile
+        return 0 <= x < self.walkable.shape[1] and 0 <= y < self.walkable.shape[0]
 
-       
-    
-    def find_path(self,start_tile:tuple[int,int], goal_tile:tuple[int,int])->list[tuple[int,int]]:
-        start=self.grid.node(start_tile[0],start_tile[1])
+    def find_path(
+        self,
+        start_tile:tuple[int,int],
+        goal_tile:tuple[int,int],
+        blocked_tiles: set[tuple[int, int]] | None = None
+    )->list[tuple[int,int]]:
+        if not self._in_bounds(start_tile) or not self._in_bounds(goal_tile):
+            return []
 
-        end=self.grid.node(goal_tile[0],goal_tile[1])
+        grid = self.grid
+        if blocked_tiles:
+            matrix = self.walkable.copy()
+            for bx, by in blocked_tiles:
+                if (bx, by) == start_tile or (bx, by) == goal_tile:
+                    continue
+                if self._in_bounds((bx, by)):
+                    matrix[by][bx] = False
+            grid = Grid(matrix=matrix)
+
+        grid.cleanup()
+        start=grid.node(start_tile[0],start_tile[1])
+        end=grid.node(goal_tile[0],goal_tile[1])
 
         finder=AStarFinder(diagonal_movement=DiagonalMovement.never)
-        path_nodes,_=finder.find_path(start,end,self.grid)
+        path_nodes,_=finder.find_path(start,end,grid)
         
         return [(node.x,node.y)for node in path_nodes]
         

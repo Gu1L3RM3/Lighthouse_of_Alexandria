@@ -3,7 +3,7 @@ from pygame import Vector2
 from core.ecs import Component
 from core.settings import *
 class PathFollower(Component):
-    def __init__(self,path: list[tuple[int, int]],speed: float = 40,loop:bool=False):
+    def __init__(self,path: list[tuple[int, int]],speed: float = 40,loop:bool=False, tile_size: int = TILE_SIZE):
     
         
         self.path:list[tuple[int,int]]=[]
@@ -13,6 +13,8 @@ class PathFollower(Component):
         self.loop = loop
         self.direction = Vector2(0, 0)
         self.original_path =  path
+        self.tile_size = tile_size
+        self.reach_radius = max(3.0, tile_size * 0.35)
         self.set_path(path)
     def restart_path(self):
         self.set_path(self.original_path)
@@ -22,8 +24,8 @@ class PathFollower(Component):
             return
         self.collision_rects:list[pygame.Rect]=[]
         for point in self.path:
-            x= (point[0]*TILE_SIZE)+TILE_SIZE//2
-            y= (point[1]*TILE_SIZE)+TILE_SIZE//2
+            x= (point[0]*self.tile_size)+self.tile_size//2
+            y= (point[1]*self.tile_size)+self.tile_size//2
 
             rect= pygame.Rect((x,y),(2,2))
             self.collision_rects.append(rect)

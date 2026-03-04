@@ -9,6 +9,8 @@ from core.components.velocity import Velocity
 from core.components.tags import EletronTag
 from core.components.always_on_top import AlwaysOnTop
 from core.components.light_component import LightComponent
+from core.components.electron_flow import ElectronFlow
+from core.components.dynamic_collision import DynamicCollision
 class Eletron(Entity):
     def __init__(self,x,y):
         super().__init__()
@@ -22,6 +24,8 @@ class Eletron(Entity):
             EletronTag(),
             Velocity(),
             LightComponent(),
+            ElectronFlow(),
+            DynamicCollision(enabled=False),
             )
         
 
@@ -30,15 +34,20 @@ class VoltageSource(Entity):
         super().__init__()
         img = ResourceManager.get().load_image('circuit_components/voltage_source.png')
         spr =  Sprite(img)
+        trigger_rect = spr.rect.inflate(12, 12)
         self.add(
             Position(x,y),
-            AreaTrigger(spr.rect,on_entered=self.on_enter),
+            AreaTrigger(trigger_rect,on_entered=self.on_enter),
             AlwaysOnTop(),
             spr,
 
             )
     def on_enter(self,entity:Entity):
-        pass
+        if not entity.has(EletronTag):
+            return
+        if entity.has(ElectronFlow):
+            flow: ElectronFlow = entity.get(ElectronFlow)
+            flow.boost()
 
 
 class Resistor(Entity):
@@ -46,16 +55,21 @@ class Resistor(Entity):
         super().__init__()
         img = ResourceManager.get().load_image('circuit_components/resistor.png')
         spr =  Sprite(img)
+        trigger_rect = spr.rect.inflate(10, 8)
 
         self.add(
             Position(x,y),
-            AreaTrigger(spr.rect,on_entered=self.on_enter),
+            AreaTrigger(trigger_rect,on_entered=self.on_enter),
             spr,
             AlwaysOnTop()
 
             )
     def on_enter(self,entity:Entity):
-        pass
+        if not entity.has(EletronTag):
+            return
+        if entity.has(ElectronFlow):
+            flow: ElectronFlow = entity.get(ElectronFlow)
+            flow.brake()
 
 
 class Light(Entity):
