@@ -8,6 +8,7 @@ from core.ecs import Entity
 from core.settings import *
 from core.ui.widgets.dialog_box import DialogueBoxWidget  
 from core.managers.ui_manager import UIManager
+from entities.dialogue_area import DialogueArea
 
 
 
@@ -96,6 +97,15 @@ class DialogueSystem:
         self.ui_manager.widgets = [
             w for w in self.ui_manager.widgets if not isinstance(w, DialogueBoxWidget)
         ]
+
+        if isinstance(entity, DialogueArea) and entity.can_grant_stealth_bonus():
+            self.event_manager.post({
+                "type": "player_invisible_to_enemies_started",
+                "duration": entity.stealth_bonus_duration,
+                "source": "area_dialog",
+                "dialog_name": entity.name,
+            })
+            entity.mark_stealth_bonus_consumed()
 
         self.active_dialogue = None
         self.event_manager.post({'type': 'dialogue_end', 'entity': entity})

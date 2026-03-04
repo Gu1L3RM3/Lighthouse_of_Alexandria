@@ -1,9 +1,11 @@
 from entities.enemies.spider_enemy import SpiderEnemy
+from entities.enemies.phantom_enemy import PhantomEnemy
 
 
 class EnemyFactory:
     _registry: dict[str, type] = {
         "spider": SpiderEnemy,
+        "phantom": PhantomEnemy,
     }
 
     @classmethod
@@ -26,9 +28,14 @@ class EnemyFactory:
 
         props = props or {}
         speed = float(props.get("speed", 42))
-        return enemy_class(
-            x=x,
-            y=y,
-            speed=speed,
-            route=route,
-        )
+        kwargs = {
+            "x": x,
+            "y": y,
+            "speed": speed,
+            "route": route,
+        }
+        if key == "phantom":
+            kwargs["detection_radius"] = float(props.get("detection_radius", 90))
+            kwargs["touch_radius"] = float(props.get("touch_radius", 10))
+            kwargs["chase_speed"] = float(props.get("chase_speed", max(speed, 58)))
+        return enemy_class(**kwargs)

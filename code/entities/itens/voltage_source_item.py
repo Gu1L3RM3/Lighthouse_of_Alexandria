@@ -18,7 +18,7 @@ class VoutageSourceItem(Item):
         self.area_id =  int(props.get('area', -1))
         self.img =  ResourceManager.get().load_image("eletric_components/voltage_source.png",size=(32,32))
         self.em =  EventManager.get()
-        self.area_trigger = Rect(x,y,32,32)
+        self.area_trigger = Rect(0,0,32,32)
         self.add(
             Position(x,y),
             AreaTrigger(self.area_trigger,active=active,on_entered=self.on_collect),

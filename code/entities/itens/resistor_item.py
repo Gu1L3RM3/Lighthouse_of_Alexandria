@@ -19,7 +19,7 @@ class ResistorItem(Item):
         self.area_id =  int(props['area'])
         self.img =  ResourceManager.get().load_image("eletric_components/resistor.png",size=(32,16))
         self.em =  EventManager.get()
-        self.area_trigger = Rect(x,y,32,16)
+        self.area_trigger = Rect(0,0,32,16)
         self.add(
             Position(x,y),
             AreaTrigger(self.area_trigger,active=active,on_entered=self.on_collect),

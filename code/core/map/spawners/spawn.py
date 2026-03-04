@@ -15,6 +15,8 @@ from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.voltage_source_item import VoutageSourceItem
 from entities.itens.current_source_item import CurrentSourceItem
+from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
+from entities.itens.anti_reaggro_flask_item import AntiReaggroFlaskItem
 from entities.animate_circuit.circuit_components import *
 from entities.npcs.npc_factory import NPCFactory
 from core.components.npc_routine import NPCRoutine
@@ -43,6 +45,8 @@ class ItemSpawner(EntitySpawner):
             'resistor':ResistorItem,
             'voltage_source':VoutageSourceItem,
             'current_source':CurrentSourceItem,
+            'crystal_invisibility': CrystalInvisibilityItem,
+            'anti_reaggro_flask': AntiReaggroFlaskItem,
         }
      
 
@@ -95,8 +99,12 @@ class CircuitSpawner(EntitySpawner):
 
 class DialogueAreaSpawner(EntitySpawner):
     def spawn(self, obj, entity_mn, tilemap):
-        list_dialogue =  obj.properties["dialogo"].split(";")
-        active_status:bool = obj.properties["active_status"]
+        list_dialogue = obj.properties["dialogo"].split(";")
+        active_status: bool = obj.properties["active_status"]
+        auto_start = bool(obj.properties.get("auto_start", False))
+        stealth_bonus_duration = float(obj.properties.get("stealth_bonus_duration", 4.0))
+        stealth_bonus_enabled = obj.properties.get("stealth_bonus_enabled", True)
+        stealth_bonus_once = obj.properties.get("stealth_bonus_once", True)
 
         dialogue_area = DialogueArea(
             obj.x,obj.y,
@@ -104,7 +112,11 @@ class DialogueAreaSpawner(EntitySpawner):
             obj.height,
             list_dialogue,
             obj.name,
-            active_status
+            active_status,
+            auto_start=auto_start,
+            stealth_bonus_enabled=stealth_bonus_enabled,
+            stealth_bonus_duration=stealth_bonus_duration,
+            stealth_bonus_once=stealth_bonus_once,
 
         )
         entity_mn.add_entity(dialogue_area)

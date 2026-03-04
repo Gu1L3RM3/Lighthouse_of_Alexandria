@@ -2,6 +2,8 @@ import pygame
 from pygame import Surface
 from core.components.animation_sprite import AnimateSprite
 from core.components.label_component import LabelComponent
+from core.components.dialogue import Dialogue
+from core.components.collider import Collider
 from core.settings import *
 from scenes.base_scene import BaseScene
 from entities.dialogue_area import DialogueArea
@@ -10,9 +12,13 @@ from entities.itens.resistor_item import ResistorItem
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
 from entities.itens.control_pannel import ControlPannel
+from entities.npcs.arquimedes import Arquimedes
+from core.components.position import Position
+from core.components.phantom_ai import PhantomAI
 from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
+from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
@@ -36,6 +42,8 @@ class BaseGenericLevel(BaseScene):
         
         self.set_ui()
         self.set_map()
+        self._configure_persistent_area_dialogues()
+        self._disable_default_arquimedes_dialogue()
 
         self.can_set_resistors = True
         self.player = self.entity_mn.get_player()
@@ -46,6 +54,7 @@ class BaseGenericLevel(BaseScene):
         self.scene_manager = SceneManager.get()
         self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
+        self.debug_interaction_areas = True
         
         # Subclasses will override this
         self.set_systems() 
@@ -72,12 +81,30 @@ class BaseGenericLevel(BaseScene):
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(self.menu_button)
+        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.ui_manager.add(self.interaction_key_widget)
 
     def set_map(self):
         spawner = MapEntitySpawner()
         spawner.spawn_entities(self.tile_map, self.entity_mn)
         self.player = self.entity_mn.get_player()
         self.physics_system.cache_static_colliders(self.entity_mn)
+
+    def _configure_persistent_area_dialogues(self):
+        dialogue_areas: list[DialogueArea] = self.entity_mn.get_entities_by_class(DialogueArea)
+        for area in dialogue_areas:
+            dialogue: Dialogue = area.get(Dialogue)
+            dialogue.active_status = True
+            dialogue.auto_start = False
+            dialogue.triggered = False
+
+    def _disable_default_arquimedes_dialogue(self):
+        arquimedes_list: list[Arquimedes] = self.entity_mn.get_entities_by_class(Arquimedes)
+        for arquimedes in arquimedes_list:
+            if not arquimedes.has(Dialogue):
+                continue
+            dialogue: Dialogue = arquimedes.get(Dialogue)
+            dialogue.active_status = False
         
     def set_resistors(self):
         if not self.can_set_resistors:
@@ -165,7 +192,50 @@ class BaseGenericLevel(BaseScene):
     def process_input(self, events):
         for event in events:
             self.ui_manager.handle_event(event)
+        self._handle_panel_interaction(events)
         self.player.input(events)
+
+    def _handle_panel_interaction(self, events):
+        player = self.entity_mn.get_player()
+        if not player:
+            self.interaction_key_widget.set_visible(False)
+            return
+
+        target_panel = None
+        for panel in self.entity_mn.get_entities_by_class(ControlPannel):
+            if panel.can_player_interact(player):
+                target_panel = panel
+                break
+
+        target_dialogue = self._find_dialogue_interaction_target(player)
+        can_interact = (target_panel is not None) or (target_dialogue is not None)
+        self.interaction_key_widget.set_visible(can_interact)
+        if not target_panel:
+            return
+
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
+                target_panel.open_circuit_editor()
+                self.interaction_key_widget.set_visible(False)
+                break
+
+    def _find_dialogue_interaction_target(self, player):
+        if not player.has(Position) or not player.has(Collider):
+            return None
+        player_pos = player.get(Position)
+        player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
+
+        for entity in self.entity_mn.get_entities_with(Dialogue, Position):
+            if not isinstance(entity, DialogueArea):
+                continue
+            dialogue: Dialogue = entity.get(Dialogue)
+            if dialogue.auto_start or not dialogue.active_status:
+                continue
+            entity_pos: Position = entity.get(Position)
+            area = dialogue.get_area(entity_pos.x, entity_pos.y).inflate(10, 10)
+            if player_col.colliderect(area):
+                return entity
+        return None
 
     def update(self, dt):
         self.dialog_system.update(self.entity_mn, self.player,dt)
@@ -176,9 +246,36 @@ class BaseGenericLevel(BaseScene):
         self.screen.fill(BLACK)
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
+        if self.debug_interaction_areas:
+            self._draw_debug_areas()
         if hasattr(self, 'light_system'):
             self.light_system.update(self.entity_mn,0)
         self.ui_manager.draw(self.screen)
+
+    def _draw_debug_areas(self):
+        # Debug do painel de controle (área de interação para tecla E).
+        for panel in self.entity_mn.get_entities_by_class(ControlPannel):
+            world_rect = panel.get_interaction_rect()
+            scaled_rect = pygame.Rect(
+                int(world_rect.x * self.scale),
+                int(world_rect.y * self.scale),
+                int(world_rect.width * self.scale),
+                int(world_rect.height * self.scale),
+            )
+            draw_rect = self.camera.apply(scaled_rect)
+            pygame.draw.rect(self.screen, (255, 210, 80), draw_rect, 2)
+
+        # Debug da área de atuação do inimigo (raio de detecção do fantasma).
+        for enemy in self.entity_mn.get_entities_with(PhantomAI, Position):
+            ai: PhantomAI = enemy.get(PhantomAI)
+            pos: Position = enemy.get(Position)
+            center = pos.center_pos()
+            center_scaled = (
+                int(center.x * self.scale - self.camera.viewport.x),
+                int(center.y * self.scale - self.camera.viewport.y),
+            )
+            radius_scaled = max(1, int(ai.detection_radius * self.scale))
+            pygame.draw.circle(self.screen, (90, 210, 255), center_scaled, radius_scaled, 1)
 
     def common_subscribes(self):
         self.event_manager.subscribe('fall_player',self.fall_player)

@@ -9,9 +9,11 @@ from core.components.area_trigger import AreaTrigger
 from core.components.always_on_top import AlwaysOnTop
 from core.components.render_layer import RenderLayer
 from core.components.depth_anchor import DepthAnchor
+from core.components.panel_status import PanelStatus
 from core.camera import Camera
 from core.managers.entity_manager import EntityManager
 from core.components.label_component import LabelComponent
+from core.ui.renderers.panel_status_renderer import PanelStatusRenderer
 from core.settings import RED, BLUE
 
 
@@ -23,6 +25,7 @@ class RenderSystem(System):
         self.debug_mode = False
         self._scaled_text_cache: dict[tuple[int, int], Surface] = {}
         self._scaled_text_cache_limit = 1024
+        self.panel_status_renderer = PanelStatusRenderer()
 
     def update(self, entity_mn, dt):
         self.camera.update()
@@ -203,7 +206,14 @@ class RenderSystem(System):
 
 
         self.screen.blit(image, draw_rect)
+        self._draw_panel_status(entity, draw_rect, scale)
         self._draw_label(entity, draw_rect, scale)
+
+    def _draw_panel_status(self, entity: Entity, draw_rect: Rect, scale: float):
+        if not entity.has(PanelStatus):
+            return
+        status: PanelStatus = entity.get(PanelStatus)
+        self.panel_status_renderer.draw(self.screen, draw_rect, status, scale)
         
     def _get_scaled_label_surface(self, base_surface: Surface, scale: float) -> Surface:
         if scale == 1.0:

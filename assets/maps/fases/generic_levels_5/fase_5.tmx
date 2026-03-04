@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="217">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="228">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -398,9 +398,9 @@
  </objectgroup>
  <objectgroup id="7" name="door">
   <object id="2" name="door" gid="31" x="944" y="400" width="16" height="16">
-    <properties>
-      <property name='next_scene' value='exp_fase_6'/>
-    </properties>
+   <properties>
+    <property name="next_scene" value="exp_fase_6"/>
+   </properties>
   </object>
  </objectgroup>
  <objectgroup id="6" name="attention_point"/>
@@ -547,6 +547,19 @@
    <point/>
   </object>
   <object id="25" name="old_paper" x="288" y="1168">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="217" name="crystal_invisibility" x="369.333" y="1184">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="218" name="anti_reaggro_flask" x="78.6667" y="577.333">
    <properties>
     <property name="active_status" type="bool" value="true"/>
    </properties>
@@ -721,6 +734,79 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="14" name="enemy_routes">
+  <object id="219" name="p5_route_a_0" x="464" y="1209.33">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="p5_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="220" name="p5_route_a_1" x="493.333" y="821.333">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="p5_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="221" name="p5_route_a_2" x="721.333" y="689.333">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="p5_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="222" name="p5_route_a_3" x="576" y="784">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="p5_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="223" name="p5_route_b_0" x="270.667" y="597.333">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="p5_route_b"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="224" name="p5_route_b_1" x="414.667" y="616">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="p5_route_b"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="225" name="p5_route_b_2" x="466.667" y="481.333">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="p5_route_b"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="15" name="enemies">
+  <object id="226" name="phantom_guard_1" x="448" y="785.333">
+   <properties>
+    <property name="chase_speed" type="float" value="62"/>
+    <property name="detection_radius" type="float" value="120"/>
+    <property name="enemy_type" value="phantom"/>
+    <property name="route_id" value="p5_route_a"/>
+    <property name="speed" type="float" value="38"/>
+    <property name="touch_radius" type="float" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="227" name="phantom_guard_2" x="198.667" y="693.333">
+   <properties>
+    <property name="chase_speed" type="float" value="62"/>
+    <property name="detection_radius" type="float" value="120"/>
+    <property name="enemy_type" value="phantom"/>
+    <property name="route_id" value="p5_route_b"/>
+    <property name="speed" type="float" value="38"/>
+    <property name="touch_radius" type="float" value="10"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
 </map>
-
-

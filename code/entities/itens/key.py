@@ -15,7 +15,7 @@ class Key(Item):
         self.animations =  ResourceManager.get().load_sprite_sheet('itens/key',(16,16),trim_transparent=False)
         self.em =  EventManager.get()
         self.animate_sprite =  AnimateSprite(self.animations,fps=10)
-        self.area_trigger = Rect(x,y,16,16)
+        self.area_trigger = Rect(0,0,16,16)
         self.hidden_surface = self._build_hidden_surface()
         self.add(
             Position(x,y),
