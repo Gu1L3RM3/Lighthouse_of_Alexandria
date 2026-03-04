@@ -21,6 +21,8 @@ class RenderSystem(System):
         self.camera = camera
         self.entity_mn = entity_mn
         self.debug_mode = False
+        self._scaled_text_cache: dict[tuple[int, int], Surface] = {}
+        self._scaled_text_cache_limit = 1024
 
     def update(self, entity_mn, dt):
         self.camera.update()
@@ -102,16 +104,43 @@ class RenderSystem(System):
         rect_draw = self.camera.apply(rect_scaled)
         pygame.draw.rect(self.screen, BLUE, rect_draw, 1)
 
+    def _sync_sprite_rect(self, entity: Entity, from_center_pos: bool):
+        pos: Position = entity.get(Position)
+        spr: Sprite = entity.get(Sprite)
+        if from_center_pos:
+            spr.rect.center = (pos.x, pos.y)
+        else:
+            spr.rect.topleft = (pos.x + spr.offset_x, pos.y + spr.offset_y)
+
+    def _world_viewport(self, viewport: Rect, scale: float) -> Rect:
+        if scale <= 0:
+            return Rect(viewport)
+        inv = 1.0 / scale
+        return Rect(
+            int(viewport.x * inv),
+            int(viewport.y * inv),
+            int(viewport.width * inv) + 2,
+            int(viewport.height * inv) + 2,
+        )
+
     def draw(self, from_center_pos=False, scale: float = 1.0):
         entities = self.entity_mn.get_entities_with(Position, Sprite)
         viewport = self.camera.viewport
-
-        entities.sort(key=self._render_sort_key)
+        world_viewport = self._world_viewport(viewport, scale)
+        visible_entities: list[Entity] = []
 
         for entity in entities:
-            self._draw_entity(entity, from_center_pos, viewport, scale)
+            self._sync_sprite_rect(entity, from_center_pos)
+            spr: Sprite = entity.get(Sprite)
+            if spr.rect.colliderect(world_viewport):
+                visible_entities.append(entity)
 
-        self._draw_debug_info(entities,scale)
+        visible_entities.sort(key=self._render_sort_key)
+
+        for entity in visible_entities:
+            self._draw_entity(entity, viewport, scale)
+
+        self._draw_debug_info(visible_entities,scale)
 
     def _render_sort_key(self, entity: Entity):
         layer_value = self._get_layer_value(entity)
@@ -155,14 +184,8 @@ class RenderSystem(System):
             self._draw_dialogues_areas(entity, pos, scale)
         self._draw_camera_viewport()
 
-    def _draw_entity(self, entity, from_center_pos, viewport, scale: float):
-        pos: Position = entity.get(Position)
+    def _draw_entity(self, entity, viewport, scale: float):
         spr: Sprite = entity.get(Sprite)
-
-        if from_center_pos:
-            spr.rect.center = (pos.x, pos.y)
-        else:
-            spr.rect.topleft = (pos.x + spr.offset_x, pos.y + spr.offset_y)
 
 
         scaled_entity_rect = Rect(
@@ -182,6 +205,22 @@ class RenderSystem(System):
         self.screen.blit(image, draw_rect)
         self._draw_label(entity, draw_rect, scale)
         
+    def _get_scaled_label_surface(self, base_surface: Surface, scale: float) -> Surface:
+        if scale == 1.0:
+            return base_surface
+        key = (id(base_surface), int(scale * 1000))
+        cached = self._scaled_text_cache.get(key)
+        if cached is not None:
+            return cached
+
+        tw, th = base_surface.get_size()
+        scaled_surface = pygame.transform.scale(
+            base_surface, (int(tw * scale), int(th * scale))
+        )
+        if len(self._scaled_text_cache) >= self._scaled_text_cache_limit:
+            self._scaled_text_cache.clear()
+        self._scaled_text_cache[key] = scaled_surface
+        return scaled_surface
 
     def _draw_label(self, entity: Entity, draw_rect: Rect, scale: float):
         if not entity.has(LabelComponent):
@@ -194,13 +233,7 @@ class RenderSystem(System):
         for label_data in label_comp.rendered_labels:
             rotated_offset = label_data['base_offset'].rotate(-spr.angle)
             label_pos = comp_center + rotated_offset * scale
-            text_surface: Surface = label_data['surface']
-
-        
-            tw, th = text_surface.get_size()
-            text_surface = pygame.transform.scale(
-                text_surface, (int(tw * scale), int(th * scale))
-            )
+            text_surface: Surface = self._get_scaled_label_surface(label_data['surface'], scale)
 
             text_rect = text_surface.get_rect(center=label_pos)
             self.screen.blit(text_surface, text_rect)

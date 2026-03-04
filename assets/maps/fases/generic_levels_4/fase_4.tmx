@@ -272,7 +272,7 @@
   <object id="152" gid="142" x="544" y="208" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="10" name="npc">
-  <object id="6" name="arquimedes" x="880" y="832">
+  <object id="6" name="arquimedes" x="817.529" y="912.186">
    <point/>
   </object>
  </objectgroup>
@@ -313,7 +313,7 @@
  <objectgroup id="6" name="attention_point"/>
  <objectgroup id="5" name="attention_points"/>
  <objectgroup id="4" name="areas_dialog">
-  <object id="21" name="dialog_1" x="800" y="784.848" width="81.8182" height="109.091">
+  <object id="21" name="dialog_1" x="814.918" y="908.857" width="78.0886" height="73.6598">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Olá meu jovem!;Vejo que seus conhecimentos em circuitos estão evoluindo bastante!;Nesse andar você terá que concertar cada painel; Para resolver cada um, basta calcular substituir os resistores de cada painel pelo seu respectivo resistor equivalente!; Boa sorte!"/>
@@ -636,7 +636,7 @@
     <property name="enemy_type" value="spider"/>
     <property name="hp" type="int" value="3"/>
     <property name="route_id" value="route_a"/>
-    <property name="speed" type="float" value="44"/>
+    <property name="speed" type="float" value="100"/>
    </properties>
    <point/>
   </object>

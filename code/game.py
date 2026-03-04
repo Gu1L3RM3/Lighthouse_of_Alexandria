@@ -1,4 +1,6 @@
 import pygame
+import time
+import os
 from core.settings               import FPS
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
@@ -20,6 +22,67 @@ from scenes.death_transition_scene import DeathTransitionScene
 from sys import exit
 from pathlib import Path
 
+
+class FrameProfiler:
+    def __init__(self, enabled: bool = False, report_interval: float = 2.0):
+        self.enabled = enabled
+        self.report_interval = report_interval
+        self._last_mark = 0.0
+        self._elapsed = 0.0
+        self._samples = 0
+        self._totals = {
+            "events": 0.0,
+            "input": 0.0,
+            "update": 0.0,
+            "render": 0.0,
+            "transition": 0.0,
+            "flip": 0.0,
+            "frame": 0.0,
+        }
+
+    def start_frame(self):
+        if not self.enabled:
+            return
+        now = time.perf_counter()
+        self._frame_start = now
+        self._last_mark = now
+
+    def mark(self, key: str):
+        if not self.enabled:
+            return
+        now = time.perf_counter()
+        self._totals[key] += (now - self._last_mark)
+        self._last_mark = now
+
+    def end_frame(self):
+        if not self.enabled:
+            return
+        now = time.perf_counter()
+        self._totals["frame"] += (now - self._frame_start)
+        self._elapsed += (now - self._frame_start)
+        self._samples += 1
+
+        if self._elapsed < self.report_interval:
+            return
+
+        ms = lambda k: (self._totals[k] / self._samples) * 1000.0
+        print(
+            "[PROFILE] "
+            f"frame={ms('frame'):.2f}ms "
+            f"events={ms('events'):.2f} "
+            f"input={ms('input'):.2f} "
+            f"update={ms('update'):.2f} "
+            f"render={ms('render'):.2f} "
+            f"transition={ms('transition'):.2f} "
+            f"flip={ms('flip'):.2f}"
+        )
+
+        for key in self._totals:
+            self._totals[key] = 0.0
+        self._elapsed = 0.0
+        self._samples = 0
+
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -38,6 +101,8 @@ class Game:
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
         self.life_manager.reset_lives()
+        profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
+        self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
 
     
         self.register_fases()
@@ -86,8 +151,10 @@ class Game:
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0
+            self.profiler.start_frame()
             
             events = pygame.event.get()
+            self.profiler.mark("events")
             filtered_events = []
 
             for e in events:
@@ -109,11 +176,17 @@ class Game:
 
             scene = self.scene_manager.active_scene
             scene.process_input(filtered_events)
+            self.profiler.mark("input")
             scene.update(dt)
+            self.profiler.mark("update")
 
             scene.render()
+            self.profiler.mark("render")
 
             self.scene_manager.update_transition()
             self.scene_manager.draw_transition(self.screen)
+            self.profiler.mark("transition")
 
             pygame.display.flip()
+            self.profiler.mark("flip")
+            self.profiler.end_frame()
