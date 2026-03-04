@@ -9,7 +9,6 @@ from core.managers.day_night_manager import DayNightManager
 from core.systems.physics_system import PhysicsSystem
 from core.systems.dialogue_system import DialogueSystem
 from core.systems.path_following_system import PathFollowingSystem
-from core.systems.weapon_system import WeaponSystem
 from core.systems.render_system import RenderSystem
 from core.ecs import System
 from core.camera import Camera

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="153">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="165">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -305,9 +305,9 @@
  </objectgroup>
  <objectgroup id="7" name="door">
   <object id="1" name="door" gid="31" x="496" y="32" width="16" height="16">
-    <properties>
-      <property name='next_scene' value='exp_fase_5'/>
-    </properties>
+   <properties>
+    <property name="next_scene" value="exp_fase_5"/>
+   </properties>
   </object>
  </objectgroup>
  <objectgroup id="6" name="attention_point"/>
@@ -571,6 +571,84 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="14" name="enemy_routes">
+  <object id="153" name="route_a_0" x="464" y="880">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="154" name="route_a_1" x="544" y="832">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="155" name="route_a_2" x="784" y="832">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="156" name="route_a_3" x="576" y="928">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="157" name="route_b_0" x="336" y="448">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="route_b"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="158" name="route_b_1" x="336" y="368">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="route_b"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="159" name="route_b_2" x="736" y="368">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="route_b"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="160" name="route_b_3" x="736" y="448">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="route_b"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="15" name="enemies">
+  <object id="161" name="spider_a" type="spider" x="448" y="848">
+   <properties>
+    <property name="contact_damage" type="int" value="1"/>
+    <property name="enemy_type" value="spider"/>
+    <property name="hp" type="int" value="3"/>
+    <property name="route_id" value="route_a"/>
+    <property name="speed" type="float" value="44"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="162" name="spider_b" type="spider" x="304" y="448">
+   <properties>
+    <property name="contact_damage" type="int" value="1"/>
+    <property name="enemy_type" value="spider"/>
+    <property name="hp" type="int" value="4"/>
+    <property name="route_id" value="route_b"/>
+    <property name="speed" type="float" value="48"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
 </map>
-
-

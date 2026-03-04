@@ -5,7 +5,7 @@ from entities.animated_tiles.door import Door
 from entities.animated_tiles.fall_ground import FallGround
 from entities.animated_tiles.iron_gate import IronGate
 from entities.player import Player
-from entities.enemies.enemie import Enemie
+from entities.enemies.enemy_factory import EnemyFactory
 from entities.dialogue_area import DialogueArea
 from entities.attention_point import AttentionPoint
 from entities.itens.item import Item
@@ -164,6 +164,52 @@ class PlayerSpawn(EntitySpawner):
         entity_mn.add_entity(player)
 
 class EnemySpawner(EntitySpawner):
+    def __init__(self):
+        self._route_cache: dict[str, dict[str, list[tuple[int, int]]]] = {}
+
     def spawn(self, obj: pytmx.TiledObject, entity_mn: EntityManager, tilemap: TileMap):
-        enemie = Enemie(obj.x, obj.y)
-        entity_mn.add_entity(enemie)
+        routes = self._get_routes(tilemap)
+        props = {k.lower(): v for k, v in (obj.properties or {}).items()}
+        enemy_type = (obj.type or props.get("enemy_type") or obj.name or "spider").lower()
+        route_id = str(props.get("route_id", "")).lower().strip()
+
+        route = routes.get(route_id) if route_id else None
+        if route:
+            start_tile = (
+                int(obj.x // tilemap.tile_width),
+                int(obj.y // tilemap.tile_height),
+            )
+            if route[0] != start_tile:
+                route = [start_tile, *route]
+
+        enemy = EnemyFactory.create(enemy_type, obj.x, obj.y, props=props, route=route)
+        entity_mn.add_entity(enemy)
+
+    def _get_routes(self, tilemap: TileMap) -> dict[str, list[tuple[int, int]]]:
+        cache_key = tilemap.tmx_file
+        if cache_key in self._route_cache:
+            return self._route_cache[cache_key]
+
+        routes: dict[str, list[tuple[int, tuple[int, int]]]] = {}
+        for layer in tilemap.tmx_data.objectgroups:
+            if (layer.name or "").lower() != "enemy_routes":
+                continue
+            for obj in layer:
+                properties = {k.lower(): v for k, v in (obj.properties or {}).items()}
+                route_id = str(properties.get("route_id") or obj.name or "").lower().strip()
+                if not route_id:
+                    continue
+                order = int(properties.get("order", 0))
+                tile_point = (
+                    int(obj.x // tilemap.tile_width),
+                    int(obj.y // tilemap.tile_height),
+                )
+                routes.setdefault(route_id, []).append((order, tile_point))
+
+        normalized_routes: dict[str, list[tuple[int, int]]] = {}
+        for route_id, points in routes.items():
+            ordered_points = sorted(points, key=lambda p: p[0])
+            normalized_routes[route_id] = [tile for _, tile in ordered_points]
+
+        self._route_cache[cache_key] = normalized_routes
+        return normalized_routes

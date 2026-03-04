@@ -7,6 +7,8 @@ from core.components.collider import Collider
 from core.components.dialogue import Dialogue
 from core.components.area_trigger import AreaTrigger
 from core.components.always_on_top import AlwaysOnTop
+from core.components.render_layer import RenderLayer
+from core.components.depth_anchor import DepthAnchor
 from core.camera import Camera
 from core.managers.entity_manager import EntityManager
 from core.components.label_component import LabelComponent
@@ -104,12 +106,44 @@ class RenderSystem(System):
         entities = self.entity_mn.get_entities_with(Position, Sprite)
         viewport = self.camera.viewport
 
-        entities.sort(key=lambda e: e.has(AlwaysOnTop))
+        entities.sort(key=self._render_sort_key)
 
         for entity in entities:
             self._draw_entity(entity, from_center_pos, viewport, scale)
 
         self._draw_debug_info(entities,scale)
+
+    def _render_sort_key(self, entity: Entity):
+        layer_value = self._get_layer_value(entity)
+        depth_y = self._get_depth_y(entity)
+        return (layer_value, depth_y, entity.id)
+
+    def _get_layer_value(self, entity: Entity) -> int:
+        if entity.has(RenderLayer):
+            layer: RenderLayer = entity.get(RenderLayer)
+            return layer.value
+
+        # Compatibilidade com cenas antigas que ainda usam AlwaysOnTop.
+        if entity.has(AlwaysOnTop):
+            return RenderLayer.OVERLAY
+
+        return RenderLayer.ACTOR
+
+    def _get_depth_y(self, entity: Entity) -> int:
+        pos: Position = entity.get(Position)
+        if entity.has(DepthAnchor):
+            anchor: DepthAnchor = entity.get(DepthAnchor)
+            return int(pos.y + anchor.offset_y)
+
+        if entity.has(Collider):
+            col: Collider = entity.get(Collider)
+            return int(pos.y + col.offset_y + col.height)
+
+        if entity.has(Sprite):
+            spr: Sprite = entity.get(Sprite)
+            return int(pos.y + spr.rect.height)
+
+        return int(pos.y)
 
     def _draw_debug_info(self,entities:list[Entity],scale:float):
         if not self.debug_mode:

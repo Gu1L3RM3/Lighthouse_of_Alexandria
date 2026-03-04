@@ -1,18 +1,20 @@
+import pygame
+
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.sprite import Sprite
 from core.components.collider import Collider
 from core.components.freeze import Freeze
 from core.components.animation_sprite import AnimateSprite
+from core.components.team import Team
+from core.components.render_layer import RenderLayer
+from core.components.depth_anchor import DepthAnchor
 from core.settings import *
 from core.ecs import Entity
-from core.components.weapon_slot import WeaponSlot
 from core.components.light_component import LightComponent
-from entities.weapons.sword import Sword   
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
 from pygame.key import get_pressed
-from core.components.always_on_top import AlwaysOnTop
 class Player(Entity):
     def __init__(self, x: float = 100, y: float = 100):
         super().__init__()
@@ -35,14 +37,17 @@ class Player(Entity):
         col = Collider(8, 6,offset_x=4,offset_y=10)
 
         self.animations = self.rm.load_sprite_sheet("player copy",size=(16,16),trim_transparent=False)
+        self._inject_death_animations()
         spr = Sprite(self.animations["idle_front"][0])
         anim = AnimateSprite(self.animations, fps=8, loop=True)
 
-        weapon_slot = WeaponSlot(weapon=Sword())  
         self.add(pos, vel, spr, col,
-                 anim, weapon_slot,
-                 Freeze(),AlwaysOnTop(),
-                 LightComponent(radius=20)
+                 anim,
+                 Freeze(),
+                 LightComponent(radius=20),
+                 Team("player"),
+                 RenderLayer(RenderLayer.ACTOR),
+                 DepthAnchor(offset_y=16),
                  )
 
         self._set_animation("idle_front")
@@ -67,7 +72,7 @@ class Player(Entity):
         freeze:Freeze = self.get(Freeze)
         if freeze.active:
              return
-        
+
         vel: Velocity = self.get(Velocity)
         keys = get_pressed()
 
@@ -93,4 +98,26 @@ class Player(Entity):
         if direction.x != 0:
             return "right" if direction.x > 0 else "left"
         return "front"
-    
+
+    def _inject_death_animations(self):
+        # Usa o strip de morte e disponibiliza para qualquer direcao.
+        base_size = self.animations["idle_front"][0].get_size()
+        base = "Top_Down_Adventure_Pack_v.1.0/Char_Sprites"
+        strip = self.rm.load_image(f"{base}/char_death_all_dir_anim_strip_10.png")
+        frames = self._slice_strip(strip, 10)
+        resized = [pygame.transform.scale(frame, base_size) for frame in frames]
+        for direction in ("front", "back", "left", "right"):
+            self.animations[f"death_{direction}"] = resized
+
+    def _slice_strip(self, strip: pygame.Surface, frame_count: int) -> list[pygame.Surface]:
+        frame_w = strip.get_width() // frame_count
+        frame_h = strip.get_height()
+        frames = []
+        for i in range(frame_count):
+            rect = pygame.Rect(i * frame_w, 0, frame_w, frame_h)
+            frame = strip.subsurface(rect).copy()
+            bbox = frame.get_bounding_rect()
+            if bbox.width > 0 and bbox.height > 0:
+                frame = frame.subsurface(bbox).copy()
+            frames.append(frame)
+        return frames

@@ -8,6 +8,7 @@ from core.components.animation_sprite import AnimateSprite
 from core.managers.resource_manager import ResourceManager
 from core.managers.event_manager import EventManager
 from core.components.collider import Collider
+from core.components.render_layer import RenderLayer
 
 class FallGround(Entity):
     def __init__(self, x, y):
@@ -20,6 +21,7 @@ class FallGround(Entity):
             Position(x, y),
             Sprite(self.animations['broken'][0]),
             self.animate,
+            RenderLayer(RenderLayer.WORLD),
             AreaTrigger(self.area, once=True, on_entered=self.on_entered)
         )
 

@@ -5,6 +5,9 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssotiationValidatorSystem
 from core.systems.freeze_system import FreezeSystem
 from core.systems.light_system import LightSystem
+from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
+from core.components.animation_sprite import AnimateSprite
+from core.components.freeze import Freeze
 from pathlib import Path
 from scenes.fases.generic_levels import BaseGenericLevel
 
@@ -12,6 +15,7 @@ from scenes.fases.generic_levels import BaseGenericLevel
 class GenericLevel4(BaseGenericLevel):
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
+        self.player_dead_by_enemy = False
         self.set_subscribes()
         self.set_resistors()
         old_paper_list = self.entity_mn.get_entities_by_class(OldPaper)
@@ -59,13 +63,47 @@ class GenericLevel4(BaseGenericLevel):
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
         self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True, ambient_alpha=100)
+        self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.circuit_validator_system = ResistorAssotiationValidatorSystem(level_path=self.level_path)
 
         self.systems.update([
-            self.freeze_system, self.physics_system, self.animation_system,
+            self.freeze_system,
+            self.path_following_system,
+            self.enemy_touch_game_over_system,
+            self.physics_system,
+            self.animation_system,
             self.area_trigger_system, self.circuit_validator_system, self.render_system,
         ])
 
     def set_subscribes(self):
         self.event_manager.subscribe('set_solutions', lambda event: self.circuit_validator_system.set_solutions(event, self.entity_mn))
+        self.event_manager.subscribe('player_touched_enemy', self.on_player_touched_enemy)
         self.common_subscribes()
+
+    def on_player_touched_enemy(self, event):
+        _ = event
+        if self.player_dead_by_enemy:
+            return
+        self.player_dead_by_enemy = True
+        player = self.entity_mn.get_player()
+        if not player:
+            self.death_flow_manager.handle_player_death()
+            return
+
+        if player.has(Freeze):
+            player.get(Freeze).active = True
+
+        if player.has(AnimateSprite):
+            anim: AnimateSprite = player.get(AnimateSprite)
+            dir_name = "front"
+            if hasattr(player, "_get_dir_name") and hasattr(player, "old_direction"):
+                dir_name = player._get_dir_name(player.old_direction)
+            anim.play(
+                f"death_{dir_name}",
+                reset=True,
+                loop=False,
+                on_finish=lambda: self.death_flow_manager.handle_player_death(),
+            )
+            return
+
+        self.death_flow_manager.handle_player_death()
