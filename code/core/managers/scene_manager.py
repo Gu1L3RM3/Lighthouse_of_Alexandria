@@ -79,43 +79,22 @@ class SceneManager:
         if not self.active_scene:
             self.change(name)
             return
+        self._begin_transition(self.scenes[name], name, duration)
 
-        EventManager.get().clear()
-        self.transitioning = True
-        self.transition_target = self.scenes[name]
-        self.transition_target_name = name
-        self.transition_phase = "fade_out"
-        self.transition_alpha = 0
-        self.transition_speed = 255 / (duration * FPS)
-        self.transition_surface = pygame.Surface(self.active_scene.screen.get_size())
-        self.transition_surface.fill((0, 0, 0))
-
-    def restart_with_fade(self, duration: float = 0.5):
-        if not self.active_scene:
-            return
-        self.active_scene.end()
-
-        scene_name = None
-        for name, scene in self.scenes.items():
-            if scene is self.active_scene:
-                scene_name = name
-                break
-        if scene_name is None:
-            return
-
-        scene_class = type(self.active_scene)
-        screen = self.active_scene.screen
-        if hasattr(self.active_scene, "level_path"):
-            new_scene = scene_class(screen, level_path=self.active_scene.level_path)
-        else:
-            new_scene = scene_class(screen)
-
+    def replace_scene_and_fade(self, scene_name: str, new_scene: BaseScene, duration: float = 0.5):
+        if scene_name not in self.scenes:
+            raise KeyError(f"Scene '{scene_name}' not registered.")
         self.scenes[scene_name] = new_scene
-        self.transition_target = new_scene
-        self.transition_target_name = scene_name
+        if not self.active_scene:
+            self.change(scene_name)
+            return
+        self._begin_transition(new_scene, scene_name, duration)
 
+    def _begin_transition(self, target_scene: BaseScene, target_name: str, duration: float):
         EventManager.get().clear()
         self.transitioning = True
+        self.transition_target = target_scene
+        self.transition_target_name = target_name
         self.transition_phase = "fade_out"
         self.transition_alpha = 0
         self.transition_speed = 255 / (duration * FPS)

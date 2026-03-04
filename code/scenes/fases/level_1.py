@@ -7,6 +7,7 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.key import Key
 from entities.animated_tiles.door import Door
 from core.ui.widgets.fps_widget import FPSWidget
+from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
@@ -62,7 +63,9 @@ class Level1(BaseScene):
         self.door.next_scene = 'level_2'
     def set_ui(self):
         fps=FPSWidget()
+        lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(fps)
+        self.ui_manager.add(lives)
         idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
         pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
         self.menu_button = Button(

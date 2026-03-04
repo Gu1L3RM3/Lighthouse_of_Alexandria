@@ -4,6 +4,7 @@ from pygame import Event, Surface
 from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
+from core.managers.life_manager import LifeManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -13,6 +14,7 @@ class MainMenuScene(BaseScene):
         width, height = screen.get_size()
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
+        self.life_manager = LifeManager.get()
         self.width = width
         self.height = height
         self.low_res_size = (320, 180)
@@ -164,6 +166,7 @@ class MainMenuScene(BaseScene):
         self.scene_manager.resume_from_menu(0.45)
 
     def start_new_game(self):
+        self.life_manager.reset_lives()
         self.scene_manager.start_fade("home_scene", 0.6)
 
     def exit_game(self):

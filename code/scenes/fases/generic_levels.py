@@ -11,11 +11,13 @@ from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
 from entities.itens.control_pannel import ControlPannel
 from core.ui.widgets.fps_widget import FPSWidget
+from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
 from core.managers.scene_manager import SceneManager
+from core.managers.death_flow_manager import DeathFlowManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.managers.circuit_manager import CircuitManager
 from core.ui.widgets.button import Button
@@ -42,6 +44,7 @@ class BaseGenericLevel(BaseScene):
         
         self.storage_circuit = StorageCircuitManager()
         self.scene_manager = SceneManager.get()
+        self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
         
         # Subclasses will override this
@@ -53,7 +56,9 @@ class BaseGenericLevel(BaseScene):
             
     def set_ui(self):
         fps = FPSWidget()
+        lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(fps)
+        self.ui_manager.add(lives)
         idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
         pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
         self.menu_button = Button(
@@ -146,7 +151,7 @@ class BaseGenericLevel(BaseScene):
     def fall_player(self, event):
         self.can_set_resistors = True
         anim:AnimateSprite = self.player.get(AnimateSprite)
-        anim.play('fall',loop=False,on_finish=self.scene_manager.restart_with_fade)
+        anim.play('fall',loop=False,on_finish=self.death_flow_manager.handle_player_death)
 
     def update_storage_circuit(self,event):
         value = event['value']

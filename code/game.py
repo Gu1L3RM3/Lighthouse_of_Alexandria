@@ -2,6 +2,7 @@ import pygame
 from core.settings               import FPS
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
+from core.managers.life_manager  import LifeManager
 from scenes.home_scene           import HomeScene
 from scenes.main_menu_scene      import MainMenuScene
 from scenes.fases.level_1        import Level1
@@ -15,6 +16,7 @@ from scenes.fases.generic_level_4 import GenericLevel4
 from scenes.fases.generic_level_5 import GenericLevel5
 from scenes.fases.generic_level_6 import GenericLevel6
 from scenes.circuit_editor       import CircuitEditor
+from scenes.death_transition_scene import DeathTransitionScene
 from sys import exit
 from pathlib import Path
 
@@ -34,11 +36,13 @@ class Game:
         
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
+        self.life_manager = LifeManager.get()
+        self.life_manager.reset_lives()
 
     
         self.register_fases()
 
-        self.scene_manager.change('level_1')
+        self.scene_manager.change('fase_4')
         
         
     def register_fases(self):
@@ -55,6 +59,7 @@ class Game:
         }
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
+        self.scene_manager.register('death_transition', DeathTransitionScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))
         self.scene_manager.register('level_2',Level2(self.screen))
         self.scene_manager.register('exp_fase_3', ExplanationLevel3(self.screen))
