@@ -26,6 +26,7 @@ from core.managers.scene_manager import SceneManager
 from core.managers.death_flow_manager import DeathFlowManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.managers.circuit_manager import CircuitManager
+from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -54,6 +55,11 @@ class BaseGenericLevel(BaseScene):
         self.scene_manager = SceneManager.get()
         self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
+        self.dialogue_hud = DialogueInteractionHUDController(
+            self.entity_mn,
+            self.dialog_system,
+            self.interaction_key_widget,
+        )
         self.debug_interaction_areas = True
         
         # Subclasses will override this
@@ -207,35 +213,19 @@ class BaseGenericLevel(BaseScene):
                 target_panel = panel
                 break
 
-        target_dialogue = self._find_dialogue_interaction_target(player)
-        can_interact = (target_panel is not None) or (target_dialogue is not None)
-        self.interaction_key_widget.set_visible(can_interact)
-        if not target_panel:
+        target_door = self.door if self.door and self.door.can_player_interact(player) else None
+        self.dialogue_hud.update(player, extra_interaction=(target_panel is not None or target_door is not None))
+        if not target_panel and not target_door:
             return
 
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
-                target_panel.open_circuit_editor()
+                if target_panel:
+                    target_panel.open_circuit_editor()
+                elif target_door:
+                    target_door.try_enter(player)
                 self.interaction_key_widget.set_visible(False)
                 break
-
-    def _find_dialogue_interaction_target(self, player):
-        if not player.has(Position) or not player.has(Collider):
-            return None
-        player_pos = player.get(Position)
-        player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
-
-        for entity in self.entity_mn.get_entities_with(Dialogue, Position):
-            if not isinstance(entity, DialogueArea):
-                continue
-            dialogue: Dialogue = entity.get(Dialogue)
-            if dialogue.auto_start or not dialogue.active_status:
-                continue
-            entity_pos: Position = entity.get(Position)
-            area = dialogue.get_area(entity_pos.x, entity_pos.y).inflate(10, 10)
-            if player_col.colliderect(area):
-                return entity
-        return None
 
     def update(self, dt):
         self.dialog_system.update(self.entity_mn, self.player,dt)

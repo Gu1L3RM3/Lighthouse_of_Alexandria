@@ -52,7 +52,12 @@ class DialogueSystem:
         player_pos = player.get(Position)
         player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
 
-        entities=entity_mn.get_entities_with(Dialogue)
+        entities = entity_mn.get_entities_with(Dialogue)
+        # Prioriza áreas de diálogo sobre diálogos de NPC e mantém ordem estável.
+        entities = sorted(
+            entities,
+            key=lambda e: (0 if isinstance(e, DialogueArea) else 1, e.id)
+        )
         
         
         for entity in entities:

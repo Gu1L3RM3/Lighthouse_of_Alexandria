@@ -13,6 +13,7 @@ from scenes.fases.explanation_level_3 import ExplanationLevel3
 from scenes.fases.explanation_level_4 import ExplanationLevel4
 from scenes.fases.explanation_level_5 import ExplanationLevel5
 from scenes.fases.explanation_level_6 import ExplanationLevel6
+from scenes.fases.explanation_level_7 import ExplanationLevel7
 from scenes.fases.generic_level_3 import GenericLevel3
 from scenes.fases.generic_level_4 import GenericLevel4
 from scenes.fases.generic_level_5 import GenericLevel5
@@ -107,7 +108,7 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change('fase_5')
+        self.scene_manager.change('level_2')
         
         
     def register_fases(self):
@@ -131,6 +132,7 @@ class Game:
         self.scene_manager.register('exp_fase_4', ExplanationLevel4(self.screen))
         self.scene_manager.register('exp_fase_5', ExplanationLevel5(self.screen))
         self.scene_manager.register('exp_fase_6', ExplanationLevel6(self.screen))
+        self.scene_manager.register('exp_fase_7', ExplanationLevel7(self.screen))
         
         for folder, level_class in folder_class_map.items():
             folder_path = (base_path / folder)

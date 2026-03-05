@@ -18,6 +18,8 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
 from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
+from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
+from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -43,6 +45,11 @@ class Level1(BaseScene):
         
 
         self.attention_manager       = AttentionManager(self.entity_mn)
+        self.dialogue_hud = DialogueInteractionHUDController(
+            self.entity_mn,
+            self.dialog_system,
+            self.interaction_key_widget,
+        )
         
         self.scene_manager           = SceneManager.get() 
     def set_systems(self):
@@ -79,6 +86,8 @@ class Level1(BaseScene):
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(self.menu_button)
+        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.ui_manager.add(self.interaction_key_widget)
 
         
     def start(self):
@@ -137,9 +146,23 @@ class Level1(BaseScene):
     def process_input(self, events):
         for event in events:
             self.ui_manager.handle_event(event)
+        self._handle_door_interaction(events)
         self.player.input(events)
 
+    def _handle_door_interaction(self, events):
+        if not self.door or not self.player:
+            return
+        if not self.door.can_player_interact(self.player):
+            return
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
+                self.door.try_enter(self.player)
+                self.interaction_key_widget.set_visible(False)
+                break
+
     def update(self, dt):
+        can_door_interact = self.door.can_player_interact(self.player) if self.door and self.player else False
+        self.dialogue_hud.update(self.player, extra_interaction=can_door_interact)
         self.dialog_system.update(self.entity_mn, self.player,dt)
 
         self.update_systems(dt)

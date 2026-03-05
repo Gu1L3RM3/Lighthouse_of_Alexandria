@@ -63,7 +63,7 @@
   </object>
  </objectgroup>
  <objectgroup id="5" name="attention_points">
-  <object id="23" name="2" x="256" y="336">
+  <object id="23" name="2" x="225.333" y="333">
    <point/>
   </object>
   <object id="24" name="3" x="551.333" y="305.334">

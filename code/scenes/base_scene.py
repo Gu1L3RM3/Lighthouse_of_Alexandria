@@ -54,7 +54,6 @@ class BaseScene(ABC):
         self.physics_system        = PhysicsSystem()
         self.dialog_system         = DialogueSystem(self.ui_manager)
         self.path_following_system = PathFollowingSystem()
-        
 
 
     
