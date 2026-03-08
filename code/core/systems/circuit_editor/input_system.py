@@ -16,6 +16,7 @@ from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.managers.circuit_manager import CircuitManager
+from core.settings import CIRCUITOS_DIR, LTSPICE_DIR
 from typing import Type
 
 
@@ -31,22 +32,22 @@ class InputSystem(System):
                  ):
 
         super().__init__()
-        Path("circuitos").mkdir(exist_ok=True)
-        Path("ltspice").mkdir(exist_ok=True)
+        CIRCUITOS_DIR.mkdir(parents=True, exist_ok=True)
+        LTSPICE_DIR.mkdir(parents=True, exist_ok=True)
 
-        self.file_list =  file.split('/')
-        self.file = self.file_list[-1]
-
-        level = Path(*self.file_list[:-1])
+        normalized_file = file.replace("\\", "/")
+        file_path = Path(normalized_file)
+        self.file = file_path.name
+        level = file_path.parent
 
         self.full_file = file  # ex: "generic_levels_3/fase_3/pannel1"
-        self.json_file = str(level / f"{self.file}.json")
+        self.json_file = str(CIRCUITOS_DIR / level / f"{self.file}.json")
 
-        filename_only = Path(self.file).name
+        filename_only = self.file
                  
 
-        self.net_file      = str(Path("ltspice") / level / f"{filename_only}.net")
-        self.lt_spice_file = str(Path("ltspice") / level / f"{filename_only}.asc")
+        self.net_file      = str(LTSPICE_DIR / level / f"{filename_only}.net")
+        self.lt_spice_file = str(LTSPICE_DIR / level / f"{filename_only}.asc")
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None

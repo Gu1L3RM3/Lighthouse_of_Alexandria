@@ -39,6 +39,8 @@ class GenericLevel6(BaseGenericLevel):
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
         self.player_dead_by_enemy = False
+        self.phantom_ai_system.set_touch_triggered(False)
+        self.enemy_touch_game_over_system.triggered = False
         if self.can_reset_pannels:
             self.clear_all_pannels_json()
             self.can_reset_pannels = False
@@ -133,8 +135,8 @@ class GenericLevel6(BaseGenericLevel):
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
         for i in range(amount_pannels):
             panel_name = f"pannel{i+1}"
-            json_base = Path("circuitos") / self.level_path
-            netlist_base = Path("ltspice") / self.level_path
+            json_base = path_in_circuitos(self.level_path)
+            netlist_base = path_in_ltspice(self.level_path)
 
             edited_json = json_base / f"{panel_name}.json"
             solution_json = json_base / f"{panel_name}_solution.json"

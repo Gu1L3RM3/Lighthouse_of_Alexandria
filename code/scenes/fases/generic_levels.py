@@ -14,6 +14,8 @@ from entities.animated_tiles.door import Door
 from entities.itens.control_pannel import ControlPannel
 from entities.npcs.arquimedes import Arquimedes
 from core.components.position import Position
+from core.components.velocity import Velocity
+from core.components.freeze import Freeze
 from core.components.phantom_ai import PhantomAI
 from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
@@ -183,13 +185,24 @@ class BaseGenericLevel(BaseScene):
         
     def fall_player(self, event):
         self.can_set_resistors = True
+        # Freeze immediately so next process_input cannot override the fall animation.
+        if self.player and self.player.has(Freeze):
+            self.player.get(Freeze).active = True
+        if self.player and self.player.has(Velocity):
+            self.player.get(Velocity).vxy = (0, 0)
         anim:AnimateSprite = self.player.get(AnimateSprite)
-        anim.play('fall',loop=False,on_finish=self.death_flow_manager.handle_player_death)
+        anim.play('fall', reset=True, loop=False, on_finish=self.death_flow_manager.handle_player_death)
 
     def update_storage_circuit(self,event):
         value = event['value']
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type='Resistor',value=value)
+        self.storage_circuit.save_eletric_storage()
+
+    def update_storage_circuit_generic(self, event, component_type):
+        value = event["value"]
+        self.storage_circuit.reload_storage()
+        self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
         
     def kill_entity_event(self,event):
@@ -275,6 +288,7 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("kill_entity",self.kill_entity_event)
         self.event_manager.subscribe("resistor_collected",self.update_storage_circuit)
         self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, "CurrentSource"))
+        self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("voutage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)

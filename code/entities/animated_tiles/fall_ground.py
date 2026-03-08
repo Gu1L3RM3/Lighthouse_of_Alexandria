@@ -16,13 +16,13 @@ class FallGround(Entity):
         self.rm = ResourceManager.get()
         self.animations = self.rm.load_sprite_sheet('fall_ground', (16, 16), trim_transparent=False)
         self.animate = AnimateSprite(self.animations, loop=False, fps=20)
-        self.area = Rect(x, y, 16, 16)
+        self.area = Rect(0, 0, 16, 16)
         self.add(
             Position(x, y),
             Sprite(self.animations['broken'][0]),
             self.animate,
             RenderLayer(RenderLayer.WORLD),
-            AreaTrigger(self.area, once=True, on_entered=self.on_entered)
+            AreaTrigger(self.area, once=False, on_entered=self.on_entered)
         )
 
     def _fall_player(self):
@@ -42,7 +42,9 @@ class FallGround(Entity):
         if rect.width <= 0 or rect.height <= 0:
             return
 
-        intersection = self.area.clip(rect)
+        ground_pos = self.get(Position)
+        ground_area = self.area.move(ground_pos.x, ground_pos.y)
+        intersection = ground_area.clip(rect)
         if intersection.width <= 0 or intersection.height <= 0:
             return
 
@@ -59,3 +61,5 @@ class FallGround(Entity):
             EventManager.get().post({'type': 'request_freeze', 'type_request': 'player fall'})
             self._fall_player()
             self.animate.play('broken')
+            trigger = self.get(AreaTrigger)
+            trigger.active = False

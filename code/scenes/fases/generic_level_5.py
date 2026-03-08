@@ -46,7 +46,7 @@ class GenericLevel5(BaseGenericLevel):
     def clear_all_pannels_json(self):
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
         for i in range(amount_pannels):
-            file_name = f'circuitos/{self.level_path}/pannel{i+1}.json'
+            file_name = path_in_circuitos(self.level_path, f"pannel{i+1}.json")
             SerializationManager.remove_droppable_entities(file_name)
 
     def set_systems(self):

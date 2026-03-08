@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Any, List, Type, Dict
 
+from core.settings import CIRCUITOS_DIR
 
 from core.ecs import Entity, Component
 from entities.circuit_editor.eletric_components import *
@@ -15,12 +16,11 @@ from core.components.label_component import LabelComponent
 
 class SerializationManager:
 
-    STORAGE_FOLDER = "circuitos"
-    STORAGE_FILE = os.path.join(STORAGE_FOLDER, "eletric_storage.json")
+    STORAGE_FOLDER = Path(CIRCUITOS_DIR)
+    STORAGE_FILE = STORAGE_FOLDER / "eletric_storage.json"
 
     # Garante que a pasta exista
-    if not os.path.exists(STORAGE_FOLDER):
-        os.makedirs(STORAGE_FOLDER)
+    STORAGE_FOLDER.mkdir(parents=True, exist_ok=True)
 
     ENTITY_MAP: dict[str, Type[Entity]] = {
         'Resistor': Resistor,
@@ -42,7 +42,7 @@ class SerializationManager:
     @staticmethod
     def load_eletric_storage() -> dict:
         try:
-            with open(SerializationManager.STORAGE_FILE, 'r') as f:
+            with open(SerializationManager.STORAGE_FILE, 'r', encoding='utf-8') as f:
                 eletric_storage_data = json.load(f)
 
             return eletric_storage_data
@@ -88,7 +88,7 @@ class SerializationManager:
     @staticmethod
     def save_eletric_storage(data: dict):
         try:
-            with open(SerializationManager.STORAGE_FILE, 'w') as f:
+            with open(SerializationManager.STORAGE_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4)
 
 
@@ -98,15 +98,24 @@ class SerializationManager:
     @staticmethod
     def clear_eletric_storage():
         try:
-            with open(SerializationManager.STORAGE_FILE, 'w') as f:
+            with open(SerializationManager.STORAGE_FILE, 'w', encoding='utf-8') as f:
                 json.dump({}, f, indent=4)
 
         except Exception as e:
             print(f"Erro ao limpar: {e}")
 
+    @staticmethod
+    def _resolve_circuit_path(filename: str | Path) -> Path:
+        path_obj = Path(filename)
+        if path_obj.is_absolute():
+            return path_obj
+        if len(path_obj.parts) > 0 and path_obj.parts[0].lower() == "circuitos":
+            path_obj = Path(*path_obj.parts[1:])
+        return SerializationManager.STORAGE_FOLDER / path_obj
+
 
     @staticmethod
-    def save_entities_to_json(entities: list[Entity], filename: str):
+    def save_entities_to_json(entities: list[Entity], filename: str | Path):
         """
         Salva entities SEMPRE dentro da pasta 'circuitos', a menos que o caminho
         já comece com 'circuitos/' ou seja absoluto.
@@ -120,19 +129,12 @@ class SerializationManager:
         """
 
         # garante extensão .json
-        my_filename = filename if filename.endswith(".json") else filename + ".json"
+        filename_str = str(filename)
+        my_filename = filename_str if filename_str.endswith(".json") else f"{filename_str}.json"
 
-        base_folder = Path(SerializationManager.STORAGE_FOLDER)
-        path_obj = Path(my_filename)
+        final_path = SerializationManager._resolve_circuit_path(my_filename)
 
         # Se já é absoluto ou já começa com 'circuitos', não prefixa de novo
-        if path_obj.is_absolute() or (
-            len(path_obj.parts) > 0 and path_obj.parts[0] == SerializationManager.STORAGE_FOLDER
-        ):
-            final_path = path_obj
-        else:
-            final_path = base_folder / path_obj
-
         final_path.parent.mkdir(parents=True, exist_ok=True)
         print(f"[SAVE] Salvando em: {final_path}")
         entities_data = [entity.to_dict() for entity in entities]
@@ -144,7 +146,7 @@ class SerializationManager:
 
 
     @staticmethod
-    def load_entities_from_json(filename: str) -> list[Entity]:
+    def load_entities_from_json(filename: str | Path) -> list[Entity]:
         """
         Carrega circuitos SEMPRE da pasta circuitos/, a menos que o caminho
         já venha absoluto ou começando com 'circuitos/'.
@@ -158,18 +160,13 @@ class SerializationManager:
         """
 
         # força extensão .json
-        if not filename.endswith(".json"):
-            filename += ".json"
+        filename_str = str(filename)
+        if not filename_str.endswith(".json"):
+            filename_str += ".json"
 
-        base_folder = Path(SerializationManager.STORAGE_FOLDER)
-        path_obj = Path(filename)
+        filepath = SerializationManager._resolve_circuit_path(filename_str)
 
-        if path_obj.is_absolute() or (
-            len(path_obj.parts) > 0 and path_obj.parts[0] == SerializationManager.STORAGE_FOLDER
-        ):
-            filepath = path_obj
-        else:
-            filepath = base_folder / path_obj
+        
 
         # não precisa criar pasta pra load, mas não machuca:
         filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -197,8 +194,8 @@ class SerializationManager:
         Atualiza o valor de um componente em uma netlist SPICE.
         
         """
-
-        with open(netlist_path, "r") as f:
+        netlist_path = Path(netlist_path)
+        with open(netlist_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
         updated_lines = []
@@ -233,7 +230,7 @@ class SerializationManager:
         if not component_found:
             raise ValueError(f"Componente '{component_name}' não encontrado na netlist.")
 
-        with open(netlist_path, "w") as f:
+        with open(netlist_path, "w", encoding="utf-8") as f:
             f.writelines(updated_lines)
     def update_resistor_labels_in_file(
         self,

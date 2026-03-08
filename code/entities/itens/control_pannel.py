@@ -38,6 +38,7 @@ class ControlPannel(Item):
         self.component_for_area = int(props['component_for_area'])
         self.name_file =f"{props['tmx_file']}/pannel{self.pannel_id}"
         self.stealth_bonus_duration = float(props.get("stealth_bonus_duration", 4.0))
+        self.solved_hold_seconds = float(props.get("solved_hold_seconds", 45.0))
         stealth_enabled_raw = props.get("stealth_bonus_enabled", True)
         if isinstance(stealth_enabled_raw, str):
             stealth_enabled_raw = stealth_enabled_raw.strip().lower() in ("1", "true", "yes", "on")

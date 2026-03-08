@@ -34,13 +34,16 @@ class DialogueInteractionHUDController:
         player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
 
         for entity in self.entity_mn.get_entities_with(Dialogue, Position):
-            if not isinstance(entity, DialogueArea):
-                continue
             dialogue: Dialogue = entity.get(Dialogue)
             if dialogue.auto_start or not dialogue.active_status:
                 continue
             entity_pos: Position = entity.get(Position)
-            area = dialogue.get_area(entity_pos.x, entity_pos.y).inflate(10, 10)
+            area = dialogue.get_area(entity_pos.x, entity_pos.y)
+            if isinstance(entity, DialogueArea):
+                area = area.inflate(10, 10)
+            else:
+                # NPC dialog area gets a small interaction margin.
+                area = area.inflate(6, 6)
             if player_col.colliderect(area):
                 return entity
         return None

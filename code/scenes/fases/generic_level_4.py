@@ -8,6 +8,7 @@ from core.systems.light_system import LightSystem
 from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
+from core.settings import path_in_circuitos, path_in_ltspice
 from pathlib import Path
 from scenes.fases.generic_levels import BaseGenericLevel
 
@@ -36,8 +37,8 @@ class GenericLevel4(BaseGenericLevel):
         self.clear_all_pannels()
 
     def clear_all_pannels(self):
-        json_base = Path("circuitos") / self.level_path
-        netlist_base = Path("ltspice") / self.level_path
+        json_base = path_in_circuitos(self.level_path)
+        netlist_base = path_in_ltspice(self.level_path)
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
 
         for i in range(amount_pannels):

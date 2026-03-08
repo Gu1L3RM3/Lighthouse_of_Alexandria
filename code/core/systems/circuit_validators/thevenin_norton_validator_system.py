@@ -7,6 +7,7 @@ from core.managers.entity_manager import EntityManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.circuit_tools.serialization_manager import SerializationManager
 from entities.itens.control_pannel import ControlPannel
+from core.settings import path_in_circuitos, path_in_ltspice
 
 
 class TheveninNortonValidatorSystem(System):
@@ -47,7 +48,7 @@ class TheveninNortonValidatorSystem(System):
         return False
 
     def _load_panel_entities(self, pannel_id: int):
-        json_file = f"circuitos/{self.level_path}/pannel{pannel_id}.json"
+        json_file = path_in_circuitos(self.level_path, f"pannel{pannel_id}.json")
         try:
             return SerializationManager.load_entities_from_json(json_file) or []
         except Exception:
@@ -131,7 +132,7 @@ class TheveninNortonValidatorSystem(System):
             if not chosen_kind or chosen_value is None:
                 continue
 
-            netlist_path = f"ltspice/{self.level_path}/pannel{cp.pannel_id}_solution.net"
+            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{cp.pannel_id}_solution.net"))
 
             # Update source in solution netlist.
             if chosen_kind == "voltage":

@@ -18,6 +18,8 @@ from scenes.fases.generic_level_3 import GenericLevel3
 from scenes.fases.generic_level_4 import GenericLevel4
 from scenes.fases.generic_level_5 import GenericLevel5
 from scenes.fases.generic_level_6 import GenericLevel6
+from scenes.fases.generic_level_7 import GenericLevel7
+from scenes.fases.final_level import FinalLevel
 from scenes.circuit_editor       import CircuitEditor
 from scenes.death_transition_scene import DeathTransitionScene
 from sys import exit
@@ -108,7 +110,7 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change('level_2')
+        self.scene_manager.change('fase_8')
         
         
     def register_fases(self):
@@ -121,7 +123,9 @@ class Game:
             "generic_levels_3": GenericLevel3,
             "generic_levels_4": GenericLevel4,
             "generic_levels_5": GenericLevel5,
-            "generic_levels_6": GenericLevel6
+            "generic_levels_6": GenericLevel6,
+            "generic_levels_7": GenericLevel7,
+            "final_fase": FinalLevel,
         }
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))

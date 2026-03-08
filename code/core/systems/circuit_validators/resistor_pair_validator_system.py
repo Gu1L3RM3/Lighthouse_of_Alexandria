@@ -6,6 +6,7 @@ from core.managers.circuit_manager            import CircuitManager
 from entities.itens.control_pannel            import ControlPannel
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit         import CircuitSolver
+from core.settings                            import path_in_ltspice
 
 
 class ResistorPairValidatorSystem(System):
@@ -51,7 +52,7 @@ class ResistorPairValidatorSystem(System):
             resistor_chosen = choice(resistors_list)
             resistors_list.remove(resistor_chosen)
 
-            netlist_path = f"ltspice/{self.level_path}/pannel{control_pannel.pannel_id}_solution.net"
+            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
 
             # Sempre substituímos o componente R3 pelo valor escolhido aleatoriamente.
             # O circuito de solução usa o R3 como "resistor secreto" que o jogador precisa descobrir.

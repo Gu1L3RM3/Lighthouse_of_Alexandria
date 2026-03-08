@@ -1,6 +1,5 @@
 import json
 from collections import deque
-import os
 from pathlib import Path
 
 from core.components.position import Position
@@ -9,7 +8,7 @@ from core.components.sprite import Sprite
 from core.components.label_component import LabelComponent
 from core.managers.entity_manager import EntityManager
 from entities.circuit_editor.eletric_components import *
-from core.settings import CELL_SIZE
+from core.settings import CELL_SIZE, CIRCUITOS_DIR
 
 
 class LtSpiceGenerate:
@@ -18,8 +17,11 @@ class LtSpiceGenerate:
     Esta classe é autônoma e processa diretamente a estrutura de dados do JSON.
     """
     def __init__(self, json_filepath: str,net_filepath:str,lt_spice_filepath,entity_manager:EntityManager):
-        
-        json_path = os.path.join('circuitos', json_filepath)
+        json_path = Path(json_filepath)
+        if not json_path.is_absolute():
+            if len(json_path.parts) > 0 and json_path.parts[0].lower() == "circuitos":
+                json_path = Path(*json_path.parts[1:])
+            json_path = CIRCUITOS_DIR / json_path
         
         self.net_filepath= net_filepath
         self.lt_spice_filepath=lt_spice_filepath

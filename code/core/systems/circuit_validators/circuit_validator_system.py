@@ -6,6 +6,7 @@ from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit         import CircuitSolver
+from core.settings                            import path_in_ltspice
 
 
 class CircuitValidatorSystem(System):
@@ -39,7 +40,7 @@ class CircuitValidatorSystem(System):
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
 
-            netlist_path = f'ltspice/{self.level_path}/pannel{control_pannel.pannel_id}_solution.net'
+            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
 
             SerializationManager.update_component_value(
                 netlist_path,

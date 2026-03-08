@@ -1,14 +1,25 @@
 import os
+from pathlib import Path
 from pygame.locals import *
 
 FPS = 60
 
 TILE_SIZE=16
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CODE_DIR = os.path.dirname(BASE_DIR)
-PROJECT_ROOT = os.path.dirname(CODE_DIR)
-ASSETS_DIR = os.path.join(PROJECT_ROOT, 'assets')
+BASE_DIR = Path(__file__).resolve().parent
+CODE_DIR = BASE_DIR.parent
+PROJECT_ROOT = CODE_DIR.parent
+ASSETS_DIR = str(PROJECT_ROOT / 'assets')
+CIRCUITOS_DIR = CODE_DIR / 'circuitos'
+LTSPICE_DIR = CODE_DIR / 'ltspice'
+
+
+def path_in_circuitos(*parts: str) -> Path:
+    return CIRCUITOS_DIR.joinpath(*parts)
+
+
+def path_in_ltspice(*parts: str) -> Path:
+    return LTSPICE_DIR.joinpath(*parts)
 
 DAWN_COLOR   = (255, 120, 50, 100)
 DAY_COLOR    = (135, 206, 250, 0)  

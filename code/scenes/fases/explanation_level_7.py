@@ -8,7 +8,7 @@ class ExplanationLevel7(BaseExplanationLevel):
         super().__init__(
             screen=screen,
             map_path="exp_fase_7",
-            next_scene="home_scene",
+            next_scene="fase_7",
         )
 
     def get_dialogue_image_sequences(self) -> dict[str, list[str]]:

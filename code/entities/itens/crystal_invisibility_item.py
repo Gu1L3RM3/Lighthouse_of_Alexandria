@@ -17,6 +17,7 @@ class CrystalInvisibilityItem(Item):
     def __init__(self, x, y, active, props):
         super().__init__(x, y, active, props)
         self.duration = float(props.get("duration", 6.0))
+        self.respawn_delay = float(props.get("respawn_delay", 20.0))
         self.em = EventManager.get()
         self.animations = self._load_animations()
         self.animate_sprite = AnimateSprite(self.animations, fps=8, loop=True)
@@ -66,5 +67,15 @@ class CrystalInvisibilityItem(Item):
         )
 
     def _after_collected(self):
+        pos: Position = self.get(Position)
         self.em.post({"type": "player_invisible_to_enemies_started", "duration": self.duration})
+        self.em.post(
+            {
+                "type": "crystal_invisibility_collected",
+                "spawn_x": pos.x,
+                "spawn_y": pos.y,
+                "duration": self.duration,
+                "respawn_delay": self.respawn_delay,
+            }
+        )
         self.em.post({"type": "kill_entity", "id": self.id})

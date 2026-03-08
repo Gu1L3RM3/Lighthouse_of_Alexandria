@@ -7,6 +7,8 @@ from core.components.freeze import Freeze
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.components.velocity import Velocity
+from core.components.render_layer import RenderLayer
+from core.components.depth_anchor import DepthAnchor
 from core.ecs import Entity
 from core.managers.resource_manager import ResourceManager
 
@@ -15,19 +17,26 @@ class FatherNPC(Entity):
     def __init__(self, x, y, props=None):
         super().__init__()
         self.rm = ResourceManager.get()
-        animations = self.rm.load_sprite_sheet("father", size=(48, 48), trim_transparent=False)
+        animations = self.rm.load_sprite_sheet(
+            "father",
+            size=(48, 48),
+            scale=0.5,
+            trim_transparent=False,
+        )
 
         spr = Sprite(animations["idle_front"][0])
         anim = AnimateSprite(animations, fps=6, loop=True)
 
         self.add(
             Position(x, y),
-            Collider(10, 6, offset_x=2, offset_y=13),
+            Collider(14, 10, offset_x=5, offset_y=13),
             spr,
             anim,
             Velocity(),
             Freeze(),
-            Dialogue(["Oi filho, vamos continuar os estudos de circuitos?"], (20, 16)),
+            Dialogue(["Oi filho, vamos continuar os estudos de circuitos?"], (44, 36)),
+            RenderLayer(RenderLayer.ACTOR),
+            DepthAnchor(offset_y=23),
         )
         self.props = props or {}
         self._direction = Vector2(0, 1)

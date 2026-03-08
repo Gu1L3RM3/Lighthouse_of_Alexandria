@@ -9,7 +9,7 @@ from entities.itens.resistor_item import ResistorItem
 from core.components.label_component import LabelComponent
 from core.circuit_tools.solve_circuit import CircuitSolver
 
-from core.settings import COMERCIAL_RESISTORS
+from core.settings import COMERCIAL_RESISTORS, CIRCUITOS_DIR, path_in_circuitos, path_in_ltspice
 
 from pathlib import Path   
 from typing import Dict    
@@ -26,7 +26,7 @@ class ResistorAssotiationValidatorSystem(System):
         self.tolerance_percent = 2.0  
 
         self.serialization_manager = SerializationManager()
-        self.serialization_manager.base_path = Path(".")
+        self.serialization_manager.base_path = Path(CIRCUITOS_DIR)
 
 
     def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
@@ -158,9 +158,9 @@ class ResistorAssotiationValidatorSystem(System):
                 print(f"[ResAssoc] Nenhum ResistorItem para área {area} (painel {control_pannel.pannel_id})")
                 continue
 
-            netlist_path = f"ltspice/{self.level_path}/pannel{control_pannel.pannel_id}_solution.net"
+            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
 
-            json_solution_path = Path("circuitos") / self.level_path / f"pannel{control_pannel.pannel_id}.json"
+            json_solution_path = path_in_circuitos(self.level_path, f"pannel{control_pannel.pannel_id}.json")
 
             label_updates = self._randomize_resistors_in_netlist(netlist_path)
 
