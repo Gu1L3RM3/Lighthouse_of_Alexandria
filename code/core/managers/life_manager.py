@@ -1,7 +1,7 @@
 class LifeManager:
     _instance = None
 
-    def __init__(self, max_lives: int = 3):
+    def __init__(self, max_lives: int = 10):
         self.max_lives = max_lives
         self.current_lives = max_lives
 

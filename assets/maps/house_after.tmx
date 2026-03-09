@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="19" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="16">
+ <tileset firstgid="1" name="tiles and items" tilewidth="16" tileheight="16" tilecount="144" columns="12">
+  <image source="../images/Pixel_16_interiors_v2_free/Pixel_16_interiors_v2_free/tiles and items.png" width="200" height="200"/>
+ </tileset>
+ <tileset firstgid="145" source="obj.tsx"/>
+ <layer id="1" name="ground" width="19" height="11">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,
+0,0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="3" name="obj" width="19" height="11">
+  <data encoding="csv">
+0,15,16,16,16,16,16,16,16,16,46,16,16,16,16,16,16,17,0,
+26,27,100,0,0,0,0,0,0,0,0,0,76,77,0,0,112,29,30,
+38,0,112,0,0,0,0,0,0,0,0,0,88,89,90,0,0,0,42,
+38,0,0,0,102,103,104,0,0,0,0,0,117,0,0,0,0,0,42,
+38,0,0,101,114,115,116,91,0,0,0,0,0,0,0,0,98,99,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,110,111,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,42,
+50,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,54,
+0,63,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,65,0
+</data>
+ </layer>
+ <objectgroup id="2" name="player">
+  <object id="1" name="player" x="145.167" y="29.8333">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="6" name="attention_point">
+  <object id="7" name="1" type="attention" x="167" y="127">
+   <properties>
+    <property name="positions" value="[]"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="7" name="attention_points"/>
+ <objectgroup id="5" name="areas_dialog" locked="1">
+  <object id="5" name="dialog_1" x="141.5" y="89" width="48" height="47.5">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="dialogo" value="O que?!?;O que aconteceu??; Como voltei aqui derrepente?!?;Hmm...;Acho que consegui impedir meu pai!;...;Talvez, eu diria;Mas, uma lição que ficou é que circuitos elétricos não são tão chatos assim...;Eu aprendi muito com essa aventura inesperada!; Não acredito que passei por tudo isso, foi incrível!;Pena que meu pai não era uma pessoa boa."/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="9" name="itens">
+  <object id="13" name="old_paper" x="47.7229" y="129.32">
+   <properties>
+    <property name="active_status" type="bool" value="false"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <layer id="4" name="ground2" width="19" height="11">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,46,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,81,82,83,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,93,94,95,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+</map>

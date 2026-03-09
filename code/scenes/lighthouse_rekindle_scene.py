@@ -54,7 +54,7 @@ class LighthouseRekindleScene(BaseScene):
         if self._resolved:
             return
         self._resolved = True
-        self.scene_manager.start_fade("home_scene", 0.85)
+        self.scene_manager.start_fade("home_after", 0.85)
 
     def _upscale_pixel(self, low_surface: Surface) -> Surface:
         return pygame.transform.scale(low_surface, (self.width, self.height))

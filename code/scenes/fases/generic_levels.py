@@ -62,7 +62,8 @@ class BaseGenericLevel(BaseScene):
             self.dialog_system,
             self.interaction_key_widget,
         )
-        self.debug_interaction_areas = True
+        # Mantem o recurso de debug no codigo, mas desativado por padrao.
+        self.debug_interaction_areas = False
         
         # Subclasses will override this
         self.set_systems() 

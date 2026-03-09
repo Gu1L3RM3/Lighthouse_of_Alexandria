@@ -6,9 +6,11 @@ from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
 from scenes.home_scene           import HomeScene
+from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
 from scenes.credits_scene        import CreditsScene
 from scenes.lighthouse_rekindle_scene import LighthouseRekindleScene
+from scenes.ending_thanks_credits_scene import EndingThanksCreditsScene
 from scenes.fases.level_1        import Level1
 from scenes.fases.level_2        import Level2
 from scenes.fases.explanation_level_3 import ExplanationLevel3
@@ -94,12 +96,14 @@ class Game:
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
+        self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
         profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
         self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
 
     
         self.register_fases()
+        self.scene_manager.change('fase_3')
 
         
     def _set_window_icon(self):
@@ -134,7 +138,9 @@ class Game:
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
         self.scene_manager.register('credits', CreditsScene(self.screen))
         self.scene_manager.register('ending_lighthouse', LighthouseRekindleScene(self.screen))
+        self.scene_manager.register('ending_thanks_credits', EndingThanksCreditsScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
+        self.scene_manager.register('home_after', HomeAfterScene(self.screen))
         self.scene_manager.register('death_transition', DeathTransitionScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))
         self.scene_manager.register('level_2',Level2(self.screen))
