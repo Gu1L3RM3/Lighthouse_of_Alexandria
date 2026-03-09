@@ -1,4 +1,4 @@
-import json
+﻿import json
 from collections import deque
 from pathlib import Path
 
@@ -13,8 +13,8 @@ from core.settings import CELL_SIZE, CIRCUITOS_DIR
 
 class LtSpiceGenerate:
     """
-    Gera uma netlist SPICE a partir de um arquivo de descrição de circuito em JSON.
-    Esta classe é autônoma e processa diretamente a estrutura de dados do JSON.
+    Gera uma netlist SPICE a partir de um arquivo de descriÃ§Ã£o de circuito em JSON.
+    Esta classe Ã© autÃ´noma e processa diretamente a estrutura de dados do JSON.
     """
     def __init__(self, json_filepath: str,net_filepath:str,lt_spice_filepath,entity_manager:EntityManager):
         json_path = Path(json_filepath)
@@ -29,10 +29,8 @@ class LtSpiceGenerate:
             json_content_string = Path(json_path).read_text(encoding="utf-8")
             self.circuit_data = json.loads(json_content_string)
         except FileNotFoundError:
-            print(f"ERRO: O arquivo de circuito '{json_path}' não foi encontrado.")
             self.circuit_data = [] # Inicializa com dados vazios para evitar mais erros
         except json.JSONDecodeError as e:
-            print(f"ERRO: O arquivo '{json_path}' não contém um JSON válido. {e}")
             self.circuit_data = []
         self.entity_manager = entity_manager
         self.lines = []
@@ -42,7 +40,7 @@ class LtSpiceGenerate:
         self.angles_current = {0: 270, 90: 180, 180: 90, 270: 0}
 
 
-    # --- Métodos de Geração .asc (sem alterações) ---
+    # --- MÃ©todos de GeraÃ§Ã£o .asc (sem alteraÃ§Ãµes) ---
     def write_wires(self):
         wires =  self.entity_manager.get_entities_by_class(Wire)
         for wire in wires:
@@ -68,7 +66,7 @@ class LtSpiceGenerate:
         for cls in [Node, Wire, Resistor, VoutageSource, CurrentSource, Ground]:
             all_connectables += self.entity_manager.get_entities_by_class(cls)
 
-        # Criar mapa de posição -> entity
+        # Criar mapa de posiÃ§Ã£o -> entity
         pos_map = {}
         for ent in all_connectables:
             pos: Position = ent.get(Position)
@@ -94,9 +92,9 @@ class LtSpiceGenerate:
                 else:
                     continue
 
-                # se existe vizinho nessa posição
+                # se existe vizinho nessa posiÃ§Ã£o
                 if neighbor_pos in pos_map:
-                    # ordem consistente (para não duplicar wires)
+                    # ordem consistente (para nÃ£o duplicar wires)
                     start, end = sorted([(x, y), neighbor_pos])
                     if (start, end) not in drawn_wires:
                         self.lines.append(f"WIRE {start[0]} {start[1]} {end[0]} {end[1]}")
@@ -104,7 +102,7 @@ class LtSpiceGenerate:
 
     def write_resistors(self):
         """
-        Gera os símbolos de resistores no arquivo .asc com suas posições e labels.
+        Gera os sÃ­mbolos de resistores no arquivo .asc com suas posiÃ§Ãµes e labels.
         """
         resistors = self.entity_manager.get_entities_by_class(Resistor)
         offset = 16
@@ -146,7 +144,7 @@ class LtSpiceGenerate:
                 self.lines.append(f"WIRE {x-offset} {start_y-28} {x-offset} {start_y+4}")
 
 
-            # Símbolo do LTspice
+            # SÃ­mbolo do LTspice
             self.lines.append(f"SYMBOL res {x} {y} R{angle}")
 
             
@@ -159,7 +157,7 @@ class LtSpiceGenerate:
                 self.lines.append(f"SYMATTR Value {label.value}")
     def write_voltage_sources(self):
         """
-        Gera os símbolos de fontes de tensão no arquivo .asc com suas posições e labels.
+        Gera os sÃ­mbolos de fontes de tensÃ£o no arquivo .asc com suas posiÃ§Ãµes e labels.
         """
         voltages = self.entity_manager.get_entities_by_class(VoutageSource)
 
@@ -197,7 +195,7 @@ class LtSpiceGenerate:
                 self.lines.append(f"WIRE {x} {y-16} {x} {y+12}")
                 self.lines.append(f"WIRE {x} {start_y-28} {x} {start_y+4}")
 
-            # Símbolo do LTspice
+            # SÃ­mbolo do LTspice
             self.lines.append(f"SYMBOL voltage {x} {y} R{angle}")
 
             # Nome da fonte (InstName)
@@ -211,7 +209,7 @@ class LtSpiceGenerate:
 
     def write_current_sources(self):
         """
-        Gera os símbolos de fontes de corrente no arquivo .asc com suas posições e labels.
+        Gera os sÃ­mbolos de fontes de corrente no arquivo .asc com suas posiÃ§Ãµes e labels.
         """
         currents = self.entity_manager.get_entities_by_class(CurrentSource)
         offset= 90
@@ -224,7 +222,6 @@ class LtSpiceGenerate:
             spr:Sprite=i.get(Sprite)
 
             angle =int(self.angles_current[spr.angle])
-            print(angle)
             if angle == 0 :
                 
                 start_y=y+130
@@ -248,7 +245,7 @@ class LtSpiceGenerate:
                 start_y=y-120
                 self.lines.append(f"WIRE {x} {y} {x} {y+40}")
                 self.lines.append(f"WIRE {x} {start_y} {x} {start_y+40}")
-            # Símbolo do LTspice
+            # SÃ­mbolo do LTspice
             self.lines.append(f"SYMBOL current {x} {y} R{angle}")
 
             # Nome da fonte (InstName)
@@ -260,8 +257,8 @@ class LtSpiceGenerate:
                 self.lines.append(f"SYMATTR Value {label.value}")
     def write_gnd(self):
             """
-            Gera o rótulo de nó '0' (terra) para todas as entidades Ground.
-            No LTspice, o terra é definido pelo FLAG '0', não por um SYMBOL.
+            Gera o rÃ³tulo de nÃ³ '0' (terra) para todas as entidades Ground.
+            No LTspice, o terra Ã© definido pelo FLAG '0', nÃ£o por um SYMBOL.
             """
             grounds = self.entity_manager.get_entities_by_class(Ground)
 
@@ -277,7 +274,7 @@ class LtSpiceGenerate:
     def _get_terminals(self, entity: dict) -> dict[str, tuple[int, int]]:
         """
         Calcula as coordenadas dos terminais com nomes que representam a polaridade
-        elétrica padrão, respeitando a orientação (rotação) do componente.
+        elÃ©trica padrÃ£o, respeitando a orientaÃ§Ã£o (rotaÃ§Ã£o) do componente.
         """
         comp_map = {c['type']: c for c in entity['components']}
         pos = comp_map.get('Position')
@@ -293,7 +290,7 @@ class LtSpiceGenerate:
         
         center_x, center_y = x + CELL_SIZE / 2, y + CELL_SIZE / 2
 
-        # Terminais para componentes de 1 célula (nós, fios, terra)
+        # Terminais para componentes de 1 cÃ©lula (nÃ³s, fios, terra)
         if entity_type in ['Node', 'Wire', 'Ground']:
             terminals = {}
             if 'up' in conn['connections'] or 'top' in conn['connections']:
@@ -306,11 +303,11 @@ class LtSpiceGenerate:
                 terminals['right'] = (x + CELL_SIZE, center_y)
             return terminals
 
-        # Terminais para componentes de 2 células
+        # Terminais para componentes de 2 cÃ©lulas
         elif entity_type in ['Resistor', 'VoutageSource', 'CurrentSource']:
             
-            # --- LÓGICA PARA COMPONENTES HORIZONTAIS ---
-            if angle == 0: # Padrão
+            # --- LÃ“GICA PARA COMPONENTES HORIZONTAIS ---
+            if angle == 0: # PadrÃ£o
                 left_terminal = (x, center_y)
                 right_terminal = (x + 2 * CELL_SIZE, center_y)
                 if entity_type == 'Resistor':      return {'p1': left_terminal, 'p2': right_terminal}
@@ -325,8 +322,8 @@ class LtSpiceGenerate:
                 if entity_type == 'VoutageSource': return {'pos': left_terminal, 'neg': right_terminal}
                 if entity_type == 'CurrentSource': return {'to': left_terminal, 'from': right_terminal}
 
-            # --- LÓGICA PARA COMPONENTES VERTICAIS ---
-            elif angle == 90: # Padrão
+            # --- LÃ“GICA PARA COMPONENTES VERTICAIS ---
+            elif angle == 90: # PadrÃ£o
                 top_terminal = (center_x, y)
                 bottom_terminal = (center_x, y + 2 * CELL_SIZE)
                 if entity_type == 'Resistor':      return {'p1': top_terminal, 'p2': bottom_terminal}
@@ -346,8 +343,8 @@ class LtSpiceGenerate:
 
     def generate_netlist(self) -> list[str]:
             """
-            Executa a lógica principal de descoberta de nós e geração da netlist,
-            respeitando a convenção de polaridade do SPICE.
+            Executa a lÃ³gica principal de descoberta de nÃ³s e geraÃ§Ã£o da netlist,
+            respeitando a convenÃ§Ã£o de polaridade do SPICE.
             """
             if not self.circuit_data:
                 return []
@@ -402,33 +399,32 @@ class LtSpiceGenerate:
                 value = label_comp['value']
                 comp_type = comp['entity_type']
 
-                # Mapeia o nome do terminal para o nome do nó (ex: 'pos' -> 'N001')
+                # Mapeia o nome do terminal para o nome do nÃ³ (ex: 'pos' -> 'N001')
                 node_map = {
                     term_name: terminal_to_node.get((comp['id'], term_name))
                     for term_name in self._get_terminals(comp)
                 }
 
-                # Garante que todos os nós foram encontrados
+                # Garante que todos os nÃ³s foram encontrados
                 if not all(node_map.values()):
-                    print(f"AVISO: Componente {name} tem nós desconectados. Pulando.")
                     continue
 
-                # Aplica a regra de ordenação correta para cada tipo de componente
+                # Aplica a regra de ordenaÃ§Ã£o correta para cada tipo de componente
                 if comp_type == 'VoutageSource':
-                    # Convenção: V_nome <nó_positivo> <nó_negativo> <valor>
+                    # ConvenÃ§Ã£o: V_nome <nÃ³_positivo> <nÃ³_negativo> <valor>
                     line = f"{name} {node_map['pos']} {node_map['neg']} {value}"
                     netlist_lines.append(line)
                 
                 elif comp_type == 'CurrentSource':
-                    # Convenção: I_nome <nó_de_saída> <nó_de_entrada> <valor>
+                    # ConvenÃ§Ã£o: I_nome <nÃ³_de_saÃ­da> <nÃ³_de_entrada> <valor>
                     # (A corrente flui DE 'from' PARA 'to')
                     line = f"{name} {node_map['from']} {node_map['to']} {value}"
                     netlist_lines.append(line)
 
                 elif comp_type == 'Resistor':
-                    # Convenção: R_nome <nó_1> <nó_2> <valor>
-                    # A corrente positiva flui de nó_1 para nó_2.
-                    # A ordem p1, p2 é consistente (ex: cima->baixo, esquerda->direita)
+                    # ConvenÃ§Ã£o: R_nome <nÃ³_1> <nÃ³_2> <valor>
+                    # A corrente positiva flui de nÃ³_1 para nÃ³_2.
+                    # A ordem p1, p2 Ã© consistente (ex: cima->baixo, esquerda->direita)
                     line = f"{name} {node_map['p1']} {node_map['p2']} {value}"
                     netlist_lines.append(line)
 
@@ -438,7 +434,6 @@ class LtSpiceGenerate:
 
     def save_netlist(self):
         """Salva a netlist dentro da pasta definida em net_filepath."""
-        print(f"FILE: {self.net_filepath}")
 
         filepath = Path(self.net_filepath)
 
@@ -449,7 +444,6 @@ class LtSpiceGenerate:
         content = "\n".join(header + netlist + ["", ".end"])
 
         filepath.write_text(content, encoding="utf-8")
-        print(f".net salvo em {filepath.resolve()}")
 
 
     def save_asc(self):
@@ -459,11 +453,10 @@ class LtSpiceGenerate:
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
         filepath.write_text("\n".join(self.lines), encoding="utf-8")
-        print(f".asc salvo em {filepath.resolve()}")
 
     def run(self):
         """
-        Ponto de entrada principal para executar o processo de geração da netlist.
+        Ponto de entrada principal para executar o processo de geraÃ§Ã£o da netlist.
         """
         self.write_resistors()
         self.write_current_sources()

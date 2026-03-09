@@ -144,11 +144,10 @@ class MenuEditCircuit(Widget):
         ])
 
     def exit(self):
-        print("[EXIT] Chamando save_circuit...")
         try:
             self.input_system.save_circuit()
-        except Exception as e:
-            print(f"[ERRO] Falha ao salvar circuito: {e}")
+        except Exception:
+            pass
         SceneManager.get().back_with_fade()
     def set_menu_right(self):
         self.surface_right = Surface((self.cell_size*2,self.screen_height))

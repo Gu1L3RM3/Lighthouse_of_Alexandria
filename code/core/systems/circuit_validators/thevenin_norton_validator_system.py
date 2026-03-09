@@ -92,14 +92,11 @@ class TheveninNortonValidatorSystem(System):
             chosen_value = choice(i_list)
             i_list.remove(chosen_value)
             area_sources["current"] = i_list
-        else:
-            print(f"[ThN] Area {cp.component_for_area} has no available source values (panel {cp.pannel_id})")
 
         return chosen_kind, chosen_value
 
     def _pick_resistor_for_area(self, cp: ControlPannel, area_resistors: list[str]) -> str | None:
         if not area_resistors:
-            print(f"[ThN] Area {cp.component_for_area} has no available resistor values (panel {cp.pannel_id})")
             return None
 
         chosen = choice(area_resistors)
@@ -124,7 +121,6 @@ class TheveninNortonValidatorSystem(System):
 
             area = getattr(cp, "component_for_area", None)
             if area is None or area not in sources_per_area:
-                print(f"[ThN] No sources for area {area} (panel {cp.pannel_id})")
                 continue
 
             area_sources = sources_per_area[area]
@@ -137,12 +133,10 @@ class TheveninNortonValidatorSystem(System):
             # Update source in solution netlist.
             if chosen_kind == "voltage":
                 if not self._net_has_component(netlist_path, "V1"):
-                    print(f"[ThN] Panel {cp.pannel_id} netlist does not contain V1.")
                     continue
                 SerializationManager.update_component_value(netlist_path, "V1", chosen_value)
             else:
                 if not self._net_has_component(netlist_path, "I1"):
-                    print(f"[ThN] Panel {cp.pannel_id} netlist does not contain I1.")
                     continue
                 SerializationManager.update_component_value(netlist_path, "I1", chosen_value)
 
@@ -155,7 +149,6 @@ class TheveninNortonValidatorSystem(System):
 
             solver = CircuitSolver(netlist_path)
             if not solver.is_solved:
-                print(f"[ThN] Failed to solve panel {cp.pannel_id} netlist")
                 continue
 
             resistor_results = solver.get_resistor_results() or {}

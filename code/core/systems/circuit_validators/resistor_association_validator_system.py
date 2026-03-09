@@ -1,4 +1,4 @@
-from core.circuit_tools.serialization_manager import SerializationManager
+﻿from core.circuit_tools.serialization_manager import SerializationManager
 from utils.setter_values import SetterValues
 from core.ecs import System
 from core.managers.entity_manager import EntityManager
@@ -40,7 +40,7 @@ class ResistorAssotiationValidatorSystem(System):
 
     def _closest_comercial_resistor(self, value: float) -> tuple[str, float]:
         """
-        Retorna (label, valor) do resistor comercial mais próximo de 'value'.
+        Retorna (label, valor) do resistor comercial mais prÃ³ximo de 'value'.
         Ex: 1030 -> ('1.0k', 1000.0)
         """
         best_key, best_val = min(
@@ -62,7 +62,7 @@ class ResistorAssotiationValidatorSystem(System):
         Escolhe um valor comercial:
         - diferente de excluded_val
         - diferente de qualquer valor em used_vals
-        - se não houver mais opções, pega o valor comercial mais distante de excluded_val
+        - se nÃ£o houver mais opÃ§Ãµes, pega o valor comercial mais distante de excluded_val
         """
 
         valid_items = [
@@ -80,14 +80,14 @@ class ResistorAssotiationValidatorSystem(System):
 
         return farthest_key, farthest_val
 
-    # ------------ Randomização do netlist ------------
+    # ------------ RandomizaÃ§Ã£o do netlist ------------
 
     def _randomize_resistors_in_netlist(self, netlist_path: str) -> Dict[str, str]:
         """
-        Lê o .net, sorteia novos valores COMERCIAIS para TODOS os resistores
-        (linhas começando com 'r'), grava de volta e
+        LÃª o .net, sorteia novos valores COMERCIAIS para TODOS os resistores
+        (linhas comeÃ§ando com 'r'), grava de volta e
         RETORNA um dict { 'R1': '560k', 'R2': '1k', ... }
-        para ser usado na atualização dos JSONs.
+        para ser usado na atualizaÃ§Ã£o dos JSONs.
         """
         label_map: Dict[str, str] = {}
 
@@ -95,7 +95,6 @@ class ResistorAssotiationValidatorSystem(System):
             with open(netlist_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
         except FileNotFoundError:
-            print(f"[ResAssoc] Netlist não encontrado: {netlist_path}")
             return label_map
 
         resistor_line_indices: list[int] = []
@@ -135,9 +134,9 @@ class ResistorAssotiationValidatorSystem(System):
         - randomiza resistores dos netlists com valores comerciais;
         - atualiza os JSONs de circuito com os mesmos valores;
         - usa CircuitSolver.get_equivalent_resistance() para obter Req;
-        - quantiza Req para o valor comercial mais próximo;
-        - escolhe 1 ResistorItem da área como correto;
-        - randomiza os outros ResistorItems da área com outros valores comerciais.
+        - quantiza Req para o valor comercial mais prÃ³ximo;
+        - escolhe 1 ResistorItem da Ã¡rea como correto;
+        - randomiza os outros ResistorItems da Ã¡rea com outros valores comerciais.
         """
         resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
         resistors_by_area: dict[int, list[ResistorItem]] = {}
@@ -155,7 +154,6 @@ class ResistorAssotiationValidatorSystem(System):
             area_res_items = resistors_by_area.get(area, [])
 
             if not area_res_items:
-                print(f"[ResAssoc] Nenhum ResistorItem para área {area} (painel {control_pannel.pannel_id})")
                 continue
 
             netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
@@ -171,18 +169,16 @@ class ResistorAssotiationValidatorSystem(System):
                         label_updates
                     )
                 except FileNotFoundError:
-                    print(f"[ResAssoc] JSON de circuito não encontrado: {json_solution_path}")
-                except Exception as e:
-                    print(f"[ResAssoc] Erro ao atualizar JSON '{json_solution_path}': {e}")
+                    pass
+                except Exception:
+                    pass
 
             solver = CircuitSolver(netlist_path)
             if not solver.is_solved:
-                print(f"[ResAssoc] Falha ao resolver circuito do painel {control_pannel.pannel_id}")
                 continue
 
             Req_real = solver.get_equivalent_resistance()
             if Req_real is None:
-                print(f"[ResAssoc] Não foi possível calcular Req no painel {control_pannel.pannel_id}")
                 continue
 
             comercial_label, Req_com = self._closest_comercial_resistor(Req_real)
@@ -217,10 +213,10 @@ class ResistorAssotiationValidatorSystem(System):
 
     def update(self, entity_mn, dt):
         """
-        Aqui você compara o Req que o jogador montou no editor
+        Aqui vocÃª compara o Req que o jogador montou no editor
         com o solution_value (Req_com) calculado em set_solutions.
 
-        O CircuitEditor deve usar também CircuitSolver.get_equivalent_resistance()
+        O CircuitEditor deve usar tambÃ©m CircuitSolver.get_equivalent_resistance()
         para calcular o Req do circuito do jogador e salvar em CircuitManager:
             CircuitManager.get().add_circuit_values(
                 control_pannel.name_file,
@@ -250,5 +246,4 @@ class ResistorAssotiationValidatorSystem(System):
             is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
 
             if is_correct:
-                print('FUNCIONOUUUUUUU')
                 control_pannel.action()

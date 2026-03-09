@@ -1,4 +1,4 @@
-import pygame
+﻿import pygame
 from pygame import Rect
 from pathlib import Path
 from core.circuit_tools.serialization_manager import SerializationManager
@@ -99,18 +99,18 @@ class InputSystem(System):
 
         entities = self.entity_manager.get_entities_by_class(obj)
 
-        # Coleta todos os IDs já usados para este tipo de componente
+        # Coleta todos os IDs jÃ¡ usados para este tipo de componente
         used_ids = set()
         for e in entities:
             label: LabelComponent = e.get(LabelComponent)
             if label and label.name:
                 try:
-                    # nome é do tipo "R1", "V2", "I3" — extrai o número
+                    # nome Ã© do tipo "R1", "V2", "I3" â€” extrai o nÃºmero
                     used_ids.add(int(''.join(filter(str.isdigit, label.name))))
                 except ValueError:
                     pass
 
-        # Menor inteiro positivo não usado
+        # Menor inteiro positivo nÃ£o usado
         new_id = 1
         while new_id in used_ids:
             new_id += 1
@@ -310,7 +310,6 @@ class InputSystem(System):
 
             return True
         except Exception as e:
-            print(f"Cannot solve circuit {e}")
             return False
 
     def _is_debug_mode(self):

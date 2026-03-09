@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 from core.circuit_tools.SMNA import smna ,get_part_values
 from core.settings import PREFIXES
 import sympy
@@ -38,7 +38,7 @@ class CircuitSolver:
                     circuit_str += f"{clear_line}\n"
             return circuit_str
         except FileNotFoundError:
-            raise FileNotFoundError(f"Arquivo de netlist não encontrado em: {self.netlist_path}")
+            raise FileNotFoundError(f"Arquivo de netlist nÃ£o encontrado em: {self.netlist_path}")
 
     def _solve_circuit(self):
         try:
@@ -48,7 +48,7 @@ class CircuitSolver:
             
             symbolic_solution = sympy.solve(A * sympy.Matrix(X) - sympy.Matrix(Z), X)
             if not symbolic_solution:
-                raise RuntimeError("O sistema não tem uma solução única (pode ser indeterminado).")
+                raise RuntimeError("O sistema nÃ£o tem uma soluÃ§Ã£o Ãºnica (pode ser indeterminado).")
 
             component_values = get_part_values(self.circuit_df)
             self.solution = {
@@ -58,8 +58,6 @@ class CircuitSolver:
             self.is_solved = True
             
         except Exception as e:
-            print(f"ERRO: Falha ao analisar ou resolver o circuito '{self.netlist_path}'.")
-            print(f"Detalhe: {e}")
             self.is_solved = False
     def get_total_values(self) -> dict:
         if not self.is_solved:
@@ -122,9 +120,9 @@ class CircuitSolver:
 
     def get_source_results(self):
             """
-            Retorna infos sobre as fontes (tensão e corrente), independente do circuito:
-            - Fontes de tensão: usa corrente da MNA (I_Vx) e tensão pelos nós.
-            - Fontes de corrente: usa o valor da fonte e a tensão pelos nós.
+            Retorna infos sobre as fontes (tensÃ£o e corrente), independente do circuito:
+            - Fontes de tensÃ£o: usa corrente da MNA (I_Vx) e tensÃ£o pelos nÃ³s.
+            - Fontes de corrente: usa o valor da fonte e a tensÃ£o pelos nÃ³s.
 
             Formato:
             {
@@ -209,8 +207,8 @@ class CircuitSolver:
         """
         
         Returns:
-            Um dicionário no formato: 
-            {'R0': {'voltage': '10.00 V', 'current': '100.00 µA','power': '1.0 mW'}}
+            Um dicionÃ¡rio no formato: 
+            {'R0': {'voltage': '10.00 V', 'current': '100.00 ÂµA','power': '1.0 mW'}}
         """
         if not self.is_solved or self.circuit_df is None:
             return {}

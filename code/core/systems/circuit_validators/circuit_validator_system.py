@@ -1,4 +1,4 @@
-from random                                   import choice
+﻿from random                                   import choice
 from core.ecs                                 import System
 from entities.itens.control_pannel            import ControlPannel
 from core.managers.circuit_manager            import CircuitManager
@@ -30,7 +30,7 @@ class CircuitValidatorSystem(System):
 
             if area not in resistors_per_area or len(resistors_per_area[area]) == 0:
                 raise ValueError(
-                    f"Nenhum resistor disponível para a área {area} (painel {control_pannel.pannel_id})"
+                    f"Nenhum resistor disponÃ­vel para a Ã¡rea {area} (painel {control_pannel.pannel_id})"
                 )
 
             resistors_list  = resistors_per_area[area]
@@ -55,13 +55,12 @@ class CircuitValidatorSystem(System):
                 resistor_results[target_component][solution_type]['value']
             )
 
-            print(new_solution_value, control_pannel.pannel_id)
 
             control_pannel.solution_value = new_solution_value
         self.event_manager.post({'type':'solutions_done'})
     def _float_equals_percent(self,a: float, b: float, percent_tol: float) -> bool:
         """
-        Compara dois floats com tolerância percentual.
+        Compara dois floats com tolerÃ¢ncia percentual.
         
         """
         if a == 0 and b == 0:

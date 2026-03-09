@@ -8,6 +8,7 @@ from core.managers.life_manager  import LifeManager
 from scenes.home_scene           import HomeScene
 from scenes.main_menu_scene      import MainMenuScene
 from scenes.credits_scene        import CreditsScene
+from scenes.lighthouse_rekindle_scene import LighthouseRekindleScene
 from scenes.fases.level_1        import Level1
 from scenes.fases.level_2        import Level2
 from scenes.fases.explanation_level_3 import ExplanationLevel3
@@ -69,18 +70,6 @@ class FrameProfiler:
         if self._elapsed < self.report_interval:
             return
 
-        ms = lambda k: (self._totals[k] / self._samples) * 1000.0
-        print(
-            "[PROFILE] "
-            f"frame={ms('frame'):.2f}ms "
-            f"events={ms('events'):.2f} "
-            f"input={ms('input'):.2f} "
-            f"update={ms('update'):.2f} "
-            f"render={ms('render'):.2f} "
-            f"transition={ms('transition'):.2f} "
-            f"flip={ms('flip'):.2f}"
-        )
-
         for key in self._totals:
             self._totals[key] = 0.0
         self._elapsed = 0.0
@@ -90,6 +79,7 @@ class FrameProfiler:
 class Game:
     def __init__(self):
         pygame.init()
+        self._set_window_icon()
         info = pygame.display.Info()
         self.screen_width = info.current_w
         self.screen_height = info.current_h
@@ -111,8 +101,21 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change('main_menu')
         
+    def _set_window_icon(self):
+        code_dir = Path(__file__).resolve().parent
+        project_dir = code_dir.parent
+        icon_path = project_dir / "assets" / "images" / "icon" / "game_icon_64.png"
+
+        if not icon_path.exists():
+            return
+
+        try:
+            icon = pygame.image.load(str(icon_path))
+            pygame.display.set_icon(icon)
+        except pygame.error:
+            pass
+
         
     def register_fases(self):
         CODE_DIR = Path(__file__).resolve().parent
@@ -130,6 +133,7 @@ class Game:
         }
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
         self.scene_manager.register('credits', CreditsScene(self.screen))
+        self.scene_manager.register('ending_lighthouse', LighthouseRekindleScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
         self.scene_manager.register('death_transition', DeathTransitionScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))
@@ -143,8 +147,6 @@ class Game:
         for folder, level_class in folder_class_map.items():
             folder_path = (base_path / folder)
 
-            print(f"[DEBUG] Checking folder: {folder_path}")
-
             if folder_path.exists() and folder_path.is_dir():
                 for file_path in folder_path.glob("*.tmx"):
                     level_name = file_path.stem
@@ -154,8 +156,6 @@ class Game:
                         level_name,
                         level_class(self.screen, level_path=level_route)
                     )
-            else:
-                print(f"[WARNING] Folder not found: {folder_path}")
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0

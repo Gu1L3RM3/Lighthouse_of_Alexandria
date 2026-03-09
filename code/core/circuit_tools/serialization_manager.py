@@ -1,4 +1,4 @@
-import json
+﻿import json
 import os
 from pathlib import Path
 from typing import Any, List, Type, Dict
@@ -49,7 +49,7 @@ class SerializationManager:
 
         except FileNotFoundError:
             raise FileNotFoundError(
-                f"Arquivo não encontrado: {SerializationManager.STORAGE_FILE}"
+                f"Arquivo nÃ£o encontrado: {SerializationManager.STORAGE_FILE}"
             )
     def remove_droppable_entities(json_file_path: str):
         """
@@ -58,7 +58,7 @@ class SerializationManager:
         """
 
         if not os.path.exists(json_file_path):
-            raise FileNotFoundError(f"Arquivo '{json_file_path}' não encontrado.")
+            raise FileNotFoundError(f"Arquivo '{json_file_path}' nÃ£o encontrado.")
 
         try:
             with open(json_file_path, 'r', encoding='utf-8') as f:
@@ -92,8 +92,8 @@ class SerializationManager:
                 json.dump(data, f, indent=4)
 
 
-        except Exception as e:
-            print(f"Erro ao salvar: {e}")
+        except Exception:
+            pass
 
     @staticmethod
     def clear_eletric_storage():
@@ -101,8 +101,8 @@ class SerializationManager:
             with open(SerializationManager.STORAGE_FILE, 'w', encoding='utf-8') as f:
                 json.dump({}, f, indent=4)
 
-        except Exception as e:
-            print(f"Erro ao limpar: {e}")
+        except Exception:
+            pass
 
     @staticmethod
     def _resolve_circuit_path(filename: str | Path) -> Path:
@@ -118,25 +118,24 @@ class SerializationManager:
     def save_entities_to_json(entities: list[Entity], filename: str | Path):
         """
         Salva entities SEMPRE dentro da pasta 'circuitos', a menos que o caminho
-        já comece com 'circuitos/' ou seja absoluto.
+        jÃ¡ comece com 'circuitos/' ou seja absoluto.
 
         Aceita:
             'pannel_1'
             'pannel_1.json'
             'fase_4/pannel_1'
             'fase_4/pannel_1.json'
-            'circuitos/pannel_1.json'  (nesse caso não duplica a pasta)
+            'circuitos/pannel_1.json'  (nesse caso nÃ£o duplica a pasta)
         """
 
-        # garante extensão .json
+        # garante extensÃ£o .json
         filename_str = str(filename)
         my_filename = filename_str if filename_str.endswith(".json") else f"{filename_str}.json"
 
         final_path = SerializationManager._resolve_circuit_path(my_filename)
 
-        # Se já é absoluto ou já começa com 'circuitos', não prefixa de novo
+        # Se jÃ¡ Ã© absoluto ou jÃ¡ comeÃ§a com 'circuitos', nÃ£o prefixa de novo
         final_path.parent.mkdir(parents=True, exist_ok=True)
-        print(f"[SAVE] Salvando em: {final_path}")
         entities_data = [entity.to_dict() for entity in entities]
 
         final_path.write_text(
@@ -149,7 +148,7 @@ class SerializationManager:
     def load_entities_from_json(filename: str | Path) -> list[Entity]:
         """
         Carrega circuitos SEMPRE da pasta circuitos/, a menos que o caminho
-        já venha absoluto ou começando com 'circuitos/'.
+        jÃ¡ venha absoluto ou comeÃ§ando com 'circuitos/'.
 
         Aceita:
             'pannel_1'
@@ -159,7 +158,7 @@ class SerializationManager:
             'circuitos/pannel_1.json'
         """
 
-        # força extensão .json
+        # forÃ§a extensÃ£o .json
         filename_str = str(filename)
         if not filename_str.endswith(".json"):
             filename_str += ".json"
@@ -168,7 +167,7 @@ class SerializationManager:
 
         
 
-        # não precisa criar pasta pra load, mas não machuca:
+        # nÃ£o precisa criar pasta pra load, mas nÃ£o machuca:
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
         try:
@@ -182,11 +181,9 @@ class SerializationManager:
             return reconstructed
 
         except FileNotFoundError:
-            print(f"ERRO: O arquivo de circuito '{filepath}' não foi encontrado.")
             return []
 
         except json.JSONDecodeError:
-            print(f"Arquivo corrompido ou inválido: {filepath.resolve()}")
             return []
     @staticmethod
     def update_component_value(netlist_path: str, component_name: str, new_value: str):
@@ -204,19 +201,19 @@ class SerializationManager:
         for line in lines:
             stripped = line.strip()
 
-            # Mantém comentários e linhas vazias
+            # MantÃ©m comentÃ¡rios e linhas vazias
             if stripped.startswith("*") or stripped == "":
                 updated_lines.append(line)
                 continue
 
             parts = stripped.split()
 
-            # Se não é o componente alvo, mantemos a linha
+            # Se nÃ£o Ã© o componente alvo, mantemos a linha
             if parts[0] != component_name:
                 updated_lines.append(line)
                 continue
 
-            # Aqui sabemos que é o componente correto → substitui valor
+            # Aqui sabemos que Ã© o componente correto â†’ substitui valor
             if len(parts) >= 4:
                 parts[-1] = str(new_value)
                 updated_line = " ".join(parts) + "\n"
@@ -224,11 +221,11 @@ class SerializationManager:
                 component_found = True
                 continue
 
-            # Caso raro: componente sem valor → erro
-            raise ValueError(f"Linha inválida para componente '{component_name}': {line}")
+            # Caso raro: componente sem valor â†’ erro
+            raise ValueError(f"Linha invÃ¡lida para componente '{component_name}': {line}")
 
         if not component_found:
-            raise ValueError(f"Componente '{component_name}' não encontrado na netlist.")
+            raise ValueError(f"Componente '{component_name}' nÃ£o encontrado na netlist.")
 
         with open(netlist_path, "w", encoding="utf-8") as f:
             f.writelines(updated_lines)
@@ -269,7 +266,6 @@ class SerializationManager:
     @staticmethod
     def remove_resistor_by_name(json_file_path: str, resistor_name: str):
         if not os.path.exists(json_file_path):
-            print(f"[Serialization] Arquivo '{json_file_path}' não encontrado para remover resistor {resistor_name}.")
             return
 
         try:
@@ -277,7 +273,6 @@ class SerializationManager:
                 entities = json.load(f)
 
             if not isinstance(entities, list):
-                print(f"[Serialization] JSON raiz de '{json_file_path}' não é uma lista.")
                 return
 
             def is_target_resistor(entity: dict) -> bool:
@@ -294,12 +289,11 @@ class SerializationManager:
             with open(json_file_path, 'w', encoding='utf-8') as f:
                 json.dump(filtered, f, indent=4, ensure_ascii=False)
 
-            print(f"[Serialization] Removido resistor '{resistor_name}' de '{json_file_path}' (se existia).")
 
         except json.JSONDecodeError:
-            print(f"[Serialization] Falha ao decodificar o arquivo JSON '{json_file_path}'.")
-        except Exception as e:
-            print(f"[Serialization] Erro inesperado ao remover resistor '{resistor_name}' de '{json_file_path}': {e}")
+            pass
+        except Exception:
+            pass
 
     @staticmethod
     def reconstruct_entity(data: dict) -> Entity:

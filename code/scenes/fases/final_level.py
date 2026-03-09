@@ -207,7 +207,7 @@ class FinalLevel(BaseMaxPowerLevel):
 
         if all(panel.done for panel in panels):
             self._won = True
-            self.scene_manager.start_fade("home_scene", self.FINAL_FADE_SECONDS)
+            self.scene_manager.start_fade("ending_lighthouse", self.FINAL_FADE_SECONDS)
             return
 
         for panel in panels:
