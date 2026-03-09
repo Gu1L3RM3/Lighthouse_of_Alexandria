@@ -7,6 +7,7 @@ from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
 from scenes.home_scene           import HomeScene
 from scenes.main_menu_scene      import MainMenuScene
+from scenes.credits_scene        import CreditsScene
 from scenes.fases.level_1        import Level1
 from scenes.fases.level_2        import Level2
 from scenes.fases.explanation_level_3 import ExplanationLevel3
@@ -110,7 +111,7 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change('fase_8')
+        self.scene_manager.change('main_menu')
         
         
     def register_fases(self):
@@ -128,6 +129,7 @@ class Game:
             "final_fase": FinalLevel,
         }
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
+        self.scene_manager.register('credits', CreditsScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))
         self.scene_manager.register('death_transition', DeathTransitionScene(self.screen))
         self.scene_manager.register('level_1',Level1(self.screen))

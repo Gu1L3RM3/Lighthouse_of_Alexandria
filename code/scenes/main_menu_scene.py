@@ -115,8 +115,8 @@ class MainMenuScene(BaseScene):
     def _create_buttons(self):
         idle, pressed = self._button_surfaces()
         center_x = self.width // 2
-        first_y = int(self.height * 0.52)
-        gap = 112
+        first_y = int(self.height * 0.47)
+        gap = 96
 
         self.resume_button = Button(
             init_surface=idle.copy(),
@@ -139,17 +139,27 @@ class MainMenuScene(BaseScene):
             font_size=12,
             color_text=(245, 230, 170),
         )
-        self.exit_button = Button(
+        self.credits_button = Button(
             init_surface=idle.copy(),
             surface_pressed=pressed.copy(),
             pos_center=(center_x, first_y + gap * 2),
+            click_type=ClickType.AFTER_RELEASED,
+            action=self.open_credits,
+            text="CREDITOS",
+            font_size=12,
+            color_text=(245, 230, 170),
+        )
+        self.exit_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(center_x, first_y + gap * 3),
             click_type=ClickType.AFTER_RELEASED,
             action=self.exit_game,
             text="SAIR",
             font_size=12,
             color_text=(245, 230, 170),
         )
-        self.ui_manager.add(self.resume_button, self.start_button, self.exit_button)
+        self.ui_manager.add(self.resume_button, self.start_button, self.credits_button, self.exit_button)
 
     def _refresh_resume_button(self):
         can_resume = self.scene_manager.can_resume_scene()
@@ -168,6 +178,9 @@ class MainMenuScene(BaseScene):
     def start_new_game(self):
         self.life_manager.reset_lives()
         self.scene_manager.start_fade("home_scene", 0.6)
+
+    def open_credits(self):
+        self.scene_manager.start_fade("credits", 0.45)
 
     def exit_game(self):
         pygame.event.post(pygame.event.Event(pygame.QUIT))

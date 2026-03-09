@@ -889,7 +889,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R1",
-                "value": "12k"
+                "value": "4.7k"
             },
             {
                 "type": "Connectable",
