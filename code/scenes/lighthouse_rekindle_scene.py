@@ -3,6 +3,7 @@ from pygame import Event, Surface
 
 from scenes.base_scene import BaseScene
 from core.managers.scene_manager import SceneManager
+from core.managers.audio_manager import AudioManager
 
 
 class LighthouseRekindleScene(BaseScene):
@@ -23,12 +24,14 @@ class LighthouseRekindleScene(BaseScene):
         self.total_duration = 6.4
         self._resolved = False
         self.min_skip_time = 1.0
+        self._ignite_sfx_played = False
 
         self.background = self._build_background()
 
     def start(self):
         self.timer = 0.0
         self._resolved = False
+        self._ignite_sfx_played = False
         pygame.mouse.set_visible(False)
 
     def process_input(self, events: list[Event]) -> None:
@@ -98,6 +101,9 @@ class LighthouseRekindleScene(BaseScene):
         t = self.timer - self.hold_before_light
         if t <= 0:
             return
+        if not self._ignite_sfx_played:
+            AudioManager.get().play_sfx("sfx/lighthouse_ignite.wav", volume=0.95)
+            self._ignite_sfx_played = True
         progress = min(1.0, t / self.light_rise_duration)
         eased = progress * progress * (3.0 - 2.0 * progress)
 

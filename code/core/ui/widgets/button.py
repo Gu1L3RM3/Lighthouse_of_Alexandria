@@ -3,6 +3,7 @@ from core.ui.widgets.widget import Widget
 from core.ui.widgets.gesture_detector import *
 from core.ui.widgets.text import Text
 from typing import Callable
+from core.managers.audio_manager import AudioManager
 
 class Button(Widget):
     def __init__(self,
@@ -37,6 +38,9 @@ class Button(Widget):
         self.font_size = font_size
         self.color_text = color_text
         self.font = font
+        self.audio = AudioManager.get()
+        self._was_hovered_last_frame = False
+        self._was_pressed_last_frame = False
         self.set_text()
 
     def set_gesture_detector(self):
@@ -61,6 +65,12 @@ class Button(Widget):
     def update(self, dt):
         self.gesture_detector.update(dt)
         pressed = self.gesture_detector._hold_state if self.click_type == ClickType.HOLD else self.gesture_detector.is_pressed
+        if self.gesture_detector.is_hovered and not self._was_hovered_last_frame:
+            self.audio.play_ui("sfx/ui_hover.wav", volume=0.75)
+        if pressed and not self._was_pressed_last_frame:
+            self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+        self._was_hovered_last_frame = self.gesture_detector.is_hovered
+        self._was_pressed_last_frame = pressed
         self.current_surf = self.surface_pressed if pressed else self.init_surface
         self._rect = self.current_surf.get_rect(center=self.pos_center)
         self.gesture_detector.rect.center = self._rect.center

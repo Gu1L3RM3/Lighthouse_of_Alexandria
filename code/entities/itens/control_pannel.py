@@ -67,6 +67,9 @@ class ControlPannel(Item):
                 "source": "control_pannel",
                 "pannel_id": self.pannel_id,
             })
+        self.event_manager.post({'type': 'panel_solved', 'pannel_id': self.pannel_id})
+        if "luz" in self.action_type:
+            self.event_manager.post({'type': 'panel_light_on', 'pannel_id': self.pannel_id})
         self.done = True
         self.panel_status.set_done(True)
 

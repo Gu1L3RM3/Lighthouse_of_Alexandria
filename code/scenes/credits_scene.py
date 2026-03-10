@@ -4,6 +4,7 @@ from pygame import Event, Surface
 from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
+from core.managers.audio_manager import AudioManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -13,6 +14,7 @@ class CreditsScene(BaseScene):
         width, height = screen.get_size()
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
+        self.audio_manager = AudioManager.get()
         self.width = width
         self.height = height
 
@@ -47,6 +49,86 @@ class CreditsScene(BaseScene):
             "Licenca conforme distribuicao original da fonte",
         ]
 
+    def _wrap_line(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
+        words = text.split(" ")
+        lines: list[str] = []
+        current = ""
+
+        for word in words:
+            if not word:
+                continue
+
+            test = f"{current} {word}".strip()
+            if font.size(test)[0] <= max_width:
+                current = test
+                continue
+
+            if current:
+                lines.append(current)
+                current = ""
+
+            if font.size(word)[0] <= max_width:
+                current = word
+                continue
+
+            # Quebra palavras longas (ex.: URLs) para nunca ultrapassar a area.
+            chunk = ""
+            for ch in word:
+                test_chunk = chunk + ch
+                if font.size(test_chunk)[0] <= max_width:
+                    chunk = test_chunk
+                else:
+                    if chunk:
+                        lines.append(chunk)
+                    chunk = ch
+            current = chunk
+
+        if current:
+            lines.append(current)
+        return lines or [""]
+
+    def _content_layout(
+        self, max_width: int, max_height: int
+    ) -> tuple[pygame.font.Font, list[tuple[str, tuple[int, int, int] | None]], int, int]:
+        for font_size in range(12, 7, -1):
+            font = self.resources.load_font("PressStart2P-Regular.ttf", font_size)
+            line_gap = max(5, int(font.get_linesize() * 0.28))
+            blank_gap = max(8, int(font.get_linesize() * 0.72))
+
+            entries: list[tuple[str, tuple[int, int, int] | None]] = []
+            total_height = 0
+            for raw_line in self.credit_lines:
+                if not raw_line:
+                    entries.append(("", None))
+                    total_height += blank_gap
+                    continue
+
+                color = (236, 222, 188) if "http" not in raw_line else (147, 194, 255)
+                wrapped = self._wrap_line(raw_line, font, max_width)
+                for piece in wrapped:
+                    entries.append((piece, color))
+                    total_height += font.get_linesize() + line_gap
+
+            if entries and total_height > 0:
+                total_height -= line_gap
+
+            if total_height <= max_height:
+                return font, entries, line_gap, blank_gap
+
+        # Fallback: usa menor fonte e clip no render caso ainda exceda.
+        fallback_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        fallback_gap = max(4, int(fallback_font.get_linesize() * 0.24))
+        fallback_blank = max(7, int(fallback_font.get_linesize() * 0.64))
+        fallback_entries: list[tuple[str, tuple[int, int, int] | None]] = []
+        for raw_line in self.credit_lines:
+            if not raw_line:
+                fallback_entries.append(("", None))
+                continue
+            color = (236, 222, 188) if "http" not in raw_line else (147, 194, 255)
+            for piece in self._wrap_line(raw_line, fallback_font, max_width):
+                fallback_entries.append((piece, color))
+        return fallback_font, fallback_entries, fallback_gap, fallback_blank
+
     def _button_surfaces(self) -> tuple[Surface, Surface]:
         surf_idle = pygame.transform.scale(self.resources.load_image("buttons/wide.png"), (330, 94))
         surf_pressed = pygame.transform.scale(self.resources.load_image("buttons/wide_pressed.png"), (330, 94))
@@ -75,6 +157,7 @@ class CreditsScene(BaseScene):
     def process_input(self, events: list[Event]) -> None:
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
                 self.go_back()
                 return
             self.ui_manager.handle_event(event)
@@ -108,15 +191,31 @@ class CreditsScene(BaseScene):
         self.screen.blit(title, title.get_rect(center=(panel.centerx, panel.top + 52)))
         self.screen.blit(subtitle, subtitle.get_rect(center=(panel.centerx, panel.top + 92)))
 
-        y = panel.top + 132
-        line_spacing = 26
-        for raw_line in self.credit_lines:
-            if not raw_line:
-                y += line_spacing // 2
+        content_rect = pygame.Rect(
+            panel.left + 36,
+            panel.top + 132,
+            panel.width - 72,
+            panel.height - 170,
+        )
+        content_font, entries, line_gap, blank_gap = self._content_layout(content_rect.width, content_rect.height)
+
+        y = content_rect.top
+        prev_clip = self.screen.get_clip()
+        self.screen.set_clip(content_rect)
+        for text, color in entries:
+            if color is None:
+                y += blank_gap
                 continue
-            color = (236, 222, 188) if "http" not in raw_line else (147, 194, 255)
-            line = self.text_font.render(raw_line, True, color)
-            self.screen.blit(line, (panel.left + 36, y))
-            y += line_spacing
+
+            line_h = content_font.get_linesize()
+            if y + line_h > content_rect.bottom:
+                ellipsis = content_font.render("...", True, (168, 154, 126))
+                self.screen.blit(ellipsis, (content_rect.left, max(content_rect.top, content_rect.bottom - line_h)))
+                break
+
+            line = content_font.render(text, True, color)
+            self.screen.blit(line, (content_rect.left, y))
+            y += line_h + line_gap
+        self.screen.set_clip(prev_clip)
 
         self.ui_manager.draw(self.screen)

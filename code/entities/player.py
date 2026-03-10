@@ -14,6 +14,7 @@ from core.ecs import Entity
 from core.components.light_component import LightComponent
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
+from core.managers.audio_manager import AudioManager
 from pygame.key import get_pressed
 class Player(Entity):
     def __init__(self, x: float = 100, y: float = 100):
@@ -24,6 +25,9 @@ class Player(Entity):
         self._speed = 100
         self._current_animation_state = "" 
         self.attack=False
+        self.audio_manager = AudioManager.get()
+        self._step_interval = 0.24
+        self._step_timer = 0.0
 
         self._key_to_direction = {
             PLAYER_RIGHT: Vector2(1, 0),
@@ -71,6 +75,7 @@ class Player(Entity):
     def input(self, events: list[Event]):
         freeze:Freeze = self.get(Freeze)
         if freeze.active:
+             self._step_timer = 0.0
              return
 
         vel: Velocity = self.get(Velocity)
@@ -87,10 +92,19 @@ class Player(Entity):
             self._old_direction = self._direction.copy()
             dir_name = self._get_dir_name(self._direction)
             self._set_animation(f"walk_{dir_name}")
+            self._play_footstep()
         else:
             vel.vxy = (0, 0)
             dir_name = self._get_dir_name(self._old_direction)
             self._set_animation(f"idle_{dir_name}")
+            self._step_timer = 0.0
+
+    def _play_footstep(self):
+        now = pygame.time.get_ticks() / 1000.0
+        if now - self._step_timer < self._step_interval:
+            return
+        self._step_timer = now
+        self.audio_manager.play_sfx("sfx/footstep_1.wav", volume=0.42)
 
     def _get_dir_name(self, direction: Vector2) -> str:
         if direction.y != 0:

@@ -5,6 +5,7 @@ from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager import LifeManager
+from core.managers.audio_manager import AudioManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -15,6 +16,7 @@ class MainMenuScene(BaseScene):
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
+        self.audio_manager = AudioManager.get()
         self.width = width
         self.height = height
         self.low_res_size = (320, 180)
@@ -183,6 +185,7 @@ class MainMenuScene(BaseScene):
         self.scene_manager.start_fade("credits", 0.45)
 
     def exit_game(self):
+        self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
         pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def start(self):
@@ -193,8 +196,10 @@ class MainMenuScene(BaseScene):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self.audio_manager.play_ui("sfx/ui_click.wav", volume=0.9)
                     self.start_new_game()
                 elif event.key == pygame.K_ESCAPE:
+                    self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
                     self.resume_current_scene()
             self.ui_manager.handle_event(event)
 

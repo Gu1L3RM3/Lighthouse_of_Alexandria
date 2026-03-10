@@ -2,6 +2,7 @@ from pygame import Rect
 from core.ecs import Entity
 from core.managers.resource_manager import ResourceManager
 from core.managers.scene_manager import SceneManager
+from core.managers.audio_manager import AudioManager
 from core.components.position import Position
 from core.components.collider import Collider
 from core.components.animation_sprite import AnimateSprite
@@ -52,6 +53,7 @@ class Door(Entity):
         _ = event
         if self.is_open:
             return
+        AudioManager.get().play_sfx("sfx/door_open.wav", volume=0.92)
         animate_sprite:AnimateSprite= self.get(AnimateSprite)
         self.add(
             Sprite(

@@ -5,6 +5,7 @@ from core.settings               import FPS
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
+from core.managers.audio_manager import AudioManager
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -96,14 +97,18 @@ class Game:
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
+        self.audio_manager = AudioManager.get()
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
+        self._last_scene_name = None
         profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
         self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
 
     
         self.register_fases()
-        self.scene_manager.change('fase_3')
+        self.scene_manager.change('main_menu')
+        self._last_scene_name = self.scene_manager.active_scene_name
+        self.audio_manager.on_scene_changed(self._last_scene_name)
 
         
     def _set_window_icon(self):
@@ -189,6 +194,9 @@ class Game:
             self.event_manager.post(filtered_events)
 
             scene = self.scene_manager.active_scene
+            if self.scene_manager.active_scene_name != self._last_scene_name:
+                self._last_scene_name = self.scene_manager.active_scene_name
+                self.audio_manager.on_scene_changed(self._last_scene_name)
             scene.process_input(filtered_events)
             self.profiler.mark("input")
             scene.update(dt)

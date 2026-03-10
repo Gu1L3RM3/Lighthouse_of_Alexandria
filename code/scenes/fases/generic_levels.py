@@ -26,6 +26,7 @@ from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
 from core.managers.scene_manager import SceneManager
 from core.managers.death_flow_manager import DeathFlowManager
+from core.managers.audio_manager import AudioManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.managers.circuit_manager import CircuitManager
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
@@ -55,6 +56,7 @@ class BaseGenericLevel(BaseScene):
         
         self.storage_circuit = StorageCircuitManager()
         self.scene_manager = SceneManager.get()
+        self.audio_manager = AudioManager.get()
         self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
         self.dialogue_hud = DialogueInteractionHUDController(
@@ -169,9 +171,11 @@ class BaseGenericLevel(BaseScene):
             
     def after_close_old_paper(self,event):
         self.event_manager.post({'type':'release_freeze'})
+        self.audio_manager.play_sfx("sfx/paper_close.wav", volume=0.85)
         
     def open_old_paper(self,event):
         self.event_manager.post({'type':'request_freeze','type_request':'open paper'})
+        self.audio_manager.play_sfx("sfx/paper_open.wav", volume=0.9)
         def close_old_paper(widget):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
@@ -186,6 +190,7 @@ class BaseGenericLevel(BaseScene):
         
     def fall_player(self, event):
         self.can_set_resistors = True
+        self.audio_manager.play_sfx("sfx/player_fall.wav", volume=0.95)
         # Freeze immediately so next process_input cannot override the fall animation.
         if self.player and self.player.has(Freeze):
             self.player.get(Freeze).active = True
@@ -196,12 +201,14 @@ class BaseGenericLevel(BaseScene):
 
     def update_storage_circuit(self,event):
         value = event['value']
+        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type='Resistor',value=value)
         self.storage_circuit.save_eletric_storage()
 
     def update_storage_circuit_generic(self, event, component_type):
         value = event["value"]
+        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
@@ -235,6 +242,7 @@ class BaseGenericLevel(BaseScene):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
                 if target_panel:
+                    self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
                     target_panel.open_circuit_editor()
                 elif target_door:
                     target_door.try_enter(player)
@@ -291,6 +299,9 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, "CurrentSource"))
         self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("voutage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
+        self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
+        self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
+        self.event_manager.subscribe("panel_light_on", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
         self.subscribe_panels()

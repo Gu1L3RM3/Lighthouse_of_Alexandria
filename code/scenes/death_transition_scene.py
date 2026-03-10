@@ -6,6 +6,7 @@ from pygame import Event, Surface
 from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.death_flow_manager import DeathFlowManager
+from core.managers.audio_manager import AudioManager
 
 
 class DeathTransitionScene(BaseScene):
@@ -13,6 +14,7 @@ class DeathTransitionScene(BaseScene):
         width, height = screen.get_size()
         super().__init__(screen, width, height)
         self.death_flow_manager = DeathFlowManager.get()
+        self.audio_manager = AudioManager.get()
         self.title_font = self.resources.load_font("PressStart2P-Regular.ttf", 34)
         self.main_font = self.resources.load_font("PressStart2P-Regular.ttf", 20)
         self.small_font = self.resources.load_font("PressStart2P-Regular.ttf", 14)
@@ -32,6 +34,8 @@ class DeathTransitionScene(BaseScene):
         self.lives_before = int(context.get("lives_before", 0))
         self.lives_after = int(context.get("lives_after", 0))
         self.is_game_over = bool(context.get("is_game_over", False))
+        if self.is_game_over:
+            self.audio_manager.play_sfx("sfx/game_over.wav", volume=1.0)
         self._spawn_particles(42)
 
     def process_input(self, events: list[Event]) -> None:

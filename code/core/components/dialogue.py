@@ -69,7 +69,13 @@ class Dialogue(Component):
         
         text_center_pos = self.dialog_box_rect.center
         self.typewriter = TypewriterEffect(
-            text_center_pos, typewriter_text, font_name, font_size, font_color, speed=30
+            text_center_pos,
+            typewriter_text,
+            font_name,
+            font_size,
+            font_color,
+            speed=30,
+            sound_name="sfx/dialogue_type.wav",
         )
 
     def start(self, screen_size, font_name="PressStart2P-Regular.ttf", font_size=16, font_color=(255,255,255)):

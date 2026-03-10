@@ -7,6 +7,7 @@ from core.components.position import Position
 from core.components.always_on_top import AlwaysOnTop
 from core.managers.resource_manager import ResourceManager
 from core.managers.event_manager import EventManager
+from core.managers.audio_manager import AudioManager
 from entities.player import Player
 
 class Key(Item):
@@ -46,6 +47,7 @@ class Key(Item):
         sprite: Sprite = self.get(Sprite)
         sprite.image = self.hidden_surface
     def after_collected(self):
+        AudioManager.get().play_sfx("sfx/key_pickup.wav", volume=0.9)
         self.em.post(events={'type':'get_key'})
         self.em.post(events={'type':'kill_entity','id':self.id})
     def on_collect(self, entity):

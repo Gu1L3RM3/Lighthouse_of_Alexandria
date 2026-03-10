@@ -27,6 +27,8 @@ class TypewriterEffect(Widget):
 
         self.font = self.rm.load_font(font_name, font_size)
         self.sound = self.rm.load_sound(sound_name) if sound_name else None
+        if self.sound:
+            self.sound.set_volume(0.22)
 
         self._full_text = ""
         self._current_text = ""
@@ -51,9 +53,10 @@ class TypewriterEffect(Widget):
         if now - self._last_update > self._interval:
             self._last_update = now
             if self._current_index < len(self._full_text):
-                self._current_text += self._full_text[self._current_index]
+                next_char = self._full_text[self._current_index]
+                self._current_text += next_char
                 self._current_index += 1
-                if self.sound:
+                if self.sound and not next_char.isspace():
                     self.sound.play()
             else:
                 self.finished = True
