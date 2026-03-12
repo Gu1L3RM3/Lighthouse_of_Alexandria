@@ -106,7 +106,7 @@ class Game:
 
     
         self.register_fases()
-        self.scene_manager.change('fase_6')
+        self.scene_manager.change('fase_3')
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 

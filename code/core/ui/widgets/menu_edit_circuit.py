@@ -51,6 +51,8 @@ class MenuEditCircuit(Widget):
         self.input_system.set_brush(list_type,value)
     def to_eletric_list_click(self,eletric_list:Widget):
         self.input_system.exit_current_tool()
+        if hasattr(eletric_list, "update_data"):
+            eletric_list.update_data()
         self.ui_manager.add(eletric_list)
     def set_menu_top(self):
         self.surface_top = Surface((self.screen_width,self.cell_size*2))

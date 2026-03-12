@@ -16,9 +16,18 @@ class PathFollowingSystem(System):
             pos: Position    = e.get(Position)
             vel: Velocity    = e.get(Velocity)
 
-            if self._is_blocked(e, pf):
+            if self._is_frozen(e):
                 vel.vel.update(0, 0)
+                continue
+            if pf.done:
+                if pf.loop:
+                    pf.restart_path()
+                else:
+                    vel.vel.update(0, 0)
+                continue
+            if not pf.collision_rects:
                 pf.done = True
+                vel.vel.update(0, 0)
                 continue
 
             self._update_path_progress(pf, pos, dt)
@@ -26,14 +35,17 @@ class PathFollowingSystem(System):
 
             if pf.done and pf.loop:
                 pf.restart_path()
+                vel.vel.update(0, 0)
+                continue
+            if pf.done:
+                vel.vel.update(0, 0)
                 continue
             if e.has(AnimateSprite):
                 anim_entity = e  
                 anim_entity.set_direction(pf.direction)
 
-    def _is_blocked(self, entity, path_follower: PathFollower) -> bool:
-        frozen = entity.get(Freeze).active if entity.has(Freeze) else False
-        return frozen or path_follower.done or not path_follower.collision_rects
+    def _is_frozen(self, entity) -> bool:
+        return entity.get(Freeze).active if entity.has(Freeze) else False
 
     def _update_path_progress(self, pf: PathFollower, pos: Position, dt: float):
         if not pf.collision_rects:

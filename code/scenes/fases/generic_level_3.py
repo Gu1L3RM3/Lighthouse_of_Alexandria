@@ -39,7 +39,7 @@ class GenericLevel3(BaseGenericLevel):
         self.animation_system         = AnimationSystem()
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True)
+        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=False)
         self.circuit_validator_system = CircuitValidatorSystem(level_path=self.level_path)
         self.systems.update([
             self.freeze_system, self.physics_system, self.animation_system,

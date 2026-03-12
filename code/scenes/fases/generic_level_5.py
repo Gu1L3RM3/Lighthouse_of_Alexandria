@@ -53,7 +53,7 @@ class GenericLevel5(BaseGenericLevel):
         self.animation_system         = AnimationSystem()
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True)
+        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=False)
         self.phantom_ai_system        = PhantomAISystem(self.tile_map)
         self.stealth_timer_widget     = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)

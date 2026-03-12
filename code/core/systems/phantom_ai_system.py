@@ -22,6 +22,7 @@ class PhantomAISystem(System):
         self.stealth_active = False
         self.stealth_total_duration = 0.0
         self.cancel_reaggro = False
+        self.disable_player_chase = False
         self.chasing_before_stealth: set[int] = set()
         self._stealth_just_ended = False
         self._touch_triggered = False
@@ -42,8 +43,7 @@ class PhantomAISystem(System):
 
     def on_flask_collected(self, event: dict):
         _ = event
-        if not self.stealth_active:
-            return
+        self.disable_player_chase = True
         self.cancel_reaggro = True
 
     def update(self, entity_mn: EntityManager, dt: float):
@@ -69,6 +69,9 @@ class PhantomAISystem(System):
 
         if self.stealth_active:
             self._force_return_all(phantoms)
+        elif self.disable_player_chase:
+            self._force_return_all(phantoms)
+            self.chasing_before_stealth.clear()
         elif self._stealth_just_ended:
             self._on_stealth_end(phantoms)
 
@@ -84,6 +87,17 @@ class PhantomAISystem(System):
                 self.event_manager.post({"type": "player_touched_enemy"})
 
             if self.stealth_active:
+                ai.was_player_in_range = False
+                continue
+
+            if self.disable_player_chase:
+                if ai.state == PhantomAI.STATE_CHASE:
+                    self._set_return_state(phantom, ai)
+                elif ai.state == PhantomAI.STATE_RETURN:
+                    self._update_return_state(phantom, ai)
+                else:
+                    self._ensure_patrol(phantom, ai, vel)
+                ai.was_player_in_range = False
                 continue
 
             in_range = (enemy_center - player_center).length_squared() <= ai.detection_radius * ai.detection_radius
