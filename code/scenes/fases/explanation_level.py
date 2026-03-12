@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 import pygame
 
 from pygame import Event, Surface
@@ -37,6 +38,7 @@ class BaseExplanationLevel(BaseScene):
         next_scene: str,
         scale: int = 2,
     ):
+        self.map_path = map_path
         loader = TileMapLoader()
         self.tile_map = loader.load(f"fases/{map_path}.tmx")
         self.scale = scale
@@ -68,6 +70,8 @@ class BaseExplanationLevel(BaseScene):
 
         self.last_dialogue_name = self._get_last_dialogue_name()
         self.dialogue_image_sequences = self.get_dialogue_image_sequences()
+        self._warned_missing_explanation_images: set[str] = set()
+        self._validate_dialogue_image_sequences()
         self._active_dialogue_image_widget: DialogueImageSequenceWidget | None = None
         self.attention_manager = AttentionManager(self.entity_mn)
         self.dialogue_hud = DialogueInteractionHUDController(
@@ -156,22 +160,83 @@ class BaseExplanationLevel(BaseScene):
         entities = self.entity_mn.get_entities_by_class(cls)
         return entities[0] if entities else None
 
-    def get_dialogue_image_sequences(self) -> dict[str, list[str]]:
+    def get_dialogue_image_sequences(self) -> dict:
         return {}
+
+    def _extract_dialogue_media_entry(self, media_entry) -> tuple[list[str], list[str]]:
+        if isinstance(media_entry, dict):
+            images = list(media_entry.get("images", []))
+            captions = list(media_entry.get("captions", []))
+        else:
+            images = list(media_entry or [])
+            captions = []
+
+        images = [str(path) for path in images if path]
+        captions = [str(text) for text in captions]
+        return images, captions
+
+    def _normalize_dialogue_media(
+        self,
+        dialogue: Dialogue,
+        image_paths: list[str],
+        captions: list[str],
+    ) -> tuple[list[str], list[str]]:
+        if not image_paths:
+            return [], []
+
+        target_len = max(1, len(dialogue.lines))
+        if len(image_paths) < target_len:
+            image_paths.extend([image_paths[-1]] * (target_len - len(image_paths)))
+        elif len(image_paths) > target_len:
+            image_paths = image_paths[:target_len]
+
+        if len(captions) < target_len:
+            captions.extend([""] * (target_len - len(captions)))
+        elif len(captions) > target_len:
+            captions = captions[:target_len]
+
+        return image_paths, captions
+
+    def _warn_missing_explanation_image(self, relative_path: str):
+        if relative_path in self._warned_missing_explanation_images:
+            return
+        self._warned_missing_explanation_images.add(relative_path)
+        print(f"[BaseExplanationLevel] Imagem de explicacao nao encontrada: {relative_path}")
+
+    def _validate_dialogue_image_sequences(self):
+        for dialogue_name, media_entry in self.dialogue_image_sequences.items():
+            image_paths, captions = self._extract_dialogue_media_entry(media_entry)
+            if not image_paths:
+                print(
+                    f"[BaseExplanationLevel] Sequencia vazia em {self.map_path}::{dialogue_name}"
+                )
+                continue
+            if captions and len(captions) != len(image_paths):
+                print(
+                    f"[BaseExplanationLevel] Legendas e imagens com tamanhos diferentes em "
+                    f"{self.map_path}::{dialogue_name} ({len(captions)} vs {len(image_paths)})."
+                )
+            for relative_path in image_paths:
+                full_path = Path(ASSETS_DIR) / "images" / relative_path
+                if not full_path.exists():
+                    self._warn_missing_explanation_image(relative_path)
 
     def _start_dialogue_image_sequence(self, event):
         entity = event.get("entity")
         if not isinstance(entity, DialogueArea):
             return
 
-        image_paths = self.dialogue_image_sequences.get(entity.name)
+        media_entry = self.dialogue_image_sequences.get(entity.name)
+        image_paths, captions = self._extract_dialogue_media_entry(media_entry)
         if not image_paths:
             return
 
         dialogue: Dialogue = entity.get(Dialogue)
+        image_paths, captions = self._normalize_dialogue_media(dialogue, image_paths, captions)
         self._active_dialogue_image_widget = DialogueImageSequenceWidget(
             dialogue_component=dialogue,
             image_paths=image_paths,
+            captions=captions,
         )
         self.ui_manager.add(self._active_dialogue_image_widget)
 
