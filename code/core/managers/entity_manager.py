@@ -35,6 +35,11 @@ class EntityManager:
     def remove_entity(self, entity: Entity):
         if entity.id in self._entities:
             del self._entities[entity.id]
+    def remove_entities_by_class(self, entity_class: Type[Entity]):
+        self._entities = {
+            eid: e for eid, e in self._entities.items()
+            if not isinstance(e, entity_class)
+        }
     
     def clear_all(self):
         self._entities.clear()

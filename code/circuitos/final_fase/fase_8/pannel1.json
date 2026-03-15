@@ -18,7 +18,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R2",
-                "value": "10k"
+                "value": "8.2k"
             },
             {
                 "type": "Connectable",
@@ -29,7 +29,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -52,7 +52,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R5",
-                "value": "10k"
+                "value": "27"
             },
             {
                 "type": "Connectable",
@@ -63,7 +63,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -91,15 +91,15 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "up",
                     "down",
                     "top",
-                    "up",
                     "bottom"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -122,7 +122,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R4",
-                "value": "47k"
+                "value": "1.5"
             },
             {
                 "type": "Connectable",
@@ -133,7 +133,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -161,7 +161,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -189,7 +189,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -217,7 +217,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -245,7 +245,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -267,14 +267,14 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "right",
                     "left",
-                    "down",
-                    "right"
+                    "down"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -302,7 +302,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -330,7 +330,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -352,15 +352,15 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "right",
                     "left",
-                    "down",
                     "up",
-                    "right"
+                    "down"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -388,7 +388,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -416,7 +416,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -444,7 +444,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -472,7 +472,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -500,7 +500,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -528,7 +528,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -556,7 +556,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -584,7 +584,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -612,7 +612,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -640,7 +640,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -668,7 +668,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -696,7 +696,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -724,7 +724,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -752,7 +752,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -780,7 +780,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -809,7 +809,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -831,14 +831,14 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
                     "up",
+                    "top",
                     "bottom"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -866,7 +866,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -900,7 +900,7 @@
             },
             {
                 "type": "Dropped",
-                "can_dropped": false
+                "can_dropped": true
             }
         ]
     },
@@ -922,13 +922,13 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     },
@@ -951,20 +951,20 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R3",
-                "value": "25k"
+                "value": "68"
             },
             {
                 "type": "Connectable",
                 "connections": [
+                    "up",
                     "down",
                     "top",
-                    "up",
                     "bottom"
                 ]
             },
             {
                 "type": "Dropped",
-                "can_dropped": true
+                "can_dropped": false
             }
         ]
     }

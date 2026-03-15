@@ -1,6 +1,6 @@
 from random import choice
 import json
-
+import math
 from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
@@ -8,26 +8,41 @@ from core.managers.entity_manager import EntityManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.circuit_tools.serialization_manager import SerializationManager
 from entities.itens.control_pannel import ControlPannel
-from core.settings import path_in_circuitos, path_in_ltspice
+from entities.itens.resistor_item import ResistorItem
+from core.components.label_component import LabelComponent
+from core.settings import path_in_circuitos, path_in_ltspice, COMERCIAL_RESISTORS
 
 
 class MaxPowerTransferValidatorSystem(System):
+    """
+    Validador de máxima transferência de potência.
+    Usa as rotinas novas do CircuitSolver para calcular Vth/Rth do componente alvo.
+    """
+
     def __init__(self, level_path: str, tolerance_percent: float = 2.0):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
+        self.debug = True  # habilita logs simples no console
 
-    def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
+    # ------------------------------------------------------
+    # Utilidades
+    # ------------------------------------------------------
+    def _log(self, msg: str):
+        if self.debug:
+            print(f"[MaxPowerTransfer] {msg}")
+
+    @staticmethod
+    def _float_equals_percent(a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
             return True
         reference = max(abs(a), abs(b))
-        diff = abs(a - b)
-        allowed = reference * (percent_tol / 100.0)
-        return diff <= allowed
+        return abs(a - b) <= reference * (percent_tol / 100.0)
 
-    def _parse_solution_types(self, raw: str) -> set[str]:
+    @staticmethod
+    def _parse_solution_types(raw: str) -> set[str]:
         if not raw:
             return {"power"}
         tokens = [p.strip().lower() for p in str(raw).split(";") if p.strip()]
@@ -35,23 +50,56 @@ class MaxPowerTransferValidatorSystem(System):
         parsed = {t for t in tokens if t in allowed}
         return parsed or {"power"}
 
-    def _pick_source(self, area_sources: dict) -> tuple[str | None, str | None]:
-        v_list = list(area_sources.get("voltage", []))
-        i_list = list(area_sources.get("current", []))
+    @staticmethod
+    def _label_to_value(label: str) -> float | None:
+        """Converte rótulo de resistor (com ou sem sufixo) para valor em ohms."""
+        if label is None:
+            return None
+        label = str(label).strip()
+        if not label:
+            return None
+        if label in COMERCIAL_RESISTORS:
+            return float(COMERCIAL_RESISTORS[label])
 
-        if v_list:
-            chosen = choice(v_list)
-            v_list.remove(chosen)
-            area_sources["voltage"] = v_list
-            return "V1", chosen
-        if i_list:
-            chosen = choice(i_list)
-            i_list.remove(chosen)
-            area_sources["current"] = i_list
-            return "I1", chosen
-        return None, None
+        suffix_map = {"k": 1e3, "K": 1e3, "m": 1e-3, "M": 1e6}
+        for suf, mult in suffix_map.items():
+            if label.endswith(suf):
+                try:
+                    return float(label[:-1]) * mult
+                except Exception:
+                    return None
 
-    def _net_has_component(self, netlist_path: str, component_name: str) -> bool:
+        try:
+            return float(label)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _nearest_commercial_resistor(target_value: float, allowed_labels: list[str] | None = None) -> tuple[str | None, float | None]:
+        """
+        Escolhe o valor comercial mais prÃ³ximo de target_value.
+        Busca sempre na tabela completa; quem chama garante colocar o valor entre os itens.
+        Retorna (label, valor_em_ohms) ou (None, None) se nÃ£o houver candidato.
+        """
+        if target_value is None or not math.isfinite(target_value) or target_value <= 0:
+            return None, None
+
+        candidates = [(lbl, float(val)) for lbl, val in COMERCIAL_RESISTORS.items()]
+
+        if not candidates:
+            return None, None
+
+        label, value = min(candidates, key=lambda item: abs(item[1] - target_value))
+        return label, value
+
+    @staticmethod
+    def _random_resistor_label() -> str:
+        from random import choice as _choice
+
+        return _choice(list(COMERCIAL_RESISTORS.keys()))
+
+    @staticmethod
+    def _net_has_component(netlist_path: str, component_name: str) -> bool:
         try:
             with open(netlist_path, "r", encoding="utf-8") as f:
                 for raw in f:
@@ -64,6 +112,22 @@ class MaxPowerTransferValidatorSystem(System):
         except Exception:
             return False
         return False
+
+    @staticmethod
+    def _list_resistors(netlist_path: str) -> list[str]:
+        names = []
+        try:
+            with open(netlist_path, "r", encoding="utf-8") as f:
+                for raw in f:
+                    line = raw.strip()
+                    if not line or line.startswith("*") or line.startswith("."):
+                        continue
+                    parts = line.split()
+                    if parts and parts[0].startswith("R"):
+                        names.append(parts[0])
+        except Exception:
+            pass
+        return names
 
     def _pick_source_for_net(self, area_sources: dict, solution_netlist: str) -> tuple[str | None, str | None]:
         has_v1 = self._net_has_component(solution_netlist, "V1")
@@ -86,14 +150,16 @@ class MaxPowerTransferValidatorSystem(System):
 
         return None, None
 
-    def _pick_resistor_for_area(self, area_resistors: list[str]) -> str | None:
+    @staticmethod
+    def _pick_resistor_for_area(area_resistors: list[str]) -> str | None:
         if not area_resistors:
             return None
         chosen = choice(area_resistors)
         area_resistors.remove(chosen)
         return chosen
 
-    def _update_resistor_label_value_in_json(self, json_path: str, resistor_name: str, new_value: str):
+    @staticmethod
+    def _update_resistor_label_value_in_json(json_path: str, resistor_name: str, new_value: str):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -120,7 +186,14 @@ class MaxPowerTransferValidatorSystem(System):
         except Exception:
             return
 
-    def _read_solution_targets(self, cp: ControlPannel, solution_netlist: str) -> dict | None:
+    # ------------------------------------------------------
+    # Pré-processamento das soluções esperadas
+    # ------------------------------------------------------
+    def _compute_expected_from_thevenin(self, cp: ControlPannel, solution_netlist: str, load_resistance: float | None = None) -> dict | None:
+        """
+        Usa o CircuitSolver.get_thevenin para obter Vth e Rth do componente alvo
+        e derivar as grandezas de máxima potência.
+        """
         target_name = str(cp.target_component).strip()
         if not target_name:
             return None
@@ -129,28 +202,42 @@ class MaxPowerTransferValidatorSystem(System):
         if not solver.is_solved:
             return None
 
-        resistor_results = solver.get_resistor_results() or {}
-        target = resistor_results.get(target_name)
-        if not target:
+        th = solver.get_thevenin(target_name)
+        if not th:
             return None
 
-        voltage = float(target["voltage"]["value"])
-        current = float(target["current"]["value"])
-        power = float(target["power"]["value"])
-        resistance = abs(voltage / current) if abs(current) > 1e-12 else float("inf")
+        vth = float(th["voltage"]["value"])
+        rth = float(th["resistance"]["value"])
+        if rth <= 0:
+            return None
+
+        rl = float(load_resistance) if load_resistance and load_resistance > 0 else rth
+
+        # Para qualquer RL: P = (Vth**2 * RL) / (Rth + RL)**2
+        expected_power = (vth ** 2 * rl) / ((rth + rl) ** 2)
+        expected_voltage = vth * (rl / (rth + rl))
+        expected_current = expected_voltage / rl
 
         return {
             "target": target_name,
-            "voltage": voltage,
-            "current": current,
-            "power": power,
-            "resistance": resistance,
+            "vth": vth,
+            "rth": rth,
+            "rl": rl,
+            "power": expected_power,
+            "resistance": rl,
+            "voltage": expected_voltage,
+            "current": expected_current,
         }
 
     def set_solutions(self, event: dict, entity_manager: EntityManager):
         sources_per_area = event.get("sources", {})
         resistors_per_area = event.get("resistors", {})
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
+        resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
+
+        items_by_area: dict[int, list[ResistorItem]] = {}
+        for item in resistor_items:
+            items_by_area.setdefault(item.area_id, []).append(item)
 
         for cp in control_pannels:
             if not cp.active:
@@ -168,39 +255,70 @@ class MaxPowerTransferValidatorSystem(System):
                 if source_name and source_value is not None:
                     try:
                         SerializationManager.update_component_value(solution_netlist, source_name, source_value)
+                        self._log(f"Painel {cp.pannel_id}: fonte {source_name} ajustada para {source_value}")
                     except Exception:
                         pass
 
-            area_resistors = resistors_per_area.get(area)
-            if isinstance(area_resistors, list):
-                chosen_r = self._pick_resistor_for_area(area_resistors)
-                if chosen_r:
-                    if self._net_has_component(solution_netlist, "R1"):
-                        try:
-                            SerializationManager.update_component_value(solution_netlist, "R1", chosen_r)
-                        except Exception:
-                            pass
-                    if self._net_has_component(solution_netlist, "R2"):
-                        try:
-                            SerializationManager.update_component_value(solution_netlist, "R2", chosen_r)
-                        except Exception:
-                            pass
-                    if self._net_has_component(panel_netlist, "R1"):
-                        try:
-                            SerializationManager.update_component_value(panel_netlist, "R1", chosen_r)
-                        except Exception:
-                            pass
-                    self._update_resistor_label_value_in_json(panel_json, "R1", chosen_r)
-                    self._update_resistor_label_value_in_json(panel_solution_json, "R1", chosen_r)
+            area_resistors = list(resistors_per_area.get(area, []))
 
-            solution_values = self._read_solution_targets(cp, solution_netlist)
-            if not solution_values:
+            # Randomiza todos os resistores do circuito problema, exceto o alvo (R1).
+            target_resistor = cp.target_component or "R1"
+            for r_name in self._list_resistors(solution_netlist):
+                if r_name == target_resistor:
+                    continue
+                rand_label = self._random_resistor_label()
+                for net_path in (solution_netlist, panel_netlist):
+                    if self._net_has_component(net_path, r_name):
+                        try:
+                            SerializationManager.update_component_value(net_path, r_name, rand_label)
+                        except Exception:
+                            pass
+                self._update_resistor_label_value_in_json(panel_json, r_name, rand_label)
+                self._update_resistor_label_value_in_json(panel_solution_json, r_name, rand_label)
+
+            base_expected = self._compute_expected_from_thevenin(cp, solution_netlist)
+            if not base_expected:
+                self._log(f"Painel {cp.pannel_id}: falha ao calcular Thevenin.")
                 continue
 
-            cp.solution_value = solution_values
+            chosen_label, chosen_value = self._nearest_commercial_resistor(base_expected["rth"], area_resistors)
+            self._log(
+                f"Painel {cp.pannel_id}: Rth={base_expected['rth']:.3g} Ohm -> "
+                f"resistor comercial escolhido {chosen_label} ({chosen_value} Ohm)"
+            )
+            if chosen_value is None:
+                chosen_value = base_expected["rth"]
+
+            # Garante que o resistor resposta esteja entre os itens da fase.
+            if chosen_label and chosen_label not in area_resistors:
+                if area_resistors:
+                    area_resistors[0] = chosen_label
+                else:
+                    area_resistors.append(chosen_label)
+            if chosen_label:
+                items = items_by_area.get(area, [])
+                if items:
+                    item = items[0]
+                    item.value = chosen_label
+                    lbl = item.get(LabelComponent)
+                    if lbl:
+                        lbl.value = chosen_label
+                    self._log(f"Painel {cp.pannel_id}: item de resistor atualizado para {chosen_label}")
+
+            # R1 permanece para o jogador substituir; a valida��o usa chosen_value como carga.
+            cp.solution_value = self._compute_expected_from_thevenin(cp, solution_netlist, load_resistance=chosen_value)
+            if cp.solution_value:
+                self._log(
+                    f"Painel {cp.pannel_id}: expectativas -> P={cp.solution_value['power']:.3g}W, "
+                    f"V={cp.solution_value['voltage']:.3g}V, I={cp.solution_value['current']:.3g}A, "
+                    f"RL={cp.solution_value['rl']:.3g} Ohm"
+                )
 
         self.event_manager.post({"type": "solutions_done"})
 
+    # ------------------------------------------------------
+    # Loop de validação em runtime
+    # ------------------------------------------------------
     def update(self, entity_mn, dt):
         _ = dt
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
@@ -242,20 +360,26 @@ class MaxPowerTransferValidatorSystem(System):
 
             all_ok = True
             if "power" in requested_types:
-                exp_p = float(expected["power"])
-                all_ok = all_ok and self._float_equals_percent(ans_p, exp_p, self.tolerance_percent)
+                all_ok = all_ok and self._float_equals_percent(ans_p, float(expected["power"]), self.tolerance_percent)
 
             if all_ok and "resistance" in requested_types:
-                exp_r = float(expected["resistance"])
-                all_ok = all_ok and self._float_equals_percent(ans_r, exp_r, self.tolerance_percent)
+                all_ok = all_ok and self._float_equals_percent(ans_r, float(expected["resistance"]), self.tolerance_percent)
 
             if all_ok and "voltage" in requested_types:
-                exp_v = float(expected["voltage"])
-                all_ok = all_ok and self._float_equals_percent(ans_v, exp_v, self.tolerance_percent)
+                all_ok = all_ok and self._float_equals_percent(ans_v, float(expected["voltage"]), self.tolerance_percent)
 
             if all_ok and "current" in requested_types:
-                exp_i = float(expected["current"])
-                all_ok = all_ok and self._float_equals_percent(ans_i, exp_i, self.tolerance_percent)
+                all_ok = all_ok and self._float_equals_percent(ans_i, float(expected["current"]), self.tolerance_percent)
+
+            self._log(
+                f"Painel {cp.pannel_id}: medido P={ans_p:.3g}W V={ans_v:.3g}V I={ans_i:.3g}A R={ans_r:.3g} Ohm "
+                f"| esperado P={expected['power']:.3g}W V={expected['voltage']:.3g}V I={expected['current']:.3g}A "
+                f"RL={expected['rl']:.3g} Ohm -> {'OK' if all_ok else 'FAIL'}"
+            )
 
             if all_ok:
                 cp.action()
+
+
+
+

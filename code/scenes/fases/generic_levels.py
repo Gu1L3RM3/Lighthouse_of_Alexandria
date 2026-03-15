@@ -1,6 +1,7 @@
 import pygame
 from pygame import Surface
 from core.components.animation_sprite import AnimateSprite
+from core.components.area_trigger import AreaTrigger
 from core.components.label_component import LabelComponent
 from core.components.dialogue import Dialogue
 from core.components.collider import Collider
@@ -220,6 +221,7 @@ class BaseGenericLevel(BaseScene):
         for event in events:
             self.ui_manager.handle_event(event)
         self._handle_panel_interaction(events)
+        self._handle_old_paper_interaction(events)
         self.player.input(events)
 
     def _handle_panel_interaction(self, events):
@@ -247,6 +249,38 @@ class BaseGenericLevel(BaseScene):
                 elif target_door:
                     target_door.try_enter(player)
                 self.interaction_key_widget.set_visible(False)
+                break
+
+    def _can_old_paper_interact(self) -> bool:
+        old_papers = self.entity_mn.get_entities_by_class(OldPaper)
+        if not old_papers:
+            return False
+        paper = old_papers[0]
+        if not paper.has(AreaTrigger) or not paper.has(Position):
+            return False
+        if not self.player or not self.player.has(Position) or not self.player.has(Collider):
+            return False
+
+        trigger: AreaTrigger = paper.get(AreaTrigger)
+        pos: Position = paper.get(Position)
+        if not trigger or not pos:
+            return False
+
+        rect = trigger.get_rect(pos.x, pos.y)
+        player_rect = self.player.get(Collider).get_rect(*self.player.get(Position).pos)
+        return rect.colliderect(player_rect)
+
+    def _handle_old_paper_interaction(self, events):
+        can_interact = self._can_old_paper_interact()
+        if can_interact:
+            self.dialogue_hud.update(self.player, extra_interaction=True)
+        for event in events:
+            if (
+                can_interact
+                and event.type == pygame.KEYDOWN
+                and event.key == KEY_DIALOG
+            ):
+                self.event_manager.post({"type": "open_old_paper"})
                 break
 
     def update(self, dt):

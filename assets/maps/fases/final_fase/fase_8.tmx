@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="52" height="72" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="1080">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="52" height="72" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="1085">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -611,71 +611,15 @@
    </properties>
    <point/>
   </object>
-  <object id="217" name="voltage_source" x="485" y="945.09">
+  <object id="15" name="resistor" x="255.697" y="1042.91">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
-    <property name="valor" value="10"/>
+    <property name="valor" value="100"/>
    </properties>
    <point/>
   </object>
-  <object id="218" name="voltage_source" x="487.667" y="653.09">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="2"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="504" name="voltage_source" x="529" y="417.757">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="1"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="507" name="voltage_source" x="722.333" y="791.09">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="2"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="505" name="voltage_source" x="529" y="417.757">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="2"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="506" name="voltage_source" x="98.333" y="643.09">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="4"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="502" name="current_source" x="70.333" y="357.757">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="4"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="503" name="current_source" x="231.667" y="623.09">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="3"/>
-    <property name="valor" value="10"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="15" name="resistor" x="249.697" y="1046.91">
+  <object id="1081" name="resistor" x="526.697" y="945.91">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
@@ -715,6 +659,22 @@
    </properties>
    <point/>
   </object>
+  <object id="1083" name="resistor" x="528.333" y="401.091">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="2"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1082" name="resistor" x="225.333" y="640.091">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="2"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
   <object id="22" name="resistor" x="672" y="1032">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -731,7 +691,23 @@
    </properties>
    <point/>
   </object>
+  <object id="1084" name="resistor" x="710.848" y="649.697">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="4"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
   <object id="24" name="resistor" x="750.667" y="353.03">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1080" name="resistor" x="764.667" y="603.03">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="3"/>
@@ -812,12 +788,6 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="duration" type="float" value="6"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="509" name="anti_reaggro_flask" x="784" y="576">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
    </properties>
    <point/>
   </object>

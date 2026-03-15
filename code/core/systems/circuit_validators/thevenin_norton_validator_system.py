@@ -1,42 +1,246 @@
-﻿from random import choice
+﻿from __future__ import annotations
 
+from collections import defaultdict
+from copy import deepcopy
+from random import choice, shuffle
 from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.components.label_component import LabelComponent
 from entities.itens.control_pannel import ControlPannel
-from core.settings import path_in_circuitos, path_in_ltspice
+from entities.itens.current_source_item import CurrentSourceItem
+from entities.itens.resistor_item import ResistorItem
+from entities.itens.voltage_source_item import VoutageSourceItem
+from core.settings import (
+    COMERCIAL_RESISTORS,
+    MAP_CURRENT_SOURCE_POOL,
+    MAP_VOLTAGE_SOURCE_POOL,
+    path_in_circuitos,
+    path_in_ltspice,
+)
+from utils.setter_values import SetterValues
 
 
 class TheveninNortonValidatorSystem(System):
+    TARGET_RESISTOR = "R1"
+
     def __init__(self, level_path: str, tolerance_percent: float = 2.0):
         super().__init__()
         self.level_path = level_path
+        self.tolerance_percent = tolerance_percent
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
-        self.tolerance_percent = tolerance_percent
 
-    def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
+        self.debug_panel_logs = True
+        self.runtime_status_logs = False
+        self._panel_status_cache: dict[int, str] = {}
+
+        self._resistor_pool = sorted(
+            [(str(label), float(value)) for label, value in COMERCIAL_RESISTORS.items()],
+            key=lambda pair: pair[1],
+        )
+        self._voltage_pool = self._build_labeled_pool(MAP_VOLTAGE_SOURCE_POOL)
+        self._current_pool = self._build_labeled_pool(MAP_CURRENT_SOURCE_POOL)
+
+    # =========================================================
+    # LOG
+    # =========================================================
+    def _log(self, message: str):
+        if self.debug_panel_logs:
+            print(f"[fase_6][validator] {message}")
+
+    def _set_panel_status(self, panel_id: int, status: str):
+        if self._panel_status_cache.get(panel_id) == status:
+            return
+        self._panel_status_cache[panel_id] = status
+        if self.runtime_status_logs or status == "solved":
+            self._log(f"panel={panel_id} status={status}")
+
+    # =========================================================
+    # UTIL
+    # =========================================================
+    @staticmethod
+    def _safe_float(value) -> float | None:
+        try:
+            return float(value)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _parse_numeric_value(raw_value) -> float | None:
+        if raw_value is None:
+            return None
+
+        text = str(raw_value).strip().replace(" ", "")
+        if not text:
+            return None
+
+        if text.lower().endswith("meg") and len(text) > 3:
+            base = text[:-3]
+            try:
+                return float(base) * 1e6
+            except Exception:
+                return None
+
+        if len(text) > 1:
+            last = text[-1]
+            if last == "M":
+                try:
+                    return float(text[:-1]) * 1e6
+                except Exception:
+                    return None
+
+            suffix_map = {
+                "t": 1e12,
+                "g": 1e9,
+                "k": 1e3,
+                "m": 1e-3,
+                "u": 1e-6,
+                "µ": 1e-6,
+                "n": 1e-9,
+                "p": 1e-12,
+            }
+            suffix = last.lower()
+            if suffix in suffix_map:
+                try:
+                    return float(text[:-1]) * suffix_map[suffix]
+                except Exception:
+                    return None
+
+        try:
+            return float(text)
+        except Exception:
+            return None
+
+    @staticmethod
+    def _float_equals_percent(a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
             return True
         reference = max(abs(a), abs(b))
-        diff = abs(a - b)
-        allowed = reference * (percent_tol / 100.0)
-        return diff <= allowed
+        return abs(a - b) <= reference * (percent_tol / 100.0)
 
-    def _parse_solution_types(self, s: str) -> set[str]:
-        if not s:
-            return set()
-        parts = [p.strip().lower() for p in str(s).split(";") if p.strip()]
-        allowed = {"voltage", "current"}
-        return {p for p in parts if p in allowed}
+    def _build_labeled_pool(self, labels: list[str]) -> list[tuple[str, float]]:
+        pool: list[tuple[str, float]] = []
+        for raw in labels:
+            value = self._parse_numeric_value(raw)
+            if value is None:
+                continue
+            pool.append((str(raw), float(value)))
+        return pool
+
+    @staticmethod
+    def _nearest_labeled(target: float, candidates: list[tuple[str, float]]) -> tuple[str, float] | None:
+        if not candidates:
+            return None
+        return min(candidates, key=lambda pair: abs(pair[1] - target))
+
+    @staticmethod
+    def _set_item_value(item, value_label: str):
+        item.value = str(value_label)
+        if item.has(LabelComponent):
+            label: LabelComponent = item.get(LabelComponent)
+            label.value = str(value_label)
+
+    def _pick_label_from_pool(self, pool: list[tuple[str, float]]) -> str:
+        labels = [str(label) for label, _ in pool] or ["1"]
+        return str(choice(labels))
+
+    def _pick_label_from_area(
+        self,
+        area_labels: dict[int, list[str]],
+        area: int,
+        fallback_pool: list[tuple[str, float]],
+    ) -> str:
+        labels = area_labels.get(area, [])
+        if labels:
+            return str(choice(labels))
+        return self._pick_label_from_pool(fallback_pool)
+
+    def _pick_source_label_for_area(
+        self,
+        sources_per_area: dict[int, dict[str, list[str]]],
+        area: int,
+        source_kind: str,
+    ) -> str:
+        area_sources = sources_per_area.get(area, {})
+        labels = area_sources.get(source_kind, [])
+        if labels:
+            return str(choice(labels))
+        pool = self._voltage_pool if source_kind == "voltage" else self._current_pool
+        return self._pick_label_from_pool(pool)
+
+    def _apply_panel_randomization_inputs(
+        self,
+        panel_id: int,
+        area: int,
+        source_kind: str,
+        sources_per_area: dict[int, dict[str, list[str]]],
+        resistors_per_area: dict[int, list[str]],
+    ) -> dict:
+        solution_net = str(self._panel_net_path(panel_id, "_solution"))
+
+        source_component = "V1" if source_kind == "voltage" else "I1"
+        source_label = self._pick_source_label_for_area(sources_per_area, area, source_kind)
+        if self._net_has_component(solution_net, source_component):
+            SerializationManager.update_component_value(solution_net, source_component, source_label)
+        else:
+            self._log(f"panel={panel_id} sem componente {source_component} para randomizar")
+
+        applied_resistors: list[tuple[str, str]] = []
+        resistor_names = self._list_resistors(solution_net)
+        for r_name in resistor_names:
+            if r_name.upper() == self.TARGET_RESISTOR:
+                continue
+            r_label = self._pick_label_from_area(resistors_per_area, area, self._resistor_pool)
+            SerializationManager.update_component_value(solution_net, r_name, r_label)
+            applied_resistors.append((r_name, r_label))
+
+        return {
+            "source": source_label,
+            "resistors": applied_resistors,
+        }
+
+    # =========================================================
+    # PATHS / FILES
+    # =========================================================
+    def _panel_json_path(self, panel_id: int, suffix: str = ""):
+        return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
+
+    def _panel_net_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
+
+    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
+
+    def _load_panel_entities(self, panel_id: int):
+        try:
+            return SerializationManager.load_entities_from_json(self._panel_json_path(panel_id)) or []
+        except Exception:
+            return []
+
+    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
+        for suffix in ("", "_solution"):
+            json_path = self._panel_json_path(panel_id, suffix)
+            if not json_path.exists():
+                continue
+            try:
+                LtSpiceGenerate(
+                    json_filepath=str(json_path),
+                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
+                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
+                    entity_manager=entity_manager,
+                ).save_netlist()
+            except Exception as ex:
+                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
 
     def _net_has_component(self, netlist_path: str, component_name: str) -> bool:
         try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
+            with open(netlist_path, "r", encoding="utf-8") as file:
+                for raw in file:
                     line = raw.strip()
                     if not line or line.startswith("*") or line.startswith("."):
                         continue
@@ -47,190 +251,507 @@ class TheveninNortonValidatorSystem(System):
             return False
         return False
 
-    def _load_panel_entities(self, pannel_id: int):
-        json_file = path_in_circuitos(self.level_path, f"pannel{pannel_id}.json")
+    def _load_net_components(self, netlist_path: str) -> dict[str, tuple[str, str]]:
+        """
+        Parse netlist components -> (p_node, n_node). Keys are component names.
+        Only minimal parsing: first three tokens are assumed to be name, p, n.
+        """
+        comps: dict[str, tuple[str, str]] = {}
         try:
-            return SerializationManager.load_entities_from_json(json_file) or []
+            with open(netlist_path, "r", encoding="utf-8") as file:
+                for raw in file:
+                    line = raw.strip()
+                    if not line or line.startswith("*") or line.startswith("."):
+                        continue
+                    parts = line.split()
+                    if len(parts) < 3:
+                        continue
+                    name, p_node, n_node = parts[0], parts[1], parts[2]
+                    comps[name] = (p_node, n_node)
         except Exception:
-            return []
+            pass
+        return comps
 
-    def _validate_player_topology(self, pannel_id: int) -> bool:
-        # Rule expected by this level: exactly 2 resistors and exactly 1 source.
-        entities = self._load_panel_entities(pannel_id)
+    def _list_resistors(self, netlist_path: str) -> list[str]:
+        names: list[str] = []
+        try:
+            with open(netlist_path, "r", encoding="utf-8") as file:
+                for raw in file:
+                    line = raw.strip()
+                    if not line or line.startswith("*") or line.startswith("."):
+                        continue
+                    parts = line.split()
+                    if not parts:
+                        continue
+                    comp = parts[0]
+                    if comp.lower().startswith("r"):
+                        names.append(comp)
+        except Exception:
+            pass
+        return names
 
-        resistor_count = 0
-        vsrc_count = 0
-        isrc_count = 0
+    # =========================================================
+    # TOPOLOGY / PLAYER INPUT
+    # =========================================================
+    def _entity_label_name(self, entity) -> str:
+        if not entity.has(LabelComponent):
+            return ""
+        try:
+            label: LabelComponent = entity.get(LabelComponent)
+            return str(label.name).strip()
+        except Exception:
+            return ""
 
-        for e in entities:
-            name = e.__class__.__name__
-            if name == "Resistor":
-                resistor_count += 1
-            elif name == "VoutageSource":
-                vsrc_count += 1
-            elif name == "CurrentSource":
-                isrc_count += 1
+    def _entity_label_value(self, entity) -> str:
+        if not entity.has(LabelComponent):
+            return ""
+        try:
+            label: LabelComponent = entity.get(LabelComponent)
+            return str(label.value).strip()
+        except Exception:
+            return ""
 
-        sources = vsrc_count + isrc_count
-        return resistor_count == 2 and sources == 1
+    def _validate_player_topology(self, panel_id: int) -> tuple[bool, str]:
+        entities = self._load_panel_entities(panel_id)
+        resistor_labels: list[str] = []
+        source_count = 0
 
-    def _pick_source_for_area(self, cp: ControlPannel, types: set[str], area_sources: dict) -> tuple[str | None, str | None]:
-        v_list = list(area_sources.get("voltage", []))
-        i_list = list(area_sources.get("current", []))
+        for entity in entities:
+            class_name = entity.__class__.__name__
+            if class_name == "Resistor":
+                resistor_labels.append(self._entity_label_name(entity))
+            elif class_name in ("VoutageSource", "CurrentSource"):
+                source_count += 1
 
-        chosen_kind = None
-        chosen_value = None
+        if len(resistor_labels) != 2:
+            return False, "invalid_topology_resistors"
+        if self.TARGET_RESISTOR not in resistor_labels:
+            return False, "invalid_topology_missing_R1"
+        if source_count != 1:
+            return False, "invalid_topology_sources"
 
-        # If panel requests voltage/current and voltage exists, prefer voltage.
-        if "voltage" in types and v_list:
-            chosen_kind = "voltage"
-            chosen_value = choice(v_list)
-            v_list.remove(chosen_value)
-            area_sources["voltage"] = v_list
-        elif i_list:
-            chosen_kind = "current"
-            chosen_value = choice(i_list)
-            i_list.remove(chosen_value)
-            area_sources["current"] = i_list
+        return True, ""
 
-        return chosen_kind, chosen_value
+    def _validate_expected_topology(
+        self,
+        cp: ControlPannel,
+        net_components: dict[str, tuple[str, str]]
+    ) -> tuple[bool, str]:
+        solution_value = cp.solution_value
+        if not isinstance(solution_value, dict):
+            return False, "waiting_solution_value"
 
-    def _pick_resistor_for_area(self, cp: ControlPannel, area_resistors: list[str]) -> str | None:
-        if not area_resistors:
+        expected = solution_value.get("expected", {})
+        expected_kind = expected.get("source_kind")
+        if expected_kind not in ("voltage", "current"):
+            return False, "waiting_expected_source_kind"
+
+        # Identify components
+        r1_nodes = net_components.get(self.TARGET_RESISTOR)
+        if not r1_nodes:
+            return False, "invalid_topology_missing_R1_net"
+
+        # pick source by kind
+        source_names = [n for n in net_components if n.lower().startswith('v')] if expected_kind == "voltage" else [n for n in net_components if n.lower().startswith('i')]
+        if not source_names:
+            return False, "invalid_topology_missing_source_net"
+        source_name = source_names[0]
+        source_nodes = net_components.get(source_name)
+        if not source_nodes:
+            return False, "invalid_topology_missing_source_net"
+
+        # helper sets
+        def shared_count(a: tuple[str, str], b: tuple[str, str]) -> int:
+            return len(set(a) & set(b))
+
+        # resistors different from R1
+        resistor_items = {k: v for k, v in net_components.items() if k.lower().startswith("r") and k.upper() != self.TARGET_RESISTOR}
+        if not resistor_items:
+            return False, "invalid_topology_missing_other_resistors_net"
+
+        if expected_kind == "voltage":
+            # Need at least one resistor in series with source and R1 (chain)
+            for name, nodes in resistor_items.items():
+                if shared_count(nodes, source_nodes) == 1 and shared_count(nodes, r1_nodes) == 1:
+                    self._log(f"panel={cp.pannel_id} topo_ok_thevenin resistor={name}")
+                    return True, ""
+            return False, "invalid_series_rth"
+
+        else:
+            # Norton: resistor must be parallel with source and R1 (same nodes)
+            for name, nodes in resistor_items.items():
+                if set(nodes) == set(source_nodes) and set(nodes) == set(r1_nodes):
+                    self._log(f"panel={cp.pannel_id} topo_ok_norton resistor={name}")
+                    return True, ""
+            return False, "invalid_parallel_rn"
+
+    def _extract_player_equivalent_values(self, panel_id: int) -> tuple[dict | None, str]:
+        entities = self._load_panel_entities(panel_id)
+        resistors: list[dict] = []
+        sources: list[dict] = []
+
+        for entity in entities:
+            class_name = entity.__class__.__name__
+            label_name = self._entity_label_name(entity)
+            label_raw_value = self._entity_label_value(entity)
+            label_num_value = self._parse_numeric_value(label_raw_value)
+
+            if class_name == "Resistor":
+                resistors.append({"name": label_name, "value": label_num_value})
+            elif class_name == "VoutageSource":
+                sources.append({"kind": "voltage", "name": label_name, "value": label_num_value})
+            elif class_name == "CurrentSource":
+                sources.append({"kind": "current", "name": label_name, "value": label_num_value})
+
+        if len(sources) != 1:
+            return None, "invalid_topology_sources"
+
+        source = sources[0]
+        if source["value"] is None:
+            return None, "invalid_source_value"
+
+        other_resistors = [r for r in resistors if r["name"] != self.TARGET_RESISTOR]
+        if len(other_resistors) != 1:
+            return None, "invalid_topology_other_resistor"
+
+        other_resistor = other_resistors[0]
+        if other_resistor["value"] is None:
+            return None, "invalid_other_resistor_value"
+
+        return {
+            "source_kind": source["kind"],
+            "source_value": float(source["value"]),
+            "resistor_value": float(other_resistor["value"]),
+        }, ""
+
+    # =========================================================
+    # SOLUTION PREP (target first -> map values later)
+    # =========================================================
+    def _infer_panel_mode(self, panel_id: int) -> tuple[str | None, str | None]:
+        solution_net = str(self._panel_net_path(panel_id, "_solution"))
+        has_v1 = self._net_has_component(solution_net, "V1")
+        has_i1 = self._net_has_component(solution_net, "I1")
+
+        if has_v1 and not has_i1:
+            return "thevenin", "voltage"
+        if has_i1 and not has_v1:
+            return "norton", "current"
+        if has_v1:
+            return "thevenin", "voltage"
+        if has_i1:
+            return "norton", "current"
+        return None, None
+
+    def _prepare_panel_solution(
+        self,
+        cp: ControlPannel,
+        entity_manager: EntityManager,
+        sources_per_area: dict[int, dict[str, list[str]]],
+        resistors_per_area: dict[int, list[str]],
+    ) -> dict | None:
+        area = getattr(cp, "component_for_area", None)
+        if area is None:
+            self._log(f"panel={cp.pannel_id} ignorado: sem area")
             return None
 
-        chosen = choice(area_resistors)
-        area_resistors.remove(chosen)
-        return chosen
+        self._sync_netlists_from_json(cp.pannel_id, entity_manager)
+
+        mode, source_kind = self._infer_panel_mode(cp.pannel_id)
+        if mode is None or source_kind is None:
+            self._log(f"panel={cp.pannel_id} sem modo inferido")
+            return None
+
+        random_result = self._apply_panel_randomization_inputs(
+            panel_id=cp.pannel_id,
+            area=area,
+            source_kind=source_kind,
+            sources_per_area=sources_per_area,
+            resistors_per_area=resistors_per_area,
+        )
+        picked_source = random_result.get("source")
+        picked_resistors = random_result.get("resistors", [])
+
+        solution_net = str(self._panel_net_path(cp.pannel_id, "_solution"))
+        solver = CircuitSolver(solution_net)
+        if not solver.is_solved:
+            self._log(f"panel={cp.pannel_id} solver falhou para {solution_net}")
+            return None
+
+        thevenin = solver.get_thevenin(self.TARGET_RESISTOR)
+        norton = solver.get_norton(self.TARGET_RESISTOR)
+        if thevenin is None or norton is None:
+            self._log(f"panel={cp.pannel_id} falha ao calcular Thevenin/Norton")
+            return None
+
+        vth = self._safe_float(thevenin.get("voltage", {}).get("value"))
+        rth = self._safe_float(thevenin.get("resistance", {}).get("value"))
+        inorton = self._safe_float(norton.get("current", {}).get("value"))
+        rnorton = self._safe_float(norton.get("resistance", {}).get("value"))
+        if None in (vth, rth, inorton, rnorton):
+            self._log(f"panel={cp.pannel_id} valores invalidos de equivalente")
+            return None
+
+        if mode == "thevenin":
+            source_label = "Vth"
+            target_source_raw = abs(float(vth))
+            source_candidate = self._nearest_labeled(target_source_raw, self._voltage_pool)
+            resistance_label = "Rth"
+            target_resistance_raw = abs(float(rth))
+        else:
+            source_label = "In"
+            target_source_raw = abs(float(inorton))
+            source_candidate = self._nearest_labeled(target_source_raw, self._current_pool)
+            resistance_label = "Rn"
+            target_resistance_raw = abs(float(rnorton))
+
+        resistance_candidate = self._nearest_labeled(target_resistance_raw, self._resistor_pool)
+        if source_candidate is None or resistance_candidate is None:
+            self._log(f"panel={cp.pannel_id} sem candidatos comerciais para aproximacao")
+            return None
+
+        source_pick_label, source_pick_value = source_candidate
+        resistor_pick_label, resistor_pick_value = resistance_candidate
+
+        cp.solution_value = {
+            "target": self.TARGET_RESISTOR,
+            "mode": mode,
+            "thevenin": {
+                "voltage": float(vth),
+                "resistance": float(rth),
+            },
+            "norton": {
+                "current": float(inorton),
+                "resistance": float(rnorton),
+            },
+            "expected": {
+                "source_kind": source_kind,
+                "source_label": source_label,
+                "source_value_raw": float(target_source_raw),
+                "source_value": float(source_pick_value),
+                "source_value_label": source_pick_label,
+                "resistance_label": resistance_label,
+                "resistance_value_raw": float(target_resistance_raw),
+                "resistance_value": float(resistor_pick_value),
+                "resistance_value_label": resistor_pick_label,
+            },
+        }
+
+        self._log(
+            f"GABARITO painel={cp.pannel_id} area={area} "
+            f"entrada_random(source={picked_source}, resistores={picked_resistors}) "
+            f"Thevenin(Vth={SetterValues.format_eng(float(vth), 'V')}, Rth={SetterValues.format_eng(float(rth), '')}) "
+            f"Norton(In={SetterValues.format_eng(float(inorton), 'A')}, Rn={SetterValues.format_eng(float(rnorton), '')}) "
+            f"modo={mode} alvo_aprox={source_label}:{source_pick_label} {resistance_label}:{resistor_pick_label}"
+        )
+
+        return {
+            "area": area,
+            "source_kind": source_kind,
+            "source_pick_label": source_pick_label,
+            "resistor_pick_label": resistor_pick_label,
+        }
+
+    def _apply_requirements_to_map_items(self, entity_manager: EntityManager, requirements: list[dict]):
+        req_by_area: dict[int, dict[str, list[str]]] = defaultdict(lambda: {
+            "voltage": [],
+            "current": [],
+            "resistor": [],
+        })
+
+        for req in requirements:
+            area = req.get("area")
+            if area is None:
+                continue
+            source_kind = req.get("source_kind")
+            source_label = req.get("source_pick_label")
+            resistor_label = req.get("resistor_pick_label")
+
+            if source_kind == "voltage" and source_label:
+                req_by_area[area]["voltage"].append(str(source_label))
+            if source_kind == "current" and source_label:
+                req_by_area[area]["current"].append(str(source_label))
+            if resistor_label:
+                req_by_area[area]["resistor"].append(str(resistor_label))
+
+        resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
+        voltage_items: list[VoutageSourceItem] = entity_manager.get_entities_by_class(VoutageSourceItem)
+        current_items: list[CurrentSourceItem] = entity_manager.get_entities_by_class(CurrentSourceItem)
+
+        resistors_by_area: dict[int, list[ResistorItem]] = defaultdict(list)
+        voltages_by_area: dict[int, list[VoutageSourceItem]] = defaultdict(list)
+        currents_by_area: dict[int, list[CurrentSourceItem]] = defaultdict(list)
+
+        for item in resistor_items:
+            resistors_by_area[getattr(item, "area_id", None)].append(item)
+        for item in voltage_items:
+            voltages_by_area[getattr(item, "area_id", None)].append(item)
+        for item in current_items:
+            currents_by_area[getattr(item, "area_id", None)].append(item)
+
+        def random_fill_labels(
+            size: int,
+            required_labels: list[str],
+            fallback_pool: list[tuple[str, float]],
+            area: int,
+            kind: str,
+        ) -> list[str]:
+            if size <= 0:
+                if required_labels:
+                    self._log(f"area={area} sem itens de {kind} para atender requisito: {required_labels}")
+                return []
+
+            pool_labels = [str(label) for label, _ in fallback_pool] or ["1"]
+            labels_result: list[str | None] = [None] * size
+
+            required_clean = [str(label) for label in required_labels if str(label).strip()]
+            if len(required_clean) > size:
+                self._log(
+                    f"area={area} faltam itens de {kind}: required={len(required_clean)} available={size}"
+                )
+
+            slots = list(range(size))
+            shuffle(slots)
+
+            for idx, required_label in enumerate(required_clean[:size]):
+                labels_result[slots[idx]] = required_label
+
+            for idx in range(size):
+                if labels_result[idx] is None:
+                    labels_result[idx] = choice(pool_labels)
+
+            return [str(label) for label in labels_result]
+
+        def fill_items(items: list, required_labels: list[str], fallback_pool: list[tuple[str, float]], area: int, kind: str):
+            assigned_labels = random_fill_labels(
+                size=len(items),
+                required_labels=required_labels,
+                fallback_pool=fallback_pool,
+                area=area,
+                kind=kind,
+            )
+            for idx, item in enumerate(items):
+                self._set_item_value(item, assigned_labels[idx])
+            if items:
+                self._log(f"area={area} kind={kind} assigned={assigned_labels}")
+
+        all_areas = set(resistors_by_area) | set(voltages_by_area) | set(currents_by_area)
+        for area in all_areas:
+            req = req_by_area.get(area, {"voltage": [], "current": [], "resistor": []})
+            fill_items(resistors_by_area.get(area, []), req["resistor"], self._resistor_pool, area, "resistor")
+            fill_items(voltages_by_area.get(area, []), req["voltage"], self._voltage_pool, area, "voltage")
+            fill_items(currents_by_area.get(area, []), req["current"], self._current_pool, area, "current")
+            self._log(
+                f"area={area} req(res={req['resistor']}, volt={req['voltage']}, curr={req['current']}) "
+                f"itens(res={len(resistors_by_area.get(area, []))}, volt={len(voltages_by_area.get(area, []))}, curr={len(currents_by_area.get(area, []))})"
+            )
 
     def set_solutions(self, event: dict, entity_manager: EntityManager):
-        control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
+        event_data = deepcopy(event) if isinstance(event, dict) else {}
+        sources_per_area = event_data.get("sources", {}) if isinstance(event_data.get("sources", {}), dict) else {}
+        resistors_per_area = event_data.get("resistors", {}) if isinstance(event_data.get("resistors", {}), dict) else {}
 
-        sources_per_area = event.get("sources", {})      # {area: {"voltage":[...], "current":[...]}}
-        resistors_per_area = event.get("resistors", {})  # {area: [resistor_labels]}
+        panels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
+        active_panels = [cp for cp in panels if cp.active]
+        active_panels.sort(key=lambda cp: getattr(cp, "pannel_id", 0))
 
-        for cp in control_pannels:
-            types = self._parse_solution_types(cp.solution_type)
-            if not types:
-                continue
+        requirements: list[dict] = []
+        for cp in active_panels:
+            req = self._prepare_panel_solution(
+                cp=cp,
+                entity_manager=entity_manager,
+                sources_per_area=sources_per_area,
+                resistors_per_area=resistors_per_area,
+            )
+            if req is not None:
+                requirements.append(req)
 
-            raw_targets = str(cp.target_component)
-            target_names = [t.strip() for t in raw_targets.split(",") if t.strip()]
-            if not target_names:
-                continue
-
-            area = getattr(cp, "component_for_area", None)
-            if area is None or area not in sources_per_area:
-                continue
-
-            area_sources = sources_per_area[area]
-            chosen_kind, chosen_value = self._pick_source_for_area(cp, types, area_sources)
-            if not chosen_kind or chosen_value is None:
-                continue
-
-            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{cp.pannel_id}_solution.net"))
-
-            # Update source in solution netlist.
-            if chosen_kind == "voltage":
-                if not self._net_has_component(netlist_path, "V1"):
-                    continue
-                SerializationManager.update_component_value(netlist_path, "V1", chosen_value)
-            else:
-                if not self._net_has_component(netlist_path, "I1"):
-                    continue
-                SerializationManager.update_component_value(netlist_path, "I1", chosen_value)
-
-            # Also randomize R2 from resistors available in the same area when present.
-            # This keeps answers dynamic with both source and resistor values.
-            area_resistors = resistors_per_area.get(area, [])
-            chosen_r = self._pick_resistor_for_area(cp, area_resistors)
-            if chosen_r and self._net_has_component(netlist_path, "R2"):
-                SerializationManager.update_component_value(netlist_path, "R2", chosen_r)
-
-            solver = CircuitSolver(netlist_path)
-            if not solver.is_solved:
-                continue
-
-            resistor_results = solver.get_resistor_results() or {}
-            solution_voltage = {}
-            solution_current = {}
-
-            for r_name in target_names:
-                if r_name not in resistor_results:
-                    continue
-                if "voltage" in types:
-                    try:
-                        solution_voltage[r_name] = float(resistor_results[r_name]["voltage"]["value"])
-                    except Exception:
-                        pass
-                if "current" in types:
-                    try:
-                        solution_current[r_name] = float(resistor_results[r_name]["current"]["value"])
-                    except Exception:
-                        pass
-
-            cp.solution_value = {"voltage": solution_voltage, "current": solution_current}
-
+        self._apply_requirements_to_map_items(entity_manager, requirements)
         self.event_manager.post({"type": "solutions_done"})
 
+    # =========================================================
+    # RUNTIME VALIDATION
+    # =========================================================
+    def _validate_equivalent_values(self, cp: ControlPannel, player_values: dict) -> tuple[bool, str]:
+        solution_value = cp.solution_value
+        if not isinstance(solution_value, dict):
+            return False, "waiting_solution_value"
+
+        expected = solution_value.get("expected", {})
+        expected_source_kind = expected.get("source_kind")
+        expected_source = self._safe_float(expected.get("source_value"))
+        expected_resistance = self._safe_float(expected.get("resistance_value"))
+        source_label = str(expected.get("source_label", "source"))
+        resistance_label = str(expected.get("resistance_label", "resistance"))
+
+        if expected_source_kind not in ("voltage", "current"):
+            return False, "waiting_expected_source_kind"
+        if expected_source is None:
+            return False, "waiting_expected_source_value"
+        if expected_resistance is None:
+            return False, "waiting_expected_resistance_value"
+
+        source_kind = player_values.get("source_kind")
+        answer_source = self._safe_float(player_values.get("source_value"))
+        answer_resistance = self._safe_float(player_values.get("resistor_value"))
+
+        if answer_source is None:
+            return False, "invalid_source_value"
+        if answer_resistance is None:
+            return False, "invalid_other_resistor_value"
+        if source_kind != expected_source_kind:
+            return False, f"source_kind_mismatch expected={expected_source_kind} got={source_kind}"
+
+        if not self._float_equals_percent(abs(answer_source), abs(expected_source), self.tolerance_percent):
+            return False, f"mismatch_{source_label} expected={expected_source} got={answer_source}"
+
+        if not self._float_equals_percent(abs(answer_resistance), abs(expected_resistance), self.tolerance_percent):
+            return False, f"mismatch_{resistance_label} expected={expected_resistance} got={answer_resistance}"
+
+        return True, ""
+
+    def _validate_panel_runtime(self, cp: ControlPannel):
+        if not cp.active:
+            self._set_panel_status(cp.pannel_id, "inactive")
+            return
+        if cp.done:
+            self._set_panel_status(cp.pannel_id, "already_done")
+            return
+
+        topology_ok, topology_reason = self._validate_player_topology(cp.pannel_id)
+        if not topology_ok:
+            self._set_panel_status(cp.pannel_id, topology_reason)
+            return
+
+        circuit_data = self.circuit_manager.get_circuit_values(cp.name_file)
+        if not circuit_data:
+            self._set_panel_status(cp.pannel_id, "waiting_player_circuit_data")
+            return
+
+        # Topologia elétrica esperada (série para Thevenin, paralelo para Norton)
+        net_components = self._load_net_components(str(self._panel_net_path(cp.pannel_id)))
+        topo_expected_ok, topo_expected_reason = self._validate_expected_topology(cp, net_components)
+        if not topo_expected_ok:
+            self._set_panel_status(cp.pannel_id, topo_expected_reason)
+            return
+
+        player_values, player_reason = self._extract_player_equivalent_values(cp.pannel_id)
+        if not player_values:
+            self._set_panel_status(cp.pannel_id, player_reason or "invalid_player_equivalent")
+            return
+
+        valid, reason = self._validate_equivalent_values(cp, player_values)
+        if valid:
+            self._set_panel_status(cp.pannel_id, "solved")
+            cp.action()
+        else:
+            self._set_panel_status(cp.pannel_id, reason or "validation_failed")
+
     def update(self, entity_mn, dt):
-        control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
+        _ = dt
+        panels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
+        for cp in panels:
+            self._validate_panel_runtime(cp)
 
-        for cp in control_pannels:
-            if cp.done:
-                continue
 
-            sv = cp.solution_value
-            if not isinstance(sv, dict):
-                continue
 
-            expected_v = sv.get("voltage", {})
-            expected_i = sv.get("current", {})
 
-            types = self._parse_solution_types(cp.solution_type)
-            if "voltage" in types and not expected_v:
-                continue
-            if "current" in types and not expected_i:
-                continue
-
-            if not self._validate_player_topology(cp.pannel_id):
-                continue
-
-            circuit_data = self.circuit_manager.get_circuit_values(cp.name_file)
-            if not circuit_data:
-                continue
-
-            all_ok = True
-
-            if "voltage" in types:
-                for r_name, exp in expected_v.items():
-                    entry = circuit_data.get(r_name)
-                    if not entry or "voltage" not in entry:
-                        all_ok = False
-                        break
-                    try:
-                        ans = float(entry["voltage"]["value"])
-                    except Exception:
-                        all_ok = False
-                        break
-                    if not self._float_equals_percent(ans, exp, self.tolerance_percent):
-                        all_ok = False
-                        break
-
-            if all_ok and "current" in types:
-                for r_name, exp in expected_i.items():
-                    entry = circuit_data.get(r_name)
-                    if not entry or "current" not in entry:
-                        all_ok = False
-                        break
-                    try:
-                        ans = float(entry["current"]["value"])
-                    except Exception:
-                        all_ok = False
-                        break
-                    if not self._float_equals_percent(ans, exp, self.tolerance_percent):
-                        all_ok = False
-                        break
-
-            if all_ok:
-                cp.action()

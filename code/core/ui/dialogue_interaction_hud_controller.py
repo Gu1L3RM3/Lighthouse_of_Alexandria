@@ -42,8 +42,8 @@ class DialogueInteractionHUDController:
             if isinstance(entity, DialogueArea):
                 area = area.inflate(10, 10)
             else:
-                # NPC dialog area gets a small interaction margin.
-                area = area.inflate(6, 6)
+                # Keep HUD interaction radius aligned with DialogueSystem collision check.
+                area = area.inflate(10, 10)
             if player_col.colliderect(area):
                 return entity
         return None

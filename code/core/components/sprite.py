@@ -29,6 +29,10 @@ class Sprite(Component):
         self.rect = self.image.get_rect(center=old_center)
         
         self._cache_key = None 
+    def get_size_from_drawn(self):
+        if not self._cached_scaled_image:
+            return self._orig_image.get_size()
+        return self._cached_scaled_image.get_size()
 
     def get_image_for_drawing(self, scale: float) -> Surface:
         

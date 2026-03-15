@@ -40,3 +40,15 @@ class Select(Entity):
             Sprite(surf,image_path=img_path),
             Position(x,y)
         )
+
+class NotDrop(Entity):
+    def __init__(self,x,y):
+        super().__init__()
+        rm = ResourceManager.get()
+        img_path="eletric_components/not_drop.png"
+        surf =  rm.load_image(img_path)
+        self.add(
+            Sprite(surf,image_path=img_path),
+            Position(x,y)
+
+        )

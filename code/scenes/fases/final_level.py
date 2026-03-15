@@ -1,4 +1,5 @@
 from pathlib import Path
+import pygame
 
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
@@ -17,6 +18,8 @@ from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.voltage_source_item import VoutageSourceItem
+from core.components.position import Position
+from core.components.sprite import Sprite
 from entities.npcs.arquimedes import Arquimedes
 from scenes.fases.max_power_level_base import BaseMaxPowerLevel
 from core.settings import path_in_circuitos, path_in_ltspice
@@ -34,16 +37,20 @@ class FinalLevel(BaseMaxPowerLevel):
     def __init__(self, screen, level_path, tolerance_percent: float = 2.0):
         self.panel_timers: dict[int, float] = {}
         self.collected_components_by_area: dict[int, list[dict]] = {}
+        self.initial_components_by_area: dict[int, list[dict]] = {}
         self.crystal_respawn_queue: list[dict] = []
+        self._panel_timer_font = None
         self._base_hooks_bound = False
         self._final_hooks_bound = False
         self._won = False
         self.player_dead_by_enemy = False
         super().__init__(screen, level_path, tolerance_percent)
+        self._panel_timer_font = pygame.font.SysFont("consolas", 12, bold=True)
 
     def start(self):
         self.panel_timers.clear()
         self.collected_components_by_area.clear()
+        self.initial_components_by_area.clear()
         self.crystal_respawn_queue.clear()
         self._won = False
         self.player_dead_by_enemy = False
@@ -52,21 +59,29 @@ class FinalLevel(BaseMaxPowerLevel):
         if hasattr(self, "enemy_touch_game_over_system"):
             self.enemy_touch_game_over_system.triggered = False
         super().start()
+        self._snapshot_initial_components()
         self._configure_final_dialogues()
 
     def end(self):
         self.panel_timers.clear()
         self.collected_components_by_area.clear()
+        self.initial_components_by_area.clear()
         self.crystal_respawn_queue.clear()
         self._won = False
         super().end()
 
     def set_subscribes(self):
-        if not self._base_hooks_bound:
-            super().set_subscribes()
-            self._base_hooks_bound = True
-        if self._final_hooks_bound:
-            return
+        # Scene transitions clear EventManager listeners. Rebind on every start.
+        super().set_subscribes()
+
+        self.event_manager.unsubscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
+        self.event_manager.unsubscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
+        self.event_manager.unsubscribe("player_touched_enemy", self.on_player_touched_enemy)
+        self.event_manager.unsubscribe("resistor_collected", self._on_resistor_collected)
+        self.event_manager.unsubscribe("current_source_collected", self._on_current_source_collected)
+        self.event_manager.unsubscribe("voltage_source_collected", self._on_voltage_source_collected)
+        self.event_manager.unsubscribe("crystal_invisibility_collected", self._on_crystal_collected)
+
         self.event_manager.subscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
         self.event_manager.subscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
         self.event_manager.subscribe("player_touched_enemy", self.on_player_touched_enemy)
@@ -74,7 +89,6 @@ class FinalLevel(BaseMaxPowerLevel):
         self.event_manager.subscribe("current_source_collected", self._on_current_source_collected)
         self.event_manager.subscribe("voltage_source_collected", self._on_voltage_source_collected)
         self.event_manager.subscribe("crystal_invisibility_collected", self._on_crystal_collected)
-        self._final_hooks_bound = True
 
     def set_systems(self):
         self.animation_system = AnimationSystem()
@@ -110,6 +124,65 @@ class FinalLevel(BaseMaxPowerLevel):
             return
         self._update_panel_timers(dt)
         self._update_crystal_respawns(dt)
+
+    def render(self):
+        super().render()
+        self._draw_panel_timers_overlay()
+
+    def _draw_panel_timers_overlay(self):
+        panels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
+        if not panels:
+            return
+
+        for panel in panels:
+            if not panel.done:
+                continue
+
+            panel_id = panel.pannel_id
+            remaining = float(self.panel_timers.get(panel_id, 0.0))
+            hold_time = float(getattr(panel, "solved_hold_seconds", self.DEFAULT_PANEL_HOLD_SECONDS))
+            if hold_time <= 0:
+                hold_time = self.DEFAULT_PANEL_HOLD_SECONDS
+
+            ratio = max(0.0, min(1.0, remaining / hold_time))
+            if not panel.has(Sprite):
+                continue
+            spr = panel.get(Sprite)
+
+            scaled_rect = pygame.Rect(
+                int(spr.rect.x * self.scale),
+                int(spr.rect.y * self.scale),
+                int(spr.rect.width * self.scale),
+                int(spr.rect.height * self.scale),
+            )
+            draw_rect = self.camera.apply(scaled_rect)
+
+            bar_w = max(38, int(draw_rect.width * 1.2))
+            bar_h = max(6, int(5 * self.scale))
+            bar_x = int(draw_rect.centerx - bar_w / 2)
+            bar_y = int(draw_rect.top - (10 + bar_h))
+
+            bg_rect = pygame.Rect(bar_x, bar_y, bar_w, bar_h)
+            fill_w = int(bar_w * ratio)
+            fill_rect = pygame.Rect(bar_x, bar_y, fill_w, bar_h)
+
+            if ratio > 0.55:
+                fill_color = (82, 201, 112)
+            elif ratio > 0.25:
+                fill_color = (236, 188, 79)
+            else:
+                fill_color = (222, 87, 87)
+
+            pygame.draw.rect(self.screen, (18, 18, 20), bg_rect, border_radius=3)
+            if fill_w > 0:
+                pygame.draw.rect(self.screen, fill_color, fill_rect, border_radius=3)
+            pygame.draw.rect(self.screen, (230, 230, 230), bg_rect, width=1, border_radius=3)
+
+            if self._panel_timer_font:
+                timer_txt = f"{remaining:0.1f}s"
+                txt_surf = self._panel_timer_font.render(timer_txt, True, (245, 245, 245))
+                txt_rect = txt_surf.get_rect(midbottom=(draw_rect.centerx, bar_y - 2))
+                self.screen.blit(txt_surf, txt_rect)
 
     def _configure_final_dialogues(self):
         lines = [
@@ -258,14 +331,90 @@ class FinalLevel(BaseMaxPowerLevel):
 
     def _respawn_components_for_area(self, area_id: int):
         collected = self.collected_components_by_area.pop(area_id, [])
-        if not collected:
+        fallback_missing = self._get_missing_components_for_area(area_id)
+
+        to_respawn: dict[tuple, dict] = {}
+        for data in collected + fallback_missing:
+            key = self._component_key(data)
+            if key in to_respawn:
+                continue
+            if self._is_component_present_on_map(data):
+                continue
+            to_respawn[key] = data
+
+        if not to_respawn:
             return
 
         self.storage_circuit.reload_storage()
-        for data in collected:
+        for data in to_respawn.values():
             self._spawn_component(data)
             self._remove_component_from_storage(data["kind"], data["value"])
         self.storage_circuit.save_eletric_storage()
+
+    def _snapshot_initial_components(self):
+        self.initial_components_by_area = {}
+        for kind, cls in (
+            ("resistor", ResistorItem),
+            ("current_source", CurrentSourceItem),
+            ("voltage_source", VoutageSourceItem),
+        ):
+            for entity in self.entity_mn.get_entities_by_class(cls):
+                if not entity.has(Position):
+                    continue
+                pos: Position = entity.get(Position)
+                self.initial_components_by_area.setdefault(int(entity.area_id), []).append(
+                    {
+                        "kind": kind,
+                        "area_id": int(entity.area_id),
+                        "value": str(entity.value),
+                        "x": float(pos.x),
+                        "y": float(pos.y),
+                    }
+                )
+
+    def _get_missing_components_for_area(self, area_id: int) -> list[dict]:
+        expected = self.initial_components_by_area.get(area_id, [])
+        if not expected:
+            return []
+        return [data for data in expected if not self._is_component_present_on_map(data)]
+
+    @staticmethod
+    def _component_key(data: dict) -> tuple:
+        return (
+            str(data.get("kind", "")),
+            int(data.get("area_id", -1)),
+            round(float(data.get("x", 0.0)), 3),
+            round(float(data.get("y", 0.0)), 3),
+            str(data.get("value", "")),
+        )
+
+    def _is_component_present_on_map(self, data: dict) -> bool:
+        kind = data.get("kind")
+        area_id = int(data.get("area_id", -1))
+        x = round(float(data.get("x", 0.0)), 3)
+        y = round(float(data.get("y", 0.0)), 3)
+        value = str(data.get("value", ""))
+
+        class_by_kind = {
+            "resistor": ResistorItem,
+            "current_source": CurrentSourceItem,
+            "voltage_source": VoutageSourceItem,
+        }
+        cls = class_by_kind.get(kind)
+        if cls is None:
+            return False
+
+        for entity in self.entity_mn.get_entities_by_class(cls):
+            if int(getattr(entity, "area_id", -1)) != area_id:
+                continue
+            if str(getattr(entity, "value", "")) != value:
+                continue
+            if not entity.has(Position):
+                continue
+            pos: Position = entity.get(Position)
+            if round(float(pos.x), 3) == x and round(float(pos.y), 3) == y:
+                return True
+        return False
 
     def _spawn_component(self, data: dict):
         kind = data["kind"]

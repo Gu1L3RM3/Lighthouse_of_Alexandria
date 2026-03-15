@@ -82,7 +82,6 @@ class FrameProfiler:
 class Game:
     def __init__(self):
         pygame.init()
-        self._set_window_icon()
         info = pygame.display.Info()
         self.screen_width = info.current_w
         self.screen_height = info.current_h
@@ -91,6 +90,7 @@ class Game:
             (self.screen_width, self.screen_height),
             pygame.FULLSCREEN
         )
+        self._set_window_icon()
         pygame.display.set_caption("Farol de Alexandria")
         self.clock = pygame.time.Clock()
         
@@ -106,7 +106,8 @@ class Game:
 
     
         self.register_fases()
-        self.scene_manager.change('fase_3')
+        self.scene_manager.change('fase_8')
+        #self.scene_manager.active_scene = CircuitEditor(self.screen,'final_fase/fase_8/pannel4_solution',debug_mode=True)
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 
@@ -116,14 +117,14 @@ class Game:
         project_dir = code_dir.parent
         icon_path = project_dir / "assets" / "images" / "icon" / "game_icon_64.png"
 
-        if not icon_path.exists():
-            return
 
         try:
             icon = pygame.image.load(str(icon_path))
             pygame.display.set_icon(icon)
+            
         except pygame.error:
             pass
+            
 
         
     def register_fases(self):
@@ -181,14 +182,6 @@ class Game:
                     self.scene_manager.active_scene.end()
                     pygame.quit()
                     exit()
-                if (
-                    e.type == pygame.KEYDOWN
-                    and e.key == pygame.K_ESCAPE
-                    and self.scene_manager.active_scene_name != 'main_menu'
-                    and not self.scene_manager.transitioning
-                ):
-                    self.scene_manager.open_menu(0.35)
-                    continue
                 filtered_events.append(e)
 
             self.event_manager.post(filtered_events)

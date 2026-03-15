@@ -52,7 +52,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R2",
-                "value": "47k"
+                "value": "22"
             },
             {
                 "type": "Connectable",
@@ -190,7 +190,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "I1",
-                "value": "20"
+                "value": "0.0001"
             },
             {
                 "type": "Connectable",

@@ -34,7 +34,6 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.player_thought_dialogue: Entity | None = None
         self.player_thought_done = False
         self.player_frozen_by_story = False
-        self._story_subscribed = False
         super().__init__(screen, level_path, tolerance_percent)
 
     def set_systems(self):
@@ -214,11 +213,13 @@ class GenericLevel7(BaseMaxPowerLevel):
             dialogue.triggered = False
 
     def _wire_story_subscribes(self):
-        if self._story_subscribed:
-            return
+        # Scene transitions clear EventManager listeners. Always rebind on start.
+        self.event_manager.unsubscribe("pannel_iron_gate1", self._on_father_freed)
+        self.event_manager.unsubscribe("panel_solved", self._on_father_freed)
+        self.event_manager.unsubscribe("dialogue_end", self._on_dialogue_end_story)
         self.event_manager.subscribe("pannel_iron_gate1", self._on_father_freed)
+        self.event_manager.subscribe("panel_solved", self._on_father_freed)
         self.event_manager.subscribe("dialogue_end", self._on_dialogue_end_story)
-        self._story_subscribed = True
 
     def _enable_story_test_shortcut(self):
         if not self.debug_story_test_mode:
@@ -228,7 +229,8 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.event_manager.post({"type": "pannel_iron_gate1"})
 
     def _on_father_freed(self, event):
-        _ = event
+        if event.get("type") == "panel_solved" and event.get("pannel_id") != 1:
+            return
         for father in self.entity_mn.get_entities_by_class(FatherNPC):
             if not father.has(Dialogue):
                 continue

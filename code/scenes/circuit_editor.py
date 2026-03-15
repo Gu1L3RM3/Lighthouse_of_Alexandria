@@ -30,10 +30,12 @@ class CircuitEditor(BaseScene):
         self.file =  file
  
 
-        self.set_gesture_canvas()
-        self.set_rects_grid()
         self.node_manager = NodeManager()
         self.storage_circuit_manager = StorageCircuitManager()
+
+        self.set_gesture_canvas()
+        self.set_rects_grid()
+        self.set_entities()
         self.input_system = InputSystem(self.entity_mn,
                                         self.rects_grid,
                                         self.node_manager,
@@ -58,18 +60,20 @@ class CircuitEditor(BaseScene):
             self.render_system
         ])
 
-        self.set_entities()
         
 
         self.inputs:dict[int,callable] ={
             pygame.K_n:lambda:self.input_system.set_brush("node"),
             pygame.K_w:lambda:self.input_system.set_brush("wire"),
+            pygame.K_g:lambda:self.input_system.set_brush("gnd"),
             pygame.K_r:lambda:self.input_system.rotate_brush(),
             pygame.K_s:lambda:self.input_system.set_brush("select"),
             pygame.K_DELETE:lambda:self.input_system.set_brush("delete"),
             pygame.K_ESCAPE:self.input_system.exit_current_tool,
 
         }
+        if self.debug_mode:
+            self.inputs[pygame.K_d] = lambda: self.input_system.set_brush('not_drop')
     
     def set_entities(self):
         initial_entities = SerializationManager.load_entities_from_json(f'{self.file}.json')

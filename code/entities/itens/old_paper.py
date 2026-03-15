@@ -23,19 +23,28 @@ class OldPaper(Item):
         surf.set_alpha(0)
         self.add(
             Position(x,y),
-            AreaTrigger(self.area_trigger,active=active,on_entered=self.on_collect),
+            AreaTrigger(self.area_trigger,active=active,on_entered=self.on_player_enter, on_exit=self.on_player_exit),
             AlwaysOnTop(),
             Sprite(surf),
             LightComponent(),
             self.animate_sprite
             )
+        self.player_inside = False
         
    
 
-    def on_collect(self,entity):
-        if not isinstance(entity,Player):
-            return
-        self.em.post(events={'type':'open_old_paper'})
+    def on_player_enter(self, entity):
+        if isinstance(entity, Player):
+            self.player_inside = True
+
+    def on_player_exit(self, entity):
+        if isinstance(entity, Player):
+            self.player_inside = False
+
+    # Mantém a interface abstrata de Item satisfeita; a abertura agora é acionada via tecla E, não pelo trigger.
+    def on_collect(self, entity):
+        _ = entity
+        return
     def on_active(self):
         
         area_trigger :AreaTrigger=self.get(AreaTrigger)

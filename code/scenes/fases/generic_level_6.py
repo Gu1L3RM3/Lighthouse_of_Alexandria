@@ -1,4 +1,4 @@
-from random import sample
+﻿from random import sample
 from pathlib import Path
 
 from pygame import Surface
@@ -27,14 +27,19 @@ from utils.setter_values import SetterValues
 
 
 class GenericLevel6(BaseGenericLevel):
-    VOLTAGE_POOL = ["1", "2", "3.3", "5", "9", "12", "15", "20"]
-    CURRENT_POOL = ["0.001", "0.002", "0.005", "0.01", "0.15", "0.20"]
+    VOLTAGE_POOL = list(MAP_VOLTAGE_SOURCE_POOL)
+    CURRENT_POOL = list(MAP_CURRENT_SOURCE_POOL)
 
     def __init__(self, screen: Surface, level_path: str, tolerance_percent: float = 2.0):
         self.tolerance_percent = tolerance_percent
         self.can_reset_pannels = True
         self.player_dead_by_enemy = False
+        self.debug_panel_logs = True
         super().__init__(screen, level_path)
+
+    def _log(self, message: str):
+        if self.debug_panel_logs:
+            print(f"[fase_6][level] {message}")
 
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
@@ -59,7 +64,7 @@ class GenericLevel6(BaseGenericLevel):
 
         self.can_set_resistors = False
         self.storage_circuit.remove_all_components()
-
+        self._log("randomizando itens do mapa e calculando alvos Thevenin/Norton")
         resistors_per_area = self._assign_resistors_for_areas()
         sources_per_area = self._assign_sources_for_areas()
         self._post_solutions_event(resistors_per_area, sources_per_area)
@@ -118,6 +123,7 @@ class GenericLevel6(BaseGenericLevel):
         resistors_per_area: dict[int, list[str]],
         sources_per_area: dict[int, dict[str, list[str]]]
     ):
+        self._log("postando evento set_solutions")
         self.event_manager.post({
             "type": "set_solutions",
             "resistors": resistors_per_area,
@@ -231,19 +237,33 @@ class GenericLevel6(BaseGenericLevel):
             if not isinstance(solution_values, dict):
                 continue
 
-            voltage_map = solution_values.get("voltage", {})
-            current_map = solution_values.get("current", {})
-
             parts = []
-            if voltage_map:
-                parts_v = [f"{resistor} â‰ˆ {SetterValues.format_eng(value, 'V')}" for resistor, value in voltage_map.items()]
-                parts.append("tensÃµes: " + ", ".join(parts_v))
-            if current_map:
-                parts_i = [f"{resistor} â‰ˆ {SetterValues.format_eng(value, 'A')}" for resistor, value in current_map.items()]
-                parts.append("correntes: " + ", ".join(parts_i))
+            expected = solution_values.get("expected", {})
+            mode = solution_values.get("mode")
+            source_kind = expected.get("source_kind")
+            source_label = expected.get("source_label")
+            source_value = expected.get("source_value")
+            resistance_label = expected.get("resistance_label")
+            resistance_value = expected.get("resistance_value")
+
+            if (
+                mode in ("thevenin", "norton")
+                and source_kind in ("voltage", "current")
+                and source_label
+                and resistance_label
+                and source_value is not None
+                and resistance_value is not None
+            ):
+                source_unit = "V" if source_kind == "voltage" else "A"
+                parts.append(
+                    f"{mode.title()} (aprox): {source_label} ~= {SetterValues.format_eng(float(source_value), source_unit)}, "
+                    f"{resistance_label} ~= {SetterValues.format_eng(float(resistance_value), '')}"
+                )
 
             if parts:
-                text_list.append(f"Arquimedes: Para ativar o painel {p.pannel_id}, no resistor alvo vocÃª deve obter aproximadamente: {' | '.join(parts)}")
+                text_list.append(
+                    f"Arquimedes: Para ativar o painel {p.pannel_id}, monte o equivalente visto por R1: {' | '.join(parts)}"
+                )
 
         if text_list:
             dialogue_area.add_dialogue_text(text_list)

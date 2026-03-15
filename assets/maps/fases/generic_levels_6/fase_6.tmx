@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="115" tilewidth="16" tileheight="16" infinite="0" nextlayerid="17" nextobjectid="532">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="115" tilewidth="16" tileheight="16" infinite="0" nextlayerid="17" nextobjectid="539">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -147,8 +147,8 @@
 0,0,97,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,109,0,0,0,0,0,0,0,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,
 0,0,97,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,121,122,122,122,122,122,122,122,122,122,122,123,126,0,0,0,0,0,0,0,0,0,0,
 0,0,97,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,6,
-0,0,97,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,14,14,14,14,14,18,
-0,0,73,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,26,26,26,26,26,30,
+0,0,97,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,14,31,32,33,14,18,
+0,0,73,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,26,43,44,45,26,30,
 0,0,85,0,0,0,0,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,97,0,0,0,0,0,102,
 0,0,97,0,0,0,0,78,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,97,0,0,0,0,0,102,
 0,0,97,0,0,0,0,90,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,97,0,0,0,0,0,102,
@@ -364,7 +364,6 @@
   <object id="350" gid="142" x="321" y="210" width="16" height="16"/>
   <object id="351" gid="142" x="321" y="225" width="16" height="16"/>
   <object id="352" gid="142" x="336" y="176" width="16" height="16"/>
-  <object id="353" gid="142" x="352" y="176" width="16" height="16"/>
   <object id="354" gid="142" x="368" y="224" width="16" height="16"/>
   <object id="355" gid="142" x="368" y="208" width="16" height="16"/>
   <object id="356" gid="142" x="368" y="192" width="16" height="16"/>
@@ -512,6 +511,9 @@
   <object id="529" gid="142" x="768" y="1552" width="16" height="16"/>
   <object id="530" gid="142" x="704" y="1408" width="16" height="16"/>
   <object id="531" gid="142" x="688" y="1376" width="16" height="16"/>
+  <object id="535" gid="142" x="320" y="160" width="16" height="16"/>
+  <object id="536" gid="142" x="368" y="240" width="16" height="16"/>
+  <object id="537" gid="142" x="368" y="256" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="10" name="npc">
   <object id="3" name="arquimedes" x="42.6364" y="1137.97">
@@ -524,12 +526,12 @@
   </object>
  </objectgroup>
  <objectgroup id="8" name="iron_gate">
-  <object id="9" gid="81" x="80" y="320" width="16" height="16">
+  <object id="9" gid="81" x="80" y="304" width="16" height="16">
    <properties>
     <property name="pannel_id" value="3"/>
    </properties>
   </object>
-  <object id="10" gid="81" x="64" y="320" width="16" height="16">
+  <object id="10" gid="81" x="64" y="304" width="16" height="16">
    <properties>
     <property name="pannel_id" value="3"/>
    </properties>
@@ -546,7 +548,7 @@
   </object>
  </objectgroup>
  <objectgroup id="7" name="door">
-  <object id="2" name="door" gid="31" x="944" y="400" width="16" height="16">
+  <object id="2" name="door" gid="31" x="944" y="384" width="16" height="16">
    <properties>
     <property name="next_scene" value="exp_fase_7"/>
    </properties>
@@ -558,7 +560,7 @@
   <object id="4" name="dialog_1" x="36.3034" y="1126.3" width="63.3333" height="76">
    <properties>
     <property name="active_status" type="bool" value="true"/>
-    <property name="dialogo" value="Olá meu jovem!;Que bom te ver denovo!; Bom, nesta fase você deve aplicar as Leis de Kirchoff"/>
+    <property name="dialogo" value="Olá meu jovem!;Que bom te ver denovo!; Bom, nesta fase você deve aplicar os teoremas de Norton e Thevenin."/>
    </properties>
   </object>
  </objectgroup>
@@ -580,7 +582,7 @@
     <property name="active_status" type="bool" value="true"/>
     <property name="component_for_area" value="2"/>
     <property name="pannel_id" value="3"/>
-    <property name="target_component" value="R1,R2"/>
+    <property name="target_component" value="R1"/>
     <property name="type_solution" value="voltage;current"/>
    </properties>
    <point/>
@@ -591,7 +593,7 @@
     <property name="active_status" type="bool" value="true"/>
     <property name="component_for_area" value="3"/>
     <property name="pannel_id" value="2"/>
-    <property name="target_component" value="R1,R2"/>
+    <property name="target_component" value="R1"/>
     <property name="type_solution" value="voltage;current"/>
    </properties>
    <point/>
@@ -602,7 +604,7 @@
     <property name="active_status" type="bool" value="true"/>
     <property name="component_for_area" value="1"/>
     <property name="pannel_id" value="1"/>
-    <property name="target_component" value="R1,R2"/>
+    <property name="target_component" value="R1"/>
     <property name="type_solution" value="voltage;current"/>
    </properties>
    <point/>
@@ -623,6 +625,14 @@
    </properties>
    <point/>
   </object>
+  <object id="532" name="voltage_source" x="541" y="1623.76">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="10"/>
+   </properties>
+   <point/>
+  </object>
   <object id="218" name="voltage_source" x="179.667" y="631.09">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -631,7 +641,15 @@
    </properties>
    <point/>
   </object>
-  <object id="504" name="voltage_source" x="833" y="689.757">
+  <object id="538" name="voltage_source" x="79.667" y="736.09">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="2"/>
+    <property name="valor" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="504" name="voltage_source" x="712" y="1319.76">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
@@ -639,7 +657,7 @@
    </properties>
    <point/>
   </object>
-  <object id="507" name="voltage_source" x="478.333" y="515.09">
+  <object id="507" name="voltage_source" x="495.666" y="527.09">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="2"/>
@@ -647,7 +665,7 @@
    </properties>
    <point/>
   </object>
-  <object id="505" name="voltage_source" x="833" y="689.757">
+  <object id="505" name="voltage_source" x="702" y="705.757">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="2"/>
@@ -655,7 +673,7 @@
    </properties>
    <point/>
   </object>
-  <object id="506" name="voltage_source" x="478.333" y="515.09">
+  <object id="506" name="voltage_source" x="528" y="947.757">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
@@ -750,6 +768,13 @@
    <point/>
   </object>
   <object id="508" name="crystal_invisibility" x="149.333" y="1216">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="534" name="crystal_invisibility" x="512" y="160">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="duration" type="float" value="6"/>
@@ -1037,6 +1062,13 @@
    </properties>
    <point/>
   </object>
+  <object id="533" name="p6_route_a_3" x="461.667" y="523.33">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="p6_route_a"/>
+   </properties>
+   <point/>
+  </object>
   <object id="523" name="p6_route_d_0" x="80" y="160">
    <properties>
     <property name="order" type="int" value="0"/>
@@ -1065,7 +1097,7 @@
    </properties>
    <point/>
   </object>
-  <object id="513" name="p6_route_b_0" x="992" y="656">
+  <object id="513" name="p6_route_b_0" x="981.333" y="698.667">
    <properties>
     <property name="order" type="int" value="0"/>
     <property name="route_id" value="p6_route_b"/>
@@ -1093,14 +1125,14 @@
    </properties>
    <point/>
   </object>
-  <object id="514" name="p6_route_b_1" x="176" y="672">
+  <object id="514" name="p6_route_b_1" x="230.667" y="700">
    <properties>
     <property name="order" type="int" value="1"/>
     <property name="route_id" value="p6_route_b"/>
    </properties>
    <point/>
   </object>
-  <object id="517" name="p6_route_b_2" x="496" y="528">
+  <object id="517" name="p6_route_b_2" x="480" y="704">
    <properties>
     <property name="order" type="int" value="2"/>
     <property name="route_id" value="p6_route_b"/>

@@ -116,7 +116,7 @@
    </properties>
    <point/>
   </object>
-  <object id="21" name="resistor" x="52" y="286">
+  <object id="21" name="resistor" x="71.5136" y="250.022">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
@@ -137,22 +137,6 @@
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
     <property name="valor" value="220"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="24" name="voltage_source" x="314.33" y="222.947">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="1"/>
-    <property name="valor" value="12"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="25" name="current_source" x="267.397" y="237.583">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="1"/>
-    <property name="valor" value="0.01"/>
    </properties>
    <point/>
   </object>
@@ -193,7 +177,7 @@
   <object id="26" name="arquimedes" type="arquimedes" x="33.0889" y="360.936">
    <point/>
   </object>
-  <object id="27" name="father" type="father" x="160" y="128">
+  <object id="27" name="father" type="father" x="175.855" y="96.2904">
    <point/>
   </object>
  </objectgroup>

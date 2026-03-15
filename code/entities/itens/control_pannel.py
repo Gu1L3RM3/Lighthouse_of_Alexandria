@@ -37,7 +37,8 @@ class ControlPannel(Item):
         self.target_component =  props['target_component']
         self.component_for_area = int(props['component_for_area'])
         self.name_file =f"{props['tmx_file']}/pannel{self.pannel_id}"
-        self.stealth_bonus_duration = float(props.get("stealth_bonus_duration", 4.0))
+        # Invisibilidade concedida ao resolver o painel (ajustada para durar mais por padrão).
+        self.stealth_bonus_duration = float(props.get("stealth_bonus_duration", 10.0))
         self.solved_hold_seconds = float(props.get("solved_hold_seconds", 45.0))
         stealth_enabled_raw = props.get("stealth_bonus_enabled", True)
         if isinstance(stealth_enabled_raw, str):
