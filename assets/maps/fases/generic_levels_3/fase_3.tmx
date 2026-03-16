@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="249">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="250">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -453,6 +453,12 @@
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="2"/>
     <property name="valor" value="47k"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="249" name="light_charge" x="608" y="298">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
    </properties>
    <point/>
   </object>

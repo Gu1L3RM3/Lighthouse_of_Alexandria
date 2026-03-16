@@ -232,6 +232,13 @@ class MaxPowerTransferValidatorSystem(System):
     def set_solutions(self, event: dict, entity_manager: EntityManager):
         sources_per_area = event.get("sources", {})
         resistors_per_area = event.get("resistors", {})
+        raw_panel_ids = event.get("panel_ids")
+        panel_ids_filter = None
+        if raw_panel_ids is not None:
+            try:
+                panel_ids_filter = {int(pid) for pid in raw_panel_ids}
+            except Exception:
+                panel_ids_filter = None
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
         resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
 
@@ -241,6 +248,8 @@ class MaxPowerTransferValidatorSystem(System):
 
         for cp in control_pannels:
             if not cp.active:
+                continue
+            if panel_ids_filter is not None and int(cp.pannel_id) not in panel_ids_filter:
                 continue
 
             area = getattr(cp, "component_for_area", None)

@@ -1,9 +1,11 @@
 from pathlib import Path
 import pygame
+import json
 
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
 from core.components.dialogue import Dialogue
+from core.components.label_component import LabelComponent
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.circuit_validators.max_power_transfer_validator_system import MaxPowerTransferValidatorSystem
@@ -94,7 +96,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.animation_system = AnimationSystem()
         self.area_trigger_system = AreaTriggerSystem()
         self.freeze_system = FreezeSystem()
-        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=False, ambient_alpha=0)
+        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.phantom_ai_system = PhantomAISystem(self.tile_map)
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
@@ -186,17 +188,17 @@ class FinalLevel(BaseMaxPowerLevel):
 
     def _configure_final_dialogues(self):
         lines = [
-            "Arquimedes: Kevin, seu pai correu para o topo com o Coracao de Foton.",
-            "Arquimedes: Ele quer apagar o farol para forcar a linha do tempo da sua avo.",
-            "Arquimedes: Esta sala e o ultimo selo. Sao quatro paineis ativos ao mesmo tempo.",
-            "Arquimedes: Cada painel resolvido dura pouco. Se o tempo acabar, ele reinicia.",
-            "Arquimedes: Dica: em cada painel, foque no resistor alvo R1 e busque maxima transferencia.",
-            "Arquimedes: Primeiro encontre o equivalente de Thevenin nos terminais da carga.",
-            "Arquimedes: Regra-chave: para maxima potencia, ajuste RL para ficar aproximadamente igual a Rth.",
-            "Arquimedes: O painel cobra potencia e resistencia. Confira os dois antes de fechar.",
-            "Arquimedes: Estrategia: deixe componentes perto dos paineis e resolva em sequencia sem parar.",
-            "Arquimedes: Se falharmos aqui, Alexandria cai antes do amanhecer.",
-        ]
+    "Arquimedes: Kevin, seu pai correu para o topo com o Coração de Fóton.",
+    "Arquimedes: Ele quer apagar o farol para forçar a linha do tempo da sua avó.",
+    "Arquimedes: Esta sala é o último selo. São quatro painéis ativos ao mesmo tempo.",
+    "Arquimedes: Cada painel resolvido dura pouco. Se o tempo acabar, ele reinicia.",
+    "Arquimedes: Dica: em cada painel, foque no resistor alvo R1 e busque máxima transferência.",
+    "Arquimedes: Primeiro encontre o equivalente de Thévenin nos terminais da carga.",
+    "Arquimedes: Regra-chave: para máxima potência, ajuste RL para ficar aproximadamente igual a Rth.",
+    "Arquimedes: O painel cobra potência e resistência. Confira os dois antes de fechar.",
+    "Arquimedes: Estratégia: deixe componentes perto dos painéis e resolva em sequência sem parar.",
+    "Arquimedes: Se falharmos aqui, Alexandria cai antes do amanhecer.",
+]
 
         for arquimedes in self.entity_mn.get_entities_by_class(Arquimedes):
             if not arquimedes.has(Dialogue):
@@ -301,12 +303,16 @@ class FinalLevel(BaseMaxPowerLevel):
                 self._reset_panel(panel)
 
     def _reset_panel(self, panel: ControlPannel):
+        area_id = int(panel.component_for_area)
+        panel_id = int(panel.pannel_id)
         panel.done = False
         panel.panel_status.set_done(False)
-        self.panel_timers.pop(panel.pannel_id, None)
-        self._restore_panel_json(panel.pannel_id)
+        self.panel_timers.pop(panel_id, None)
+        # Ordem obrigatoria: devolver itens ao mapa e retirar do storage antes do reroll.
+        self._respawn_components_for_area(area_id, panel_id)
+        self._restore_panel_json(panel_id)
         self.circuit_manager.clear_circuit(panel.name_file)
-        self._respawn_components_for_area(int(panel.component_for_area))
+        self._reroll_panel_area(area_id, panel_id)
 
     def _restore_panel_json(self, panel_id: int):
         panel_name = f"pannel{panel_id}"
@@ -329,46 +335,133 @@ class FinalLevel(BaseMaxPowerLevel):
             except Exception:
                 pass
 
-    def _respawn_components_for_area(self, area_id: int):
+    def _respawn_components_for_area(self, area_id: int, panel_id: int | None = None):
         collected = self.collected_components_by_area.pop(area_id, [])
-        fallback_missing = self._get_missing_components_for_area(area_id)
+        used_on_panel = self._extract_dropped_components_from_panel(panel_id, area_id) if panel_id else []
+        slots = self.initial_components_by_area.get(int(area_id), [])
+        if not slots:
+            return
 
-        to_respawn: dict[tuple, dict] = {}
-        for data in collected + fallback_missing:
-            key = self._component_key(data)
-            if key in to_respawn:
+        value_pool_by_kind: dict[str, list[str]] = {}
+        for data in collected + used_on_panel:
+            kind = str(data.get("kind", ""))
+            value = str(data.get("value", ""))
+            if not kind or not value:
                 continue
-            if self._is_component_present_on_map(data):
+            value_pool_by_kind.setdefault(kind, []).append(value)
+
+        to_respawn: list[dict] = []
+        for slot in slots:
+            kind = str(slot.get("kind", ""))
+            if not kind:
                 continue
-            to_respawn[key] = data
+            pool = value_pool_by_kind.get(kind, [])
+            restored_value = pool.pop(0) if pool else str(slot.get("value", ""))
+            to_respawn.append(
+                {
+                    "kind": kind,
+                    "area_id": int(area_id),
+                    "value": restored_value,
+                    "x": float(slot.get("x", 0.0)),
+                    "y": float(slot.get("y", 0.0)),
+                }
+            )
 
         if not to_respawn:
             return
 
+        # Reset deterministico da area: remove os itens atuais e recria todos os slots.
+        self._remove_area_items_from_map(area_id)
         self.storage_circuit.reload_storage()
-        for data in to_respawn.values():
+        for data in to_respawn:
             self._spawn_component(data)
             self._remove_component_from_storage(data["kind"], data["value"])
         self.storage_circuit.save_eletric_storage()
 
-    def _snapshot_initial_components(self):
-        self.initial_components_by_area = {}
-        for kind, cls in (
-            ("resistor", ResistorItem),
-            ("current_source", CurrentSourceItem),
-            ("voltage_source", VoutageSourceItem),
-        ):
-            for entity in self.entity_mn.get_entities_by_class(cls):
-                if not entity.has(Position):
+    def _remove_area_items_from_map(self, area_id: int):
+        for cls in (ResistorItem, CurrentSourceItem, VoutageSourceItem):
+            for entity in list(self.entity_mn.get_entities_by_class(cls)):
+                if int(getattr(entity, "area_id", -1)) != int(area_id):
                     continue
-                pos: Position = entity.get(Position)
-                self.initial_components_by_area.setdefault(int(entity.area_id), []).append(
+                self.entity_mn.remove_entity(entity)
+
+    def _reroll_panel_area(self, area_id: int, panel_id: int):
+        area_resistors: list[ResistorItem] = [
+            item for item in self.entity_mn.get_entities_by_class(ResistorItem)
+            if int(item.area_id) == int(area_id)
+        ]
+        new_resistor_values = self.circuit_manager.random_list_resistors(len(area_resistors)) if area_resistors else []
+        for idx, resistor_item in enumerate(area_resistors):
+            if idx >= len(new_resistor_values):
+                break
+            new_value = str(new_resistor_values[idx])
+            resistor_item.value = new_value
+            if resistor_item.has(LabelComponent):
+                resistor_item.get(LabelComponent).value = new_value
+
+        resistors_payload = {
+            int(area_id): [str(item.value) for item in area_resistors]
+        }
+        sources_payload: dict[int, dict[str, list[str]]] = {}
+
+        for voltage_item in self.entity_mn.get_entities_by_class(VoutageSourceItem):
+            if int(voltage_item.area_id) != int(area_id):
+                continue
+            sources_payload.setdefault(int(area_id), {}).setdefault("voltage", []).append(str(voltage_item.value))
+
+        for current_item in self.entity_mn.get_entities_by_class(CurrentSourceItem):
+            if int(current_item.area_id) != int(area_id):
+                continue
+            sources_payload.setdefault(int(area_id), {}).setdefault("current", []).append(str(current_item.value))
+
+        self.event_manager.post(
+            {
+                "type": "set_solutions",
+                "panel_ids": [int(panel_id)],
+                "resistors": resistors_payload,
+                "sources": sources_payload,
+            }
+        )
+
+    def _snapshot_initial_components(self):
+        # Snapshot imutavel dos slots de itens vindo do TMX da fase.
+        # Isso evita perder referencias quando a cena e recarregada com itens ja coletados.
+        self.initial_components_by_area = {}
+        kind_by_name = {
+            "resistor": "resistor",
+            "current_source": "current_source",
+            "voltage_source": "voltage_source",
+        }
+
+        tmx_data = getattr(self.tile_map, "tmx_data", None)
+        if tmx_data is None:
+            return
+
+        for layer in getattr(tmx_data, "objectgroups", []):
+            if str(getattr(layer, "name", "")).lower() != "itens":
+                continue
+            for obj in layer:
+                obj_name = str(getattr(obj, "name", "")).lower()
+                kind = kind_by_name.get(obj_name)
+                if not kind:
+                    continue
+
+                props = getattr(obj, "properties", {}) or {}
+                try:
+                    area_id = int(props.get("area", -1))
+                except Exception:
+                    area_id = -1
+                if area_id < 0:
+                    continue
+
+                value = str(props.get("valor", ""))
+                self.initial_components_by_area.setdefault(area_id, []).append(
                     {
                         "kind": kind,
-                        "area_id": int(entity.area_id),
-                        "value": str(entity.value),
-                        "x": float(pos.x),
-                        "y": float(pos.y),
+                        "area_id": area_id,
+                        "value": value,
+                        "x": float(getattr(obj, "x", 0.0)),
+                        "y": float(getattr(obj, "y", 0.0)),
                     }
                 )
 
@@ -385,15 +478,63 @@ class FinalLevel(BaseMaxPowerLevel):
             int(data.get("area_id", -1)),
             round(float(data.get("x", 0.0)), 3),
             round(float(data.get("y", 0.0)), 3),
-            str(data.get("value", "")),
         )
+
+    @staticmethod
+    def _map_entity_type_to_kind(entity_type: str) -> str | None:
+        return {
+            "Resistor": "resistor",
+            "CurrentSource": "current_source",
+            "VoutageSource": "voltage_source",
+        }.get(str(entity_type))
+
+    def _extract_dropped_components_from_panel(self, panel_id: int, area_id: int) -> list[dict]:
+        panel_json = path_in_circuitos(self.level_path, f"pannel{panel_id}.json")
+        if not panel_json.exists():
+            return []
+        try:
+            entities = json.loads(panel_json.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+
+        dropped_components: list[dict] = []
+        for entity in entities:
+            kind = self._map_entity_type_to_kind(entity.get("entity_type", ""))
+            if not kind:
+                continue
+            components = entity.get("components", [])
+            dropped = next((c for c in components if c.get("type") == "Dropped"), None)
+            if not dropped or not bool(dropped.get("can_dropped", False)):
+                continue
+            label = next((c for c in components if c.get("type") == "LabelComponent"), None)
+            if not label or not label.get("value"):
+                continue
+            restored = self._allocate_respawn_slot(area_id, kind, str(label.get("value")))
+            if restored:
+                dropped_components.append(restored)
+        return dropped_components
+
+    def _allocate_respawn_slot(self, area_id: int, kind: str, value: str) -> dict | None:
+        expected = self.initial_components_by_area.get(int(area_id), [])
+        missing = [data for data in expected if data.get("kind") == kind and not self._is_component_present_on_map(data)]
+        if not missing:
+            return None
+
+        # Prioriza slot que ja tinha o mesmo valor; se nao houver, usa o primeiro faltando.
+        selected = next((data for data in missing if str(data.get("value")) == str(value)), missing[0])
+        return {
+            "kind": kind,
+            "area_id": int(area_id),
+            "value": str(value),
+            "x": float(selected.get("x", 0.0)),
+            "y": float(selected.get("y", 0.0)),
+        }
 
     def _is_component_present_on_map(self, data: dict) -> bool:
         kind = data.get("kind")
         area_id = int(data.get("area_id", -1))
         x = round(float(data.get("x", 0.0)), 3)
         y = round(float(data.get("y", 0.0)), 3)
-        value = str(data.get("value", ""))
 
         class_by_kind = {
             "resistor": ResistorItem,
@@ -406,8 +547,6 @@ class FinalLevel(BaseMaxPowerLevel):
 
         for entity in self.entity_mn.get_entities_by_class(cls):
             if int(getattr(entity, "area_id", -1)) != area_id:
-                continue
-            if str(getattr(entity, "value", "")) != value:
                 continue
             if not entity.has(Position):
                 continue

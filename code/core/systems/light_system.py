@@ -11,11 +11,22 @@ class LightSystem(System):
         self.screen = screen
         self.camera = camera
         self.enabled = enabled
+        self.initial_enabled = enabled
         self.ambient_alpha = max(0, min(255, ambient_alpha))
         self.debug = debug
 
     def toggle(self):
+        self.enabled = not self.enabled
+
+    def set_enabled(self, enabled: bool):
+        self.enabled = bool(enabled)
+
+    def turn_on(self):
+        # "Luz ligada" significa remover a escuridao global.
         self.enabled = False
+
+    def turn_off(self):
+        self.enabled = True
 
     def _entity_screen_center(self, entity):
         

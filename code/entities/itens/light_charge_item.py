@@ -1,23 +1,21 @@
 import pygame
 from pygame import Rect
 
-from core.components.area_trigger import AreaTrigger
+from core.components.always_on_top import AlwaysOnTop
 from core.components.animation_sprite import AnimateSprite
+from core.components.area_trigger import AreaTrigger
+from core.components.light_component import LightComponent
 from core.components.position import Position
 from core.components.sprite import Sprite
-from core.components.always_on_top import AlwaysOnTop
-from core.components.light_component import LightComponent
 from core.managers.event_manager import EventManager
 from core.managers.resource_manager import ResourceManager
 from entities.itens.item import Item
 from entities.player import Player
 
 
-class CrystalInvisibilityItem(Item):
+class LightChargeItem(Item):
     def __init__(self, x, y, active, props):
         super().__init__(x, y, active, props)
-        self.duration = float(props.get("duration", 6.0))
-        self.respawn_delay = float(props.get("respawn_delay", 20.0))
         self.em = EventManager.get()
         self.animations = self._load_animations()
         self.animate_sprite = AnimateSprite(self.animations, fps=8, loop=True)
@@ -29,19 +27,18 @@ class CrystalInvisibilityItem(Item):
             AreaTrigger(self.area_trigger, active=active, on_entered=self.on_collect),
             Sprite(self.animations["idle"][0]),
             AlwaysOnTop(),
-            LightComponent(radius=15),
+            LightComponent(radius=18),
             self.animate_sprite,
         )
         self.animate_sprite.play("idle")
 
     def _load_animations(self) -> dict[str, list[pygame.Surface]]:
         rm = ResourceManager.get()
-        base = "Top_Down_Adventure_Pack_v.1.0/Props_Items_(animated)"
-        idle_strip = rm.load_image(f"{base}/crystal_item_anim_strip_6.png")
-        collected_strip = rm.load_image(f"{base}/crystal_item_anim_collected_strip_5.png")
+        sheet = rm.load_image("itens/light_charge/coin_pickup.png")
+        frames = self._slice_strip(sheet, 11)
         return {
-            "idle": self._slice_strip(idle_strip, 6),
-            "collected": self._slice_strip(collected_strip, 5),
+            "idle": frames[:7],
+            "collected": self._build_collected_frames(frames[7:]),
         }
 
     def _slice_strip(self, surface: pygame.Surface, frames: int) -> list[pygame.Surface]:
@@ -51,6 +48,29 @@ class CrystalInvisibilityItem(Item):
         for i in range(frames):
             rect = pygame.Rect(i * frame_w, 0, frame_w, frame_h)
             result.append(surface.subsurface(rect).copy())
+        return result
+
+    def _build_collected_frames(self, base_frames: list[pygame.Surface]) -> list[pygame.Surface]:
+        result = []
+        frame_count = len(base_frames)
+        for i, source in enumerate(base_frames):
+            progress = i / max(1, frame_count - 1)
+            scale = 1.0 + progress * 0.25
+            alpha = max(0, int(255 * (1.0 - progress * 0.2)))
+            scaled = pygame.transform.scale(
+                source,
+                (
+                    max(1, int(source.get_width() * scale)),
+                    max(1, int(source.get_height() * scale)),
+                ),
+            )
+            scaled.set_alpha(alpha)
+
+            canvas_size = max(scaled.get_width(), scaled.get_height(), 18)
+            canvas = pygame.Surface((canvas_size, canvas_size), pygame.SRCALPHA)
+            rect = scaled.get_rect(center=(canvas_size // 2, canvas_size // 2))
+            canvas.blit(scaled, rect)
+            result.append(canvas)
         return result
 
     def on_collect(self, entity):
@@ -67,15 +87,5 @@ class CrystalInvisibilityItem(Item):
         )
 
     def _after_collected(self):
-        pos: Position = self.get(Position)
-        self.em.post({"type": "player_invisible_to_enemies_started", "duration": self.duration})
-        self.em.post(
-            {
-                "type": "crystal_invisibility_collected",
-                "spawn_x": pos.x,
-                "spawn_y": pos.y,
-                "duration": self.duration,
-                "respawn_delay": self.respawn_delay,
-            }
-        )
+        self.em.post({"type": "temporary_light_collected"})
         self.em.post({"type": "kill_entity", "id": self.id})

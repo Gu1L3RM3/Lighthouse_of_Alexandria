@@ -102,19 +102,19 @@ class GenericLevel7(BaseMaxPowerLevel):
             target = solution.get("target", "R1")
 
             hints = [
-                "Arquimedes: Kevin, seu pai esta logo atras desse portao de ferro. Mantenha a calma.",
-                f"Arquimedes: O painel avalia o resistor alvo {target}, que ja esta fixo no circuito.",
-                "Arquimedes: Para abrir, busque maxima transferencia de potencia no resistor alvo.",
+                "Arquimedes: Kevin, seu pai esta logo atrás desse portão de ferro. Mantenha a calma.",
+                f"Arquimedes: O painel avalia o resistor alvo {target}, que já está fixo no circuito.",
+                "Arquimedes: Para abrir, busque máxima transferência de potência no resistor alvo.",
                 "Arquimedes: Use Thevenin nos terminais da carga e ajuste RL para casar com Rth.",
-                "Arquimedes: Monte com cuidado e valide no painel. Estamos muito perto de liberta-lo.",
+                "Arquimedes: Monte com cuidado e valide no painel. Estamos muito perto de libertá-lo.",
             ]
         else:
             hints = [
-                "Arquimedes: Kevin, seu pai esta preso adiante. Este painel controla o portao da cela.",
-                "Arquimedes: Para vencer esta etapa, use maxima transferencia de potencia.",
-                "Arquimedes: Primeiro ache o equivalente de Thevenin nos terminais da carga, com GND como referencia.",
-                "Arquimedes: A regra principal e RL igual a Rth.",
-                "Arquimedes: Nao chute. Monte, meça e ajuste ate o painel aceitar.",
+                "Arquimedes: Kevin, seu pai esta preso adiante. Este painel controla o portão da cela.",
+                "Arquimedes: Para vencer esta etapa, use máxima transferência de potência.",
+                "Arquimedes: Primeiro ache o equivalente de Thevenin nos terminais da carga, com GND como referência.",
+                "Arquimedes: A regra principal é RL igual a Rth.",
+                "Arquimedes: Não chute. Monte, meça e ajuste até o painel aceitar.",
             ]
 
         for arquimedes in self.entity_mn.get_entities_by_class(Arquimedes):

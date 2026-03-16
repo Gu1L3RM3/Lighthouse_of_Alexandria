@@ -49,7 +49,7 @@ class ResistorItem(Item):
                 use_outline=True,
             ),
             AlwaysOnTop(),
-            LightComponent(radius=22)
+            LightComponent(radius=35)
         )
     def on_active(self):
         area_trigger:AreaTrigger =  self.get(AreaTrigger)

@@ -22,6 +22,7 @@ from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
+from core.ui.widgets.temporary_light_bar_widget import TemporaryLightBarWidget
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
@@ -35,6 +36,8 @@ from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
 class BaseGenericLevel(BaseScene):
+    TEMPORARY_LIGHT_DURATION_SECONDS = 8.0
+
     def __init__(self, screen: Surface, level_path: str):
         self.loader = TileMapLoader()
         self.level_path = level_path
@@ -67,6 +70,8 @@ class BaseGenericLevel(BaseScene):
         )
         # Mantem o recurso de debug no codigo, mas desativado por padrao.
         self.debug_interaction_areas = False
+        self._temporary_light_timer = 0.0
+        self._temporary_light_restore_enabled = None
         
         # Subclasses will override this
         self.set_systems() 
@@ -95,6 +100,8 @@ class BaseGenericLevel(BaseScene):
         self.ui_manager.add(self.menu_button)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
+        self.temporary_light_bar_widget = TemporaryLightBarWidget(self.screen.get_size(), self)
+        self.ui_manager.add(self.temporary_light_bar_widget)
 
     def set_map(self):
         spawner = MapEntitySpawner()
@@ -150,7 +157,7 @@ class BaseGenericLevel(BaseScene):
         for pannel in pannels:
             action_type = pannel.action_type
             if "luz" in action_type:
-                self.event_manager.subscribe(action_type, lambda event: self.light_system.toggle())
+                self.event_manager.subscribe(action_type, self._activate_permanent_light)
             elif "door" in action_type and self.door:
                 self.event_manager.subscribe(action_type, self.door.open)
                 
@@ -284,6 +291,7 @@ class BaseGenericLevel(BaseScene):
                 break
 
     def update(self, dt):
+        self._update_temporary_light(dt)
         self.dialog_system.update(self.entity_mn, self.player,dt)
         self.update_systems(dt)
         self.ui_manager.update(dt)
@@ -324,6 +332,10 @@ class BaseGenericLevel(BaseScene):
             pygame.draw.circle(self.screen, (90, 210, 255), center_scaled, radius_scaled, 1)
 
     def common_subscribes(self):
+        self._temporary_light_timer = 0.0
+        self._temporary_light_restore_enabled = None
+        if hasattr(self, "light_system"):
+            self.light_system.set_enabled(self.light_system.initial_enabled)
         self.event_manager.subscribe('fall_player',self.fall_player)
         self.event_manager.subscribe('request_freeze',self.freeze_system.request_freeze)
         self.event_manager.subscribe('release_freeze',self.freeze_system.release_freeze)
@@ -334,12 +346,52 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("voutage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
+        self.event_manager.subscribe("temporary_light_collected", self._on_temporary_light_collected)
+        self.event_manager.subscribe("temporary_light_collected", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
         self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
         self.event_manager.subscribe("panel_light_on", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
         self.subscribe_panels()
         self.subscribe_iron_gates()
+
+    def _on_temporary_light_collected(self, event):
+        _ = event
+        if not hasattr(self, "light_system"):
+            return
+        self._activate_temporary_light(self.TEMPORARY_LIGHT_DURATION_SECONDS)
+
+    def _activate_temporary_light(self, duration: float):
+        if not hasattr(self, "light_system"):
+            return
+        if self._temporary_light_timer <= 0:
+            self._temporary_light_restore_enabled = self.light_system.enabled
+        self.light_system.turn_on()
+        self._temporary_light_timer = max(0.0, float(duration))
+
+    def _activate_permanent_light(self, event):
+        _ = event
+        if not hasattr(self, "light_system"):
+            return
+        self.light_system.turn_on()
+        if self._temporary_light_timer > 0:
+            self._temporary_light_restore_enabled = self.light_system.enabled
+
+    def _update_temporary_light(self, dt: float):
+        if self._temporary_light_timer <= 0:
+            return
+        self._temporary_light_timer = max(0.0, self._temporary_light_timer - dt)
+        if self._temporary_light_timer > 0:
+            return
+        if hasattr(self, "light_system") and self._temporary_light_restore_enabled is not None:
+            self.light_system.set_enabled(self._temporary_light_restore_enabled)
+        self._temporary_light_restore_enabled = None
+
+    def get_temporary_light_ratio(self) -> float:
+        duration = float(self.TEMPORARY_LIGHT_DURATION_SECONDS)
+        if duration <= 0:
+            return 0.0
+        return max(0.0, min(1.0, self._temporary_light_timer / duration))
 
 
 

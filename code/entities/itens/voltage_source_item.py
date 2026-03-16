@@ -56,7 +56,7 @@ class VoutageSourceItem(Item):
                 use_outline=True,
             ),
             AlwaysOnTop(),
-            LightComponent(radius=26)
+            LightComponent(radius=30)
         )
     def on_active(self):
         area_trigger:AreaTrigger =  self.get(AreaTrigger)

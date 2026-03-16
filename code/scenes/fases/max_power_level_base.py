@@ -140,7 +140,7 @@ class BaseMaxPowerLevel(BaseGenericLevel):
         self.animation_system = AnimationSystem()
         self.area_trigger_system = AreaTriggerSystem()
         self.freeze_system = FreezeSystem()
-        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=True, ambient_alpha=0)
+        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.circuit_validator_system = MaxPowerTransferValidatorSystem(
             level_path=self.level_path,
             tolerance_percent=self.tolerance_percent,
