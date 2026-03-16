@@ -28,7 +28,7 @@ from core.settings import path_in_circuitos, path_in_ltspice
 
 
 class FinalLevel(BaseMaxPowerLevel):
-    DEFAULT_PANEL_HOLD_SECONDS = 45.0
+    DEFAULT_PANEL_HOLD_SECONDS = 90.0
     FINAL_FADE_SECONDS = 0.8
     STORAGE_TYPE_BY_KIND = {
         "resistor": "Resistor",
@@ -180,11 +180,7 @@ class FinalLevel(BaseMaxPowerLevel):
                 pygame.draw.rect(self.screen, fill_color, fill_rect, border_radius=3)
             pygame.draw.rect(self.screen, (230, 230, 230), bg_rect, width=1, border_radius=3)
 
-            if self._panel_timer_font:
-                timer_txt = f"{remaining:0.1f}s"
-                txt_surf = self._panel_timer_font.render(timer_txt, True, (245, 245, 245))
-                txt_rect = txt_surf.get_rect(midbottom=(draw_rect.centerx, bar_y - 2))
-                self.screen.blit(txt_surf, txt_rect)
+            # Mantem apenas a barra de progresso visual (sem label de tempo).
 
     def _configure_final_dialogues(self):
         lines = [

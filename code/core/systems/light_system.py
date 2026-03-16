@@ -6,27 +6,50 @@ from core.components.position import Position
 from core.components.sprite import Sprite
 
 class LightSystem(System):
-    def __init__(self, screen: Surface, camera, enabled: bool = True, ambient_alpha: int = 255, debug: bool = False):
+    def __init__(self, screen: Surface, camera, enabled: bool = True, ambient_alpha: int = 220, debug: bool = False):
         super().__init__()
         self.screen = screen
         self.camera = camera
         self.enabled = enabled
         self.initial_enabled = enabled
         self.ambient_alpha = max(0, min(255, ambient_alpha))
+        self.current_alpha = float(self.ambient_alpha if enabled else 0)
+        self._transition_active = False
+        self._transition_elapsed = 0.0
+        self._transition_duration = 0.0
+        self._transition_from = float(self.current_alpha)
+        self._transition_to = float(self.current_alpha)
+        self._transition_target_enabled = enabled
         self.debug = debug
 
     def toggle(self):
         self.enabled = not self.enabled
 
-    def set_enabled(self, enabled: bool):
-        self.enabled = bool(enabled)
+    def set_enabled(self, enabled: bool, transition_seconds: float = 0.0):
+        target_enabled = bool(enabled)
+        duration = max(0.0, float(transition_seconds))
+
+        if duration <= 0.0:
+            self._transition_active = False
+            self.enabled = target_enabled
+            self.current_alpha = float(self.ambient_alpha if target_enabled else 0.0)
+            return
+
+        self._transition_active = True
+        self._transition_elapsed = 0.0
+        self._transition_duration = duration
+        self._transition_from = float(self.current_alpha)
+        self._transition_to = float(self.ambient_alpha if target_enabled else 0.0)
+        self._transition_target_enabled = target_enabled
+        # Mantem desenho ativo durante o fade.
+        self.enabled = True
 
     def turn_on(self):
         # "Luz ligada" significa remover a escuridao global.
-        self.enabled = False
+        self.set_enabled(False)
 
     def turn_off(self):
-        self.enabled = True
+        self.set_enabled(True)
 
     def _entity_screen_center(self, entity):
         
@@ -51,7 +74,7 @@ class LightSystem(System):
 
         w, h = self.screen.get_size()
         darkness = pygame.Surface((w, h), flags=pygame.SRCALPHA)
-        darkness.fill((0, 0, 0, self.ambient_alpha))
+        darkness.fill((0, 0, 0, int(max(0, min(255, self.current_alpha)))))
 
         for entity in entities_with_light:
             try:
@@ -75,6 +98,15 @@ class LightSystem(System):
         return darkness
 
     def update(self, entity_mn, dt):
+        if self._transition_active:
+            self._transition_elapsed += float(dt)
+            t = min(1.0, self._transition_elapsed / max(1e-6, self._transition_duration))
+            self.current_alpha = self._transition_from + (self._transition_to - self._transition_from) * t
+            if t >= 1.0:
+                self._transition_active = False
+                self.current_alpha = float(self._transition_to)
+                self.enabled = bool(self._transition_target_enabled)
+
         if not self.enabled:
             return
 

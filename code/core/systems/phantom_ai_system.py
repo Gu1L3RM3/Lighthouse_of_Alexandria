@@ -22,7 +22,7 @@ class PhantomAISystem(System):
         self.stealth_active = False
         self.stealth_total_duration = 0.0
         self.cancel_reaggro = False
-        self.disable_player_chase = False
+        self._cancel_active_chases_requested = False
         self.chasing_before_stealth: set[int] = set()
         self._stealth_just_ended = False
         self._touch_triggered = False
@@ -43,8 +43,10 @@ class PhantomAISystem(System):
 
     def on_flask_collected(self, event: dict):
         _ = event
-        self.disable_player_chase = True
+        # Cancela as perseguicoes atuais e exige reentrada na area
+        # para que cada fantasma volte a perseguir.
         self.cancel_reaggro = True
+        self._cancel_active_chases_requested = True
 
     def update(self, entity_mn: EntityManager, dt: float):
         _ = dt
@@ -66,12 +68,12 @@ class PhantomAISystem(System):
             self._stealth_just_ended = False
 
         phantoms = entity_mn.get_entities_with(PhantomAI, Position, Velocity)
+        if self._cancel_active_chases_requested:
+            self._cancel_active_chases_until_reenter(phantoms)
+            self._cancel_active_chases_requested = False
 
         if self.stealth_active:
             self._force_return_all(phantoms)
-        elif self.disable_player_chase:
-            self._force_return_all(phantoms)
-            self.chasing_before_stealth.clear()
         elif self._stealth_just_ended:
             self._on_stealth_end(phantoms)
 
@@ -87,16 +89,6 @@ class PhantomAISystem(System):
                 self.event_manager.post({"type": "player_touched_enemy"})
 
             if self.stealth_active:
-                ai.was_player_in_range = False
-                continue
-
-            if self.disable_player_chase:
-                if ai.state == PhantomAI.STATE_CHASE:
-                    self._set_return_state(phantom, ai)
-                elif ai.state == PhantomAI.STATE_RETURN:
-                    self._update_return_state(phantom, ai)
-                else:
-                    self._ensure_patrol(phantom, ai, vel)
                 ai.was_player_in_range = False
                 continue
 
@@ -128,6 +120,14 @@ class PhantomAISystem(System):
             if ai.state == PhantomAI.STATE_CHASE:
                 self.chasing_before_stealth.add(phantom.id)
                 self._set_return_state(phantom, ai)
+
+    def _cancel_active_chases_until_reenter(self, phantoms: list[Entity]):
+        for phantom in phantoms:
+            ai: PhantomAI = phantom.get(PhantomAI)
+            if ai.state != PhantomAI.STATE_CHASE:
+                continue
+            ai.wait_for_reenter = True
+            self._set_return_state(phantom, ai)
 
     def _on_stealth_end(self, phantoms: list[Entity]):
         if self.cancel_reaggro:

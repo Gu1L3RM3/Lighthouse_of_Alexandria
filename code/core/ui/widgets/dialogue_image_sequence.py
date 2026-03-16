@@ -37,10 +37,6 @@ class DialogueImageSequenceWidget(Widget):
 
         self._load_images(image_paths)
         self._normalize_caption_count()
-        self._wrapped_captions = [
-            self._wrap_text(caption, self.caption_font, max(60, self.max_size[0] - 24))
-            for caption in self.captions
-        ]
 
     def _load_images(self, image_paths: list[str]):
         for rel_path in image_paths:
@@ -135,10 +131,11 @@ class DialogueImageSequenceWidget(Widget):
         surface.blit(badge, badge_rect)
 
     def _draw_caption(self, surface: pygame.Surface, frame_rect: pygame.Rect, index: int):
-        if index >= len(self._wrapped_captions):
+        if index >= len(self.captions):
             return
 
-        lines = self._wrapped_captions[index]
+        text_max_w = max(40, frame_rect.width - 20)
+        lines = self._wrap_text(self.captions[index], self.caption_font, text_max_w)
         if not lines:
             return
 

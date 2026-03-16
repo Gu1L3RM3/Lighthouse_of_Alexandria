@@ -106,8 +106,8 @@ class Game:
 
     
         self.register_fases()
-        self.scene_manager.change('fase_4')
-        #self.scene_manager.active_scene = CircuitEditor(self.screen,'final_fase/fase_8/pannel4_solution',debug_mode=True)
+        self.scene_manager.change('fase_8')
+        #self.scene_manager.active_scene = CircuitEditor(self.screen,'bombs/bomb_editor',debug_mode=True)
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 

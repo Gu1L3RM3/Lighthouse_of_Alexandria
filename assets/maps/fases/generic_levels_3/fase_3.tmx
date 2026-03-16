@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="250">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="20" nextobjectid="273">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -345,9 +345,9 @@
  </objectgroup>
  <objectgroup id="9" name="door">
   <object id="215" name="door" gid="31" x="224" y="240" width="16" height="16">
-    <properties>
-      <property name='next_scene' value='exp_fase_4'/>
-    </properties>
+   <properties>
+    <property name="next_scene" value="exp_fase_4"/>
+   </properties>
   </object>
  </objectgroup>
  <objectgroup id="7" name="attention_point"/>
@@ -424,6 +424,46 @@
    </properties>
    <point/>
   </object>
+  <object id="250" name="voltage_source" x="526" y="405">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="15"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="251" name="voltage_source" x="218" y="584">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="20"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="254" name="voltage_source" x="677" y="540">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="5"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="252" name="voltage_source" x="161" y="831">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="30"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="253" name="voltage_source" x="577" y="843">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="15"/>
+   </properties>
+   <point/>
+  </object>
   <object id="111" name="resistor" x="72" y="955">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -456,9 +496,140 @@
    </properties>
    <point/>
   </object>
-  <object id="249" name="light_charge" x="608" y="298">
+  <object id="249" name="light_charge" x="384" y="288">
    <properties>
     <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="272" name="light_charge" x="544" y="591">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="255" name="light_charge" x="367" y="707">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="256" name="light_charge" x="720" y="690">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="257" name="crystal_invisibility" x="448" y="528">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="261" name="crystal_invisibility" x="240" y="305">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="269" name="crystal_invisibility" x="540" y="329">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="270" name="crystal_invisibility" x="719" y="340">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="271" name="crystal_invisibility" x="322" y="490">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="262" name="crystal_invisibility" x="223" y="750">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="263" name="crystal_invisibility" x="381" y="841">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="264" name="crystal_invisibility" x="599" y="939">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="265" name="crystal_invisibility" x="639" y="691">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="18" name="enemy_routes">
+  <object id="258" name="p3_route_a_0" x="640" y="496">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="p3_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="259" name="p3_route_a_1" x="523" y="457">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="p3_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="266" name="p3_route_a_1" x="324" y="838">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="p3_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="267" name="p3_route_a_3" x="274" y="384">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="p3_route_a"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="268" name="p3_route_a_4" x="712" y="421">
+   <properties>
+    <property name="order" type="int" value="4"/>
+    <property name="route_id" value="p3_route_a"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="19" name="enemies">
+  <object id="260" name="phantom_guard_1" x="640" y="496">
+   <properties>
+    <property name="chase_speed" type="float" value="62"/>
+    <property name="detection_radius" type="float" value="120"/>
+    <property name="enemy_type" value="phantom"/>
+    <property name="route_id" value="p3_route_a"/>
+    <property name="speed" type="float" value="38"/>
+    <property name="touch_radius" type="float" value="10"/>
    </properties>
    <point/>
   </object>
@@ -600,5 +771,3 @@
 </data>
  </layer>
 </map>
-
-

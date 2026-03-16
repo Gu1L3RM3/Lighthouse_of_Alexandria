@@ -15,6 +15,21 @@ class CircuitValidatorSystem(System):
         self.level_path =  level_path
         self.circuit_manager = CircuitManager.get()
         self.event_manager   = EventManager.get()
+        self.debug = True
+        self._panel_status_cache: dict[int, str] = {}
+
+    def _log(self, message: str):
+        if self.debug:
+            print(f"[fase_basica][validator] {message}")
+
+    def _set_panel_status(self, panel_id: int, status: str, details: str = ""):
+        if self._panel_status_cache.get(panel_id) == status:
+            return
+        self._panel_status_cache[panel_id] = status
+        message = f"panel={panel_id} status={status}"
+        if details:
+            message += f" | {details}"
+        self._log(message)
 
 
     #TODO: Fazer funcionar para qualquer tipo de lista de componentes [resistors,current sources,voltage_sources]
@@ -57,6 +72,11 @@ class CircuitValidatorSystem(System):
 
 
             control_pannel.solution_value = new_solution_value
+            self._log(
+                f"GABARITO panel={control_pannel.pannel_id} area={area} "
+                f"alvo={target_component}.{solution_type}="
+                f"{new_solution_value:.6g} (R_escolhido={resistor_chosen})"
+            )
         self.event_manager.post({'type':'solutions_done'})
     def _float_equals_percent(self,a: float, b: float, percent_tol: float) -> bool:
         """
@@ -77,9 +97,11 @@ class CircuitValidatorSystem(System):
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
         for control_pannel in control_pannels:
             if control_pannel.done:
+                self._set_panel_status(int(control_pannel.pannel_id), "already_done")
                 continue
             resistor_results =  self.circuit_manager.get_circuit_values(control_pannel.name_file)
             if not resistor_results:
+                self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
                 continue
 
             target_component = control_pannel.target_component
@@ -92,6 +114,23 @@ class CircuitValidatorSystem(System):
             is_correct_answer = self._float_equals_percent(answer,solution_value,tolerance_percent)
 
             if  is_correct_answer:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "solved",
+                    (
+                        f"medido={answer:.6g} esperado={float(solution_value):.6g} "
+                        f"tipo={solution_type} tol={tolerance_percent}%"
+                    ),
+                )
                 control_pannel.action()
+            else:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "wrong_answer",
+                    (
+                        f"medido={answer:.6g} esperado={float(solution_value):.6g} "
+                        f"tipo={solution_type} tol={tolerance_percent}%"
+                    ),
+                )
             
 

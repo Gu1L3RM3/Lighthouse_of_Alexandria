@@ -12,6 +12,7 @@ class SpiderEnemy(EnemyBase):
         y: float,
         speed: float = 42.0,
         route: list[tuple[int, int]] | None = None,
+        max_hp: float = 100.0,
     ):
         animations = self._load_animations()
         super().__init__(
@@ -21,6 +22,7 @@ class SpiderEnemy(EnemyBase):
             collider=Collider(10, 8, offset_x=3, offset_y=4),
             route=route,
             speed=speed,
+            max_hp=max_hp,
         )
 
     def _load_animations(self) -> dict[str, list[pygame.Surface]]:

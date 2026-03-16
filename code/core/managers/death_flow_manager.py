@@ -27,6 +27,12 @@ class DeathFlowManager:
         lives_before = self.life_manager.current_lives
         lives_after = self.life_manager.lose_life()
         is_game_over = self.life_manager.is_game_over()
+        active_scene = self.scene_manager.active_scene
+        if is_game_over and active_scene and hasattr(active_scene, "reset_bomb_circuit_to_default"):
+            try:
+                active_scene.reset_bomb_circuit_to_default()
+            except Exception:
+                pass
 
         self.death_context = {
             "lives_before": lives_before,

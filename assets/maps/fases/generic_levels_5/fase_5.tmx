@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="229">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="239">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -514,6 +514,46 @@
    </properties>
    <point/>
   </object>
+  <object id="229" name="voltage_source" x="522.667" y="212">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="20"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="230" name="voltage_source" x="460" y="669.333">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="25"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="231" name="voltage_source" x="108" y="620">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="15"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="232" name="current_source" x="384" y="1093.33">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="2"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="233" name="current_source" x="625.333" y="598.667">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="1"/>
+   </properties>
+   <point/>
+  </object>
   <object id="23" name="resistor" x="848" y="160">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -790,6 +830,34 @@
    </properties>
    <point/>
   </object>
+  <object id="235" name="p5_route_c_0" x="818.667" y="91.9997">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="p5_route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="236" name="p5_route_c_1" x="70.667" y="440">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="p5_route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="238" name="p5_route_c_3" x="962.667" y="498.666">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="p5_route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="237" name="p5_route_c_2" x="590.667" y="205.333">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="p5_route_c"/>
+   </properties>
+   <point/>
+  </object>
  </objectgroup>
  <objectgroup id="15" name="enemies">
   <object id="226" name="phantom_guard_1" x="448" y="785.333">
@@ -809,6 +877,17 @@
     <property name="detection_radius" type="float" value="120"/>
     <property name="enemy_type" value="phantom"/>
     <property name="route_id" value="p5_route_b"/>
+    <property name="speed" type="float" value="38"/>
+    <property name="touch_radius" type="float" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="234" name="phantom_guard_3" x="94.667" y="194.666">
+   <properties>
+    <property name="chase_speed" type="float" value="62"/>
+    <property name="detection_radius" type="float" value="120"/>
+    <property name="enemy_type" value="phantom"/>
+    <property name="route_id" value="p5_route_c"/>
     <property name="speed" type="float" value="38"/>
     <property name="touch_radius" type="float" value="10"/>
    </properties>

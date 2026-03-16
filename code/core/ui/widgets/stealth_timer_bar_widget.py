@@ -8,7 +8,8 @@ class StealthTimerBarWidget(Widget):
         super().__init__()
         self.stealth_system = stealth_system
         screen_w, screen_h = screen_size
-        self.outer_rect = pygame.Rect(12, screen_h - 24, min(180, max(120, screen_w // 5)), 10)
+        # Barra superior no stack de status temporarios.
+        self.outer_rect = pygame.Rect(12, screen_h - 58, min(180, max(120, screen_w // 5)), 10)
 
     def update(self, dt):
         _ = dt

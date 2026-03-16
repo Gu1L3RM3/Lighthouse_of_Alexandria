@@ -11,6 +11,7 @@ from core.components.path_follower import PathFollower
 from core.components.freeze import Freeze
 from core.components.render_layer import RenderLayer
 from core.components.depth_anchor import DepthAnchor
+from core.components.health import Health
 
 
 class EnemyBase(Entity):
@@ -22,6 +23,7 @@ class EnemyBase(Entity):
         collider: Collider,
         route: list[tuple[int, int]] | None = None,
         speed: float = 42.0,
+        max_hp: float = 100.0,
     ):
         super().__init__()
         self._facing = Vector2(0, 1)
@@ -36,6 +38,7 @@ class EnemyBase(Entity):
             Sprite(first_frame),
             AnimateSprite(animations, fps=8, loop=True),
             Team("enemy"),
+            Health(max_hp=max_hp),
             Freeze(),
             RenderLayer(RenderLayer.ACTOR),
             DepthAnchor(offset_y=12),

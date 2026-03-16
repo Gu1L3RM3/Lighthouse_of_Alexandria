@@ -5,7 +5,9 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssotiationValidatorSystem
 from core.systems.freeze_system import FreezeSystem
 from core.systems.light_system import LightSystem
+from core.systems.phantom_ai_system import PhantomAISystem
 from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
+from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
 from core.settings import path_in_circuitos, path_in_ltspice
@@ -17,6 +19,8 @@ class GenericLevel4(BaseGenericLevel):
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
         self.player_dead_by_enemy = False
+        self.phantom_ai_system.set_touch_triggered(False)
+        self.enemy_touch_game_over_system.triggered = False
         self.set_subscribes()
         self.set_resistors()
         old_paper_list = self.entity_mn.get_entities_by_class(OldPaper)
@@ -63,12 +67,16 @@ class GenericLevel4(BaseGenericLevel):
         self.animation_system         = AnimationSystem()
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True)
+        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=False)
+        self.phantom_ai_system        = PhantomAISystem(self.tile_map)
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
+        self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
+        self.ui_manager.add(self.stealth_timer_widget)
         self.circuit_validator_system = ResistorAssotiationValidatorSystem(level_path=self.level_path)
 
         self.systems.update([
             self.freeze_system,
+            self.phantom_ai_system,
             self.path_following_system,
             self.enemy_touch_game_over_system,
             self.physics_system,
@@ -78,6 +86,8 @@ class GenericLevel4(BaseGenericLevel):
 
     def set_subscribes(self):
         self.event_manager.subscribe('set_solutions', lambda event: self.circuit_validator_system.set_solutions(event, self.entity_mn))
+        self.event_manager.subscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
+        self.event_manager.subscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
         self.event_manager.subscribe('player_touched_enemy', self.on_player_touched_enemy)
         self.common_subscribes()
 
@@ -86,6 +96,7 @@ class GenericLevel4(BaseGenericLevel):
         if self.player_dead_by_enemy:
             return
         self.player_dead_by_enemy = True
+        self.phantom_ai_system.set_touch_triggered(True)
         player = self.entity_mn.get_player()
         if not player:
             self.death_flow_manager.handle_player_death()

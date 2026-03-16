@@ -35,6 +35,10 @@ class EnemyFactory:
             "route": route,
         }
         if key == "phantom":
+            kwargs["max_hp"] = float(props.get("hp", props.get("max_hp", 130)))
+        else:
+            kwargs["max_hp"] = float(props.get("hp", props.get("max_hp", 80)))
+        if key == "phantom":
             kwargs["detection_radius"] = float(props.get("detection_radius", 90))
             kwargs["touch_radius"] = float(props.get("touch_radius", 10))
             kwargs["chase_speed"] = float(props.get("chase_speed", max(speed, 58)))

@@ -1,23 +1,30 @@
 import pygame
+import shutil
+from pathlib import Path
 from pygame import Surface
 from core.components.animation_sprite import AnimateSprite
 from core.components.area_trigger import AreaTrigger
 from core.components.label_component import LabelComponent
 from core.components.dialogue import Dialogue
 from core.components.collider import Collider
+from core.components.health import Health
+from core.components.team import Team
 from core.settings import *
 from scenes.base_scene import BaseScene
+from scenes.circuit_editor import CircuitEditor
 from entities.dialogue_area import DialogueArea
 from entities.animated_tiles.iron_gate import IronGate
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
 from entities.itens.control_pannel import ControlPannel
+from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 from entities.npcs.arquimedes import Arquimedes
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
 from core.components.phantom_ai import PhantomAI
+from core.components.path_follower import PathFollower
 from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
@@ -29,14 +36,24 @@ from core.map.map_renderer import MapRenderer
 from core.managers.scene_manager import SceneManager
 from core.managers.death_flow_manager import DeathFlowManager
 from core.managers.audio_manager import AudioManager
+from core.managers.bomb_manager import BombManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.managers.circuit_manager import CircuitManager
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.button import Button
+from core.ui.widgets.bomb_status_widget import BombStatusWidget
 from core.ui.widgets.gesture_detector import ClickType
 
 class BaseGenericLevel(BaseScene):
-    TEMPORARY_LIGHT_DURATION_SECONDS = 8.0
+    TEMPORARY_LIGHT_DURATION_SECONDS = 6.0
+    TEMPORARY_LIGHT_FADE_OUT_SECONDS = 1.0
+    BOMB_ENEMY_HIT_MARGIN = 10.0
+    BOMB_COUNT_PER_LEVEL = 8
+    BOMB_EDITOR_FILE = "bombs/bomb_editor"
+    BOMB_TARGET_RESISTOR = "R1"
+    BOMB_KEY = pygame.K_b
+    BOMB_DEFAULT_NETLIST = "bombs/default_bomb.net"
+    BOMB_VISUAL_SCALE = 0.34
 
     def __init__(self, screen: Surface, level_path: str):
         self.loader = TileMapLoader()
@@ -47,6 +64,18 @@ class BaseGenericLevel(BaseScene):
         super().__init__(screen, self.tile_map.map_width * self.scale, self.tile_map.map_height * self.scale)
         self.camera.scale = self.scale
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
+        self.bomb_manager = BombManager(
+            bombs_per_level=self.BOMB_COUNT_PER_LEVEL,
+            default_netlist_path=path_in_ltspice(self.BOMB_DEFAULT_NETLIST),
+        )
+        self._configure_bomb_balance_profile()
+        self.pending_bombs: list[dict] = []
+        self.active_explosions: list[dict] = []
+        self.crystal_respawn_queue: list[dict] = []
+        self._last_frame_dt = 0.0
+        self.bomb_world_sprite = None
+        self.bomb_prefuze_frames: list[pygame.Surface] = []
+        self.bomb_boom_frames: list[pygame.Surface] = []
         
         self.set_ui()
         self.set_map()
@@ -79,6 +108,17 @@ class BaseGenericLevel(BaseScene):
         self.door = self.entity_mn.get_entities_by_class(Door)
         if self.door:
             self.door = self.door[0]
+        self._set_bomb_visuals()
+
+    def _configure_bomb_balance_profile(self):
+        level_name = Path(self.level_path).stem.lower()
+        if level_name in {"fase_8", "final_level"}:
+            self.bomb_manager.set_balance_profile("final")
+            return
+        if level_name in {"fase_6", "fase_7"}:
+            self.bomb_manager.set_balance_profile("challenging")
+            return
+        self.bomb_manager.set_balance_profile("standard")
             
     def set_ui(self):
         fps = FPSWidget()
@@ -90,18 +130,49 @@ class BaseGenericLevel(BaseScene):
         self.menu_button = Button(
             init_surface=idle,
             surface_pressed=pressed,
-            pos_center=(self.screen.get_width() - 92, 44),
+            pos_center=(self.screen.get_width() - 240, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
             text="MENU",
             font_size=11,
             color_text=(245, 230, 170),
         )
-        self.ui_manager.add(self.menu_button)
+        self.edit_bomb_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(self.screen.get_width() - 92, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=self.open_bomb_editor,
+            text="NUCLEO",
+            font_size=10,
+            color_text=(245, 230, 170),
+        )
+        self.bomb_status_widget = BombStatusWidget(self.bomb_manager, pos=(10, 86))
+        self.ui_manager.add(self.menu_button, self.edit_bomb_button, self.bomb_status_widget)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
         self.temporary_light_bar_widget = TemporaryLightBarWidget(self.screen.get_size(), self)
         self.ui_manager.add(self.temporary_light_bar_widget)
+
+    def _set_bomb_visuals(self):
+        try:
+            icon = self.resources.load_image("circuit_components/eletron.png")
+            self.bomb_world_sprite = pygame.transform.scale(icon, (18, 18))
+        except Exception:
+            self.bomb_world_sprite = None
+        self.bomb_prefuze_frames = []
+        self.bomb_boom_frames = []
+
+    def _slice_strip(self, strip: pygame.Surface, frame_count: int) -> list[pygame.Surface]:
+        if frame_count <= 0:
+            return []
+        frame_w = strip.get_width() // frame_count
+        frame_h = strip.get_height()
+        frames = []
+        for i in range(frame_count):
+            rect = pygame.Rect(i * frame_w, 0, frame_w, frame_h)
+            frames.append(strip.subsurface(rect).copy())
+        return frames
 
     def set_map(self):
         spawner = MapEntitySpawner()
@@ -223,10 +294,315 @@ class BaseGenericLevel(BaseScene):
         
     def kill_entity_event(self,event):
         self.entity_mn.remove_entity_by_id(event['id'])
+
+    def open_bomb_editor(self):
+        self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
+        SceneManager.get().active_scene = CircuitEditor(
+            pygame.display.get_surface(),
+            file=self.BOMB_EDITOR_FILE,
+            debug_mode=False,
+        )
+
+    def place_bomb(self):
+        if not self.bomb_manager.consume_bomb():
+            self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+            return
+
+        self._sync_bomb_runtime()
+        if not self.player or not self.player.has(Position):
+            return
+
+        player_pos: Position = self.player.get(Position)
+        center = player_pos.center_pos()
+        params = self.bomb_manager.current_params
+        self.pending_bombs.append(
+            {
+                "center": center,
+                "total_delay": float(params.explosion_delay),
+                "delay": float(params.explosion_delay),
+                "radius": float(params.explosion_radius),
+                "damage": float(params.damage),
+            }
+        )
+        self.audio_manager.play_sfx("sfx/lighthouse_ignite.wav", volume=0.58)
+
+    def _sync_bomb_runtime(self):
+        bomb_results = self.circuit_manager.get_circuit_values(self.BOMB_EDITOR_FILE)
+        self.bomb_manager.update_from_resistor_results(bomb_results, target_resistor=self.BOMB_TARGET_RESISTOR)
+
+    def _update_bombs(self, dt: float):
+        self._sync_bomb_runtime()
+        if not self.pending_bombs:
+            return
+
+        still_pending = []
+        for bomb in self.pending_bombs:
+            bomb["delay"] -= dt
+            if bomb["delay"] > 0:
+                still_pending.append(bomb)
+                continue
+            self._explode_bomb(bomb)
+        self.pending_bombs = still_pending
+
+    def _explode_bomb(self, bomb_data: dict):
+        center: pygame.Vector2 = bomb_data["center"]
+        radius = float(bomb_data["radius"])
+        damage = float(bomb_data["damage"])
+        radius_sq = radius * radius
+        enemy_radius_sq = (radius + float(self.BOMB_ENEMY_HIT_MARGIN)) ** 2
+
+        self.active_explosions.append(
+            {
+                "center": center,
+                "radius": radius,
+                "elapsed": 0.0,
+                "duration": 0.36,
+            }
+        )
+        shake_intensity = max(3.0, min(9.0, radius / 22.0))
+        self.camera.start_shake(duration=0.22, intensity=shake_intensity)
+        self.audio_manager.play_sfx("sfx/bombs/explosion_01.ogg", volume=0.45)
+
+        # Dano aos inimigos por area.
+        enemies = self.entity_mn.get_entities_with(Position, Collider, Team, Health)
+        for enemy in enemies:
+            team: Team = enemy.get(Team)
+            if team.name != "enemy":
+                continue
+            enemy_pos: Position = enemy.get(Position)
+            if (enemy_pos.center_pos() - center).length_squared() > enemy_radius_sq:
+                continue
+            self._damage_enemy(enemy, damage)
+
+        # Friendly fire no jogador.
+        if self.player and self.player.has(Position):
+            if (self.player.get(Position).center_pos() - center).length_squared() <= radius_sq:
+                self._trigger_player_death()
+
+    def _damage_enemy(self, enemy, damage: float):
+        health: Health = enemy.get(Health)
+        died = health.take_damage(damage)
+        if not died:
+            self._play_enemy_hit_feedback(enemy)
+            return
+        was_phantom = enemy.has(PhantomAI)
+
+        # Impede sistemas de movimento/IA de sobrescrever a animacao de morte.
+        if enemy.has(PathFollower):
+            enemy.remove(PathFollower)
+        if enemy.has(PhantomAI):
+            enemy.remove(PhantomAI)
+
+        # Fantasma: congela no momento da morte para reforcar feedback visual.
+        if was_phantom and enemy.has(Freeze):
+            enemy.get(Freeze).active = True
+
+        if enemy.has(Velocity):
+            enemy.get(Velocity).vxy = (0, 0)
+
+        if enemy.has(AnimateSprite):
+            anim: AnimateSprite = enemy.get(AnimateSprite)
+            facing = "front"
+            if hasattr(enemy, "get_facing_name"):
+                facing = enemy.get_facing_name()
+            death_state = f"death_{facing}"
+            if death_state in anim.animations:
+                anim.play(
+                    death_state,
+                    reset=True,
+                    loop=False,
+                    on_finish=lambda eid=enemy.id: self.event_manager.post({"type": "kill_entity", "id": eid}),
+                )
+                return
+        self.event_manager.post({"type": "kill_entity", "id": enemy.id})
+
+    def _play_enemy_hit_feedback(self, enemy):
+        if not enemy.has(AnimateSprite):
+            return
+
+        anim: AnimateSprite = enemy.get(AnimateSprite)
+        facing = "front"
+        if hasattr(enemy, "get_facing_name"):
+            facing = enemy.get_facing_name()
+        hit_state = f"hit_{facing}"
+        if hit_state not in anim.animations:
+            return
+
+        def _resume_after_hit():
+            if enemy.has(Velocity):
+                vel: Velocity = enemy.get(Velocity)
+                moving = vel.vel.length_squared() > 1e-6
+            else:
+                moving = False
+
+            next_state = f"walk_{facing}" if moving else f"idle_{facing}"
+            if next_state in anim.animations:
+                anim.play(next_state, reset=True, loop=True)
+                if hasattr(enemy, "_current_animation_state"):
+                    enemy._current_animation_state = next_state
+
+        anim.play(
+            hit_state,
+            reset=True,
+            loop=False,
+            on_finish=_resume_after_hit,
+        )
+
+    def _trigger_player_death(self):
+        if getattr(self, "player_dead_by_enemy", False):
+            return
+        if hasattr(self, "player_dead_by_enemy"):
+            self.player_dead_by_enemy = True
+
+        player = self.entity_mn.get_player()
+        if not player:
+            self.death_flow_manager.handle_player_death()
+            return
+
+        if player.has(Freeze):
+            player.get(Freeze).active = True
+        if player.has(Velocity):
+            player.get(Velocity).vxy = (0, 0)
+        if player.has(AnimateSprite):
+            anim: AnimateSprite = player.get(AnimateSprite)
+            dir_name = "front"
+            if hasattr(player, "_get_dir_name") and hasattr(player, "old_direction"):
+                dir_name = player._get_dir_name(player.old_direction)
+            anim.play(
+                f"death_{dir_name}",
+                reset=True,
+                loop=False,
+                on_finish=lambda: self.death_flow_manager.handle_player_death(),
+            )
+            return
+        self.death_flow_manager.handle_player_death()
+
+    def _draw_active_explosions(self, dt: float):
+        if not self.active_explosions:
+            return
+
+        alive_effects = []
+        for effect in self.active_explosions:
+            effect["elapsed"] += dt
+            ratio = effect["elapsed"] / effect["duration"]
+            if ratio >= 1.0:
+                continue
+
+            center = effect["center"]
+            base_radius = float(effect["radius"])
+            draw_radius = int(max(1, base_radius * ratio * self.scale))
+            off_x, off_y = self.camera.render_offset
+            center_scaled = (
+                int(center.x * self.scale - self.camera.viewport.x + off_x),
+                int(center.y * self.scale - self.camera.viewport.y + off_y),
+            )
+            if self.bomb_boom_frames:
+                frame_index = min(len(self.bomb_boom_frames) - 1, int(ratio * len(self.bomb_boom_frames)))
+                frame = self.bomb_boom_frames[frame_index]
+                sprite = pygame.transform.scale(
+                    frame,
+                    (
+                        max(20, int(draw_radius * 2.0)),
+                        max(20, int(draw_radius * 2.0)),
+                    ),
+                )
+                rect = sprite.get_rect(center=center_scaled)
+                self.screen.blit(sprite, rect)
+            else:
+                alpha = int(max(0, 185 * (1.0 - ratio)))
+                core_alpha = int(max(0, 230 * (1.0 - ratio * 1.15)))
+                overlay = pygame.Surface((draw_radius * 2 + 12, draw_radius * 2 + 12), pygame.SRCALPHA)
+                center_overlay = (overlay.get_width() // 2, overlay.get_height() // 2)
+                pygame.draw.circle(overlay, (80, 200, 255, alpha), center_overlay, draw_radius)
+                pygame.draw.circle(overlay, (190, 245, 255, core_alpha), center_overlay, max(2, int(draw_radius * 0.35)))
+                ring_radius = max(2, int(draw_radius * 0.78))
+                ring_width = max(1, int(2 * self.scale))
+                pygame.draw.circle(overlay, (120, 230, 255, alpha), center_overlay, ring_radius, ring_width)
+                self.screen.blit(
+                    overlay,
+                    (center_scaled[0] - overlay.get_width() // 2, center_scaled[1] - overlay.get_height() // 2),
+                )
+            alive_effects.append(effect)
+
+        self.active_explosions = alive_effects
+
+    def _draw_pending_bombs(self):
+        if not self.pending_bombs:
+            return
+        for bomb in self.pending_bombs:
+            center = bomb["center"]
+            delay = max(0.001, float(bomb["delay"]))
+            total = max(0.001, float(bomb.get("total_delay", delay)))
+            ratio = max(0.0, min(1.0, delay / total))
+
+            off_x, off_y = self.camera.render_offset
+            world_center = (
+                int(center.x * self.scale - self.camera.viewport.x + off_x),
+                int(center.y * self.scale - self.camera.viewport.y + off_y),
+            )
+            radius_world = max(1, int(float(bomb["radius"]) * self.scale))
+            preview_overlay = pygame.Surface((radius_world * 2 + 6, radius_world * 2 + 6), pygame.SRCALPHA)
+            pc = (preview_overlay.get_width() // 2, preview_overlay.get_height() // 2)
+            preview_alpha = int(42 + (26 * (1.0 - ratio)))
+            ring_alpha = int(128 + (44 * (1.0 - ratio)))
+            pygame.draw.circle(preview_overlay, (100, 215, 255, preview_alpha), pc, radius_world)
+            pygame.draw.circle(
+                preview_overlay,
+                (168, 238, 255, ring_alpha),
+                pc,
+                radius_world,
+                width=max(1, int(2 * self.scale)),
+            )
+            self.screen.blit(
+                preview_overlay,
+                (world_center[0] - preview_overlay.get_width() // 2, world_center[1] - preview_overlay.get_height() // 2),
+            )
+
+            blink = int((pygame.time.get_ticks() / 120) % 2)
+            pulse_scale = 1.0 + (0.1 * (1.0 - ratio)) + (0.08 if blink == 0 else 0.0)
+
+            if self.bomb_prefuze_frames:
+                speed_up = 1.0 + (1.4 * (1.0 - ratio))
+                ticks = pygame.time.get_ticks() / 170.0
+                frame_index = int(ticks * speed_up) % len(self.bomb_prefuze_frames)
+                frame = self.bomb_prefuze_frames[frame_index]
+                sprite = pygame.transform.scale(
+                    frame,
+                    (
+                        max(10, int(frame.get_width() * self.scale * pulse_scale * self.BOMB_VISUAL_SCALE)),
+                        max(10, int(frame.get_height() * self.scale * pulse_scale * self.BOMB_VISUAL_SCALE)),
+                    ),
+                )
+                rect = sprite.get_rect(center=world_center)
+                self.screen.blit(sprite, rect)
+            elif self.bomb_world_sprite is not None:
+                sprite = pygame.transform.scale(
+                    self.bomb_world_sprite,
+                    (
+                        max(10, int(self.bomb_world_sprite.get_width() * self.scale * pulse_scale * 0.75)),
+                        max(10, int(self.bomb_world_sprite.get_height() * self.scale * pulse_scale * 0.75)),
+                    ),
+                )
+                rect = sprite.get_rect(center=world_center)
+                self.screen.blit(sprite, rect)
+            else:
+                radius = max(4, int(7 * self.scale * pulse_scale))
+                color = (20, 90, 120) if blink else (90, 230, 255)
+                pygame.draw.circle(self.screen, color, world_center, radius)
+
+            # Barra visual curta de "tempo pra explodir".
+            bar_w = max(18, int(24 * self.scale))
+            bar_h = max(3, int(3 * self.scale))
+            bx = world_center[0] - bar_w // 2
+            by = world_center[1] - max(14, int(16 * self.scale))
+            pygame.draw.rect(self.screen, (20, 20, 20), pygame.Rect(bx, by, bar_w, bar_h))
+            pygame.draw.rect(self.screen, (255, 196, 96), pygame.Rect(bx, by, int(bar_w * ratio), bar_h))
         
     def process_input(self, events):
         for event in events:
             self.ui_manager.handle_event(event)
+            if event.type == pygame.KEYDOWN and event.key == self.BOMB_KEY:
+                self.place_bomb()
         self._handle_panel_interaction(events)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
@@ -291,6 +667,9 @@ class BaseGenericLevel(BaseScene):
                 break
 
     def update(self, dt):
+        self._last_frame_dt = dt
+        self._update_bombs(dt)
+        self._update_crystal_respawn_queue(dt)
         self._update_temporary_light(dt)
         self.dialog_system.update(self.entity_mn, self.player,dt)
         self.update_systems(dt)
@@ -300,10 +679,13 @@ class BaseGenericLevel(BaseScene):
         self.screen.fill(BLACK)
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
+        self._draw_pending_bombs()
+        self._draw_active_explosions(self._last_frame_dt)
         if self.debug_interaction_areas:
             self._draw_debug_areas()
         if hasattr(self, 'light_system'):
-            self.light_system.update(self.entity_mn,0)
+            # Usa o dt real para permitir transicoes de luz (fade in/out) fluirem.
+            self.light_system.update(self.entity_mn, self._last_frame_dt)
         self.ui_manager.draw(self.screen)
 
     def _draw_debug_areas(self):
@@ -332,6 +714,11 @@ class BaseGenericLevel(BaseScene):
             pygame.draw.circle(self.screen, (90, 210, 255), center_scaled, radius_scaled, 1)
 
     def common_subscribes(self):
+        self.pending_bombs.clear()
+        self.active_explosions.clear()
+        self.crystal_respawn_queue.clear()
+        self.bomb_manager.reset_bombs(self.BOMB_COUNT_PER_LEVEL)
+        self._sync_bomb_runtime()
         self._temporary_light_timer = 0.0
         self._temporary_light_restore_enabled = None
         if hasattr(self, "light_system"):
@@ -346,6 +733,8 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("voutage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
         self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
+        if not self._uses_custom_crystal_respawn():
+            self.event_manager.subscribe("crystal_invisibility_collected", self._on_crystal_invisibility_collected)
         self.event_manager.subscribe("temporary_light_collected", self._on_temporary_light_collected)
         self.event_manager.subscribe("temporary_light_collected", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
         self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
@@ -354,6 +743,22 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
         self.subscribe_panels()
         self.subscribe_iron_gates()
+
+    def reset_bomb_circuit_to_default(self):
+        default_json = path_in_circuitos("bombs", "default_bomb.json")
+        editor_json = path_in_circuitos("bombs", "bomb_editor.json")
+        try:
+            editor_json.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(default_json, editor_json)
+        except Exception:
+            pass
+        self.circuit_manager.clear_circuit(self.BOMB_EDITOR_FILE)
+        self.bomb_manager.current_params = self.bomb_manager.default_params
+
+    def on_scene_will_change(self, target_scene_name: str):
+        if target_scene_name in {"main_menu", "death_transition"}:
+            return
+        self.reset_bomb_circuit_to_default()
 
     def _on_temporary_light_collected(self, event):
         _ = event
@@ -384,7 +789,10 @@ class BaseGenericLevel(BaseScene):
         if self._temporary_light_timer > 0:
             return
         if hasattr(self, "light_system") and self._temporary_light_restore_enabled is not None:
-            self.light_system.set_enabled(self._temporary_light_restore_enabled)
+            self.light_system.set_enabled(
+                self._temporary_light_restore_enabled,
+                transition_seconds=self.TEMPORARY_LIGHT_FADE_OUT_SECONDS,
+            )
         self._temporary_light_restore_enabled = None
 
     def get_temporary_light_ratio(self) -> float:
@@ -393,8 +801,38 @@ class BaseGenericLevel(BaseScene):
             return 0.0
         return max(0.0, min(1.0, self._temporary_light_timer / duration))
 
+    def _uses_custom_crystal_respawn(self) -> bool:
+        level_name = Path(self.level_path).stem.lower()
+        return level_name in {"fase_8", "final_level"}
 
+    def _on_crystal_invisibility_collected(self, event: dict):
+        self.crystal_respawn_queue.append(
+            {
+                "remaining": float(event.get("respawn_delay", 20.0)),
+                "x": float(event.get("spawn_x", 0.0)),
+                "y": float(event.get("spawn_y", 0.0)),
+                "duration": float(event.get("duration", 6.0)),
+                "respawn_delay": float(event.get("respawn_delay", 20.0)),
+            }
+        )
 
+    def _update_crystal_respawn_queue(self, dt: float):
+        if self._uses_custom_crystal_respawn() or not self.crystal_respawn_queue:
+            return
 
+        still_waiting: list[dict] = []
+        for entry in self.crystal_respawn_queue:
+            entry["remaining"] -= dt
+            if entry["remaining"] > 0:
+                still_waiting.append(entry)
+                continue
 
+            props = {
+                "duration": entry["duration"],
+                "respawn_delay": entry["respawn_delay"],
+                "tmx_file": self.tile_map.tmx_file,
+            }
+            crystal = CrystalInvisibilityItem(entry["x"], entry["y"], True, props)
+            self.entity_mn.add_entity(crystal)
 
+        self.crystal_respawn_queue = still_waiting

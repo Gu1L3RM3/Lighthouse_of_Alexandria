@@ -6,6 +6,9 @@ from entities.dialogue_area import DialogueArea
 from entities.itens.old_paper import OldPaper
 from entities.itens.key import Key
 from entities.animated_tiles.door import Door
+from core.components.area_trigger import AreaTrigger
+from core.components.position import Position
+from core.components.collider import Collider
 from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
@@ -147,6 +150,7 @@ class Level1(BaseScene):
         for event in events:
             self.ui_manager.handle_event(event)
         self._handle_door_interaction(events)
+        self._handle_old_paper_interaction(events)
         self.player.input(events)
 
     def _handle_door_interaction(self, events):
@@ -160,9 +164,37 @@ class Level1(BaseScene):
                 self.interaction_key_widget.set_visible(False)
                 break
 
+    def _can_old_paper_interact(self) -> bool:
+        if not hasattr(self, "old_paper") or not self.old_paper:
+            return False
+        if not self.player or not self.player.has(Position) or not self.player.has(Collider):
+            return False
+        if not self.old_paper.has(AreaTrigger) or not self.old_paper.has(Position):
+            return False
+
+        trigger: AreaTrigger = self.old_paper.get(AreaTrigger)
+        if not trigger.active:
+            return False
+
+        paper_pos: Position = self.old_paper.get(Position)
+        paper_rect = trigger.get_rect(paper_pos.x, paper_pos.y)
+        player_pos: Position = self.player.get(Position)
+        player_rect = self.player.get(Collider).get_rect(player_pos.x, player_pos.y)
+        return player_rect.colliderect(paper_rect)
+
+    def _handle_old_paper_interaction(self, events):
+        if not self._can_old_paper_interact():
+            return
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
+                self.interaction_key_widget.set_visible(False)
+                self.event_manager.post({"type": "open_old_paper"})
+                break
+
     def update(self, dt):
         can_door_interact = self.door.can_player_interact(self.player) if self.door and self.player else False
-        self.dialogue_hud.update(self.player, extra_interaction=can_door_interact)
+        can_paper_interact = self._can_old_paper_interact()
+        self.dialogue_hud.update(self.player, extra_interaction=(can_door_interact or can_paper_interact))
         self.dialog_system.update(self.entity_mn, self.player,dt)
 
         self.update_systems(dt)

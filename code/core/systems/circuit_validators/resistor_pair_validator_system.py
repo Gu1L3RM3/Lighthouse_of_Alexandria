@@ -16,6 +16,21 @@ class ResistorPairValidatorSystem(System):
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
+        self.debug = True
+        self._panel_status_cache: dict[int, str] = {}
+
+    def _log(self, message: str):
+        if self.debug:
+            print(f"[fase_5][validator] {message}")
+
+    def _set_panel_status(self, panel_id: int, status: str, details: str = ""):
+        if self._panel_status_cache.get(panel_id) == status:
+            return
+        self._panel_status_cache[panel_id] = status
+        message = f"panel={panel_id} status={status}"
+        if details:
+            message += f" | {details}"
+        self._log(message)
 
     def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
@@ -98,6 +113,10 @@ class ResistorPairValidatorSystem(System):
                 continue
 
             control_pannel.solution_value = solution_values
+            self._log(
+                f"GABARITO panel={control_pannel.pannel_id} area={area} "
+                f"tipo={solution_type} alvo={solution_values} (R3={resistor_chosen})"
+            )
 
         self.event_manager.post({"type": "solutions_done"})
 
@@ -106,21 +125,26 @@ class ResistorPairValidatorSystem(System):
 
         for control_pannel in control_pannels:
             if control_pannel.done:
+                self._set_panel_status(int(control_pannel.pannel_id), "already_done")
                 continue
 
             solution_values = control_pannel.solution_value
             if not isinstance(solution_values, dict) or not solution_values:
+                self._set_panel_status(int(control_pannel.pannel_id), "waiting_solution")
                 continue
 
             solution_type = control_pannel.solution_type
             if solution_type not in ("current", "voltage"):
+                self._set_panel_status(int(control_pannel.pannel_id), "invalid_solution_type")
                 continue
 
             circuit_data = self.circuit_manager.get_circuit_values(control_pannel.name_file)
             if not circuit_data:
+                self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
                 continue
 
             all_ok = True
+            measured_values: dict[str, float] = {}
 
             for r_name, expected_value in solution_values.items():
                 res_entry = circuit_data.get(r_name)
@@ -137,10 +161,28 @@ class ResistorPairValidatorSystem(System):
                 except Exception:
                     all_ok = False
                     break
+                measured_values[r_name] = answer
 
                 if not self._float_equals_percent(answer, expected_value, self.tolerance_percent):
                     all_ok = False
                     break
 
             if all_ok:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "solved",
+                    (
+                        f"medido={measured_values} esperado={solution_values} "
+                        f"tipo={solution_type} tol={self.tolerance_percent}%"
+                    ),
+                )
                 control_pannel.action()
+            else:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "wrong_answer",
+                    (
+                        f"medido={measured_values} esperado={solution_values} "
+                        f"tipo={solution_type} tol={self.tolerance_percent}%"
+                    ),
+                )

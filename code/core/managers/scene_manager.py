@@ -91,6 +91,11 @@ class SceneManager:
         self._begin_transition(new_scene, scene_name, duration)
 
     def _begin_transition(self, target_scene: BaseScene, target_name: str, duration: float):
+        if self.active_scene and hasattr(self.active_scene, "on_scene_will_change"):
+            try:
+                self.active_scene.on_scene_will_change(target_name)
+            except Exception:
+                pass
         EventManager.get().clear()
         self.transitioning = True
         self.transition_target = target_scene

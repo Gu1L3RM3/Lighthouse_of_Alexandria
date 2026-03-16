@@ -17,6 +17,7 @@ class PhantomEnemy(EnemyBase):
         detection_radius: float = 90.0,
         touch_radius: float = 10.0,
         chase_speed: float = 58.0,
+        max_hp: float = 130.0,
     ):
         animations = self._load_animations()
         super().__init__(
@@ -26,6 +27,7 @@ class PhantomEnemy(EnemyBase):
             collider=Collider(0, 0),
             route=route,
             speed=speed,
+            max_hp=max_hp,
         )
         self.add(
 

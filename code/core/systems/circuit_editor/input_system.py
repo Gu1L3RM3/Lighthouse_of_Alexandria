@@ -359,6 +359,7 @@ class InputSystem(System):
 
             return True
         except Exception as e:
+            CircuitManager.get().clear_circuit(self.full_file)
             return False
 
    

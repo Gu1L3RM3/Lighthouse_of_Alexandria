@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="166">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="64" height="64" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="182">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -393,6 +393,38 @@
    </properties>
    <point/>
   </object>
+  <object id="166" name="voltage_source" x="178.573" y="922.294">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="15"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="167" name="voltage_source" x="448.037" y="633.249">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="20"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="168" name="voltage_source" x="671.814" y="461.688">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="25"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="169" name="voltage_source" x="449.902" y="376.839">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="1"/>
+    <property name="valor" value="25"/>
+   </properties>
+   <point/>
+  </object>
   <object id="15" name="resistor" x="544" y="96">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -437,6 +469,27 @@
   <object id="165" name="light_charge" x="608" y="464">
    <properties>
     <property name="active_status" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="175" name="crystal_invisibility" x="560" y="432">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="176" name="crystal_invisibility" x="400" y="896">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="177" name="crystal_invisibility" x="736" y="864">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="duration" type="float" value="6"/>
    </properties>
    <point/>
   </object>
@@ -585,6 +638,34 @@
    </properties>
    <point/>
   </object>
+  <object id="171" name="route_c_0" x="98.4988" y="835.245">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="172" name="route_c_1" x="299.897" y="834.312">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="173" name="route_c_2" x="398.732" y="916.364">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="route_c"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="174" name="route_c_3" x="911.552" y="834.312">
+   <properties>
+    <property name="order" type="int" value="3"/>
+    <property name="route_id" value="route_c"/>
+   </properties>
+   <point/>
+  </object>
   <object id="154" name="route_a_1" x="544" y="832">
    <properties>
     <property name="order" type="int" value="1"/>
@@ -634,6 +715,27 @@
    </properties>
    <point/>
   </object>
+  <object id="178" name="route_d_0" x="512.298" y="481.417">
+   <properties>
+    <property name="order" type="int" value="0"/>
+    <property name="route_id" value="route_phantom_d"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="179" name="route_d_1" x="515.506" y="861.837">
+   <properties>
+    <property name="order" type="int" value="1"/>
+    <property name="route_id" value="route_phantom_d"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="181" name="route_d_2" x="207.814" y="850.648">
+   <properties>
+    <property name="order" type="int" value="2"/>
+    <property name="route_id" value="route_phantom_d"/>
+   </properties>
+   <point/>
+  </object>
  </objectgroup>
  <objectgroup id="15" name="enemies">
   <object id="161" name="spider_a" type="spider" x="448" y="848">
@@ -646,6 +748,16 @@
    </properties>
    <point/>
   </object>
+  <object id="170" name="spider_c" type="spider" x="113.268" y="930.051">
+   <properties>
+    <property name="contact_damage" type="int" value="1"/>
+    <property name="enemy_type" value="spider"/>
+    <property name="hp" type="int" value="3"/>
+    <property name="route_id" value="route_c"/>
+    <property name="speed" type="float" value="80"/>
+   </properties>
+   <point/>
+  </object>
   <object id="162" name="spider_b" type="spider" x="304" y="448">
    <properties>
     <property name="contact_damage" type="int" value="1"/>
@@ -653,6 +765,19 @@
     <property name="hp" type="int" value="4"/>
     <property name="route_id" value="route_b"/>
     <property name="speed" type="float" value="90"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="180" name="phantom_guard_d" type="phantom" x="437.706" y="460.904">
+   <properties>
+    <property name="chase_speed" type="float" value="62"/>
+    <property name="contact_damage" type="int" value="1"/>
+    <property name="detection_radius" type="float" value="120"/>
+    <property name="enemy_type" value="phantom"/>
+    <property name="hp" type="int" value="130"/>
+    <property name="route_id" value="route_phantom_d"/>
+    <property name="speed" type="float" value="38"/>
+    <property name="touch_radius" type="float" value="10"/>
    </properties>
    <point/>
   </object>

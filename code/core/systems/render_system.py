@@ -28,7 +28,7 @@ class RenderSystem(System):
         self.panel_status_renderer = PanelStatusRenderer()
 
     def update(self, entity_mn, dt):
-        self.camera.update()
+        self.camera.update(dt)
     def _draw_camera_viewport(self):
         
         viewport_color = (255, 255, 0) 
