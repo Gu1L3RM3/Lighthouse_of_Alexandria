@@ -201,7 +201,7 @@ class MenuEditCircuit(Widget):
             init_surface=surf1.copy(),
             surface_pressed=surf2.copy(),
             pos_center=(pos_x, start_y + self.cell_size*6),
-            text="Save",
+            text="Solve",
             font_size=font_size,
         )
         self.load_button = Button(

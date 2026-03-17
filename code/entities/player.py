@@ -24,7 +24,6 @@ class Player(Entity):
         self._old_direction = Vector2(0, 1)
         self._speed = 100
         self._current_animation_state = "" 
-        self.attack=False
         self.audio_manager = AudioManager.get()
         self._step_interval = 0.24
         self._step_timer = 0.0

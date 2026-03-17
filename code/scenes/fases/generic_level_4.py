@@ -67,7 +67,7 @@ class GenericLevel4(BaseGenericLevel):
         self.animation_system         = AnimationSystem()
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=False)
+        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.phantom_ai_system        = PhantomAISystem(self.tile_map)
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)

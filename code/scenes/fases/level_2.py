@@ -110,19 +110,33 @@ class Level2(BaseScene):
         lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(fps)
         self.ui_manager.add(lives)
+        top_button_gap = 20
+        top_button_step = 142 + top_button_gap
+        menu_x = self.screen.get_width() - 92
+        help_x = menu_x - top_button_step
         idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
         pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
         self.menu_button = Button(
             init_surface=idle,
             surface_pressed=pressed,
-            pos_center=(self.screen.get_width() - 92, 44),
+            pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
             text="MENU",
             font_size=11,
             color_text=(245, 230, 170),
         )
-        self.ui_manager.add(self.menu_button)
+        self.help_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(help_x, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=lambda: SceneManager.get().open_help(0.35),
+            text="HELP",
+            font_size=11,
+            color_text=(245, 230, 170),
+        )
+        self.ui_manager.add(self.menu_button, self.help_button)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
 

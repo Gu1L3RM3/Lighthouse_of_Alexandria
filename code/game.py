@@ -10,6 +10,7 @@ from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
 from scenes.credits_scene        import CreditsScene
+from scenes.help_scene           import HelpScene
 from scenes.lighthouse_rekindle_scene import LighthouseRekindleScene
 from scenes.ending_thanks_credits_scene import EndingThanksCreditsScene
 from scenes.fases.level_1        import Level1
@@ -106,7 +107,8 @@ class Game:
 
     
         self.register_fases()
-        self.scene_manager.change('fase_8')
+
+        self.scene_manager.change("fase_3")
         #self.scene_manager.active_scene = CircuitEditor(self.screen,'bombs/bomb_editor',debug_mode=True)
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
@@ -143,6 +145,7 @@ class Game:
         }
         self.scene_manager.register('main_menu', MainMenuScene(self.screen))
         self.scene_manager.register('credits', CreditsScene(self.screen))
+        self.scene_manager.register('help', HelpScene(self.screen))
         self.scene_manager.register('ending_lighthouse', LighthouseRekindleScene(self.screen))
         self.scene_manager.register('ending_thanks_credits', EndingThanksCreditsScene(self.screen))
         self.scene_manager.register('home_scene',HomeScene(self.screen))

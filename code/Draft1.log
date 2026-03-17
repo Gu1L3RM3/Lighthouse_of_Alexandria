@@ -1,0 +1,11 @@
+LTspice 24.0.9 for Windows
+Circuit: * C:\Users\cavaz\OneDrive\Documentos\Projetos\Projetos_Python\IC\Alexandria\code\Draft1.asc
+Start Time: Mon Mar 16 20:45:48 2026
+solver = Normal
+Maximum thread count: 8
+tnom = 27
+temp = 27
+method = modified trap
+Direct Newton iteration for .op point succeeded.
+Total elapsed time: 0.288 seconds.
+

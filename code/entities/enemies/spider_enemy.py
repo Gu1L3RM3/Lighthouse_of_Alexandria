@@ -12,7 +12,7 @@ class SpiderEnemy(EnemyBase):
         y: float,
         speed: float = 42.0,
         route: list[tuple[int, int]] | None = None,
-        max_hp: float = 100.0,
+        max_hp: float = 130.0,
     ):
         animations = self._load_animations()
         super().__init__(

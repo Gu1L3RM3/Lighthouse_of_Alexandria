@@ -17,7 +17,7 @@ class PhantomEnemy(EnemyBase):
         detection_radius: float = 90.0,
         touch_radius: float = 10.0,
         chase_speed: float = 58.0,
-        max_hp: float = 130.0,
+        max_hp: float = 200.0,
     ):
         animations = self._load_animations()
         super().__init__(

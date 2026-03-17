@@ -16,7 +16,9 @@ class SceneManager:
 
         self.scene_preview = "level_3"
         self.menu_scene_name = "main_menu"
+        self.help_scene_name = "help"
         self.resume_scene_name: str | None = None
+        self.help_resume_scene_name: str | None = None
 
         self.transitioning = False
         self.transition_target: BaseScene = None
@@ -64,6 +66,28 @@ class SceneManager:
             return
         self.resume_scene_name = self.active_scene_name
         self.start_fade(self.menu_scene_name, duration)
+
+    def can_resume_help_scene(self) -> bool:
+        return (
+            self.help_resume_scene_name is not None
+            and self.help_resume_scene_name in self.scenes
+            and self.help_resume_scene_name != self.help_scene_name
+        )
+
+    def open_help(self, duration: float = 0.35):
+        if self.active_scene_name == self.help_scene_name:
+            return
+        if self.transitioning:
+            return
+        self.help_resume_scene_name = self.active_scene_name
+        self.start_fade(self.help_scene_name, duration)
+
+    def resume_from_help(self, duration: float = 0.35):
+        if not self.can_resume_help_scene():
+            self.start_fade(self.menu_scene_name, duration)
+            return
+        target = self.help_resume_scene_name
+        self.start_fade(target, duration)
 
     def resume_from_menu(self, duration: float = 0.35):
         if not self.can_resume_scene():

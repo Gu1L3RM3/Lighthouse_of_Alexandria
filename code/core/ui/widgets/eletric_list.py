@@ -175,6 +175,20 @@ class EletricList(Widget):
             elif event.button == 5:
                 self._scroll_by(self.SCROLL_STEP)
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                self._scroll_by(-self.SCROLL_STEP)
+            elif event.key == pygame.K_DOWN:
+                self._scroll_by(self.SCROLL_STEP)
+            elif event.key == pygame.K_PAGEUP:
+                self._scroll_by(-int(self.content_view_rect.height * 0.8))
+            elif event.key == pygame.K_PAGEDOWN:
+                self._scroll_by(int(self.content_view_rect.height * 0.8))
+            elif event.key == pygame.K_HOME:
+                self._set_scroll(0)
+            elif event.key == pygame.K_END:
+                self._set_scroll(self._max_scroll())
+
     def update(self, dt):
         if self._last_revision != self.storage_manager.revision:
             self.update_data()

@@ -42,7 +42,6 @@ PLAYER_RIGHT = K_d
 PLAYER_LEFT  = K_a
 PLAYER_UP    = K_w
 PLAYER_DOWN  = K_s
-PLAYER_ATTACK = K_l
         
 
 

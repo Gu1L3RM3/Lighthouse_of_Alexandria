@@ -424,19 +424,11 @@
    </properties>
    <point/>
   </object>
-  <object id="250" name="voltage_source" x="526" y="405">
+  <object id="250" name="current_source" x="526" y="405">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
-    <property name="valor" value="15"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="251" name="voltage_source" x="218" y="584">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-    <property name="area" value="1"/>
-    <property name="valor" value="20"/>
+    <property name="valor" value="1"/>
    </properties>
    <point/>
   </object>

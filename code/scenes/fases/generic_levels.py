@@ -52,6 +52,7 @@ class BaseGenericLevel(BaseScene):
     BOMB_EDITOR_FILE = "bombs/bomb_editor"
     BOMB_TARGET_RESISTOR = "R1"
     BOMB_KEY = pygame.K_b
+    PERMANENT_LIGHT_KEY = pygame.K_l
     BOMB_DEFAULT_NETLIST = "bombs/default_bomb.net"
     BOMB_VISUAL_SCALE = 0.34
 
@@ -125,22 +126,37 @@ class BaseGenericLevel(BaseScene):
         lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(fps)
         self.ui_manager.add(lives)
+        top_button_gap = 20
+        top_button_step = 142 + top_button_gap
+        nucleo_x = self.screen.get_width() - 92
+        help_x = nucleo_x - top_button_step
+        menu_x = help_x - top_button_step
         idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
         pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
         self.menu_button = Button(
             init_surface=idle,
             surface_pressed=pressed,
-            pos_center=(self.screen.get_width() - 240, 44),
+            pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
             text="MENU",
             font_size=11,
             color_text=(245, 230, 170),
         )
+        self.help_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(help_x, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=lambda: SceneManager.get().open_help(0.35),
+            text="HELP",
+            font_size=11,
+            color_text=(245, 230, 170),
+        )
         self.edit_bomb_button = Button(
             init_surface=idle.copy(),
             surface_pressed=pressed.copy(),
-            pos_center=(self.screen.get_width() - 92, 44),
+            pos_center=(nucleo_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=self.open_bomb_editor,
             text="NUCLEO",
@@ -148,7 +164,7 @@ class BaseGenericLevel(BaseScene):
             color_text=(245, 230, 170),
         )
         self.bomb_status_widget = BombStatusWidget(self.bomb_manager, pos=(10, 86))
-        self.ui_manager.add(self.menu_button, self.edit_bomb_button, self.bomb_status_widget)
+        self.ui_manager.add(self.menu_button, self.help_button, self.edit_bomb_button, self.bomb_status_widget)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
         self.temporary_light_bar_widget = TemporaryLightBarWidget(self.screen.get_size(), self)
@@ -601,8 +617,11 @@ class BaseGenericLevel(BaseScene):
     def process_input(self, events):
         for event in events:
             self.ui_manager.handle_event(event)
-            if event.type == pygame.KEYDOWN and event.key == self.BOMB_KEY:
-                self.place_bomb()
+            if event.type == pygame.KEYDOWN:
+                if event.key == self.BOMB_KEY:
+                    self.place_bomb()
+                elif event.key == self.PERMANENT_LIGHT_KEY:
+                    self._toggle_permanent_light(event)
         self._handle_panel_interaction(events)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
@@ -756,7 +775,7 @@ class BaseGenericLevel(BaseScene):
         self.bomb_manager.current_params = self.bomb_manager.default_params
 
     def on_scene_will_change(self, target_scene_name: str):
-        if target_scene_name in {"main_menu", "death_transition"}:
+        if target_scene_name in {"main_menu", "help"}:
             return
         self.reset_bomb_circuit_to_default()
 
@@ -780,6 +799,20 @@ class BaseGenericLevel(BaseScene):
             return
         self.light_system.turn_on()
         if self._temporary_light_timer > 0:
+            self._temporary_light_restore_enabled = self.light_system.enabled
+
+    def _toggle_permanent_light(self, event):
+        _ = event
+        if not hasattr(self, "light_system"):
+            return
+
+        if self.light_system.enabled:
+            self.light_system.turn_on()
+        else:
+            self.light_system.turn_off()
+
+        if self._temporary_light_timer > 0:
+            # Respeita a escolha manual atual quando o boost temporario expirar.
             self._temporary_light_restore_enabled = self.light_system.enabled
 
     def _update_temporary_light(self, dt: float):

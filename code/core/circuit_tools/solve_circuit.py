@@ -158,12 +158,12 @@ class CircuitSolver:
         n_node: int
     ) -> float:
         """
-        Mantém a mesma convenção já usada no restante da classe:
-        V = -Vp + Vn
+        Convenção única de sinais:
+        V = Vp - Vn
         """
         v_p = self._get_node_voltage_from_solution(solution, p_node)
         v_n = self._get_node_voltage_from_solution(solution, n_node)
-        return -v_p + v_n
+        return v_p - v_n
 
     def _find_test_source_current(
         self,
@@ -267,7 +267,7 @@ class CircuitSolver:
             v_p = 0.0 if p_node == 0 else float(self.solution.get(sympy.Symbol(f'v{p_node}'), 0.0))
             v_n = 0.0 if n_node == 0 else float(self.solution.get(sympy.Symbol(f'v{n_node}'), 0.0))
 
-            voltage_across = -v_p + v_n
+            voltage_across = v_p - v_n
 
             if first_letter == 'v':
                 I_symbol = sympy.Symbol(f'I_{element_name}')
@@ -326,7 +326,7 @@ class CircuitSolver:
 
                 voltage_p = 0 if p_node == 0 else self.solution.get(sympy.Symbol(f'v{p_node}'), 0)
                 voltage_n = 0 if n_node == 0 else self.solution.get(sympy.Symbol(f'v{n_node}'), 0)
-                voltage_across = -voltage_p + voltage_n
+                voltage_across = voltage_p - voltage_n
                 current_through = voltage_across / resistance if resistance != 0 else 0
                 power = voltage_across * current_through
 

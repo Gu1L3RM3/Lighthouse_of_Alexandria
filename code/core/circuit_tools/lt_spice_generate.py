@@ -327,16 +327,18 @@ class LtSpiceGenerate:
                 top_terminal = (center_x, y)
                 bottom_terminal = (center_x, y + 2 * CELL_SIZE)
                 if entity_type == 'Resistor':      return {'p1': top_terminal, 'p2': bottom_terminal}
-                if entity_type == 'VoutageSource': return {'neg': top_terminal, 'pos': bottom_terminal}
-                if entity_type == 'CurrentSource': return {'from': top_terminal, 'to': bottom_terminal}
+                # Sprite base horizontal: pos/fluxo para a direita.
+                # Rotacao +90 (CCW) leva pos/fluxo para cima.
+                if entity_type == 'VoutageSource': return {'pos': top_terminal, 'neg': bottom_terminal}
+                if entity_type == 'CurrentSource': return {'to': top_terminal, 'from': bottom_terminal}
             
             elif angle == 270: # Girado 180 graus (invertido)
                 top_terminal = (center_x, y)
                 bottom_terminal = (center_x, y + 2 * CELL_SIZE)
                 if entity_type == 'Resistor':      return {'p1': top_terminal, 'p2': bottom_terminal}
                 # Polaridade invertida para as fontes!
-                if entity_type == 'VoutageSource': return {'pos': top_terminal, 'neg': bottom_terminal}
-                if entity_type == 'CurrentSource': return {'to': top_terminal, 'from': bottom_terminal}
+                if entity_type == 'VoutageSource': return {'neg': top_terminal, 'pos': bottom_terminal}
+                if entity_type == 'CurrentSource': return {'from': top_terminal, 'to': bottom_terminal}
         
         return {}
 
