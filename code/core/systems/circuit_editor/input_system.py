@@ -76,8 +76,7 @@ class InputSystem(System):
 
     def set_brush(self, brush_type: str | None ,value:str|None=None):
         if self.brush:
-            self.entity_manager.remove_entity(self.brush)
-            self.brush = None
+            self.exit_current_tool(set_mouse=False)
         self.active_tool=brush_type
 
         brush_map = {
@@ -169,11 +168,6 @@ class InputSystem(System):
         self.brush = target
         self.show_mouse = False
         self.select_mode = True
-
-
-        
-        label :LabelComponent=target.get(LabelComponent)
-        self.storage_manager.add_component(target.__class__.__name__,label.value) 
 
     def change_drop_status(self):
         if not isinstance(self.brush,NotDrop):
@@ -302,7 +296,7 @@ class InputSystem(System):
         
         self.node_manager.handle_new_entity(new_entity, entities)
 
-        if self.brush.has(LabelComponent):
+        if self.brush.has(LabelComponent) and not self.select_mode:
             label :LabelComponent=self.brush.get(LabelComponent)
             has_component =self.storage_manager.remove_component(self.brush.__class__.__name__,label.value) 
             if not has_component:
@@ -321,6 +315,11 @@ class InputSystem(System):
 
         
     def exit_current_tool(self, set_mouse: bool = True):
+        if self.select_mode and self.brush and self.brush.has(LabelComponent):
+            label: LabelComponent = self.brush.get(LabelComponent)
+            self.storage_manager.add_component(self.brush.__class__.__name__, label.value)
+            self.select_mode = False
+
         if self.brush:
             self.entity_manager.remove_entity(self.brush)
             self.brush = None
@@ -373,13 +372,17 @@ class InputSystem(System):
         SerializationManager.save_entities_to_json(entities_to_save,self.json_file)
         LtSpiceGenerate(self.json_file,self.net_file,self.lt_spice_file,self.entity_manager).run()
         self.storage_manager.save_eletric_storage()
+        self.storage_manager.sync_baseline()
         self.solve_circuit()
         self.set_empty_boxes_for_debug()
         
 
     def load_circuit(self):
-        self.entity_manager.clear_all_entities(excepts=[self.brush]) 
+        self.exit_current_tool()
+        self.entity_manager.clear_all_entities()
         self.node_manager.clear_all_nodes()
+        self.storage_manager.reload_storage()
+        self.storage_manager.sync_baseline()
         loaded_entities = SerializationManager.load_entities_from_json(self.json_file)
         for entity in loaded_entities:
             self.entity_manager.add_entity(entity)
