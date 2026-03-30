@@ -1,4 +1,6 @@
 import os
+import shutil
+import sys
 from pathlib import Path
 from pygame.locals import *
 
@@ -9,9 +11,46 @@ TILE_SIZE=16
 BASE_DIR = Path(__file__).resolve().parent
 CODE_DIR = BASE_DIR.parent
 PROJECT_ROOT = CODE_DIR.parent
-ASSETS_DIR = str(PROJECT_ROOT / 'assets')
-CIRCUITOS_DIR = CODE_DIR / 'circuitos'
-LTSPICE_DIR = CODE_DIR / 'ltspice'
+IS_FROZEN = bool(getattr(sys, "frozen", False))
+BUNDLE_ROOT = Path(getattr(sys, "_MEIPASS", PROJECT_ROOT))
+DEFAULT_CIRCUITOS_DIR = BUNDLE_ROOT / "code" / "circuitos"
+DEFAULT_LTSPICE_DIR = BUNDLE_ROOT / "code" / "ltspice"
+
+
+def _copy_missing_tree(source_dir: Path, target_dir: Path) -> None:
+    if not source_dir.exists():
+        return
+    for src in source_dir.rglob("*"):
+        if not src.is_file():
+            continue
+        rel = src.relative_to(source_dir)
+        dst = target_dir / rel
+        if dst.exists():
+            continue
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+
+
+def _resolve_runtime_data_dirs() -> tuple[Path, Path]:
+    if not IS_FROZEN:
+        return CODE_DIR / "circuitos", CODE_DIR / "ltspice"
+
+    base_local = os.getenv("LOCALAPPDATA")
+    runtime_root = Path(base_local) if base_local else (Path.home() / "AppData" / "Local")
+    runtime_root = runtime_root / "Alexandria"
+    circuitos_runtime = runtime_root / "code" / "circuitos"
+    ltspice_runtime = runtime_root / "code" / "ltspice"
+    circuitos_runtime.mkdir(parents=True, exist_ok=True)
+    ltspice_runtime.mkdir(parents=True, exist_ok=True)
+
+    # Copia apenas arquivos que ainda nao existem no perfil do usuario.
+    _copy_missing_tree(DEFAULT_CIRCUITOS_DIR, circuitos_runtime)
+    _copy_missing_tree(DEFAULT_LTSPICE_DIR, ltspice_runtime)
+    return circuitos_runtime, ltspice_runtime
+
+
+CIRCUITOS_DIR, LTSPICE_DIR = _resolve_runtime_data_dirs()
+ASSETS_DIR = str(BUNDLE_ROOT / "assets")
 
 
 def path_in_circuitos(*parts: str) -> Path:
@@ -37,6 +76,7 @@ FONT = "PressStart2P-Regular.ttf"
 
 KEY_DIALOG = K_e
 KEY_NEXT_SCENE = K_SPACE
+KEY_PLACE_BOMB = K_b
 
 PLAYER_RIGHT = K_d           
 PLAYER_LEFT  = K_a
@@ -106,3 +146,81 @@ PREFIXES = [
 
 
 
+
+# UI / cenas
+HELP_SCROLL_STEP = 34
+ELETRIC_LIST_DIALOG_MAX_SCREEN_RATIO = 0.75
+ELETRIC_LIST_DIALOG_MIN_HEIGHT = 150
+ELETRIC_LIST_DIALOG_SIDE_PADDING = 30
+ELETRIC_LIST_DIALOG_TOP_PADDING = 52
+ELETRIC_LIST_DIALOG_BOTTOM_PADDING = 24
+ELETRIC_LIST_SCROLL_STEP = 36
+
+# Gameplay de fases
+GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS = 6.0
+GENERIC_LEVEL_TEMPORARY_LIGHT_FADE_OUT_SECONDS = 1.0
+GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN = 10.0
+GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL = 8
+GENERIC_LEVEL_BOMB_EDITOR_FILE = "bombs/bomb_editor"
+GENERIC_LEVEL_BOMB_TARGET_RESISTOR = "R1"
+GENERIC_LEVEL_BOMB_DEFAULT_NETLIST = "bombs/default_bomb.net"
+GENERIC_LEVEL_BOMB_VISUAL_SCALE = 0.34
+GENERIC_LEVEL_GHOST_RESPAWN_SECONDS = 30.0
+GENERIC_LEVEL_GHOST_REBIRTH_ANIM_SECONDS = 1.2
+
+# Spider webs (global tuning, shared across all phases)
+SPIDER_WEB_ENABLED_DEFAULT = True
+SPIDER_WEB_SPAWN_INTERVAL_SECONDS = 2.6
+SPIDER_WEB_LIFETIME_SECONDS = 16.0
+SPIDER_WEB_RADIUS = 15.0
+SPIDER_WEB_MAX_PER_SPIDER = 4
+SPIDER_WEB_GLOBAL_MAX_ACTIVE = 14
+SPIDER_WEB_MIN_SPAWN_DISTANCE = 30.0
+SPIDER_WEB_SLOW_MULTIPLIER = 0.38
+SPIDER_WEB_SLOW_DURATION_SECONDS = 1.6
+SPIDER_WEB_ARM_DELAY_SECONDS = 0.2
+SPIDER_WEB_PLAYER_GRACE_SECONDS = 0.85
+SPIDER_WEB_AMBUSH_SPEED = 150.0
+SPIDER_WEB_AMBUSH_DURATION_SECONDS = 0.62
+SPIDER_WEB_AMBUSH_COOLDOWN_SECONDS = 2.4
+SPIDER_WEB_AMBUSH_PREDICTION_SECONDS = 0.45
+SPIDER_WEB_CHASE_MIN_SECONDS = 1.2
+SPIDER_WEB_CHASE_MAX_SECONDS = 3.8
+SPIDER_WEB_CHASE_TIME_MARGIN_SECONDS = 0.55
+SPIDER_WEB_ALERT_RADIUS = 120.0
+SPIDER_WEB_ALERT_MAX_HELPERS = 1
+
+MAX_POWER_LEVEL_VOLTAGE_POOL = ["1", "2", "3.3", "5", "9", "12", "15", "20"]
+MAX_POWER_LEVEL_CURRENT_POOL = ["0.001", "0.002", "0.005", "0.01", "0.05", "0.10"]
+
+FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS = 90.0
+FINAL_LEVEL_FINAL_FADE_SECONDS = 0.8
+FINAL_LEVEL_STORAGE_TYPE_BY_KIND = {
+    "resistor": "Resistor",
+    "current_source": "CurrentSource",
+    "voltage_source": "VoutageSource",
+}
+
+EXPLANATION_LEVEL3_BOMB_INTRO_LINES = [
+    "Arquimedes: Kevin, antes da fase 3 voce vai usar cargas de foton, nao explosivos comuns.",
+    "Arquimedes: Elas liberam um pulso curto que desestabiliza as sombras e abre passagem nos paineis.",
+    "Arquimedes: O pulso depende do NUCLEO; se a calibracao estiver ruim, o efeito cai.",
+    "Arquimedes: Em campo, pressione B para posicionar a carga e use o botao NUCLEO para ajustar no painel.",
+    "Arquimedes: Use com estrategia. Cada carga precisa contar ate acendermos o caminho do farol.",
+]
+
+# Sistemas
+DAY_NIGHT_KEY_FRAMES = [
+    (0, NIGHT_COLOR),
+    (4, NIGHT_COLOR),
+    (6, DAWN_COLOR),
+    (8, DAY_COLOR),
+    (17, DAY_COLOR),
+    (18, DUSK_COLOR),
+    (21, NIGHT_COLOR),
+    (24, NIGHT_COLOR),
+]
+DAY_NIGHT_GAME_HOUR_DURATION = 48.0
+PHANTOM_AI_STEALTH_TIMER_NAME = "phantom_stealth_timer"
+FALL_GROUND_REQUIRED_PERCENT_INSIDE = 10
+THEVENIN_NORTON_TARGET_RESISTOR = "R1"

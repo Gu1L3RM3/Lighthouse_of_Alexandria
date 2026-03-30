@@ -6,16 +6,7 @@ class DayNightManager:
    
 
     
-    KEY_FRAMES = [
-        (0,  NIGHT_COLOR),
-        (4,  NIGHT_COLOR),    
-        (6,  DAWN_COLOR),    
-        (8,  DAY_COLOR),     
-        (17, DAY_COLOR),    
-        (18, DUSK_COLOR),    
-        (21, NIGHT_COLOR),   
-        (24, NIGHT_COLOR)    
-    ]
+    KEY_FRAMES = DAY_NIGHT_KEY_FRAMES
 
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
@@ -31,7 +22,7 @@ class DayNightManager:
         return int(r), int(g), int(b), int(a)
 
     def update(self, dt: float):
-        GAME_HOUR_DURATION = 48.0  
+        GAME_HOUR_DURATION = DAY_NIGHT_GAME_HOUR_DURATION
         game_hours_per_second = 1 / GAME_HOUR_DURATION
 
         self.time_of_day = (self.time_of_day + game_hours_per_second * dt) % 24

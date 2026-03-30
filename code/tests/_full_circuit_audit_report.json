@@ -1,0 +1,28 @@
+{
+  "total_json": 42,
+  "ok": 41,
+  "bad": 1,
+  "bad_files": [
+    {
+      "file": "generic_levels_3\\fase_3\\pannel3.json",
+      "ok": false,
+      "reason": "solver_failed",
+      "types": {
+        "CurrentSource": 1,
+        "Node": 5,
+        "Wire": 5,
+        "Ground": 1
+      }
+    }
+  ],
+  "bomb_default_params": {
+    "voltage_r1": 10.0,
+    "current_r1": 0.01,
+    "delay": 1.7999999999999998,
+    "radius": 42.0,
+    "damage": 85.0,
+    "used_fallback": true
+  },
+  "bomb_default_net_exists": true,
+  "bomb_editor_net_exists": true
+}

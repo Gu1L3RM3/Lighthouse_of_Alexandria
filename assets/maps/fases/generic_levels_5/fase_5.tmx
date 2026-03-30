@@ -416,8 +416,9 @@
  <objectgroup id="3" name="itens">
   <object id="5" name="control_pannel" x="800" y="16">
    <properties>
-    <property name="action" value="luz"/>
+    <property name="action" value="bomb_bonus"/>
     <property name="active_status" type="bool" value="true"/>
+    <property name="bomb_reward" type="int" value="6"/>
     <property name="component_for_area" value="3"/>
     <property name="pannel_id" value="4"/>
     <property name="target_component" value="R1,R2"/>
@@ -600,12 +601,6 @@
    <point/>
   </object>
   <object id="218" name="anti_reaggro_flask" x="78.6667" y="577.333">
-   <properties>
-    <property name="active_status" type="bool" value="true"/>
-   </properties>
-   <point/>
-  </object>
-  <object id="228" name="light_charge" x="800" y="592">
    <properties>
     <property name="active_status" type="bool" value="true"/>
    </properties>

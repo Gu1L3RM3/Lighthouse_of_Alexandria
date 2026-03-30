@@ -14,6 +14,8 @@ from scenes.base_scene import BaseScene
 from scenes.circuit_editor import CircuitEditor
 from entities.dialogue_area import DialogueArea
 from entities.animated_tiles.iron_gate import IronGate
+from entities.enemies.enemy_factory import EnemyFactory
+from entities.enemies.phantom_enemy import PhantomEnemy
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
@@ -29,7 +31,6 @@ from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
-from core.ui.widgets.temporary_light_bar_widget import TemporaryLightBarWidget
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
@@ -45,17 +46,6 @@ from core.ui.widgets.bomb_status_widget import BombStatusWidget
 from core.ui.widgets.gesture_detector import ClickType
 
 class BaseGenericLevel(BaseScene):
-    TEMPORARY_LIGHT_DURATION_SECONDS = 6.0
-    TEMPORARY_LIGHT_FADE_OUT_SECONDS = 1.0
-    BOMB_ENEMY_HIT_MARGIN = 10.0
-    BOMB_COUNT_PER_LEVEL = 8
-    BOMB_EDITOR_FILE = "bombs/bomb_editor"
-    BOMB_TARGET_RESISTOR = "R1"
-    BOMB_KEY = pygame.K_b
-    PERMANENT_LIGHT_KEY = pygame.K_l
-    BOMB_DEFAULT_NETLIST = "bombs/default_bomb.net"
-    BOMB_VISUAL_SCALE = 0.34
-
     def __init__(self, screen: Surface, level_path: str):
         self.loader = TileMapLoader()
         self.level_path = level_path
@@ -66,13 +56,17 @@ class BaseGenericLevel(BaseScene):
         self.camera.scale = self.scale
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
         self.bomb_manager = BombManager(
-            bombs_per_level=self.BOMB_COUNT_PER_LEVEL,
-            default_netlist_path=path_in_ltspice(self.BOMB_DEFAULT_NETLIST),
+            bombs_per_level=GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL,
+            default_netlist_path=path_in_ltspice(GENERIC_LEVEL_BOMB_DEFAULT_NETLIST),
         )
         self._configure_bomb_balance_profile()
         self.pending_bombs: list[dict] = []
         self.active_explosions: list[dict] = []
         self.crystal_respawn_queue: list[dict] = []
+        self.ghost_respawn_queue: list[dict] = []
+        self.ghost_rebirth_effects: list[dict] = []
+        self._ghost_spawn_templates: dict[str, dict] = {}
+        self._ghost_entity_to_spawn_key: dict[int, str] = {}
         self._last_frame_dt = 0.0
         self.bomb_world_sprite = None
         self.bomb_prefuze_frames: list[pygame.Surface] = []
@@ -167,8 +161,6 @@ class BaseGenericLevel(BaseScene):
         self.ui_manager.add(self.menu_button, self.help_button, self.edit_bomb_button, self.bomb_status_widget)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
-        self.temporary_light_bar_widget = TemporaryLightBarWidget(self.screen.get_size(), self)
-        self.ui_manager.add(self.temporary_light_bar_widget)
 
     def _set_bomb_visuals(self):
         try:
@@ -195,6 +187,223 @@ class BaseGenericLevel(BaseScene):
         spawner.spawn_entities(self.tile_map, self.entity_mn)
         self.player = self.entity_mn.get_player()
         self.physics_system.cache_static_colliders(self.entity_mn)
+        self._capture_initial_ghost_spawn_templates()
+
+    def _capture_initial_ghost_spawn_templates(self):
+        self._ghost_spawn_templates.clear()
+        self._ghost_entity_to_spawn_key.clear()
+        routes = self._extract_enemy_routes_from_map()
+
+        enemy_layer = None
+        for layer in self.tile_map.tmx_data.objectgroups:
+            if (layer.name or "").lower() == "enemies":
+                enemy_layer = layer
+                break
+        if enemy_layer is None:
+            return
+
+        spawn_index = 0
+        for obj in enemy_layer:
+            props = {k.lower(): v for k, v in (obj.properties or {}).items()}
+            enemy_type = (obj.type or props.get("enemy_type") or obj.name or "spider").lower()
+            if enemy_type != "phantom":
+                continue
+
+            route_id = str(props.get("route_id", "")).lower().strip()
+            route = routes.get(route_id) if route_id else None
+            if route:
+                start_tile = (
+                    int(obj.x // self.tile_map.tile_width),
+                    int(obj.y // self.tile_map.tile_height),
+                )
+                if route[0] != start_tile:
+                    route = [start_tile, *route]
+
+            spawn_key = f"phantom_spawn_{spawn_index}"
+            spawn_index += 1
+            self._ghost_spawn_templates[spawn_key] = {
+                "enemy_type": enemy_type,
+                "x": float(obj.x),
+                "y": float(obj.y),
+                "props": dict(props),
+                "route": [tuple(tile) for tile in (route or [])],
+                "pending_respawn": False,
+                "active_entity_id": None,
+            }
+
+        self._bind_existing_ghost_entities_to_templates()
+
+    def _extract_enemy_routes_from_map(self) -> dict[str, list[tuple[int, int]]]:
+        routes: dict[str, list[tuple[int, tuple[int, int]]]] = {}
+        for layer in self.tile_map.tmx_data.objectgroups:
+            if (layer.name or "").lower() != "enemy_routes":
+                continue
+            for obj in layer:
+                properties = {k.lower(): v for k, v in (obj.properties or {}).items()}
+                route_id = str(properties.get("route_id") or obj.name or "").lower().strip()
+                if not route_id:
+                    continue
+                order = int(properties.get("order", 0))
+                tile_point = (
+                    int(obj.x // self.tile_map.tile_width),
+                    int(obj.y // self.tile_map.tile_height),
+                )
+                routes.setdefault(route_id, []).append((order, tile_point))
+
+        normalized_routes: dict[str, list[tuple[int, int]]] = {}
+        for route_id, points in routes.items():
+            ordered_points = sorted(points, key=lambda p: p[0])
+            normalized_routes[route_id] = [tile for _, tile in ordered_points]
+        return normalized_routes
+
+    def _bind_existing_ghost_entities_to_templates(self):
+        self._ghost_entity_to_spawn_key.clear()
+        for template in self._ghost_spawn_templates.values():
+            template["pending_respawn"] = False
+            template["active_entity_id"] = None
+
+        ghosts: list[PhantomEnemy] = self.entity_mn.get_entities_by_class(PhantomEnemy)
+        unmatched_ghosts = list(ghosts)
+
+        for spawn_key, template in self._ghost_spawn_templates.items():
+            target_x = float(template["x"])
+            target_y = float(template["y"])
+            chosen = None
+            chosen_dist = None
+            for ghost in unmatched_ghosts:
+                if not ghost.has(Position):
+                    continue
+                pos: Position = ghost.get(Position)
+                dist_sq = ((float(pos.x) - target_x) ** 2) + ((float(pos.y) - target_y) ** 2)
+                if chosen is None or dist_sq < chosen_dist:
+                    chosen = ghost
+                    chosen_dist = dist_sq
+            if chosen is None:
+                continue
+            template["active_entity_id"] = chosen.id
+            self._ghost_entity_to_spawn_key[chosen.id] = spawn_key
+            unmatched_ghosts.remove(chosen)
+
+    def _queue_ghost_respawn_by_entity_id(self, entity_id: int, death_x: float | None = None, death_y: float | None = None):
+        spawn_key = self._ghost_entity_to_spawn_key.pop(entity_id, None)
+        if spawn_key is None:
+            return
+        template = self._ghost_spawn_templates.get(spawn_key)
+        if not template:
+            return
+        if template.get("pending_respawn", False):
+            return
+        template["active_entity_id"] = None
+        template["pending_respawn"] = True
+        self.ghost_respawn_queue.append(
+            {
+                "spawn_key": spawn_key,
+                "remaining": float(GENERIC_LEVEL_GHOST_RESPAWN_SECONDS),
+                "respawn_x": death_x,
+                "respawn_y": death_y,
+            }
+        )
+
+    def _spawn_ghost_from_template(self, spawn_key: str, respawn_x: float | None = None, respawn_y: float | None = None):
+        template = self._ghost_spawn_templates.get(spawn_key)
+        if not template:
+            return
+        props = dict(template.get("props", {}))
+        route = [tuple(tile) for tile in template.get("route", [])]
+        spawn_x = float(template.get("x", 0.0)) if respawn_x is None else float(respawn_x)
+        spawn_y = float(template.get("y", 0.0)) if respawn_y is None else float(respawn_y)
+        enemy = EnemyFactory.create(
+            enemy_type=str(template.get("enemy_type", "phantom")),
+            x=spawn_x,
+            y=spawn_y,
+            props=props,
+            route=route,
+        )
+        self.entity_mn.add_entity(enemy)
+        template["pending_respawn"] = False
+        template["active_entity_id"] = enemy.id
+        self._ghost_entity_to_spawn_key[enemy.id] = spawn_key
+
+    def _start_ghost_rebirth_effect(self, spawn_key: str, respawn_x: float | None = None, respawn_y: float | None = None):
+        template = self._ghost_spawn_templates.get(spawn_key)
+        if not template:
+            return
+        spawn_x = float(template.get("x", 0.0)) if respawn_x is None else float(respawn_x)
+        spawn_y = float(template.get("y", 0.0)) if respawn_y is None else float(respawn_y)
+        self.ghost_rebirth_effects.append(
+            {
+                "spawn_key": spawn_key,
+                "x": spawn_x,
+                "y": spawn_y,
+                "elapsed": 0.0,
+                "duration": float(GENERIC_LEVEL_GHOST_REBIRTH_ANIM_SECONDS),
+            }
+        )
+
+    def _update_ghost_respawns(self, dt: float):
+        if not self.ghost_respawn_queue:
+            return
+        still_waiting = []
+        for entry in self.ghost_respawn_queue:
+            entry["remaining"] -= dt
+            if entry["remaining"] > 0:
+                still_waiting.append(entry)
+                continue
+            self._start_ghost_rebirth_effect(
+                str(entry.get("spawn_key", "")),
+                respawn_x=entry.get("respawn_x"),
+                respawn_y=entry.get("respawn_y"),
+            )
+        self.ghost_respawn_queue = still_waiting
+
+    def _update_ghost_rebirth_effects(self, dt: float):
+        if not self.ghost_rebirth_effects:
+            return
+        still_animating = []
+        for effect in self.ghost_rebirth_effects:
+            effect["elapsed"] += dt
+            duration = max(0.001, float(effect.get("duration", GENERIC_LEVEL_GHOST_REBIRTH_ANIM_SECONDS)))
+            if effect["elapsed"] < duration:
+                still_animating.append(effect)
+                continue
+            self._spawn_ghost_from_template(
+                str(effect.get("spawn_key", "")),
+                respawn_x=effect.get("x"),
+                respawn_y=effect.get("y"),
+            )
+            self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.82)
+        self.ghost_rebirth_effects = still_animating
+
+    def _draw_ghost_rebirth_effects(self):
+        if not self.ghost_rebirth_effects:
+            return
+
+        off_x, off_y = self.camera.render_offset
+        for effect in self.ghost_rebirth_effects:
+            duration = max(0.001, float(effect.get("duration", GENERIC_LEVEL_GHOST_REBIRTH_ANIM_SECONDS)))
+            ratio = max(0.0, min(1.0, float(effect.get("elapsed", 0.0)) / duration))
+            x = float(effect.get("x", 0.0))
+            y = float(effect.get("y", 0.0))
+
+            center = (
+                int(x * self.scale - self.camera.viewport.x + off_x),
+                int(y * self.scale - self.camera.viewport.y + off_y),
+            )
+            base_r = max(8, int(8 * self.scale))
+            pulse_r = int(base_r + ratio * (20 * self.scale))
+            core_r = max(2, int(base_r * (0.32 + ratio * 0.55)))
+            alpha = int(170 * (1.0 - ratio))
+            core_alpha = int(220 * (0.3 + 0.7 * ratio))
+
+            overlay = pygame.Surface((pulse_r * 2 + 12, pulse_r * 2 + 12), pygame.SRCALPHA)
+            local_center = (overlay.get_width() // 2, overlay.get_height() // 2)
+            pygame.draw.circle(overlay, (96, 180, 255, alpha), local_center, pulse_r, width=max(1, int(2 * self.scale)))
+            pygame.draw.circle(overlay, (160, 230, 255, int(alpha * 0.6)), local_center, max(1, int(pulse_r * 0.62)))
+            pygame.draw.circle(overlay, (220, 245, 255, core_alpha), local_center, core_r)
+            self.screen.blit(
+                overlay,
+                (center[0] - overlay.get_width() // 2, center[1] - overlay.get_height() // 2),
+            )
 
     def _configure_persistent_area_dialogues(self):
         dialogue_areas: list[DialogueArea] = self.entity_mn.get_entities_by_class(DialogueArea)
@@ -243,9 +452,7 @@ class BaseGenericLevel(BaseScene):
         pannels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
         for pannel in pannels:
             action_type = pannel.action_type
-            if "luz" in action_type:
-                self.event_manager.subscribe(action_type, self._activate_permanent_light)
-            elif "door" in action_type and self.door:
+            if "door" in action_type and self.door:
                 self.event_manager.subscribe(action_type, self.door.open)
                 
     def subscribe_iron_gates(self):
@@ -309,13 +516,23 @@ class BaseGenericLevel(BaseScene):
         self.storage_circuit.save_eletric_storage()
         
     def kill_entity_event(self,event):
-        self.entity_mn.remove_entity_by_id(event['id'])
+        entity_id = event['id']
+        entity = self.entity_mn.get_entity_by_id(entity_id)
+        if isinstance(entity, PhantomEnemy):
+            death_x = None
+            death_y = None
+            if entity.has(Position):
+                pos: Position = entity.get(Position)
+                death_x = float(pos.x)
+                death_y = float(pos.y)
+            self._queue_ghost_respawn_by_entity_id(entity_id, death_x=death_x, death_y=death_y)
+        self.entity_mn.remove_entity_by_id(entity_id)
 
     def open_bomb_editor(self):
         self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
         SceneManager.get().active_scene = CircuitEditor(
             pygame.display.get_surface(),
-            file=self.BOMB_EDITOR_FILE,
+            file=GENERIC_LEVEL_BOMB_EDITOR_FILE,
             debug_mode=False,
         )
 
@@ -343,8 +560,8 @@ class BaseGenericLevel(BaseScene):
         self.audio_manager.play_sfx("sfx/lighthouse_ignite.wav", volume=0.58)
 
     def _sync_bomb_runtime(self):
-        bomb_results = self.circuit_manager.get_circuit_values(self.BOMB_EDITOR_FILE)
-        self.bomb_manager.update_from_resistor_results(bomb_results, target_resistor=self.BOMB_TARGET_RESISTOR)
+        bomb_results = self.circuit_manager.get_circuit_values(GENERIC_LEVEL_BOMB_EDITOR_FILE)
+        self.bomb_manager.update_from_resistor_results(bomb_results, target_resistor=GENERIC_LEVEL_BOMB_TARGET_RESISTOR)
 
     def _update_bombs(self, dt: float):
         self._sync_bomb_runtime()
@@ -365,7 +582,7 @@ class BaseGenericLevel(BaseScene):
         radius = float(bomb_data["radius"])
         damage = float(bomb_data["damage"])
         radius_sq = radius * radius
-        enemy_radius_sq = (radius + float(self.BOMB_ENEMY_HIT_MARGIN)) ** 2
+        enemy_radius_sq = (radius + float(GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN)) ** 2
 
         self.active_explosions.append(
             {
@@ -389,6 +606,13 @@ class BaseGenericLevel(BaseScene):
             if (enemy_pos.center_pos() - center).length_squared() > enemy_radius_sq:
                 continue
             self._damage_enemy(enemy, damage)
+
+        # Bomba tambem limpa teias de aranha no raio da explosao.
+        if hasattr(self, "spider_web_system"):
+            try:
+                self.spider_web_system.destroy_traps_in_radius(self.entity_mn, center, radius)
+            except Exception:
+                pass
 
         # Friendly fire no jogador.
         if self.player and self.player.has(Position):
@@ -585,8 +809,8 @@ class BaseGenericLevel(BaseScene):
                 sprite = pygame.transform.scale(
                     frame,
                     (
-                        max(10, int(frame.get_width() * self.scale * pulse_scale * self.BOMB_VISUAL_SCALE)),
-                        max(10, int(frame.get_height() * self.scale * pulse_scale * self.BOMB_VISUAL_SCALE)),
+                        max(10, int(frame.get_width() * self.scale * pulse_scale * GENERIC_LEVEL_BOMB_VISUAL_SCALE)),
+                        max(10, int(frame.get_height() * self.scale * pulse_scale * GENERIC_LEVEL_BOMB_VISUAL_SCALE)),
                     ),
                 )
                 rect = sprite.get_rect(center=world_center)
@@ -615,16 +839,26 @@ class BaseGenericLevel(BaseScene):
             pygame.draw.rect(self.screen, (255, 196, 96), pygame.Rect(bx, by, int(bar_w * ratio), bar_h))
         
     def process_input(self, events):
+        modal = self._get_modal_alert_dialog()
+        if modal is not None:
+            for event in events:
+                modal.handle_events(event)
+            return
+
         for event in events:
             self.ui_manager.handle_event(event)
             if event.type == pygame.KEYDOWN:
-                if event.key == self.BOMB_KEY:
+                if event.key == KEY_PLACE_BOMB:
                     self.place_bomb()
-                elif event.key == self.PERMANENT_LIGHT_KEY:
-                    self._toggle_permanent_light(event)
         self._handle_panel_interaction(events)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
+
+    def _get_modal_alert_dialog(self):
+        for widget in self.ui_manager.widgets:
+            if isinstance(widget, AlertDialog):
+                return widget
+        return None
 
     def _handle_panel_interaction(self, events):
         player = self.entity_mn.get_player()
@@ -690,6 +924,8 @@ class BaseGenericLevel(BaseScene):
         self._update_bombs(dt)
         self._update_crystal_respawn_queue(dt)
         self._update_temporary_light(dt)
+        self._update_ghost_respawns(dt)
+        self._update_ghost_rebirth_effects(dt)
         self.dialog_system.update(self.entity_mn, self.player,dt)
         self.update_systems(dt)
         self.ui_manager.update(dt)
@@ -700,6 +936,7 @@ class BaseGenericLevel(BaseScene):
         self.render_system.draw(scale=self.scale) 
         self._draw_pending_bombs()
         self._draw_active_explosions(self._last_frame_dt)
+        self._draw_ghost_rebirth_effects()
         if self.debug_interaction_areas:
             self._draw_debug_areas()
         if hasattr(self, 'light_system'):
@@ -736,12 +973,13 @@ class BaseGenericLevel(BaseScene):
         self.pending_bombs.clear()
         self.active_explosions.clear()
         self.crystal_respawn_queue.clear()
-        self.bomb_manager.reset_bombs(self.BOMB_COUNT_PER_LEVEL)
+        self.ghost_respawn_queue.clear()
+        self.ghost_rebirth_effects.clear()
+        self._bind_existing_ghost_entities_to_templates()
+        self.bomb_manager.reset_bombs(GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL)
         self._sync_bomb_runtime()
         self._temporary_light_timer = 0.0
         self._temporary_light_restore_enabled = None
-        if hasattr(self, "light_system"):
-            self.light_system.set_enabled(self.light_system.initial_enabled)
         self.event_manager.subscribe('fall_player',self.fall_player)
         self.event_manager.subscribe('request_freeze',self.freeze_system.request_freeze)
         self.event_manager.subscribe('release_freeze',self.freeze_system.release_freeze)
@@ -754,14 +992,24 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
         if not self._uses_custom_crystal_respawn():
             self.event_manager.subscribe("crystal_invisibility_collected", self._on_crystal_invisibility_collected)
-        self.event_manager.subscribe("temporary_light_collected", self._on_temporary_light_collected)
-        self.event_manager.subscribe("temporary_light_collected", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
         self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
-        self.event_manager.subscribe("panel_light_on", lambda e: self.audio_manager.play_sfx("sfx/light_on.wav", volume=0.95))
+        self.event_manager.subscribe("panel_bomb_reward", self._on_panel_bomb_reward)
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
         self.subscribe_panels()
         self.subscribe_iron_gates()
+
+    def _on_panel_bomb_reward(self, event):
+        amount_raw = event.get("amount", 0)
+        try:
+            amount = int(float(amount_raw))
+        except (TypeError, ValueError):
+            amount = 0
+        if amount <= 0:
+            return
+        self.bomb_manager.max_bombs += amount
+        self.bomb_manager.remaining_bombs += amount
+        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
 
     def reset_bomb_circuit_to_default(self):
         default_json = path_in_circuitos("bombs", "default_bomb.json")
@@ -771,7 +1019,7 @@ class BaseGenericLevel(BaseScene):
             shutil.copyfile(default_json, editor_json)
         except Exception:
             pass
-        self.circuit_manager.clear_circuit(self.BOMB_EDITOR_FILE)
+        self.circuit_manager.clear_circuit(GENERIC_LEVEL_BOMB_EDITOR_FILE)
         self.bomb_manager.current_params = self.bomb_manager.default_params
 
     def on_scene_will_change(self, target_scene_name: str):
@@ -783,7 +1031,7 @@ class BaseGenericLevel(BaseScene):
         _ = event
         if not hasattr(self, "light_system"):
             return
-        self._activate_temporary_light(self.TEMPORARY_LIGHT_DURATION_SECONDS)
+        self._activate_temporary_light(GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS)
 
     def _activate_temporary_light(self, duration: float):
         if not hasattr(self, "light_system"):
@@ -824,12 +1072,12 @@ class BaseGenericLevel(BaseScene):
         if hasattr(self, "light_system") and self._temporary_light_restore_enabled is not None:
             self.light_system.set_enabled(
                 self._temporary_light_restore_enabled,
-                transition_seconds=self.TEMPORARY_LIGHT_FADE_OUT_SECONDS,
+                transition_seconds=GENERIC_LEVEL_TEMPORARY_LIGHT_FADE_OUT_SECONDS,
             )
         self._temporary_light_restore_enabled = None
 
     def get_temporary_light_ratio(self) -> float:
-        duration = float(self.TEMPORARY_LIGHT_DURATION_SECONDS)
+        duration = float(GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS)
         if duration <= 0:
             return 0.0
         return max(0.0, min(1.0, self._temporary_light_timer / duration))

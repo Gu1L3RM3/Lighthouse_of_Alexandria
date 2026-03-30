@@ -7,9 +7,13 @@ from core.components.label_component import LabelComponent
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
-from core.systems.light_system import LightSystem
 from core.systems.circuit_validators.max_power_transfer_validator_system import MaxPowerTransferValidatorSystem
-from core.settings import path_in_circuitos, path_in_ltspice
+from core.settings import (
+    MAX_POWER_LEVEL_CURRENT_POOL,
+    MAX_POWER_LEVEL_VOLTAGE_POOL,
+    path_in_circuitos,
+    path_in_ltspice,
+)
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.old_paper import OldPaper
@@ -19,8 +23,8 @@ from scenes.fases.generic_levels import BaseGenericLevel
 
 
 class BaseMaxPowerLevel(BaseGenericLevel):
-    VOLTAGE_POOL = ["1", "2", "3.3", "5", "9", "12", "15", "20"]
-    CURRENT_POOL = ["0.001", "0.002", "0.005", "0.01", "0.05", "0.10"]
+    VOLTAGE_POOL = list(MAX_POWER_LEVEL_VOLTAGE_POOL)
+    CURRENT_POOL = list(MAX_POWER_LEVEL_CURRENT_POOL)
 
     def __init__(self, screen: Surface, level_path: str, tolerance_percent: float = 2.0):
         self.tolerance_percent = tolerance_percent
@@ -140,7 +144,6 @@ class BaseMaxPowerLevel(BaseGenericLevel):
         self.animation_system = AnimationSystem()
         self.area_trigger_system = AreaTriggerSystem()
         self.freeze_system = FreezeSystem()
-        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.circuit_validator_system = MaxPowerTransferValidatorSystem(
             level_path=self.level_path,
             tolerance_percent=self.tolerance_percent,

@@ -4,6 +4,7 @@ import random
 
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit import CircuitSolver
+from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
 from core.components.label_component import LabelComponent
 from core.ecs import System
 from core.managers.circuit_manager import CircuitManager
@@ -25,6 +26,30 @@ class ResistorAssotiationValidatorSystem(System):
 
         self.serialization_manager = SerializationManager()
         self.serialization_manager.base_path = Path(CIRCUITOS_DIR)
+
+    def _panel_json_path(self, panel_id: int, suffix: str = ""):
+        return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
+
+    def _panel_net_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
+
+    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
+
+    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
+        for suffix in ("", "_solution"):
+            json_path = self._panel_json_path(panel_id, suffix)
+            if not json_path.exists():
+                continue
+            try:
+                LtSpiceGenerate(
+                    json_filepath=str(json_path),
+                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
+                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
+                    entity_manager=entity_manager,
+                ).save_netlist()
+            except Exception:
+                pass
 
     def _set_resistor_item_value(self, item: ResistorItem, value: float):
         formatted = SetterValues.format_eng(float(value), "")
@@ -155,11 +180,13 @@ class ResistorAssotiationValidatorSystem(System):
             area_res_items = resistors_by_area.get(area, [])
             panel_id = control_pannel.pannel_id
 
+            self._sync_netlists_from_json(panel_id, entity_manager)
+
             if not area_res_items:
                 self._log_panel_solution(panel_id, area, None, None, "no_resistors_in_area")
                 continue
 
-            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{panel_id}_solution.net"))
+            netlist_path = str(self._panel_net_path(panel_id, "_solution"))
             json_solution_path = path_in_circuitos(self.level_path, f"pannel{panel_id}.json")
 
             label_updates = self._randomize_resistors_in_netlist(netlist_path)
@@ -228,7 +255,6 @@ class ResistorAssotiationValidatorSystem(System):
         """
         Compara o Req do jogador com o solution_value calculado em set_solutions.
         """
-        _ = dt
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
 
         for control_pannel in control_pannels:
@@ -248,6 +274,7 @@ class ResistorAssotiationValidatorSystem(System):
                 continue
 
             answer = float(req_player["value"])
+
             is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
 
             if is_correct:

@@ -6,7 +6,8 @@ from core.managers.circuit_manager import CircuitManager
 from entities.itens.control_pannel import ControlPannel
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit import CircuitSolver
-from core.settings import path_in_ltspice
+from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.settings import path_in_circuitos, path_in_ltspice
 
 
 class ResistorPairValidatorSystem(System):
@@ -31,6 +32,30 @@ class ResistorPairValidatorSystem(System):
         if details:
             message += f" | {details}"
         self._log(message)
+
+    def _panel_json_path(self, panel_id: int, suffix: str = ""):
+        return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
+
+    def _panel_net_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
+
+    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
+
+    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
+        for suffix in ("", "_solution"):
+            json_path = self._panel_json_path(panel_id, suffix)
+            if not json_path.exists():
+                continue
+            try:
+                LtSpiceGenerate(
+                    json_filepath=str(json_path),
+                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
+                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
+                    entity_manager=entity_manager,
+                ).save_netlist()
+            except Exception as ex:
+                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
 
     def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
@@ -57,6 +82,7 @@ class ResistorPairValidatorSystem(System):
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
 
         for control_pannel in control_pannels:
+            self._sync_netlists_from_json(control_pannel.pannel_id, entity_manager)
             area = control_pannel.component_for_area
 
             if area not in resistors_per_area or len(resistors_per_area[area]) == 0:
@@ -66,7 +92,7 @@ class ResistorPairValidatorSystem(System):
             resistor_chosen = choice(resistors_list)
             resistors_list.remove(resistor_chosen)
 
-            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
+            netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
 
             # Sempre substituimos o componente R3 pelo valor escolhido aleatoriamente.
             # O circuito de solucao usa o R3 como "resistor secreto" que o jogador precisa descobrir.

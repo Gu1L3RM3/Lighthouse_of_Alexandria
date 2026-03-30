@@ -13,4 +13,9 @@ __pycache__/
 .vscode/
 .idea/
 
+# Build de distribuicao (PyInstaller)
+build/
+dist/
+*.spec.bak
+
 

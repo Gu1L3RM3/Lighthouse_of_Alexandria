@@ -161,11 +161,23 @@ class Level1(BaseScene):
         self.entity_mn.remove_entity_by_id(event['id'])
 
     def process_input(self, events):
+        modal = self._get_modal_alert_dialog()
+        if modal is not None:
+            for event in events:
+                modal.handle_events(event)
+            return
+
         for event in events:
             self.ui_manager.handle_event(event)
         self._handle_door_interaction(events)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
+
+    def _get_modal_alert_dialog(self):
+        for widget in self.ui_manager.widgets:
+            if isinstance(widget, AlertDialog):
+                return widget
+        return None
 
     def _handle_door_interaction(self, events):
         if not self.door or not self.player:

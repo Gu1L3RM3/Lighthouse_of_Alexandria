@@ -1,0 +1,14 @@
+﻿Farol de Alexandria - Instrucoes de Execucao (Windows)
+
+1) Extraia este arquivo ZIP para uma pasta local (ex.: C:\Jogos\Alexandria).
+2) Abra a pasta extraida "Alexandria".
+3) Execute "Alexandria.exe".
+
+Observacoes:
+- Nao remova a pasta "_internal" (ela eh obrigatoria para o jogo rodar).
+- Na primeira execucao, dados de runtime podem ser criados em:
+  %LOCALAPPDATA%\Alexandria\code\
+- Se o Windows SmartScreen bloquear, clique em "Mais informacoes" e depois "Executar assim mesmo".
+
+Atalho rapido:
+- Voce pode criar um atalho para "Alexandria.exe" na area de trabalho.

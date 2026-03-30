@@ -1,6 +1,7 @@
 import pygame
 
 from core.components.collider import Collider
+from core.components.spider_web_hunter import SpiderWebHunter
 from core.managers.resource_manager import ResourceManager
 from entities.enemies.base_enemy import EnemyBase
 
@@ -13,7 +14,20 @@ class SpiderEnemy(EnemyBase):
         speed: float = 42.0,
         route: list[tuple[int, int]] | None = None,
         max_hp: float = 130.0,
+        web_enabled: bool = True,
+        web_spawn_interval: float = 3.2,
+        web_lifetime: float = 14.0,
+        web_radius: float = 14.0,
+        max_webs: int = 3,
+        min_spawn_distance: float = 28.0,
+        web_slow_multiplier: float = 0.45,
+        web_slow_duration: float = 1.15,
+        ambush_speed: float = 128.0,
+        ambush_duration: float = 0.55,
+        ambush_cooldown: float = 3.0,
+        ambush_prediction_seconds: float = 0.35,
     ):
+        self.enemy_kind = "spider"
         animations = self._load_animations()
         super().__init__(
             x=x,
@@ -23,6 +37,22 @@ class SpiderEnemy(EnemyBase):
             route=route,
             speed=speed,
             max_hp=max_hp,
+        )
+        self.add(
+            SpiderWebHunter(
+                enabled=web_enabled,
+                web_spawn_interval=web_spawn_interval,
+                web_lifetime=web_lifetime,
+                web_radius=web_radius,
+                max_webs=max_webs,
+                min_spawn_distance=min_spawn_distance,
+                slow_multiplier=web_slow_multiplier,
+                slow_duration=web_slow_duration,
+                ambush_speed=ambush_speed,
+                ambush_duration=ambush_duration,
+                ambush_cooldown=ambush_cooldown,
+                prediction_seconds=ambush_prediction_seconds,
+            )
         )
 
     def _load_animations(self) -> dict[str, list[pygame.Surface]]:

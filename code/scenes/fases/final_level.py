@@ -11,8 +11,8 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.circuit_validators.max_power_transfer_validator_system import MaxPowerTransferValidatorSystem
 from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
 from core.systems.freeze_system import FreezeSystem
-from core.systems.light_system import LightSystem
 from core.systems.phantom_ai_system import PhantomAISystem
+from core.systems.spider_web_system import SpiderWebSystem
 from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from entities.dialogue_area import DialogueArea
 from entities.itens.control_pannel import ControlPannel
@@ -24,17 +24,19 @@ from core.components.position import Position
 from core.components.sprite import Sprite
 from entities.npcs.arquimedes import Arquimedes
 from scenes.fases.max_power_level_base import BaseMaxPowerLevel
-from core.settings import path_in_circuitos, path_in_ltspice
+from core.settings import (
+    FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS,
+    FINAL_LEVEL_FINAL_FADE_SECONDS,
+    FINAL_LEVEL_STORAGE_TYPE_BY_KIND,
+    path_in_circuitos,
+    path_in_ltspice,
+)
 
 
 class FinalLevel(BaseMaxPowerLevel):
-    DEFAULT_PANEL_HOLD_SECONDS = 90.0
-    FINAL_FADE_SECONDS = 0.8
-    STORAGE_TYPE_BY_KIND = {
-        "resistor": "Resistor",
-        "current_source": "CurrentSource",
-        "voltage_source": "VoutageSource",
-    }
+    DEFAULT_PANEL_HOLD_SECONDS = FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS
+    FINAL_FADE_SECONDS = FINAL_LEVEL_FINAL_FADE_SECONDS
+    STORAGE_TYPE_BY_KIND = dict(FINAL_LEVEL_STORAGE_TYPE_BY_KIND)
 
     def __init__(self, screen, level_path, tolerance_percent: float = 2.0):
         self.panel_timers: dict[int, float] = {}
@@ -96,8 +98,8 @@ class FinalLevel(BaseMaxPowerLevel):
         self.animation_system = AnimationSystem()
         self.area_trigger_system = AreaTriggerSystem()
         self.freeze_system = FreezeSystem()
-        self.light_system = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.phantom_ai_system = PhantomAISystem(self.tile_map)
+        self.spider_web_system = SpiderWebSystem()
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
@@ -111,6 +113,7 @@ class FinalLevel(BaseMaxPowerLevel):
                 self.freeze_system,
                 self.phantom_ai_system,
                 self.path_following_system,
+                self.spider_web_system,
                 self.enemy_touch_game_over_system,
                 self.physics_system,
                 self.animation_system,

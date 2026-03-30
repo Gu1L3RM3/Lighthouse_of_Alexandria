@@ -1,7 +1,7 @@
 import pygame
 import time
 import os
-from core.settings               import FPS
+from core.settings               import FPS, ASSETS_DIR
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
@@ -28,7 +28,6 @@ from scenes.fases.generic_level_7 import GenericLevel7
 from scenes.fases.final_level import FinalLevel
 from scenes.circuit_editor       import CircuitEditor
 from scenes.death_transition_scene import DeathTransitionScene
-from sys import exit
 from pathlib import Path
 
 
@@ -108,16 +107,14 @@ class Game:
     
         self.register_fases()
 
-        self.scene_manager.change("fase_3")
+        #self.scene_manager.change("fase_3")
         #self.scene_manager.active_scene = CircuitEditor(self.screen,'bombs/bomb_editor',debug_mode=True)
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 
         
     def _set_window_icon(self):
-        code_dir = Path(__file__).resolve().parent
-        project_dir = code_dir.parent
-        icon_path = project_dir / "assets" / "images" / "icon" / "game_icon_64.png"
+        icon_path = Path(ASSETS_DIR) / "images" / "icon" / "game_icon_64.png"
 
 
         try:
@@ -130,9 +127,7 @@ class Game:
 
         
     def register_fases(self):
-        CODE_DIR = Path(__file__).resolve().parent
-        PROJECT_DIR = CODE_DIR.parent
-        base_path = PROJECT_DIR / "assets" / "maps" / "fases"
+        base_path = Path(ASSETS_DIR) / "maps" / "fases"
 
         
         folder_class_map = {
@@ -181,10 +176,10 @@ class Game:
             filtered_events = []
 
             for e in events:
-                if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_q):
+                if e.type == pygame.QUIT:
                     self.scene_manager.active_scene.end()
                     pygame.quit()
-                    exit()
+                    raise SystemExit
                 filtered_events.append(e)
 
             self.event_manager.post(filtered_events)

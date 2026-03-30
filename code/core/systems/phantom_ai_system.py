@@ -10,10 +10,11 @@ from core.map.tile_map import TileMap
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
 from core.managers.time_manager import TimeManager
+from core.settings import PHANTOM_AI_STEALTH_TIMER_NAME
 
 
 class PhantomAISystem(System):
-    STEALTH_TIMER_NAME = "phantom_stealth_timer"
+    STEALTH_TIMER_NAME = PHANTOM_AI_STEALTH_TIMER_NAME
 
     def __init__(self, tile_map: TileMap):
         self.tile_map = tile_map

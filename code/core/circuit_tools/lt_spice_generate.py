@@ -407,8 +407,9 @@ class LtSpiceGenerate:
                     for term_name in self._get_terminals(comp)
                 }
 
-                # Garante que todos os nÃ³s foram encontrados
-                if not all(node_map.values()):
+                # Garante que todos os nos foram encontrados.
+                # Nao use truthiness aqui: o no de terra e "0" e deve ser valido.
+                if any(node is None for node in node_map.values()):
                     continue
 
                 # Aplica a regra de ordenaÃ§Ã£o correta para cada tipo de componente

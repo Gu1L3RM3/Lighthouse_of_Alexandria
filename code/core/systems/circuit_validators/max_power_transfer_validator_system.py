@@ -7,6 +7,7 @@ from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from core.components.label_component import LabelComponent
@@ -128,6 +129,30 @@ class MaxPowerTransferValidatorSystem(System):
         except Exception:
             pass
         return names
+
+    def _panel_json_path(self, panel_id: int, suffix: str = ""):
+        return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
+
+    def _panel_net_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
+
+    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
+
+    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
+        for suffix in ("", "_solution"):
+            json_path = self._panel_json_path(panel_id, suffix)
+            if not json_path.exists():
+                continue
+            try:
+                LtSpiceGenerate(
+                    json_filepath=str(json_path),
+                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
+                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
+                    entity_manager=entity_manager,
+                ).save_netlist()
+            except Exception as ex:
+                self._log(f"Painel {panel_id}{suffix}: falha ao sincronizar netlist ({ex})")
 
     def _pick_source_for_net(self, area_sources: dict, solution_netlist: str) -> tuple[str | None, str | None]:
         has_v1 = self._net_has_component(solution_netlist, "V1")
@@ -251,6 +276,8 @@ class MaxPowerTransferValidatorSystem(System):
                 continue
             if panel_ids_filter is not None and int(cp.pannel_id) not in panel_ids_filter:
                 continue
+
+            self._sync_netlists_from_json(cp.pannel_id, entity_manager)
 
             area = getattr(cp, "component_for_area", None)
             solution_netlist = str(path_in_ltspice(self.level_path, f"pannel{cp.pannel_id}_solution.net"))

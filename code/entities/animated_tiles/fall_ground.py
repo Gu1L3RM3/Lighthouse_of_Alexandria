@@ -9,6 +9,7 @@ from core.managers.resource_manager import ResourceManager
 from core.managers.event_manager import EventManager
 from core.components.collider import Collider
 from core.components.render_layer import RenderLayer
+from core.settings import FALL_GROUND_REQUIRED_PERCENT_INSIDE
 
 class FallGround(Entity):
     def __init__(self, x, y):
@@ -55,9 +56,7 @@ class FallGround(Entity):
 
         percent_inside = (intersect_area / player_area) * 100
 
-        REQUIRED_PERCENT_INSIDE = 10
-
-        if percent_inside >= REQUIRED_PERCENT_INSIDE:
+        if percent_inside >= FALL_GROUND_REQUIRED_PERCENT_INSIDE:
             EventManager.get().post({'type': 'request_freeze', 'type_request': 'player fall'})
             self._fall_player()
             self.animate.play('broken')

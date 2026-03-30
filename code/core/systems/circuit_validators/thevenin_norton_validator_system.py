@@ -19,6 +19,7 @@ from core.settings import (
     COMERCIAL_RESISTORS,
     MAP_CURRENT_SOURCE_POOL,
     MAP_VOLTAGE_SOURCE_POOL,
+    THEVENIN_NORTON_TARGET_RESISTOR,
     path_in_circuitos,
     path_in_ltspice,
 )
@@ -26,7 +27,7 @@ from utils.setter_values import SetterValues
 
 
 class TheveninNortonValidatorSystem(System):
-    TARGET_RESISTOR = "R1"
+    TARGET_RESISTOR = THEVENIN_NORTON_TARGET_RESISTOR
 
     def __init__(self, level_path: str, tolerance_percent: float = 2.0):
         super().__init__()

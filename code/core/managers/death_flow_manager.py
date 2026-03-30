@@ -11,7 +11,7 @@ class DeathFlowManager:
         self.scene_manager = SceneManager.get()
         self.scene_factory = SceneFactory.get()
         self.death_scene_name = "death_transition"
-        self.game_over_return_scene = "home_scene"
+        self.game_over_return_scene = "level_2"
         self.death_context: dict | None = None
 
     @classmethod

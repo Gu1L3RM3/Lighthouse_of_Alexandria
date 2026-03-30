@@ -23,6 +23,8 @@ from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
+from core.ui.widgets.button import Button
+from core.ui.widgets.gesture_detector import ClickType
 
 class HomeScene(BaseScene):
     def __init__(self, screen:Surface):
@@ -38,6 +40,7 @@ class HomeScene(BaseScene):
         self.ui_manager.add(fps)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
+        self._set_hud_buttons()
         self.set_map()
 
         self.animation_system =  AnimationSystem()
@@ -64,6 +67,22 @@ class HomeScene(BaseScene):
         )
         self.scene_manager     = SceneManager.get() 
         self.audio_manager = AudioManager.get()
+
+    def _set_hud_buttons(self):
+        help_x = self.screen.get_width() - 92
+        idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
+        pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
+        self.help_button = Button(
+            init_surface=idle,
+            surface_pressed=pressed,
+            pos_center=(help_x, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=lambda: SceneManager.get().open_help(0.35),
+            text="HELP",
+            font_size=11,
+            color_text=(245, 230, 170),
+        )
+        self.ui_manager.add(self.help_button)
 
     def start(self):
         pygame.mouse.set_visible(True)
@@ -170,6 +189,8 @@ class HomeScene(BaseScene):
                 break
 
     def process_input(self, events):
+        for event in events:
+            self.ui_manager.handle_event(event)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
 

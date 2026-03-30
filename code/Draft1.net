@@ -1,7 +1,0 @@
-* C:\Users\cavaz\OneDrive\Documentos\Projetos\Projetos_Python\IC\Alexandria\code\Draft1.asc
-V1 N002 0 15
-R1 N001 0 1k
-V2 N001 N002 20
-.tran 1s
-.backanno
-.end

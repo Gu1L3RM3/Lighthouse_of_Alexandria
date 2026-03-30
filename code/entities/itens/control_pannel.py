@@ -44,6 +44,11 @@ class ControlPannel(Item):
         if isinstance(stealth_enabled_raw, str):
             stealth_enabled_raw = stealth_enabled_raw.strip().lower() in ("1", "true", "yes", "on")
         self.stealth_bonus_enabled = bool(stealth_enabled_raw)
+        bomb_reward_raw = props.get("bomb_reward", 0)
+        try:
+            self.bomb_reward = int(float(bomb_reward_raw))
+        except (TypeError, ValueError):
+            self.bomb_reward = 0
         
         self.action_type =f"pannel_{props['action']}{self.pannel_id}" 
         
@@ -69,7 +74,9 @@ class ControlPannel(Item):
                 "pannel_id": self.pannel_id,
             })
         self.event_manager.post({'type': 'panel_solved', 'pannel_id': self.pannel_id})
-        if "luz" in self.action_type:
+        if self.bomb_reward > 0:
+            self.event_manager.post({'type': 'panel_bomb_reward', 'pannel_id': self.pannel_id, 'amount': self.bomb_reward})
+        elif "luz" in self.action_type:
             self.event_manager.post({'type': 'panel_light_on', 'pannel_id': self.pannel_id})
         self.done = True
         self.panel_status.set_done(True)

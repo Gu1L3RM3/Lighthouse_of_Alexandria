@@ -64,6 +64,9 @@ class PhysicsSystem(System):
         return dyn.enabled
 
     def _should_ignore_dynamic_collision(self, entity: Entity, other: Entity) -> bool:
+        # Aranhas devem atravessar umas às outras para evitar travamentos de rota.
+        if getattr(entity, "enemy_kind", None) == "spider" and getattr(other, "enemy_kind", None) == "spider":
+            return True
         return (
             (not self._has_dynamic_collision_enabled(entity))
             or (not self._has_dynamic_collision_enabled(other))

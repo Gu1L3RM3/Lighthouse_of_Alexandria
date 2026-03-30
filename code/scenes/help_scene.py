@@ -3,7 +3,7 @@ from pygame import Event, Surface
 
 from scenes.base_scene import BaseScene
 from scenes.help_content import HELP_SECTIONS
-from core.settings import BLACK
+from core.settings import BLACK, HELP_SCROLL_STEP
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
 from core.ui.widgets.button import Button
@@ -11,7 +11,7 @@ from core.ui.widgets.gesture_detector import ClickType
 
 
 class HelpScene(BaseScene):
-    SCROLL_STEP = 34
+    SCROLL_STEP = HELP_SCROLL_STEP
 
     def __init__(self, screen: Surface):
         width, height = screen.get_size()
@@ -234,4 +234,3 @@ class HelpScene(BaseScene):
         self.screen.blit(hint, hint.get_rect(center=(panel.centerx, panel.bottom - 22)))
 
         self.ui_manager.draw(self.screen)
-

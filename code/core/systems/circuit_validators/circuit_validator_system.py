@@ -6,7 +6,8 @@ from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit         import CircuitSolver
-from core.settings                            import path_in_ltspice
+from core.circuit_tools.lt_spice_generate     import LtSpiceGenerate
+from core.settings                            import path_in_circuitos, path_in_ltspice
 
 
 class CircuitValidatorSystem(System):
@@ -31,6 +32,30 @@ class CircuitValidatorSystem(System):
             message += f" | {details}"
         self._log(message)
 
+    def _panel_json_path(self, panel_id: int, suffix: str = ""):
+        return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
+
+    def _panel_net_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
+
+    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
+        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
+
+    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
+        for suffix in ("", "_solution"):
+            json_path = self._panel_json_path(panel_id, suffix)
+            if not json_path.exists():
+                continue
+            try:
+                LtSpiceGenerate(
+                    json_filepath=str(json_path),
+                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
+                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
+                    entity_manager=entity_manager,
+                ).save_netlist()
+            except Exception as ex:
+                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
+
 
     #TODO: Fazer funcionar para qualquer tipo de lista de componentes [resistors,current sources,voltage_sources]
     def set_solutions(self, event: dict, entity_manager: EntityManager):
@@ -40,6 +65,7 @@ class CircuitValidatorSystem(System):
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
 
         for control_pannel in control_pannels:
+            self._sync_netlists_from_json(control_pannel.pannel_id, entity_manager)
 
             area = control_pannel.component_for_area
 
@@ -55,7 +81,7 @@ class CircuitValidatorSystem(System):
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
 
-            netlist_path = str(path_in_ltspice(self.level_path, f"pannel{control_pannel.pannel_id}_solution.net"))
+            netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
 
             SerializationManager.update_component_value(
                 netlist_path,

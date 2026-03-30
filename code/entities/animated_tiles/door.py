@@ -3,11 +3,13 @@ from core.ecs import Entity
 from core.managers.resource_manager import ResourceManager
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
+from core.managers.life_manager import LifeManager
 from core.components.position import Position
 from core.components.collider import Collider
 from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
 from core.components.light_component import LightComponent
+from core.components.health import Health
 from entities.player import Player
 
 
@@ -47,6 +49,11 @@ class Door(Entity):
     def try_enter(self, player: Player):
         if not self.can_player_interact(player):
             return
+        # Ao concluir uma fase, restaura as tentativas e a vida do jogador.
+        LifeManager.get().reset_lives()
+        if player and player.has(Health):
+            health: Health = player.get(Health)
+            health.heal_full()
         SceneManager.get().start_fade(self.next_scene)
 
     def open(self,event):

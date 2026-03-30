@@ -7,8 +7,8 @@ from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.circuit_validators.resistor_pair_validator_system import ResistorPairValidatorSystem
 from core.systems.freeze_system import FreezeSystem
-from core.systems.light_system import LightSystem
 from core.systems.phantom_ai_system import PhantomAISystem
+from core.systems.spider_web_system import SpiderWebSystem
 from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from core.circuit_tools.serialization_manager import SerializationManager
 from core.components.animation_sprite import AnimateSprite
@@ -53,8 +53,8 @@ class GenericLevel5(BaseGenericLevel):
         self.animation_system         = AnimationSystem()
         self.area_trigger_system      = AreaTriggerSystem()
         self.freeze_system            = FreezeSystem()
-        self.light_system             = LightSystem(self.screen, self.camera, debug=False, enabled=True)
         self.phantom_ai_system        = PhantomAISystem(self.tile_map)
+        self.spider_web_system        = SpiderWebSystem()
         self.stealth_timer_widget     = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
         self.circuit_validator_system = ResistorPairValidatorSystem(level_path=self.level_path, tolerance_percent=self.tolerance_percent)
@@ -63,6 +63,7 @@ class GenericLevel5(BaseGenericLevel):
             self.freeze_system,
             self.phantom_ai_system,
             self.path_following_system,
+            self.spider_web_system,
             self.physics_system,
             self.animation_system,
             self.area_trigger_system, self.circuit_validator_system, self.render_system,

@@ -213,7 +213,8 @@ class RenderSystem(System):
         if not entity.has(PanelStatus):
             return
         status: PanelStatus = entity.get(PanelStatus)
-        self.panel_status_renderer.draw(self.screen, draw_rect, status, scale)
+        panel_id = getattr(entity, "pannel_id", None)
+        self.panel_status_renderer.draw(self.screen, draw_rect, status, scale, panel_id=panel_id)
         
     def _get_scaled_label_surface(self, base_surface: Surface, scale: float) -> Surface:
         if scale == 1.0:
