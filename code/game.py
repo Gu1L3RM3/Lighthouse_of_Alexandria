@@ -6,6 +6,7 @@ from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
 from core.managers.audio_manager import AudioManager
+from core.managers.save_game_manager import SaveGameManager
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -98,6 +99,7 @@ class Game:
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
+        self.save_manager = SaveGameManager.get()
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
         self._last_scene_name = None
@@ -177,6 +179,11 @@ class Game:
 
             for e in events:
                 if e.type == pygame.QUIT:
+                    self.save_manager.autosave_scene(
+                        self.scene_manager.active_scene_name,
+                        current_lives=self.life_manager.current_lives,
+                        max_lives=self.life_manager.max_lives,
+                    )
                     self.scene_manager.active_scene.end()
                     pygame.quit()
                     raise SystemExit

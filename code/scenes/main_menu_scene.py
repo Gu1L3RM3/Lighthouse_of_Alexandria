@@ -6,6 +6,7 @@ from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager import LifeManager
 from core.managers.audio_manager import AudioManager
+from core.managers.save_game_manager import SaveGameManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -17,6 +18,7 @@ class MainMenuScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
+        self.save_manager = SaveGameManager.get()
         self.width = width
         self.height = height
         self.low_res_size = (320, 180)
@@ -164,20 +166,34 @@ class MainMenuScene(BaseScene):
         self.ui_manager.add(self.resume_button, self.start_button, self.credits_button, self.exit_button)
 
     def _refresh_resume_button(self):
-        can_resume = self.scene_manager.can_resume_scene()
+        can_resume = self.scene_manager.can_resume_scene() or self.save_manager.has_save()
         if can_resume:
-            self.resume_button.change_text("RETOMAR FASE")
+            self.resume_button.change_text("CONTINUAR JORNADA")
             self.resume_button.text_widget.font_color = (245, 230, 170)
         else:
-            self.resume_button.change_text("SEM FASE ATIVA")
+            self.resume_button.change_text("SEM SAVE ATIVO")
             self.resume_button.text_widget.font_color = (166, 154, 126)
 
     def resume_current_scene(self):
-        if not self.scene_manager.can_resume_scene():
+        if self.scene_manager.can_resume_scene():
+            self.scene_manager.resume_from_menu(0.45)
             return
-        self.scene_manager.resume_from_menu(0.45)
+
+        save_data = self.save_manager.load_game()
+        if not save_data:
+            return
+
+        scene_name = str(save_data.get("current_scene", ""))
+        lives = save_data.get("lives", {})
+        current_lives = int(lives.get("current", self.life_manager.max_lives))
+        max_lives = int(lives.get("max", self.life_manager.max_lives))
+        self.life_manager.set_state(current_lives=current_lives, max_lives=max_lives)
+
+        if scene_name and scene_name in self.scene_manager.scenes:
+            self.scene_manager.start_fade(scene_name, 0.45)
 
     def start_new_game(self):
+        self.save_manager.clear_save()
         self.life_manager.reset_lives()
         self.scene_manager.start_fade("home_scene", 0.6)
 

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-03-30T22:59:01.608026+00:00",
+  "current_scene": "fase_3",
+  "lives": {
+    "current": 8,
+    "max": 10
+  }
+}

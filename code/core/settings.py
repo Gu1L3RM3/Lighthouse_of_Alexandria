@@ -51,6 +51,9 @@ def _resolve_runtime_data_dirs() -> tuple[Path, Path]:
 
 CIRCUITOS_DIR, LTSPICE_DIR = _resolve_runtime_data_dirs()
 ASSETS_DIR = str(BUNDLE_ROOT / "assets")
+SAVE_DIR = CIRCUITOS_DIR.parent / "save"
+SAVE_FILE = SAVE_DIR / "savegame.json"
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def path_in_circuitos(*parts: str) -> Path:
@@ -59,6 +62,10 @@ def path_in_circuitos(*parts: str) -> Path:
 
 def path_in_ltspice(*parts: str) -> Path:
     return LTSPICE_DIR.joinpath(*parts)
+
+
+def path_in_save(*parts: str) -> Path:
+    return SAVE_DIR.joinpath(*parts)
 
 DAWN_COLOR   = (255, 120, 50, 100)
 DAY_COLOR    = (135, 206, 250, 0)  

@@ -21,6 +21,11 @@ class LifeManager:
     def reset_lives(self):
         self.current_lives = self.max_lives
 
+    def set_state(self, current_lives: int, max_lives: int | None = None):
+        if max_lives is not None:
+            self.set_max_lives(max_lives)
+        self.current_lives = max(0, min(int(current_lives), self.max_lives))
+
     def lose_life(self) -> int:
         if self.current_lives > 0:
             self.current_lives -= 1

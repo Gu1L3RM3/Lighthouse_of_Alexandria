@@ -2,6 +2,8 @@ import pygame
 from typing import Dict
 from scenes.base_scene import BaseScene
 from core.managers.event_manager import EventManager
+from core.managers.life_manager import LifeManager
+from core.managers.save_game_manager import SaveGameManager
 
 from core.settings import *
 
@@ -142,6 +144,12 @@ class SceneManager:
                 self.active_scene = self.transition_target
                 self.active_scene_name = self.transition_target_name
                 self.active_scene.start()
+                lives = LifeManager.get()
+                SaveGameManager.get().autosave_scene(
+                    self.active_scene_name,
+                    current_lives=lives.current_lives,
+                    max_lives=lives.max_lives,
+                )
                 self.transition_phase = "fade_in"
 
         elif self.transition_phase == "fade_in":
