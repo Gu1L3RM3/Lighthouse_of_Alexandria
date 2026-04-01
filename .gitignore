@@ -1,21 +1,68 @@
-# Ignorar .venv
-.venv/
-.mypy_cache/
-# Arquivos gerados pelo Python
+# ------------------------------
+# Python cache / bytecode
+# ------------------------------
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-*.ini
+# Ferramentas Python
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+.nox/
+.hypothesis/
+.pyre/
+.pytype/
 
-# Configurações do IDE
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ------------------------------
+# Ambientes virtuais
+# ------------------------------
+.venv/
+venv/
+env/
+ENV/
+
+# ------------------------------
+# IDE / editor
+# ------------------------------
 .vscode/
 .idea/
+*.code-workspace
 
-# Build de distribuicao (PyInstaller)
+# ------------------------------
+# Sistema operacional
+# ------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ------------------------------
+# Build / distribuicao
+# ------------------------------
 build/
 dist/
+release/
 *.spec.bak
 
+# Artefatos comuns de empacotamento Python
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
 
+# ------------------------------
+# Arquivos locais de execucao
+# ------------------------------
+code/save/
+logs/
+*.log
+
+# Configuracao local sensivel
+.env
+.env.*

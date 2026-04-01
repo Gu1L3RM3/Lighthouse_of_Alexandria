@@ -14,7 +14,6 @@ from entities.itens.key import Key
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
 from core.components.area_trigger import AreaTrigger
-from core.ui.widgets.fps_widget import FPSWidget
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
 from core.map.map_renderer import MapRenderer
@@ -81,7 +80,6 @@ class BaseExplanationLevel(BaseScene):
         )
 
     def set_ui(self):
-        self.ui_manager.add(FPSWidget())
         top_button_gap = 20
         top_button_step = 142 + top_button_gap
         menu_x = self.screen.get_width() - 92

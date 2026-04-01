@@ -1,7 +1,6 @@
 from scenes.base_scene import BaseScene
 from core.ui.widgets.gesture_detector import GestureDetector, ClickType
 from core.ui.widgets.menu_edit_circuit import MenuEditCircuit
-from core.ui.widgets.fps_widget import FPSWidget
 from pygame import Surface, Rect
 from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.node_manager import NodeManager
@@ -47,7 +46,6 @@ class CircuitEditor(BaseScene):
 
         
         self.ui_manager.add(
-            FPSWidget(),
             MenuEditCircuit(self.input_system,
                             self.screen,
                             self.cell_size,

@@ -10,7 +10,6 @@ from core.components.area_trigger import AreaTrigger
 from core.components.position import Position
 from core.components.collider import Collider
 from core.components.dialogue import Dialogue
-from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.map.tile_map_loader import TileMapLoader
 from core.map.map_entity_spawner import MapEntitySpawner
@@ -35,8 +34,6 @@ class HomeAfterScene(BaseScene):
         super().__init__(screen, self.tile_map.map_width * self.scale, self.tile_map.map_height * self.scale)
 
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
-        fps = FPSWidget()
-        self.ui_manager.add(fps)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
         self._set_hud_buttons()

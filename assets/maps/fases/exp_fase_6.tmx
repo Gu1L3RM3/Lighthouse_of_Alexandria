@@ -1,10 +1,10 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="23" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="21">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="100" columns="10">
-  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160" />
+  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160"/>
  </tileset>
  <tileset firstgid="101" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
-  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208" />
+  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
  <layer id="1" name="ground" width="23" height="21">
   <data encoding="csv">
@@ -59,44 +59,44 @@
  <objectgroup id="9" name="door">
   <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16">
    <properties>
-    <property name="next_scene" value="fase_6" />
+    <property name="next_scene" value="fase_6"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="6" name="player">
   <object id="1" name="player" x="218.5" y="273.5">
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <objectgroup id="5" name="attention_point" locked="1">
   <object id="5" name="1" x="171" y="281">
    <properties>
-    <property name="positions" value="[]" />
+    <property name="positions" value="[]"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
- <objectgroup id="4" name="attention_points" />
+ <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
   <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
    <properties>
-    <property name="active_status" type="bool" value="true" />
-    <property name="dialogo" value="Arquimedes: Nesta etapa voce vai dominar os teoremas de Thevenin e Norton.;Arquimedes: Thevenin substitui a rede por uma fonte de tensao Vth em serie com Rth.;Arquimedes: Norton substitui a rede por uma fonte de corrente In em paralelo com Rn.;Arquimedes: As relacoes sao Rth igual a Rn Vth igual a In vezes Rth e In igual a Vth dividido por Rth.;Arquimedes: Para achar Vth retire a carga e calcule a tensao de circuito aberto.;Arquimedes: Para achar Rth desligue as fontes independentes e veja a resistencia vista dos terminais.;Arquimedes: Para Norton use a corrente de curto circuito nos terminais para obter In.;Arquimedes: Sempre use GND Ground como referencia de zero volt para as medicoes.;Arquimedes: Sem GND os resultados podem ficar indefinidos ou incorretos.;Arquimedes: Nos paineis identifique os terminais calcule o equivalente e valide com cuidado." />
+    <property name="active_status" type="bool" value="true"/>
+    <property name="dialogo" value="Arquimedes: Nesta etapa você vai dominar os teoremas de Thévenin e Norton.;Arquimedes: Thévenin substitui a rede por uma fonte de tensão Vth em série com Rth.;Arquimedes: Norton substitui a rede por uma fonte de corrente In em paralelo com Rn.;Arquimedes: As relações são Rth igual a Rn, Vth igual a In vezes Rth e In igual a Vth dividido por Rth.;Arquimedes: Para achar Vth, retire a carga e calcule a tensão de circuito aberto.;Arquimedes: Para achar Rth, desligue as fontes independentes e veja a resistência vista dos terminais.;Arquimedes: Para Norton, use a corrente de curto-circuito nos terminais para obter In.;Arquimedes: Sempre use GND Ground como referência de zero volt para as medições.;Arquimedes: Sem GND, os resultados podem ficar indefinidos ou incorretos.;Arquimedes: Nos painéis, identifique os terminais, calcule o equivalente e valide com cuidado."/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="2" name="itens">
   <object id="15" name="key" x="40" y="217">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
   <object id="19" name="old_paper" x="169" y="190">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <layer id="8" name="ground2" width="23" height="21">
@@ -124,4 +124,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
-<objectgroup id="10" name="npc"><object id="20" name="arquimedes" type="arquimedes" x="152" y="228"><point /></object></objectgroup></map>
+ <objectgroup id="10" name="npc">
+  <object id="20" name="arquimedes" type="arquimedes" x="152" y="228">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

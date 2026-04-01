@@ -9,7 +9,6 @@ from entities.animated_tiles.door import Door
 from core.components.area_trigger import AreaTrigger
 from core.components.position import Position
 from core.components.collider import Collider
-from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.map.tile_map_loader import TileMapLoader
@@ -72,9 +71,7 @@ class Level1(BaseScene):
         self.door:Door = self.entity_mn.get_entities_by_class(Door)[0]
         self.door.next_scene = 'level_2'
     def set_ui(self):
-        fps=FPSWidget()
         lives = LivesWidget(pos=(10, 42))
-        self.ui_manager.add(fps)
         self.ui_manager.add(lives)
         top_button_gap = 20
         top_button_step = 142 + top_button_gap

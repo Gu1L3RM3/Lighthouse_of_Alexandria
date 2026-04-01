@@ -24,7 +24,6 @@ from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
 from core.components.phantom_ai import PhantomAI
-from core.ui.widgets.fps_widget import FPSWidget
 from core.ui.widgets.lives_widget import LivesWidget
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
@@ -127,9 +126,7 @@ class BaseGenericLevel(BaseScene):
         self.bomb_manager.set_balance_profile("standard")
             
     def set_ui(self):
-        fps = FPSWidget()
         lives = LivesWidget(pos=(10, 42))
-        self.ui_manager.add(fps)
         self.ui_manager.add(lives)
         top_button_gap = 20
         top_button_step = 142 + top_button_gap
