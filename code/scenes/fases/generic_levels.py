@@ -67,6 +67,8 @@ class BaseGenericLevel(BaseScene):
         self.crystal_respawn_queue: list[dict] = []
         self.ghost_respawn_queue: list[dict] = []
         self.ghost_rebirth_effects: list[dict] = []
+        self._restore_bombs_after_editor = False
+        self._saved_bomb_counts: tuple[int, int] | None = None
         self._ghost_spawn_templates: dict[str, dict] = {}
         self._ghost_entity_to_spawn_key: dict[int, str] = {}
         self._last_frame_dt = 0.0
@@ -106,6 +108,7 @@ class BaseGenericLevel(BaseScene):
         self.debug_interaction_areas = False
         self._temporary_light_timer = 0.0
         self._temporary_light_restore_enabled = None
+        self._scene_change_target_name: str | None = None
         
         # Subclasses will override this
         self.set_systems() 
@@ -337,7 +340,7 @@ class BaseGenericLevel(BaseScene):
     def kill_entity_event(self,event):
         entity_id = event['id']
         entity = self.entity_mn.get_entity_by_id(entity_id)
-        if isinstance(entity, PhantomEnemy):
+        if entity and entity.has(PhantomAI):
             death_x = None
             death_y = None
             if entity.has(Position):
@@ -349,6 +352,12 @@ class BaseGenericLevel(BaseScene):
 
     def open_bomb_editor(self):
         self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
+        # Preserva contagem de nucleos ao abrir/fechar o editor durante a mesma fase.
+        self._saved_bomb_counts = (
+            int(self.bomb_manager.max_bombs),
+            int(self.bomb_manager.remaining_bombs),
+        )
+        self._restore_bombs_after_editor = True
         SceneManager.get().active_scene = CircuitEditor(
             pygame.display.get_surface(),
             file=GENERIC_LEVEL_BOMB_EDITOR_FILE,
@@ -465,7 +474,17 @@ class BaseGenericLevel(BaseScene):
         self.ghost_respawn_queue.clear()
         self.ghost_rebirth_effects.clear()
         self.ghost_system.bind_existing_ghost_entities_to_templates()
-        self.bomb_manager.reset_bombs(GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL)
+        if self._restore_bombs_after_editor and self._saved_bomb_counts is not None:
+            max_bombs, remaining_bombs = self._saved_bomb_counts
+            self.bomb_manager.max_bombs = max(0, int(max_bombs))
+            self.bomb_manager.remaining_bombs = max(
+                0,
+                min(int(remaining_bombs), self.bomb_manager.max_bombs),
+            )
+            self._saved_bomb_counts = None
+            self._restore_bombs_after_editor = False
+        else:
+            self.bomb_manager.reset_bombs(GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL)
         self.bomb_system.sync_bomb_runtime()
         self._temporary_light_timer = 0.0
         self._temporary_light_restore_enabled = None
@@ -500,6 +519,22 @@ class BaseGenericLevel(BaseScene):
         self.bomb_manager.remaining_bombs += amount
         self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
 
+    def _should_skip_progress_reset_on_end(self) -> bool:
+        target = (self._scene_change_target_name or "").strip().lower()
+        return target in {"main_menu", "help"}
+
+    def _reset_panels_runtime_state(self):
+        for panel in self.entity_mn.get_entities_by_class(ControlPannel):
+            panel.done = False
+            if hasattr(panel, "solution_value"):
+                panel.solution_value = None
+            if hasattr(panel, "panel_status"):
+                try:
+                    panel.panel_status.set_done(False)
+                    panel.panel_status.set_active(bool(getattr(panel, "active", True)))
+                except Exception:
+                    pass
+
     def reset_bomb_circuit_to_default(self):
         default_json = path_in_circuitos("bombs", "default_bomb.json")
         editor_json = path_in_circuitos("bombs", "bomb_editor.json")
@@ -512,6 +547,7 @@ class BaseGenericLevel(BaseScene):
         self.bomb_manager.current_params = self.bomb_manager.default_params
 
     def on_scene_will_change(self, target_scene_name: str):
+        self._scene_change_target_name = target_scene_name
         if target_scene_name in {"main_menu", "help"}:
             return
         self.reset_bomb_circuit_to_default()

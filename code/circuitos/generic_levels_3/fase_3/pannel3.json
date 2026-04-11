@@ -23,10 +23,10 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
-                    "up",
                     "bottom",
-                    "down"
+                    "top",
+                    "down",
+                    "up"
                 ]
             },
             {
@@ -53,8 +53,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "down"
+                    "down",
+                    "right"
                 ]
             },
             {
@@ -81,8 +81,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "down"
+                    "down",
+                    "left"
                 ]
             },
             {
@@ -137,9 +137,9 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "right",
-                    "left",
-                    "down"
+                    "left"
                 ]
             },
             {

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-04-01T14:23:47.659035+00:00",
-  "current_scene": "exp_fase_7",
+  "updated_at": "2026-04-07T00:59:58.298201+00:00",
+  "current_scene": "level_2",
   "lives": {
     "current": 10,
     "max": 10

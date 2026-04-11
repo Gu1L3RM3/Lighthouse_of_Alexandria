@@ -23,9 +23,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "bottom",
                     "down",
+                    "bottom",
+                    "up",
                     "top"
                 ]
             },
@@ -53,8 +53,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "down"
+                    "down",
+                    "right"
                 ]
             },
             {
@@ -115,9 +115,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "bottom",
                     "down",
+                    "bottom",
+                    "up",
                     "top"
                 ]
             },
@@ -151,9 +151,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "bottom",
                     "down",
+                    "bottom",
+                    "up",
                     "top"
                 ]
             },
@@ -181,9 +181,9 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "right",
-                    "left",
-                    "down"
+                    "left"
                 ]
             },
             {
@@ -210,9 +210,9 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "right",
-                    "left",
-                    "down"
+                    "left"
                 ]
             },
             {
@@ -239,8 +239,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "down"
+                    "down",
+                    "left"
                 ]
             },
             {
@@ -267,8 +267,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "up"
+                    "up",
+                    "left"
                 ]
             },
             {
@@ -296,8 +296,8 @@
                 "type": "Connectable",
                 "connections": [
                     "right",
-                    "left",
-                    "up"
+                    "up",
+                    "left"
                 ]
             },
             {
@@ -324,10 +324,10 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "right",
-                    "left",
                     "up",
-                    "down"
+                    "left"
                 ]
             },
             {
@@ -746,13 +746,49 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "top"
+                    "top",
+                    "up"
                 ]
             },
             {
                 "type": "Dropped",
                 "can_dropped": false
+            }
+        ]
+    },
+    {
+        "entity_type": "Resistor",
+        "components": [
+            {
+                "type": "Position",
+                "x": 704.0,
+                "y": 384.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/resistor.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 90.0
+            },
+            {
+                "type": "LabelComponent",
+                "font_path": "PressStart2P-Regular.ttf",
+                "name": "R3",
+                "value": "1.5k"
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "top",
+                    "down",
+                    "bottom",
+                    "up"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
             }
         ]
     }

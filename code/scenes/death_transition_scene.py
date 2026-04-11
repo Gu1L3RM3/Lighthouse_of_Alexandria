@@ -118,7 +118,7 @@ class DeathTransitionScene(BaseScene):
         self.screen.blit(board, panel.topleft)
 
         title = "GAME OVER" if self.is_game_over else "TENTATIVA PERDIDA"
-        subtitle = "A jornada recomeca na casa." if self.is_game_over else "Respire e tente novamente."
+        subtitle = "As sombras vencem por ora; voltamos ao inicio da jornada para tentar de novo." if self.is_game_over else "Respire e tente novamente."
         title_color = (244, 132, 98) if self.is_game_over else (245, 214, 132)
         title_surf = self.title_font.render(title, True, title_color)
         sub_surf = self.small_font.render(subtitle, True, (215, 196, 151))

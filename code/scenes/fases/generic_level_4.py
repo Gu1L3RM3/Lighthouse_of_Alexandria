@@ -36,6 +36,8 @@ class GenericLevel4(BaseGenericLevel):
         self.event_manager.post({'type': 'set_solutions'})
 
     def end(self):
+        if self._should_skip_progress_reset_on_end():
+            return
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels()

@@ -90,17 +90,23 @@ class ResistorPairValidatorSystem(System):
 
             resistors_list = resistors_per_area[area]
             resistor_chosen = choice(resistors_list)
-            resistors_list.remove(resistor_chosen)
 
-            netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
-
-            # Sempre substituimos o componente R3 pelo valor escolhido aleatoriamente.
-            # O circuito de solucao usa o R3 como "resistor secreto" que o jogador precisa descobrir.
-            SerializationManager.update_component_value(
-                netlist_path,
-                "R3",
-                resistor_chosen
-            )
+            # Prioriza o netlist jogavel do painel para calcular gabarito.
+            # Se ele nao tiver R3 (alguns paineis antigos), faz fallback para _solution.
+            netlist_path = str(self._panel_net_path(control_pannel.pannel_id))
+            try:
+                SerializationManager.update_component_value(
+                    netlist_path,
+                    "R3",
+                    resistor_chosen
+                )
+            except Exception:
+                netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
+                SerializationManager.update_component_value(
+                    netlist_path,
+                    "R3",
+                    resistor_chosen
+                )
 
             solver = CircuitSolver(netlist_path)
             if not solver.is_solved:
@@ -190,8 +196,10 @@ class ResistorPairValidatorSystem(System):
                 measured_values[r_name] = answer
 
                 if not self._float_equals_percent(answer, expected_value, self.tolerance_percent):
-                    all_ok = False
-                    break
+                    # Corrige casos de orientacao onde apenas o sinal muda.
+                    if not self._float_equals_percent(abs(answer), abs(expected_value), self.tolerance_percent):
+                        all_ok = False
+                        break
 
             if all_ok:
                 self._set_panel_status(

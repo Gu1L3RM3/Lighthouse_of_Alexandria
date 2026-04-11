@@ -41,6 +41,49 @@ class CircuitValidatorSystem(System):
     def _panel_asc_path(self, panel_id: int, suffix: str = ""):
         return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
 
+    def _list_resistor_names_in_netlist(self, netlist_path: str) -> list[str]:
+        resistor_names: list[str] = []
+        try:
+            with open(netlist_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith(("*", ".")):
+                        continue
+                    parts = stripped.split()
+                    if not parts:
+                        continue
+                    if parts[0].lower().startswith("r"):
+                        resistor_names.append(parts[0])
+        except Exception:
+            return []
+        return resistor_names
+
+    def _get_unique_resistor_name(self, resistor_results: dict) -> str | None:
+        names = [name for name in resistor_results.keys()]
+        if len(names) != 1:
+            return None
+        return names[0]
+
+    def _get_target_measurement(
+        self,
+        resistor_results: dict,
+        target_component: str,
+        solution_type: str,
+    ) -> float | None:
+        component_data = resistor_results.get(target_component)
+        if component_data is None:
+            return None
+
+        metric_data = component_data.get(solution_type)
+        if metric_data is None:
+            return None
+
+        value = metric_data.get("value")
+        if value is None:
+            return None
+
+        return float(value)
+
     def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
         for suffix in ("", "_solution"):
             json_path = self._panel_json_path(panel_id, suffix)
@@ -74,33 +117,76 @@ class CircuitValidatorSystem(System):
                     f"Nenhum resistor disponÃ­vel para a Ã¡rea {area} (painel {control_pannel.pannel_id})"
                 )
 
-            resistors_list  = resistors_per_area[area]
-            resistor_chosen = choice(resistors_list)
-            resistors_list.remove(resistor_chosen)
-
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
 
             netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
+            resistor_names_in_solution = self._list_resistor_names_in_netlist(netlist_path)
+            if len(resistor_names_in_solution) != 1:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "invalid_resistor_count",
+                    (
+                        f"esperado=1 encontrado={len(resistor_names_in_solution)} "
+                        "no circuito de solucao"
+                    ),
+                )
+                continue
 
-            SerializationManager.update_component_value(
-                netlist_path,
-                target_component,
-                resistor_chosen
-            )
+            target_component = resistor_names_in_solution[0]
+            resistors_list = resistors_per_area[area]
+            resistor_chosen = choice(resistors_list)
+            resistors_list.remove(resistor_chosen)
+
+            try:
+                SerializationManager.update_component_value(
+                    netlist_path,
+                    target_component,
+                    resistor_chosen
+                )
+            except Exception as ex:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "missing_target_component",
+                    f"falha ao atualizar resistor da solucao: {ex}",
+                )
+                continue
 
             circuit_solver = CircuitSolver(netlist_path)
             resistor_results = circuit_solver.get_resistor_results()
+            unique_resistor_name = self._get_unique_resistor_name(resistor_results)
+            if unique_resistor_name is None:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "invalid_resistor_count",
+                    (
+                        f"esperado=1 encontrado={len(resistor_results)} "
+                        "na leitura da solucao"
+                    ),
+                )
+                continue
 
-            new_solution_value = float(
-                resistor_results[target_component][solution_type]['value']
+            new_solution_value = self._get_target_measurement(
+                resistor_results,
+                unique_resistor_name,
+                solution_type,
             )
+            if new_solution_value is None:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "missing_target_component",
+                    (
+                        f"alvo={unique_resistor_name} tipo={solution_type} "
+                        "nao encontrado no circuito de solucao"
+                    ),
+                )
+                continue
 
 
             control_pannel.solution_value = new_solution_value
             self._log(
                 f"GABARITO panel={control_pannel.pannel_id} area={area} "
-                f"alvo={target_component}.{solution_type}="
+                f"alvo={unique_resistor_name}.{solution_type}="
                 f"{new_solution_value:.6g} (R_escolhido={resistor_chosen})"
             )
         self.event_manager.post({'type':'solutions_done'})
@@ -133,8 +219,41 @@ class CircuitValidatorSystem(System):
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
             solution_value   = control_pannel.solution_value
+            if solution_value is None:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "waiting_solution_value",
+                    "painel sem gabarito valido",
+                )
+                continue
 
-            answer = float(resistor_results[target_component][solution_type]['value'])
+            unique_resistor_name = self._get_unique_resistor_name(resistor_results)
+            if unique_resistor_name is None:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "invalid_resistor_count",
+                    (
+                        f"esperado=1 encontrado={len(resistor_results)} "
+                        "no circuito do jogador"
+                    ),
+                )
+                continue
+
+            answer = self._get_target_measurement(
+                resistor_results,
+                unique_resistor_name,
+                solution_type,
+            )
+            if answer is None:
+                self._set_panel_status(
+                    int(control_pannel.pannel_id),
+                    "missing_target_component",
+                    (
+                        f"alvo={unique_resistor_name} tipo={solution_type} "
+                        "nao encontrado no circuito do jogador"
+                    ),
+                )
+                continue
         
             tolerance_percent = 2 
             is_correct_answer = self._float_equals_percent(answer,solution_value,tolerance_percent)

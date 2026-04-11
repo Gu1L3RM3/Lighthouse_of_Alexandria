@@ -23,8 +23,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -57,8 +57,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -92,8 +92,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "top",
-                    "bottom"
+                    "bottom",
+                    "top"
                 ]
             },
             {
@@ -127,8 +127,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "top",
-                    "bottom"
+                    "bottom",
+                    "top"
                 ]
             },
             {
@@ -162,8 +162,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "top",
-                    "bottom"
+                    "bottom",
+                    "top"
                 ]
             },
             {
@@ -218,8 +218,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "up"
+                    "up",
+                    "left"
                 ]
             },
             {
@@ -247,9 +247,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "left",
                     "right",
-                    "up"
+                    "up",
+                    "left"
                 ]
             },
             {
@@ -304,9 +304,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
                     "right",
-                    "up"
+                    "up",
+                    "left"
                 ]
             },
             {
@@ -334,9 +334,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "left",
+                    "right",
                     "up",
-                    "right"
+                    "left"
                 ]
             },
             {
@@ -391,8 +391,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -419,8 +419,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -447,8 +447,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -475,8 +475,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -503,8 +503,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -531,8 +531,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -559,8 +559,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -587,8 +587,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -615,8 +615,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -643,8 +643,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -758,8 +758,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -787,9 +787,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -873,9 +873,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -909,6 +909,40 @@
             {
                 "type": "Dropped",
                 "can_dropped": false
+            }
+        ]
+    },
+    {
+        "entity_type": "Resistor",
+        "components": [
+            {
+                "type": "Position",
+                "x": 384.0,
+                "y": 256.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/resistor.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 0.0
+            },
+            {
+                "type": "LabelComponent",
+                "font_path": "PressStart2P-Regular.ttf",
+                "name": "R3",
+                "value": "270k"
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "right",
+                    "left"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
             }
         ]
     }

@@ -31,6 +31,8 @@ class GenericLevel3(BaseGenericLevel):
             self.old_paper.on_active()
 
     def end(self):
+        if self._should_skip_progress_reset_on_end():
+            return
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels_json()
@@ -104,11 +106,13 @@ class GenericLevel3(BaseGenericLevel):
         dialogue_area :DialogueArea = dialogues[0]
         
         for pannel in pannels:
+            if pannel.solution_value is None:
+                continue
             st = pannel.solution_type
             if st == "voltage":
-                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor {pannel.target_component} deve ter tensão próxima de {SetterValues.format_eng(pannel.solution_value,'V')}")
+                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor do circuito deve ter tensão próxima de {SetterValues.format_eng(pannel.solution_value,'V')}")
             elif st == "power":
-                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor {pannel.target_component} deve ter potência próxima de {SetterValues.format_eng(pannel.solution_value,'W')}")
+                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor do circuito deve ter potência próxima de {SetterValues.format_eng(pannel.solution_value,'W')}")
             elif st == "current":
-                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor {pannel.target_component} deve ter corrente próxima de {SetterValues.format_eng(pannel.solution_value,'A')}")
+                text_list.append(f"Arquimedes: Para ativar o painel {pannel.pannel_id} o resistor do circuito deve ter corrente próxima de {SetterValues.format_eng(pannel.solution_value,'A')}")
         dialogue_area.add_dialogue_text(text_list)

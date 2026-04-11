@@ -26,7 +26,10 @@ class GenericLevel5(BaseGenericLevel):
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
         self.player_dead_by_enemy = False
+        self.phantom_ai_system.set_touch_triggered(False)
         if self.can_reset_pannels:
+            self._reset_panels_runtime_state()
+            self.circuit_manager.clear_phase(self.level_path)
             self.clear_all_pannels_json()
             self.can_reset_pannels = False
         self.set_subscribes()
@@ -37,6 +40,8 @@ class GenericLevel5(BaseGenericLevel):
             self.old_paper.on_active()
 
     def end(self):
+        if self._should_skip_progress_reset_on_end():
+            return
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels_json()

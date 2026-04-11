@@ -23,10 +23,10 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "down",
+                    "bottom",
                     "top",
-                    "bottom"
+                    "down",
+                    "up"
                 ]
             },
             {
@@ -73,7 +73,7 @@
             },
             {
                 "type": "Sprite",
-                "image_path": "eletric_components/node/node_left_bottom.png",
+                "image_path": "eletric_components/node/node_left.png",
                 "offset_x": 0,
                 "offset_y": 0,
                 "angle": 0.0
@@ -81,7 +81,6 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
                     "left"
                 ]
             },
@@ -101,7 +100,7 @@
             },
             {
                 "type": "Sprite",
-                "image_path": "eletric_components/node/node_left_top.png",
+                "image_path": "eletric_components/node/node_left.png",
                 "offset_x": 0,
                 "offset_y": 0,
                 "angle": 0.0
@@ -109,7 +108,6 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
                     "left"
                 ]
             },
@@ -138,8 +136,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -166,8 +164,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -194,8 +192,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -222,8 +220,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "right"
+                    "right",
+                    "up"
                 ]
             },
             {
@@ -250,8 +248,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -278,8 +276,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -306,8 +304,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left",
-                    "right"
+                    "right",
+                    "left"
                 ]
             },
             {
@@ -334,8 +332,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "top"
+                    "top",
+                    "up"
                 ]
             },
             {

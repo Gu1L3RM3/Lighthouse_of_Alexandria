@@ -1,6 +1,7 @@
 from core.managers.life_manager import LifeManager
 from core.managers.scene_manager import SceneManager
 from core.managers.scene_factory import SceneFactory
+from core.managers.save_game_manager import SaveGameManager
 
 
 class DeathFlowManager:
@@ -10,6 +11,7 @@ class DeathFlowManager:
         self.life_manager = LifeManager.get()
         self.scene_manager = SceneManager.get()
         self.scene_factory = SceneFactory.get()
+        self.save_manager = SaveGameManager.get()
         self.death_scene_name = "death_transition"
         self.game_over_return_scene = "level_2"
         self.death_context: dict | None = None
@@ -40,6 +42,19 @@ class DeathFlowManager:
             "is_game_over": is_game_over,
             "return_scene_name": self.scene_manager.active_scene_name,
         }
+        # Mantem o save coerente mesmo se o jogador fechar o jogo na transicao.
+        if is_game_over:
+            self.save_manager.autosave_scene(
+                self.game_over_return_scene,
+                current_lives=self.life_manager.max_lives,
+                max_lives=self.life_manager.max_lives,
+            )
+        else:
+            self.save_manager.autosave_scene(
+                self.scene_manager.active_scene_name,
+                current_lives=lives_after,
+                max_lives=self.life_manager.max_lives,
+            )
         self.scene_manager.start_fade(self.death_scene_name, duration)
 
     def get_death_context(self) -> dict | None:
@@ -56,7 +71,17 @@ class DeathFlowManager:
         if context["is_game_over"]:
             self.life_manager.reset_lives()
             self.scene_manager.resume_scene_name = None
-            self.scene_manager.start_fade(self.game_over_return_scene, duration)
+            if self.game_over_return_scene not in self.scene_manager.scenes:
+                self.scene_manager.start_fade(self.game_over_return_scene, duration)
+                return
+            fresh_scene = self.scene_factory.recreate(
+                self.scene_manager.scenes[self.game_over_return_scene]
+            )
+            self.scene_manager.replace_scene_and_fade(
+                self.game_over_return_scene,
+                fresh_scene,
+                duration,
+            )
             return
 
         return_scene_name = context["return_scene_name"]

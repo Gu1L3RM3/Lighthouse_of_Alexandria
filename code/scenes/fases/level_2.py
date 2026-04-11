@@ -137,8 +137,14 @@ class Level2(BaseScene):
 
         
     def start(self):
+        # SceneManager limpa os eventos a cada transicao.
+        # Ao reentrar na cena, precisamos reinscrever handlers.
+        self._events_bound = False
         self.event_manager.post({'type':'release_freeze'})
         self.set_subscribes()
+
+    def end(self):
+        self._events_bound = False
 
     def set_subscribes(self):
         if self._events_bound:

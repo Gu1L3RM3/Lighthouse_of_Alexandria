@@ -47,6 +47,8 @@ class GenericLevel6(BaseGenericLevel):
         self.phantom_ai_system.set_touch_triggered(False)
         self.enemy_touch_game_over_system.triggered = False
         if self.can_reset_pannels:
+            self._reset_panels_runtime_state()
+            self.circuit_manager.clear_phase(self.level_path)
             self.clear_all_pannels_json()
             self.can_reset_pannels = False
 
@@ -131,6 +133,8 @@ class GenericLevel6(BaseGenericLevel):
         })
 
     def end(self):
+        if self._should_skip_progress_reset_on_end():
+            return
         self.storage_circuit.remove_all_components()
         self.storage_circuit.save_eletric_storage()
         self.clear_all_pannels_json()

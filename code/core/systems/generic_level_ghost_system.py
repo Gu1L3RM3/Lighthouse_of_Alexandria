@@ -117,6 +117,26 @@ class GenericLevelGhostSystem(System):
     ):
         spawn_key = self.scene._ghost_entity_to_spawn_key.pop(entity_id, None)
         if spawn_key is None:
+            for key, template in self.scene._ghost_spawn_templates.items():
+                if template.get("active_entity_id") == entity_id:
+                    spawn_key = key
+                    break
+        if spawn_key is None and death_x is not None and death_y is not None:
+            # Fallback: se o vinculo foi perdido por alguma transicao de cena,
+            # escolhe o spawn de fantasma mais proximo da morte.
+            nearest_key = None
+            nearest_dist = None
+            for key, template in self.scene._ghost_spawn_templates.items():
+                if template.get("pending_respawn", False):
+                    continue
+                tx = float(template.get("x", 0.0))
+                ty = float(template.get("y", 0.0))
+                dist_sq = ((float(death_x) - tx) ** 2) + ((float(death_y) - ty) ** 2)
+                if nearest_key is None or dist_sq < nearest_dist:
+                    nearest_key = key
+                    nearest_dist = dist_sq
+            spawn_key = nearest_key
+        if spawn_key is None:
             return
         template = self.scene._ghost_spawn_templates.get(spawn_key)
         if not template:
@@ -203,4 +223,3 @@ class GenericLevelGhostSystem(System):
             )
             self.scene.audio_manager.play_sfx("sfx/light_on.wav", volume=0.82)
         self.scene.ghost_rebirth_effects = still_animating
-
