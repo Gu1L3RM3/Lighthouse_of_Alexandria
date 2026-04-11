@@ -35,6 +35,9 @@ class TheveninNortonValidatorSystem(System):
         self.tolerance_percent = tolerance_percent
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
+        self._validation_interval = 0.20
+        self._validation_acc = 0.0
+        self._panel_rr_index = 0
 
         self.debug_panel_logs = True
         self.runtime_status_logs = False
@@ -748,10 +751,23 @@ class TheveninNortonValidatorSystem(System):
             self._set_panel_status(cp.pannel_id, reason or "validation_failed")
 
     def update(self, entity_mn, dt):
-        _ = dt
+        self._validation_acc += max(0.0, float(dt))
+        if self._validation_acc < self._validation_interval:
+            return
+        self._validation_acc = 0.0
+
         panels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
-        for cp in panels:
-            self._validate_panel_runtime(cp)
+        candidates = [cp for cp in panels if cp.active and not cp.done]
+        if not candidates:
+            self._panel_rr_index = 0
+            return
+
+        if self._panel_rr_index >= len(candidates):
+            self._panel_rr_index = 0
+
+        cp = candidates[self._panel_rr_index]
+        self._panel_rr_index = (self._panel_rr_index + 1) % len(candidates)
+        self._validate_panel_runtime(cp)
 
 
 

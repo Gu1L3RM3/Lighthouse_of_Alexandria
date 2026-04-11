@@ -17,6 +17,9 @@ class ResistorPairValidatorSystem(System):
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
+        self._validation_interval = 0.12
+        self._validation_acc = 0.0
+        self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
 
@@ -153,70 +156,82 @@ class ResistorPairValidatorSystem(System):
         self.event_manager.post({"type": "solutions_done"})
 
     def update(self, entity_mn, dt):
+        self._validation_acc += max(0.0, float(dt))
+        if self._validation_acc < self._validation_interval:
+            return
+        self._validation_acc = 0.0
+
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
+        for done_panel in control_pannels:
+            if done_panel.done:
+                self._set_panel_status(int(done_panel.pannel_id), "already_done")
 
-        for control_pannel in control_pannels:
-            if control_pannel.done:
-                self._set_panel_status(int(control_pannel.pannel_id), "already_done")
-                continue
+        candidates = [cp for cp in control_pannels if not cp.done]
+        if not candidates:
+            self._panel_rr_index = 0
+            return
 
-            solution_values = control_pannel.solution_value
-            if not isinstance(solution_values, dict) or not solution_values:
-                self._set_panel_status(int(control_pannel.pannel_id), "waiting_solution")
-                continue
+        if self._panel_rr_index >= len(candidates):
+            self._panel_rr_index = 0
+        control_pannel = candidates[self._panel_rr_index]
+        self._panel_rr_index = (self._panel_rr_index + 1) % len(candidates)
 
-            solution_type = control_pannel.solution_type
-            if solution_type not in ("current", "voltage"):
-                self._set_panel_status(int(control_pannel.pannel_id), "invalid_solution_type")
-                continue
+        solution_values = control_pannel.solution_value
+        if not isinstance(solution_values, dict) or not solution_values:
+            self._set_panel_status(int(control_pannel.pannel_id), "waiting_solution")
+            return
 
-            circuit_data = self.circuit_manager.get_circuit_values(control_pannel.name_file)
-            if not circuit_data:
-                self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
-                continue
+        solution_type = control_pannel.solution_type
+        if solution_type not in ("current", "voltage"):
+            self._set_panel_status(int(control_pannel.pannel_id), "invalid_solution_type")
+            return
 
-            all_ok = True
-            measured_values: dict[str, float] = {}
+        circuit_data = self.circuit_manager.get_circuit_values(control_pannel.name_file)
+        if not circuit_data:
+            self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
+            return
 
-            for r_name, expected_value in solution_values.items():
-                res_entry = circuit_data.get(r_name)
-                if not res_entry:
+        all_ok = True
+        measured_values: dict[str, float] = {}
+
+        for r_name, expected_value in solution_values.items():
+            res_entry = circuit_data.get(r_name)
+            if not res_entry:
+                all_ok = False
+                break
+
+            if solution_type not in res_entry:
+                all_ok = False
+                break
+
+            try:
+                answer = float(res_entry[solution_type]["value"])
+            except Exception:
+                all_ok = False
+                break
+            measured_values[r_name] = answer
+
+            if not self._float_equals_percent(answer, expected_value, self.tolerance_percent):
+                if not self._float_equals_percent(abs(answer), abs(expected_value), self.tolerance_percent):
                     all_ok = False
                     break
 
-                if solution_type not in res_entry:
-                    all_ok = False
-                    break
-
-                try:
-                    answer = float(res_entry[solution_type]["value"])
-                except Exception:
-                    all_ok = False
-                    break
-                measured_values[r_name] = answer
-
-                if not self._float_equals_percent(answer, expected_value, self.tolerance_percent):
-                    # Corrige casos de orientacao onde apenas o sinal muda.
-                    if not self._float_equals_percent(abs(answer), abs(expected_value), self.tolerance_percent):
-                        all_ok = False
-                        break
-
-            if all_ok:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "solved",
-                    (
-                        f"medido={measured_values} esperado={solution_values} "
-                        f"tipo={solution_type} tol={self.tolerance_percent}%"
-                    ),
-                )
-                control_pannel.action()
-            else:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "wrong_answer",
-                    (
-                        f"medido={measured_values} esperado={solution_values} "
-                        f"tipo={solution_type} tol={self.tolerance_percent}%"
-                    ),
-                )
+        if all_ok:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "solved",
+                (
+                    f"medido={measured_values} esperado={solution_values} "
+                    f"tipo={solution_type} tol={self.tolerance_percent}%"
+                ),
+            )
+            control_pannel.action()
+        else:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "wrong_answer",
+                (
+                    f"medido={measured_values} esperado={solution_values} "
+                    f"tipo={solution_type} tol={self.tolerance_percent}%"
+                ),
+            )

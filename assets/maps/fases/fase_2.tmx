@@ -90,7 +90,7 @@ Arquimedes: Por sorte, conseguimos prendê-lo!;
 Arquimedes: Antes de mais nada, que tal dar uma olhada neste circuito, hein?</property>
    </properties>
   </object>
-  <object id="22" name="dialog_2" x="220" y="322.667" width="61.3333" height="66">
+  <object id="22" name="dialog_2" x="200" y="295.667" width="81.3333" height="148">
    <properties>
     <property name="active_status" type="bool" value="false"/>
     <property name="dialogo" value="Hmmm;Que interessante!;É o que eu vi nas aulas!;O circuito possui uma bateria, um resistor e uma lampada;Vejo que quando o eletron passa pela lâmpada, ela ascende;A , e os elétrons aceleram quando passam pela bateria; E desaceleram quando passam pelo resistor e pela lâmpada;Outro fato é que o sentido da corrente é a convencional, ou seja, o fluxo de energia vai do positivo da bateria para o negativo dela.Interessante!;Ok, vamos ver o que ele tem a me ensinar."/>

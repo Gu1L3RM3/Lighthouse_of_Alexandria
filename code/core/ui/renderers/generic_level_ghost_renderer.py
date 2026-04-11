@@ -35,4 +35,3 @@ class GenericLevelGhostRenderer:
                 overlay,
                 (center[0] - overlay.get_width() // 2, center[1] - overlay.get_height() // 2),
             )
-

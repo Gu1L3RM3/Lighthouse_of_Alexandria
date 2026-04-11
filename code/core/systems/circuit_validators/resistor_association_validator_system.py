@@ -23,6 +23,9 @@ class ResistorAssotiationValidatorSystem(System):
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = 2.0
+        self._validation_interval = 0.12
+        self._validation_acc = 0.0
+        self._panel_rr_index = 0
 
         self.serialization_manager = SerializationManager()
         self.serialization_manager.base_path = Path(CIRCUITOS_DIR)
@@ -255,27 +258,32 @@ class ResistorAssotiationValidatorSystem(System):
         """
         Compara o Req do jogador com o solution_value calculado em set_solutions.
         """
+        self._validation_acc += max(0.0, float(dt))
+        if self._validation_acc < self._validation_interval:
+            return
+        self._validation_acc = 0.0
+
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
+        candidates = [cp for cp in control_pannels if not cp.done and cp.solution_value is not None]
+        if not candidates:
+            self._panel_rr_index = 0
+            return
 
-        for control_pannel in control_pannels:
-            if control_pannel.done:
-                continue
+        if self._panel_rr_index >= len(candidates):
+            self._panel_rr_index = 0
+        control_pannel = candidates[self._panel_rr_index]
+        self._panel_rr_index = (self._panel_rr_index + 1) % len(candidates)
 
-            target_req = control_pannel.solution_value
-            if target_req is None:
-                continue
+        circuit_data = self.circuit_manager.get_total_values(control_pannel.name_file)
+        if not circuit_data:
+            return
 
-            circuit_data = self.circuit_manager.get_total_values(control_pannel.name_file)
-            if not circuit_data:
-                continue
+        req_player = circuit_data.get("resistance", None)
+        if req_player is None:
+            return
 
-            req_player = circuit_data.get("resistance", None)
-            if req_player is None:
-                continue
-
-            answer = float(req_player["value"])
-
-            is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
-
-            if is_correct:
-                control_pannel.action()
+        answer = float(req_player["value"])
+        target_req = float(control_pannel.solution_value)
+        is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
+        if is_correct:
+            control_pannel.action()

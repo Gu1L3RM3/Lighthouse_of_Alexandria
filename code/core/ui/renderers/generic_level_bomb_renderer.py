@@ -125,4 +125,3 @@ class GenericLevelBombRenderer:
             by = world_center[1] - max(14, int(16 * scene.scale))
             pygame.draw.rect(scene.screen, (20, 20, 20), pygame.Rect(bx, by, bar_w, bar_h))
             pygame.draw.rect(scene.screen, (255, 196, 96), pygame.Rect(bx, by, int(bar_w * ratio), bar_h))
-

@@ -17,16 +17,16 @@ class TileMapLoader:
         rel_path = tmx_filename.replace('fases/', '').replace('.tmx', '')
         tilemap.tmx_file = rel_path
 
-        ground_surface = pygame.Surface((tilemap.map_width, tilemap.map_height)).convert_alpha()
-        ground_surface.fill((0, 0, 0, 0))
-
-        for layer in self._iter_visible_layers(tmx_data, ("ground", "ground2","ground3"), pytmx.TiledTileLayer):
-            for x, y, gid in layer:
-                img = tmx_data.get_tile_image_by_gid(gid)
-                if img:
-                    ground_surface.blit(img, (x * tilemap.tile_width, y * tilemap.tile_height))
-
-        tilemap.ground_surface = ground_surface
+        tilemap.ground_surface = self._build_surface_for_layers(
+            tmx_data, tilemap, ("ground", "ground2", "ground3")
+        )
+        tilemap.object_surface = self._build_surface_for_layers(
+            tmx_data, tilemap, ("obj",)
+        )
+        tilemap.foreground_surface = self._build_surface_for_layers(
+            tmx_data, tilemap, ("obj2",)
+        )
+        tilemap.solid_colliders = self._collect_tile_colliders(tmx_data, tilemap, ("obj", "obj2"))
 
 
 
@@ -52,3 +52,37 @@ class TileMapLoader:
         for layer in self._iter_layers(tmx_data, names, layer_type):
             if getattr(layer, "visible", True):
                 yield layer
+
+    def _build_surface_for_layers(
+        self,
+        tmx_data: pytmx.TiledMap,
+        tilemap: TileMap,
+        layer_names: tuple[str, ...],
+    ) -> pygame.Surface:
+        surface = pygame.Surface((tilemap.map_width, tilemap.map_height)).convert_alpha()
+        surface.fill((0, 0, 0, 0))
+
+        for layer in self._iter_visible_layers(tmx_data, layer_names, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                if not isinstance(gid, int) or gid == 0:
+                    continue
+                img = tmx_data.get_tile_image_by_gid(gid)
+                if img:
+                    surface.blit(img, (x * tilemap.tile_width, y * tilemap.tile_height))
+        return surface
+
+    def _collect_tile_colliders(
+        self,
+        tmx_data: pytmx.TiledMap,
+        tilemap: TileMap,
+        layer_names: tuple[str, ...],
+    ) -> list[pygame.Rect]:
+        occupied_cells: set[tuple[int, int]] = set()
+        for layer in self._iter_visible_layers(tmx_data, layer_names, pytmx.TiledTileLayer):
+            for x, y, gid in layer:
+                if isinstance(gid, int) and gid != 0:
+                    occupied_cells.add((x, y))
+
+        tw = tilemap.tile_width
+        th = tilemap.tile_height
+        return [pygame.Rect(x * tw, y * th, tw, th) for (x, y) in occupied_cells]

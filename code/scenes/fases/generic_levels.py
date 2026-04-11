@@ -199,9 +199,10 @@ class BaseGenericLevel(BaseScene):
         return frames
 
     def set_map(self):
-        spawner = MapEntitySpawner()
+        spawner = MapEntitySpawner(spawn_tile_layer_entities=False)
         spawner.spawn_entities(self.tile_map, self.entity_mn)
         self.player = self.entity_mn.get_player()
+        self.physics_system.set_external_static_colliders(self.tile_map.solid_colliders)
         self.physics_system.cache_static_colliders(self.entity_mn)
         self._capture_initial_ghost_spawn_templates()
 
@@ -458,6 +459,7 @@ class BaseGenericLevel(BaseScene):
         self.screen.fill(BLACK)
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
+        self.map_renderer.draw_foreground()
         self.bomb_renderer.draw_pending_bombs(self)
         self.bomb_renderer.draw_active_explosions(self, self._last_frame_dt)
         self.ghost_renderer.draw_rebirth_effects(self)

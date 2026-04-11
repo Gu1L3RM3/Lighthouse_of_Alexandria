@@ -30,8 +30,10 @@ class EventManager:
         if isinstance(events, list):
             for e in events:
                 name = pygame.event.event_name(e.type)
-                for listener in self._listeners.get(name, []):
+                listeners = tuple(self._listeners.get(name, ()))
+                for listener in listeners:
                     listener(e)
         elif isinstance(events, dict) and 'type' in events:
-            for listener in self._listeners.get(events['type'], []):
+            listeners = tuple(self._listeners.get(events['type'], ()))
+            for listener in listeners:
                 listener(events)

@@ -11,6 +11,8 @@ class FPSWidget(Widget):
         self.color = color
         
         self.display_fps = 0
+        self._cached_text_surface: Surface | None = None
+        self._cached_label: str = ""
 
         
         self._update_interval = 0.5 
@@ -32,7 +34,11 @@ class FPSWidget(Widget):
             self._frame_count = 0
 
     def draw(self,screen:Surface):
-        text_surface = self.font.render(f"FPS: {int(self.display_fps)}", True, self.color)
+        label = f"FPS: {int(self.display_fps)}"
+        if self._cached_text_surface is None or label != self._cached_label:
+            self._cached_label = label
+            self._cached_text_surface = self.font.render(label, True, self.color)
+        text_surface = self._cached_text_surface
         
         bg_rect = text_surface.get_rect()
         bg_rect.topleft = self.pos

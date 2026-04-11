@@ -1,3 +1,4 @@
+import pygame
 from pygame import Rect
 from core.ecs import Entity
 from entities.player import Player
@@ -12,6 +13,9 @@ from core.components.render_layer import RenderLayer
 from core.settings import FALL_GROUND_REQUIRED_PERCENT_INSIDE
 
 class FallGround(Entity):
+    _fall_cooldown_ms = 250
+    _last_fall_ms = -10_000
+
     def __init__(self, x, y):
         super().__init__()
         self.rm = ResourceManager.get()
@@ -27,6 +31,10 @@ class FallGround(Entity):
         )
 
     def _fall_player(self):
+        now_ms = pygame.time.get_ticks()
+        if now_ms - FallGround._last_fall_ms < FallGround._fall_cooldown_ms:
+            return
+        FallGround._last_fall_ms = now_ms
         EventManager.get().post({'type': 'fall_player'})
 
     def on_entered(self, entity: Entity):
@@ -57,8 +65,10 @@ class FallGround(Entity):
         percent_inside = (intersect_area / player_area) * 100
 
         if percent_inside >= FALL_GROUND_REQUIRED_PERCENT_INSIDE:
-            EventManager.get().post({'type': 'request_freeze', 'type_request': 'player fall'})
-            self._fall_player()
+            now_ms = pygame.time.get_ticks()
+            if now_ms - FallGround._last_fall_ms >= FallGround._fall_cooldown_ms:
+                EventManager.get().post({'type': 'request_freeze', 'type_request': 'player fall'})
+                self._fall_player()
             self.animate.play('broken')
             trigger = self.get(AreaTrigger)
             trigger.active = False

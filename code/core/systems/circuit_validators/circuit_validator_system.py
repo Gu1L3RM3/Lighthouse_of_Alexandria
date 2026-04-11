@@ -16,6 +16,9 @@ class CircuitValidatorSystem(System):
         self.level_path =  level_path
         self.circuit_manager = CircuitManager.get()
         self.event_manager   = EventManager.get()
+        self._validation_interval = 0.12
+        self._validation_acc = 0.0
+        self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
 
@@ -206,76 +209,90 @@ class CircuitValidatorSystem(System):
 
 
     def update(self, entity_mn, dt):
+        self._validation_acc += max(0.0, float(dt))
+        if self._validation_acc < self._validation_interval:
+            return
+        self._validation_acc = 0.0
+
         control_pannels: list[ControlPannel] = entity_mn.get_entities_by_class(ControlPannel)
-        for control_pannel in control_pannels:
-            if control_pannel.done:
-                self._set_panel_status(int(control_pannel.pannel_id), "already_done")
-                continue
-            resistor_results =  self.circuit_manager.get_circuit_values(control_pannel.name_file)
-            if not resistor_results:
-                self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
-                continue
+        for done_panel in control_pannels:
+            if done_panel.done:
+                self._set_panel_status(int(done_panel.pannel_id), "already_done")
 
-            target_component = control_pannel.target_component
-            solution_type    = control_pannel.solution_type
-            solution_value   = control_pannel.solution_value
-            if solution_value is None:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "waiting_solution_value",
-                    "painel sem gabarito valido",
-                )
-                continue
+        candidates = [cp for cp in control_pannels if not cp.done]
+        if not candidates:
+            self._panel_rr_index = 0
+            return
 
-            unique_resistor_name = self._get_unique_resistor_name(resistor_results)
-            if unique_resistor_name is None:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "invalid_resistor_count",
-                    (
-                        f"esperado=1 encontrado={len(resistor_results)} "
-                        "no circuito do jogador"
-                    ),
-                )
-                continue
+        if self._panel_rr_index >= len(candidates):
+            self._panel_rr_index = 0
+        control_pannel = candidates[self._panel_rr_index]
+        self._panel_rr_index = (self._panel_rr_index + 1) % len(candidates)
 
-            answer = self._get_target_measurement(
-                resistor_results,
-                unique_resistor_name,
-                solution_type,
+        resistor_results = self.circuit_manager.get_circuit_values(control_pannel.name_file)
+        if not resistor_results:
+            self._set_panel_status(int(control_pannel.pannel_id), "waiting_circuit_data")
+            return
+
+        solution_type = control_pannel.solution_type
+        solution_value = control_pannel.solution_value
+        if solution_value is None:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "waiting_solution_value",
+                "painel sem gabarito valido",
             )
-            if answer is None:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "missing_target_component",
-                    (
-                        f"alvo={unique_resistor_name} tipo={solution_type} "
-                        "nao encontrado no circuito do jogador"
-                    ),
-                )
-                continue
-        
-            tolerance_percent = 2 
-            is_correct_answer = self._float_equals_percent(answer,solution_value,tolerance_percent)
+            return
 
-            if  is_correct_answer:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "solved",
-                    (
-                        f"medido={answer:.6g} esperado={float(solution_value):.6g} "
-                        f"tipo={solution_type} tol={tolerance_percent}%"
-                    ),
-                )
-                control_pannel.action()
-            else:
-                self._set_panel_status(
-                    int(control_pannel.pannel_id),
-                    "wrong_answer",
-                    (
-                        f"medido={answer:.6g} esperado={float(solution_value):.6g} "
-                        f"tipo={solution_type} tol={tolerance_percent}%"
-                    ),
-                )
+        unique_resistor_name = self._get_unique_resistor_name(resistor_results)
+        if unique_resistor_name is None:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "invalid_resistor_count",
+                (
+                    f"esperado=1 encontrado={len(resistor_results)} "
+                    "no circuito do jogador"
+                ),
+            )
+            return
+
+        answer = self._get_target_measurement(
+            resistor_results,
+            unique_resistor_name,
+            solution_type,
+        )
+        if answer is None:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "missing_target_component",
+                (
+                    f"alvo={unique_resistor_name} tipo={solution_type} "
+                    "nao encontrado no circuito do jogador"
+                ),
+            )
+            return
+
+        tolerance_percent = 2
+        is_correct_answer = self._float_equals_percent(answer, solution_value, tolerance_percent)
+
+        if is_correct_answer:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "solved",
+                (
+                    f"medido={answer:.6g} esperado={float(solution_value):.6g} "
+                    f"tipo={solution_type} tol={tolerance_percent}%"
+                ),
+            )
+            control_pannel.action()
+        else:
+            self._set_panel_status(
+                int(control_pannel.pannel_id),
+                "wrong_answer",
+                (
+                    f"medido={answer:.6g} esperado={float(solution_value):.6g} "
+                    f"tipo={solution_type} tol={tolerance_percent}%"
+                ),
+            )
             
 

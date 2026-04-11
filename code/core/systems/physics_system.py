@@ -12,16 +12,21 @@ import pygame
 class PhysicsSystem(System):
     def __init__(self):
         self.static_colliders: List[pygame.Rect] = []
+        self.external_static_colliders: List[pygame.Rect] = []
+
+    def set_external_static_colliders(self, colliders: List[pygame.Rect]):
+        self.external_static_colliders = list(colliders)
 
     def cache_static_colliders(self, entity_mn: EntityManager):
         """Armazena os colisores estaticos (paredes/obstaculos fixos)."""
         collidable_entities = entity_mn.get_entities_with(
             Position, Collider, filter=lambda e: not e.has(Velocity)
         )
-        self.static_colliders = [
+        entity_colliders = [
             e.get(Collider).get_rect(e.get(Position).x, e.get(Position).y)
             for e in collidable_entities
         ]
+        self.static_colliders = [*entity_colliders, *self.external_static_colliders]
 
     def update(self, entity_mn: EntityManager, dt: float):
         """Atualiza posicao e colisoes das entidades em movimento."""

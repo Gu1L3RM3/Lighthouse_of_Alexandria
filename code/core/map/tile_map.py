@@ -15,7 +15,10 @@ class TileMap:
         self.waypoints:    dict[str, tuple[int, int]] = {}
 
         self.ground_surface: pygame.Surface | None = None
+        self.object_surface: pygame.Surface | None = None
+        self.foreground_surface: pygame.Surface | None = None
         self.solid_colliders: list[pygame.Rect] = []
+        self.draw_static_object_layers = True
         self.navgrid = NavGrid(self.tmx_data, self.tile_width, self.tile_height, walk_layer_name="ground2")
         self.pathfinder = PathFinder(self.navgrid)
 

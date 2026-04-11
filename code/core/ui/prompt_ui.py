@@ -1,5 +1,8 @@
 import pygame
 
+_ROW_CACHE: dict[tuple, pygame.Surface] = {}
+_ROW_CACHE_LIMIT = 256
+
 
 def get_prompt_style(label: str) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]:
     normalized = label.upper()
@@ -50,21 +53,51 @@ def draw_prompt_hint_row(
     align: str = "center",
     gap: int = 14,
 ):
-    prepared: list[tuple[str, object]] = []
-    total_width = 0
-    max_height = 0
+    normalized_items = tuple((str(button_label), str(description)) for button_label, description in items)
+    cache_key = (
+        id(chip_font),
+        id(text_font),
+        normalized_items,
+        int(gap),
+    )
+    row_surface = _ROW_CACHE.get(cache_key)
+    if row_surface is None:
+        prepared: list[tuple[str, object]] = []
+        total_width = 0
+        max_height = 0
 
-    for index, (button_label, description) in enumerate(items):
-        chip_w = max(34, chip_font.size(button_label)[0] + 18)
-        chip_h = max(24, chip_font.get_height() + 10)
-        text_surf = text_font.render(description, True, (176, 165, 136))
-        prepared.append(("chip", (button_label, chip_w, chip_h)))
-        prepared.append(("text", text_surf))
-        total_width += chip_w + 8 + text_surf.get_width()
-        max_height = max(max_height, chip_h, text_surf.get_height())
-        if index < len(items) - 1:
-            total_width += gap
+        for index, (button_label, description) in enumerate(normalized_items):
+            chip_w = max(34, chip_font.size(button_label)[0] + 18)
+            chip_h = max(24, chip_font.get_height() + 10)
+            text_surf = text_font.render(description, True, (176, 165, 136))
+            prepared.append(("chip", (button_label, chip_w, chip_h)))
+            prepared.append(("text", text_surf))
+            total_width += chip_w + 8 + text_surf.get_width()
+            max_height = max(max_height, chip_h, text_surf.get_height())
+            if index < len(normalized_items) - 1:
+                total_width += gap
 
+        row_surface = pygame.Surface((max(1, total_width), max(1, max_height)), pygame.SRCALPHA)
+        rx = 0
+        for idx, (kind, payload) in enumerate(prepared):
+            if kind == "chip":
+                button_label, chip_w, chip_h = payload
+                rect = pygame.Rect(rx, (max_height - chip_h) // 2, chip_w, chip_h)
+                draw_prompt_chip(row_surface, chip_font, button_label, rect)
+                rx += chip_w + 8
+            else:
+                text_surf = payload
+                row_surface.blit(text_surf, (rx, (max_height - text_surf.get_height()) // 2))
+                rx += text_surf.get_width()
+                if idx < len(prepared) - 1:
+                    rx += gap
+
+        if len(_ROW_CACHE) >= _ROW_CACHE_LIMIT:
+            _ROW_CACHE.clear()
+        _ROW_CACHE[cache_key] = row_surface
+
+    total_width = row_surface.get_width()
+    max_height = row_surface.get_height()
     if align == "center":
         x = anchor[0] - total_width // 2
     elif align == "right":
@@ -72,16 +105,4 @@ def draw_prompt_hint_row(
     else:
         x = anchor[0]
     y = anchor[1] - max_height // 2
-
-    for idx, (kind, payload) in enumerate(prepared):
-        if kind == "chip":
-            button_label, chip_w, chip_h = payload
-            rect = pygame.Rect(x, y + (max_height - chip_h) // 2, chip_w, chip_h)
-            draw_prompt_chip(surface, chip_font, button_label, rect)
-            x += chip_w + 8
-        else:
-            text_surf = payload
-            surface.blit(text_surf, (x, y + (max_height - text_surf.get_height()) // 2))
-            x += text_surf.get_width()
-            if idx < len(prepared) - 1:
-                x += gap
+    surface.blit(row_surface, (x, y))

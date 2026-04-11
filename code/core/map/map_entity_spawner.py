@@ -12,8 +12,9 @@ from typing                       import  Dict
 
 
 class MapEntitySpawner:
-    def __init__(self):
+    def __init__(self, spawn_tile_layer_entities: bool = True):
         self._spawners: Dict[str, EntitySpawner] = {}
+        self.spawn_tile_layer_entities = spawn_tile_layer_entities
         self._register_default_spawners()
 
     def _register_default_spawners(self):
@@ -32,12 +33,15 @@ class MapEntitySpawner:
         self._spawners[layer_name.lower()] = spawner
 
     def spawn_entities(self, tilemap: TileMap, entity_mn: EntityManager):
-        
-        for layer in tilemap.tmx_data.visible_layers:
-            if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj":
-                self._spawn_from_tile_layer(layer, tilemap, entity_mn)
-            if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj2":
-                self._spawn_from_tile_layer(layer, tilemap, entity_mn)
+        if self.spawn_tile_layer_entities:
+            tilemap.draw_static_object_layers = False
+            for layer in tilemap.tmx_data.visible_layers:
+                if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj":
+                    self._spawn_from_tile_layer(layer, tilemap, entity_mn)
+                if isinstance(layer, pytmx.TiledTileLayer) and layer.name and layer.name.lower() == "obj2":
+                    self._spawn_from_tile_layer(layer, tilemap, entity_mn)
+        else:
+            tilemap.draw_static_object_layers = True
 
         for layer in tilemap.tmx_data.objectgroups:
             layer_name = (layer.name or "").lower()
