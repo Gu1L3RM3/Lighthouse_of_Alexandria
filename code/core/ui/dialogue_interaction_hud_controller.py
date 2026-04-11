@@ -18,12 +18,16 @@ class DialogueInteractionHUDController:
         self.dialogue_system = dialogue_system
         self.widget = widget
 
-    def update(self, player, extra_interaction: bool = False):
+    def update(self, player, extra_interaction: bool = False, extra_prompt_label: str = "INTERAGIR"):
         if self.dialogue_system.active_dialogue:
             self.widget.set_visible(False)
             return
 
         has_dialogue_interaction = self._find_dialogue_interaction_target(player) is not None
+        if has_dialogue_interaction:
+            self.widget.set_prompt("interact", "CONVERSAR")
+        else:
+            self.widget.set_prompt("interact", extra_prompt_label)
         self.widget.set_visible(bool(extra_interaction or has_dialogue_interaction))
 
     def _find_dialogue_interaction_target(self, player):

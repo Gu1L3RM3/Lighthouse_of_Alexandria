@@ -1,17 +1,18 @@
 HELP_SECTIONS: list[dict[str, list[str] | str]] = [
     {
-        "title": "Controles Básicos",
+        "title": "Controles Basicos",
         "lines": [
-            "W A S D: movimentação do personagem.",
-            "E: interagir com portas, painéis e objetos próximos.",
-            "B: posicionar bomba (somente nas fases que utilizam bomba).",
+            "Teclado: W A S D movimenta o personagem. Controle: analogico esquerdo ou D-Pad.",
+            "Teclado: E interage com portas, paineis e objetos proximos. Controle: A.",
+            "Teclado: B posiciona bomba nas fases que usam nucleos. Controle: X.",
+            "Teclado: Esc abre o menu. Controle: Start.",
             "L: alterna a luz da fase (acende/apaga).",
         ],
     },
     {
         "title": "Objetivo do Jogo",
         "lines": [
-            "Explore o mapa, leia os diálogos e resolva os desafios elétricos.",
+            "Explore o mapa, leia os dialogos e resolva os desafios eletricos.",
             "Cada painel exige um circuito correto para liberar portas, luzes ou progresso.",
             "Use os itens coletados no mapa para montar o circuito correto no editor.",
         ],
@@ -19,32 +20,32 @@ HELP_SECTIONS: list[dict[str, list[str] | str]] = [
     {
         "title": "Como Abrir o Editor de Circuito",
         "lines": [
-            "Aproxime-se de um painel de controle e pressione E.",
-            "No desafio da bomba, use o botão NÚCLEO na interface da fase.",
+            "Aproxime-se de um painel de controle e pressione E no teclado ou A no controle.",
+            "No desafio da bomba, use o botao NUCLEO na interface da fase ou Y no controle.",
             "Ao abrir o editor, monte o circuito e clique em Solve para validar.",
         ],
     },
     {
-        "title": "Editor: Barra Superior (Botões)",
+        "title": "Editor: Barra Superior (Botoes)",
         "lines": [
-            "Node: adiciona um nó de conexão.",
-            "V Source: adiciona fonte de tensão (abre lista de valores disponíveis).",
-            "Resistor: adiciona resistor (abre lista de valores disponíveis).",
-            "I Source: adiciona fonte de corrente (abre lista de valores disponíveis).",
-            "GND: adiciona o terra (referência obrigatória em vários circuitos).",
+            "Node: adiciona um no de conexao.",
+            "V Source: adiciona fonte de tensao (abre lista de valores disponiveis).",
+            "Resistor: adiciona resistor (abre lista de valores disponiveis).",
+            "I Source: adiciona fonte de corrente (abre lista de valores disponiveis).",
+            "GND: adiciona o terra (referencia obrigatoria em varios circuitos).",
             "Wire: adiciona fio para conectar os componentes.",
             "X: salva e fecha o editor.",
         ],
     },
     {
-        "title": "Editor: Barra Lateral (Botões)",
+        "title": "Editor: Barra Lateral (Botoes)",
         "lines": [
-            "R: ferramenta de rotação do componente selecionado.",
-            "D: ferramenta de exclusão.",
-            "S: ferramenta de seleção.",
+            "R: ferramenta de rotacao do componente selecionado.",
+            "D: ferramenta de exclusao.",
+            "S: ferramenta de selecao.",
             "Solve: salva o circuito atual, gera a netlist e resolve o circuito.",
             "Load: carrega o circuito salvo no arquivo atual.",
-            "Clear: limpa os componentes editáveis.",
+            "Clear: limpa os componentes editaveis.",
         ],
     },
     {
@@ -63,18 +64,18 @@ HELP_SECTIONS: list[dict[str, list[str] | str]] = [
         "title": "Editor: Listas de Componentes (Resistor, V Source, I Source)",
         "lines": [
             "As listas podem ser roladas com a roda do mouse.",
-            "Também funcionam os atalhos: seta para cima/baixo.",
-            "PageUp e PageDown rolam mais rápido.",
+            "Tambem funcionam os atalhos: seta para cima/baixo.",
+            "PageUp e PageDown rolam mais rapido.",
             "Home vai para o topo da lista e End vai para o final.",
         ],
     },
     {
         "title": "Fluxo Recomendado no Editor",
         "lines": [
-            "1) Coloque o GND e os nós principais.",
+            "1) Coloque o GND e os nos principais.",
             "2) Adicione fontes e resistores com valores corretos.",
             "3) Conecte tudo com Wire.",
-            "4) Ajuste orientações com R e remova erros com D.",
+            "4) Ajuste orientacoes com R e remova erros com D.",
             "5) Clique em Solve para validar os resultados.",
             "6) Saia pelo X quando terminar.",
         ],

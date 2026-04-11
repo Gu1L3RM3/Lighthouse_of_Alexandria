@@ -15,7 +15,9 @@ from core.components.light_component import LightComponent
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
 from core.managers.audio_manager import AudioManager
-from pygame.key import get_pressed
+from core.managers.input_manager import InputManager
+
+
 class Player(Entity):
     def __init__(self, x: float = 100, y: float = 100):
         super().__init__()
@@ -25,15 +27,9 @@ class Player(Entity):
         self._speed = 100
         self._current_animation_state = "" 
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self._step_interval = 0.24
         self._step_timer = 0.0
-
-        self._key_to_direction = {
-            PLAYER_RIGHT: Vector2(1, 0),
-            PLAYER_LEFT: Vector2(-1, 0),
-            PLAYER_DOWN: Vector2(0, 1),
-            PLAYER_UP: Vector2(0, -1),
-        }
 
         pos = Position(x, y)
         vel = Velocity(0, 0)
@@ -78,15 +74,9 @@ class Player(Entity):
              return
 
         vel: Velocity = self.get(Velocity)
-        keys = get_pressed()
-
-        self._direction.update(0, 0)
-        for key, vector in self._key_to_direction.items():
-            if keys[key]:
-                self._direction += vector
+        self._direction = self.input_manager.get_movement_vector()
 
         if self._direction.length_squared() > 0:
-            self._direction.normalize_ip()
             vel.vxy = (self._direction.x * self._speed, self._direction.y * self._speed)
             self._old_direction = self._direction.copy()
             dir_name = self._get_dir_name(self._direction)

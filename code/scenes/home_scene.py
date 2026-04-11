@@ -20,6 +20,8 @@ from core.systems.freeze_system import FreezeSystem
 from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from core.ui.widgets.button import Button
@@ -64,11 +66,27 @@ class HomeScene(BaseScene):
         )
         self.scene_manager     = SceneManager.get() 
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
+        self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
     def _set_hud_buttons(self):
+        top_button_gap = 20
+        top_button_step = 142 + top_button_gap
         help_x = self.screen.get_width() - 92
+        menu_x = help_x - top_button_step
         idle = pygame.transform.scale(self.resources.load_image("buttons/short.png"), (142, 78))
         pressed = pygame.transform.scale(self.resources.load_image("buttons/short_pressed.png"), (142, 78))
+        self.menu_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(menu_x, 44),
+            click_type=ClickType.AFTER_RELEASED,
+            action=lambda: SceneManager.get().open_menu(0.35),
+            text="MENU",
+            font_size=11,
+            color_text=(245, 230, 170),
+        )
         self.help_button = Button(
             init_surface=idle,
             surface_pressed=pressed,
@@ -79,7 +97,7 @@ class HomeScene(BaseScene):
             font_size=11,
             color_text=(245, 230, 170),
         )
-        self.ui_manager.add(self.help_button)
+        self.ui_manager.add(self.menu_button, self.help_button)
 
     def start(self):
         pygame.mouse.set_visible(True)
@@ -186,7 +204,16 @@ class HomeScene(BaseScene):
                 break
 
     def process_input(self, events):
+        if self.input_manager.is_action_just_pressed("pause"):
+            SceneManager.get().open_menu(0.35)
+            return
+        if self.input_manager.is_action_just_pressed("help"):
+            SceneManager.get().open_help(0.35)
+            return
         for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+                SceneManager.get().open_help(0.35)
+                return
             self.ui_manager.handle_event(event)
         self._handle_old_paper_interaction(events)
         self.player.input(events)
@@ -204,3 +231,19 @@ class HomeScene(BaseScene):
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
         self.ui_manager.draw(self.screen)
+        self._draw_home_prompt_bar()
+
+    def _draw_home_prompt_bar(self):
+        if not self.should_draw_bottom_prompt_bar():
+            return
+        items = self.input_manager.get_prompt_items("home")
+        if not items:
+            return
+        draw_prompt_hint_row(
+            self.screen,
+            self.prompt_chip_font,
+            self.prompt_text_font,
+            items,
+            anchor=(18, self.screen.get_height() - 24),
+            align="left",
+        )

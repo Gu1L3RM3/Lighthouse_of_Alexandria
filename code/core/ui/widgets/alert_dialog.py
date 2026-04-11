@@ -77,6 +77,12 @@ class AlertDialog(Widget):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if not self.dialog_rect.collidepoint(event.pos):
                 self._close()
+        elif event.type == pygame.KEYDOWN and event.key in (
+            pygame.K_ESCAPE,
+            pygame.K_RETURN,
+            pygame.K_SPACE,
+        ):
+            self._close()
 
 
 

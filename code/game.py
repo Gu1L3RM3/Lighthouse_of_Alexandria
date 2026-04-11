@@ -7,6 +7,7 @@ from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
 from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
+from core.managers.input_manager import InputManager
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -100,6 +101,8 @@ class Game:
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
         self.save_manager = SaveGameManager.get()
+        self.input_manager = InputManager.get()
+        self.input_manager.initialize()
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
         self._last_scene_name = None
@@ -174,6 +177,7 @@ class Game:
             self.profiler.start_frame()
             
             events = pygame.event.get()
+            events = self.input_manager.process_events(events)
             self.profiler.mark("events")
             filtered_events = []
 
@@ -198,6 +202,7 @@ class Game:
             scene.process_input(filtered_events)
             self.profiler.mark("input")
             scene.update(dt)
+            self.input_manager.apply_mouse_visibility()
             self.profiler.mark("update")
 
             scene.render()

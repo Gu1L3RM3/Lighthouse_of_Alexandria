@@ -9,6 +9,8 @@ from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 
 
 class MainMenuScene(BaseScene):
@@ -18,6 +20,7 @@ class MainMenuScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self.save_manager = SaveGameManager.get()
         self.width = width
         self.height = height
@@ -47,8 +50,11 @@ class MainMenuScene(BaseScene):
 
         self.title_font = self.resources.load_font("PressStart2P-Regular.ttf", 34)
         self.subtitle_font = self.resources.load_font("PressStart2P-Regular.ttf", 14)
+        self.hint_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        self.hint_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
         self._create_buttons()
+        self.selected_button_index = 0
 
     def _upscale_pixel(self, low_surface: Surface) -> Surface:
         return pygame.transform.scale(low_surface, (self.width, self.height))
@@ -164,6 +170,12 @@ class MainMenuScene(BaseScene):
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(self.resume_button, self.start_button, self.credits_button, self.exit_button)
+        self.menu_buttons = [
+            self.resume_button,
+            self.start_button,
+            self.credits_button,
+            self.exit_button,
+        ]
 
     def _refresh_resume_button(self):
         can_resume = self.scene_manager.can_resume_scene() or self.save_manager.has_save()
@@ -173,6 +185,8 @@ class MainMenuScene(BaseScene):
         else:
             self.resume_button.change_text("SEM SAVE ATIVO")
             self.resume_button.text_widget.font_color = (166, 154, 126)
+            if self.selected_button_index == 0:
+                self.selected_button_index = 1
 
     def resume_current_scene(self):
         if self.scene_manager.can_resume_scene():
@@ -206,14 +220,35 @@ class MainMenuScene(BaseScene):
 
     def start(self):
         pygame.mouse.set_visible(True)
+        self.selected_button_index = 0
         self._refresh_resume_button()
+
+    def _move_selection(self, delta: int):
+        if not self.menu_buttons:
+            return
+        self.selected_button_index = (self.selected_button_index + delta) % len(self.menu_buttons)
+        self.audio_manager.play_ui("sfx/ui_hover.wav", volume=0.75)
+
+    def _activate_selected_button(self):
+        button = self.menu_buttons[self.selected_button_index]
+        if button is self.resume_button:
+            can_resume = self.scene_manager.can_resume_scene() or self.save_manager.has_save()
+            if not can_resume:
+                self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.75)
+                return
+        self.audio_manager.play_ui("sfx/ui_click.wav", volume=0.9)
+        if button.action:
+            button.action()
 
     def process_input(self, events: list[Event]):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_RETURN, pygame.K_SPACE):
-                    self.audio_manager.play_ui("sfx/ui_click.wav", volume=0.9)
-                    self.start_new_game()
+                if event.key in (pygame.K_w, pygame.K_UP):
+                    self._move_selection(-1)
+                elif event.key in (pygame.K_s, pygame.K_DOWN):
+                    self._move_selection(1)
+                elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    self._activate_selected_button()
                 elif event.key == pygame.K_ESCAPE:
                     self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
                     self.resume_current_scene()
@@ -290,8 +325,27 @@ class MainMenuScene(BaseScene):
         self.screen.blit(self.component_icons["r"], (panel_rect.left + 110, icon_y))
         self.screen.blit(self.component_icons["g"], (panel_rect.right - 68, icon_y - 2))
 
+    def _draw_selected_button_highlight(self):
+        if not self.menu_buttons:
+            return
+        selected = self.menu_buttons[self.selected_button_index]
+        highlight = selected._rect.inflate(20, 14)
+        pygame.draw.rect(self.screen, (247, 218, 151), highlight, width=3, border_radius=12)
+
+    def _draw_control_hint(self):
+        draw_prompt_hint_row(
+            self.screen,
+            self.hint_chip_font,
+            self.hint_text_font,
+            self.input_manager.get_prompt_items("menu"),
+            anchor=(self.width // 2, self.height - 28),
+            align="center",
+        )
+
     def render(self):
         self._draw_background()
         self._draw_torches()
         self._draw_title_and_panel()
         self.ui_manager.draw(self.screen)
+        self._draw_selected_button_highlight()
+        self._draw_control_hint()

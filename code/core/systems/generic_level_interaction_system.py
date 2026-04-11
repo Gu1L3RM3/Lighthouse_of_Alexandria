@@ -91,3 +91,19 @@ class GenericLevelInteractionSystem(System):
             ):
                 self.scene.event_manager.post({"type": "open_old_paper"})
                 break
+
+    def resolve_interaction_prompt(self, player) -> str | None:
+        if not player:
+            return None
+
+        for panel in self.scene.entity_mn.get_entities_by_class(ControlPannel):
+            if panel.can_player_interact(player):
+                return "ABRIR"
+
+        if self._resolve_target_door(player):
+            return "ENTRAR"
+
+        if self.can_old_paper_interact():
+            return "LER"
+
+        return None

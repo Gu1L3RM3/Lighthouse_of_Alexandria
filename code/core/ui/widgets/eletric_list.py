@@ -206,6 +206,14 @@ class EletricList(Widget):
             btn.update(dt)
         self.alert_dialog.update(dt)
 
+    def activate_hovered(self, mouse_pos: tuple[int, int]) -> bool:
+        for btn in self.visible_buttons:
+            if btn._rect.collidepoint(mouse_pos):
+                if btn.action:
+                    btn.action()
+                return True
+        return False
+
     def _draw_scrollbar(self, surface: Surface):
         max_scroll = self._max_scroll()
         if max_scroll <= 0:

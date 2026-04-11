@@ -6,6 +6,8 @@ from scenes.help_content import HELP_SECTIONS
 from core.settings import BLACK, HELP_SCROLL_STEP
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -18,6 +20,7 @@ class HelpScene(BaseScene):
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self.width = width
         self.height = height
 
@@ -26,6 +29,7 @@ class HelpScene(BaseScene):
         self.section_font = self.resources.load_font("PressStart2P-Regular.ttf", 11)
         self.text_font = self.resources.load_font("PressStart2P-Regular.ttf", 10)
         self.hint_font = self.resources.load_font("PressStart2P-Regular.ttf", 9)
+        self.hint_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
         self.sections = HELP_SECTIONS
         self.scroll_offset = 0.0
@@ -230,7 +234,13 @@ class HelpScene(BaseScene):
 
         self._draw_scrollbar(content_rect, total_height)
 
-        hint = self.hint_font.render("Scroll: roda do mouse, W/S, setas, PgUp/PgDn", True, (176, 165, 136))
-        self.screen.blit(hint, hint.get_rect(center=(panel.centerx, panel.bottom - 22)))
+        draw_prompt_hint_row(
+            self.screen,
+            self.hint_chip_font,
+            self.hint_font,
+            self.input_manager.get_prompt_items("help"),
+            anchor=(panel.centerx, panel.bottom - 22),
+            align="center",
+        )
 
         self.ui_manager.draw(self.screen)

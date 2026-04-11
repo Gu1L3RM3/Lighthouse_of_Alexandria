@@ -27,6 +27,8 @@ from core.ui.widgets.dialogue_image_sequence import DialogueImageSequenceWidget
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 
 
 class BaseExplanationLevel(BaseScene):
@@ -73,6 +75,7 @@ class BaseExplanationLevel(BaseScene):
         self._validate_dialogue_image_sequences()
         self._active_dialogue_image_widget: DialogueImageSequenceWidget | None = None
         self.attention_manager = AttentionManager(self.entity_mn)
+        self.input_manager = InputManager.get()
         self.dialogue_hud = DialogueInteractionHUDController(
             self.entity_mn,
             self.dialog_system,
@@ -109,6 +112,8 @@ class BaseExplanationLevel(BaseScene):
         self.ui_manager.add(self.menu_button, self.help_button)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
+        self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
     def set_map(self):
         spawner = MapEntitySpawner()
@@ -276,7 +281,16 @@ class BaseExplanationLevel(BaseScene):
         self.entity_mn.remove_entity_by_id(event["id"])
 
     def process_input(self, events: list[Event]):
+        if self.input_manager.is_action_just_pressed("help"):
+            SceneManager.get().open_help(0.35)
+            return
+        if self.input_manager.is_action_just_pressed("pause"):
+            SceneManager.get().open_menu(0.35)
+            return
         for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+                SceneManager.get().open_help(0.35)
+                return
             self.ui_manager.handle_event(event)
         self._handle_door_interaction(events)
         self.player.input(events)
@@ -294,7 +308,11 @@ class BaseExplanationLevel(BaseScene):
 
     def update(self, dt: float):
         can_door_interact = self.door.can_player_interact(self.player) if self.door and self.player else False
-        self.dialogue_hud.update(self.player, extra_interaction=can_door_interact)
+        self.dialogue_hud.update(
+            self.player,
+            extra_interaction=can_door_interact,
+            extra_prompt_label="ENTRAR",
+        )
         self.dialog_system.update(self.entity_mn, self.player, dt)
         self.update_systems(dt)
         self.ui_manager.update(dt)
@@ -304,3 +322,19 @@ class BaseExplanationLevel(BaseScene):
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale)
         self.ui_manager.draw(self.screen)
+        self._draw_gameplay_prompt_bar()
+
+    def _draw_gameplay_prompt_bar(self):
+        if not self.should_draw_bottom_prompt_bar():
+            return
+        items = self.input_manager.get_prompt_items("basic_level")
+        if not items:
+            return
+        draw_prompt_hint_row(
+            self.screen,
+            self.prompt_chip_font,
+            self.prompt_text_font,
+            items,
+            anchor=(18, self.screen.get_height() - 24),
+            align="left",
+        )

@@ -6,6 +6,7 @@ from core.managers.event_manager import EventManager
 from core.managers.entity_manager import EntityManager
 from core.ecs import Entity
 from core.settings import *
+from core.managers.input_manager import InputManager
 from core.ui.widgets.dialog_box import DialogueBoxWidget  
 from core.managers.ui_manager import UIManager
 from entities.dialogue_area import DialogueArea
@@ -15,6 +16,7 @@ from entities.dialogue_area import DialogueArea
 class DialogueSystem:
     def __init__(self, ui_manager:UIManager):
         self.event_manager = EventManager.get()
+        self.input_manager = InputManager.get()
         self.active_dialogue: Entity | None = None
         self.screen_size = pygame.display.get_surface().get_size()
         self.ui_manager = ui_manager 
@@ -27,12 +29,11 @@ class DialogueSystem:
         self._check_for_new_dialogue(entity_mn, player)
 
     def _handle_active_dialogue(self,dt):
-        keys = pygame.key.get_just_pressed()
         dialogue = self.active_dialogue.get(Dialogue)
 
         dialogue.update(dt)  
 
-        if not keys[KEY_DIALOG]:
+        if not self.input_manager.is_key_just_pressed(KEY_DIALOG):
             return
         
         if not dialogue.typewriter.finished:
@@ -46,9 +47,6 @@ class DialogueSystem:
         
         
     def _check_for_new_dialogue(self, entity_mn:EntityManager, player: Entity):
-        keys = pygame.key.get_just_pressed()
-
-
         player_pos = player.get(Position)
         player_col = player.get(Collider).get_rect(player_pos.x, player_pos.y)
 
@@ -75,7 +73,7 @@ class DialogueSystem:
                 self._start_dialogue(entity,player)
                 break
 
-            elif not entity_dialogue.auto_start and keys[KEY_DIALOG]:
+            elif not entity_dialogue.auto_start and self.input_manager.is_key_just_pressed(KEY_DIALOG):
                 self._start_dialogue(entity,player)
                 break
     

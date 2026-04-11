@@ -12,6 +12,7 @@ from core.systems.path_following_system import PathFollowingSystem
 from core.systems.render_system import RenderSystem
 from core.ecs import System
 from core.camera import Camera
+from core.ui.widgets.alert_dialog import AlertDialog
 
 
 class OrderedSystems:
@@ -104,3 +105,12 @@ class BaseScene(ABC):
         Útil para limpeza ou salvar estado.
         """
         pass
+
+
+    def should_draw_bottom_prompt_bar(self) -> bool:
+        if self.dialog_system.active_dialogue:
+            return False
+        for widget in reversed(self.ui_manager.widgets):
+            if isinstance(widget, AlertDialog):
+                return False
+        return True

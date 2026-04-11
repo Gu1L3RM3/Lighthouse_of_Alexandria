@@ -46,6 +46,8 @@ from core.systems.generic_level_bomb_system import GenericLevelBombSystem
 from core.systems.generic_level_environment_system import GenericLevelEnvironmentSystem
 from core.ui.renderers.generic_level_bomb_renderer import GenericLevelBombRenderer
 from core.ui.renderers.generic_level_ghost_renderer import GenericLevelGhostRenderer
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 
 class BaseGenericLevel(BaseScene):
     def __init__(self, screen: Surface, level_path: str):
@@ -96,6 +98,7 @@ class BaseGenericLevel(BaseScene):
         self.storage_circuit = StorageCircuitManager()
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
         self.dialogue_hud = DialogueInteractionHUDController(
@@ -172,6 +175,8 @@ class BaseGenericLevel(BaseScene):
         self.ui_manager.add(self.menu_button, self.help_button, self.edit_bomb_button, self.bomb_status_widget)
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
+        self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
     def _set_bomb_visuals(self):
         try:
@@ -398,7 +403,22 @@ class BaseGenericLevel(BaseScene):
                 modal.handle_events(event)
             return
 
+        if self.input_manager.is_action_just_pressed("help"):
+            SceneManager.get().open_help(0.35)
+            return
+
+        if self.input_manager.is_action_just_pressed("pause"):
+            SceneManager.get().open_menu(0.35)
+            return
+
+        if self.input_manager.is_action_just_pressed("open_editor"):
+            self.open_bomb_editor()
+            return
+
         for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_F1:
+                SceneManager.get().open_help(0.35)
+                return
             self.ui_manager.handle_event(event)
             if event.type == pygame.KEYDOWN and event.key == KEY_PLACE_BOMB:
                 self.place_bomb()
@@ -424,6 +444,12 @@ class BaseGenericLevel(BaseScene):
         self.bomb_system.update_bombs(dt)
         self.environment_system.update(self.entity_mn, dt)
         self.ghost_system.update(self.entity_mn, dt)
+        prompt_label = self.interaction_system.resolve_interaction_prompt(self.player)
+        self.dialogue_hud.update(
+            self.player,
+            extra_interaction=prompt_label is not None,
+            extra_prompt_label=prompt_label or "INTERAGIR",
+        )
         self.dialog_system.update(self.entity_mn, self.player,dt)
         self.update_systems(dt)
         self.ui_manager.update(dt)
@@ -441,6 +467,22 @@ class BaseGenericLevel(BaseScene):
             # Usa o dt real para permitir transicoes de luz (fade in/out) fluirem.
             self.light_system.update(self.entity_mn, self._last_frame_dt)
         self.ui_manager.draw(self.screen)
+        self._draw_gameplay_prompt_bar()
+
+    def _draw_gameplay_prompt_bar(self):
+        if not self.should_draw_bottom_prompt_bar():
+            return
+        items = self.input_manager.get_prompt_items("generic_level")
+        if not items:
+            return
+        draw_prompt_hint_row(
+            self.screen,
+            self.prompt_chip_font,
+            self.prompt_text_font,
+            items,
+            anchor=(18, self.screen.get_height() - 24),
+            align="left",
+        )
 
     def _draw_debug_areas(self):
         # Debug do painel de controle (área de interação para tecla E).

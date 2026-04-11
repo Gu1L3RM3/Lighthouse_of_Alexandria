@@ -247,6 +247,14 @@ class MenuEditCircuit(Widget):
         for button in self.buttons:
             button.update(dt)
 
+    def activate_hovered(self, mouse_pos: tuple[int, int]) -> bool:
+        for button in self.buttons:
+            if button._rect.collidepoint(mouse_pos):
+                if button.action:
+                    button.action()
+                return True
+        return False
+
     def draw(self, surface):
         surface.blit(self.surface_top,self.rect_top)
         surface.blit(self.surface_right,self.rect_right)
