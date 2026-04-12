@@ -4,6 +4,19 @@
 
 Você joga como **Kevin**, atravessando fases com inimigos, portas e painéis elétricos, enquanto tenta impedir uma mudança catastrófica na linha do tempo de Alexandria.
 
+## Galeria
+
+![Menu](assets/images/images_game/menu.png)
+![Home](assets/images/images_game/home.png)
+![Fase explicativa](assets/images/images_game/fase_explicativa.png)
+![Level 2](assets/images/images_game/level_2.png)
+![Painel](assets/images/images_game/pannel.png)
+![Circuito problema](assets/images/images_game/circuito_problema.png)
+![Bomba](assets/images/images_game/bomb.png)
+![Inimigos](assets/images/images_game/enemies.png)
+![Pai](assets/images/images_game/pai.png)
+![Game Over](assets/images/images_game/game_over.png)
+
 ## Enredo (sem grandes spoilers)
 
 Kevin descobre que o Farol de Alexandria está no centro de uma decisão impossível: salvar a cidade pode custar sua própria história familiar. Ao longo das fases, os painéis elétricos deixam de ser apenas puzzles e viram parte direta do conflito narrativo.
