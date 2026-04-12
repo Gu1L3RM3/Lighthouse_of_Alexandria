@@ -87,10 +87,10 @@ python main.py
 
 ## Build para Windows
 
-Use o script de build:
+Exemplo de build manual com PyInstaller:
 
 ```powershell
-.\scripts\build_windows.ps1
+pyinstaller --noconfirm Alexandria.spec
 ```
 
 Guia detalhado em [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md).
