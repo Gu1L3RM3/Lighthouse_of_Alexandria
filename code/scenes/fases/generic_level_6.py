@@ -1,4 +1,4 @@
-﻿from random import sample
+from random import sample
 from pathlib import Path
 
 from pygame import Surface

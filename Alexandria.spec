@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(SPECPATH).resolve()
+OUTPUT_NAME = "Farol de Alexandria"
 ICON_CANDIDATES = [
     PROJECT_ROOT / "assets" / "images" / "icon" / "game_icon.ico",
     PROJECT_ROOT / "assets" / "images" / "icon" / "game_icon.png",
@@ -123,7 +124,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="Alexandria",
+    name=OUTPUT_NAME,
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -145,5 +146,5 @@ coll = COLLECT(
     strip=False,
     upx=False,
     upx_exclude=[],
-    name="Alexandria",
+    name=OUTPUT_NAME,
 )

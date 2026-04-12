@@ -1,4 +1,4 @@
-﻿import pygame
+import pygame
 from pygame import Rect
 from pathlib import Path
 from typing import Tuple,Dict

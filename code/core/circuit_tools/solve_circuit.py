@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from core.circuit_tools.SMNA import smna, get_part_values
 from core.settings import PREFIXES
 import sympy

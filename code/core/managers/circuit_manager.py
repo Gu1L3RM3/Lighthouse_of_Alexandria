@@ -1,4 +1,4 @@
-﻿from core.settings import *
+from core.settings import *
 from random import sample
 class CircuitManager:
     _instance = None

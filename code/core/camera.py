@@ -1,4 +1,4 @@
-﻿from pygame import Rect, Surface, Vector2
+from pygame import Rect, Surface, Vector2
 from core.ecs import Entity
 from core.components.position import Position
 import random

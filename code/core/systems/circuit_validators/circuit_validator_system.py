@@ -1,4 +1,4 @@
-﻿from random                                   import choice
+from random                                   import choice
 from core.ecs                                 import System
 from entities.itens.control_pannel            import ControlPannel
 from core.managers.circuit_manager            import CircuitManager

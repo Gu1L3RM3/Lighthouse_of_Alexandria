@@ -8,7 +8,6 @@ from core.managers.life_manager  import LifeManager
 from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
-from core.ui.widgets.fps_widget import FPSWidget
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -126,7 +125,6 @@ class Game:
         self._last_scene_name = None
         profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
         self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
-        self.global_fps_widget = FPSWidget(font_size=12, pos=(12, 12), color=(245, 230, 170))
         self.profile_start_scene = os.getenv("ALEX_START_SCENE", "").strip()
         try:
             self.profile_auto_seconds = max(0.0, float(os.getenv("ALEX_PROFILE_SECONDS", "0") or 0))
@@ -233,14 +231,12 @@ class Game:
             scene.update(dt)
             self.input_manager.apply_mouse_visibility()
             self.profiler.mark("update")
-            self.global_fps_widget.update(dt)
 
             scene.render()
             self.profiler.mark("render")
 
             self.scene_manager.update_transition()
             self.scene_manager.draw_transition(self.screen)
-            self.global_fps_widget.draw(self.screen)
             self.profiler.mark("transition")
 
             pygame.display.flip()

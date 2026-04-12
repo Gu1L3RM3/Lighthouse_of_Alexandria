@@ -50,6 +50,11 @@ build/
 dist/
 release/
 *.spec.bak
+obf_src/
+obf_test/
+.pyarmor_home/
+dist_obf/
+Alexandria_obf.spec
 
 # Artefatos comuns de empacotamento Python
 *.egg-info/
