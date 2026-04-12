@@ -7,6 +7,7 @@ from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.death_flow_manager import DeathFlowManager
 from core.managers.audio_manager import AudioManager
+from core.managers.input_manager import InputManager
 
 
 class DeathTransitionScene(BaseScene):
@@ -15,6 +16,7 @@ class DeathTransitionScene(BaseScene):
         super().__init__(screen, width, height)
         self.death_flow_manager = DeathFlowManager.get()
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self.title_font = self.resources.load_font("PressStart2P-Regular.ttf", 34)
         self.main_font = self.resources.load_font("PressStart2P-Regular.ttf", 20)
         self.small_font = self.resources.load_font("PressStart2P-Regular.ttf", 14)
@@ -39,6 +41,13 @@ class DeathTransitionScene(BaseScene):
         self._spawn_particles(42)
 
     def process_input(self, events: list[Event]) -> None:
+        if self.timer >= 1.0 and (
+            self.input_manager.is_action_just_pressed("confirm")
+            or self.input_manager.is_action_just_pressed("back")
+        ):
+            self._resolve()
+            return
+
         for event in events:
             if event.type == pygame.KEYDOWN and self.timer >= 1.0:
                 if event.key in (pygame.K_RETURN, pygame.K_SPACE):
@@ -149,7 +158,11 @@ class DeathTransitionScene(BaseScene):
         lives_text_after.set_alpha(after_alpha)
         self.screen.blit(lives_text_after, lives_text_after.get_rect(center=(panel.centerx + 54, panel.centery + 26)))
 
-        hint = "ENTER para avancar" if self.timer >= 1.0 else "..."
+        if self.timer >= 1.0:
+            hint_button = self.input_manager.get_prompt_button("confirm")
+            hint = f"{hint_button} para avancar"
+        else:
+            hint = "..."
         hint_surf = self.small_font.render(hint, True, (177, 156, 120))
         self.screen.blit(hint_surf, hint_surf.get_rect(center=(panel.centerx, panel.bottom - 34)))
 

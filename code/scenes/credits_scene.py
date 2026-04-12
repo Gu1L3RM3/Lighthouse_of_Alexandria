@@ -50,6 +50,9 @@ class CreditsScene(BaseScene):
             "https://github.com/Tiburonboy/Symbolic-modified-nodal-analysis",
             "Fonte: PressStart2P-Regular.ttf",
             "Licenca conforme distribuicao original da fonte",
+            "",
+            "AVISO",
+            "Nao e permitido vender este jogo sem autorizacao do autor.",
         ]
 
     def _wrap_line(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:

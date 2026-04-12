@@ -4,6 +4,7 @@ from pygame import Event, Surface
 from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
+from core.managers.input_manager import InputManager
 
 
 class EndingThanksCreditsScene(BaseScene):
@@ -11,6 +12,7 @@ class EndingThanksCreditsScene(BaseScene):
         width, height = screen.get_size()
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
+        self.input_manager = InputManager.get()
         self.width = width
         self.height = height
 
@@ -38,6 +40,8 @@ class EndingThanksCreditsScene(BaseScene):
             "2D Pixel Dungeon Asset Pack v2.0",
             "SMNA (Symbolic Modified Nodal Analysis)",
             "Fonte: PressStart2P-Regular.ttf",
+            "",
+            "Nao e permitido vender este jogo sem autorizacao do autor.",
         ]
 
     def start(self):
@@ -46,6 +50,13 @@ class EndingThanksCreditsScene(BaseScene):
         pygame.mouse.set_visible(True)
 
     def process_input(self, events: list[Event]) -> None:
+        if self.timer >= self.min_skip_time and (
+            self.input_manager.is_action_just_pressed("confirm")
+            or self.input_manager.is_action_just_pressed("back")
+        ):
+            self._go_menu()
+            return
+
         for event in events:
             if (
                 event.type == pygame.KEYDOWN
@@ -101,5 +112,7 @@ class EndingThanksCreditsScene(BaseScene):
             self.screen.blit(line, (panel.left + 36, y))
             y += line_spacing
 
-        hint = self.subtitle_font.render("ENTER/SPACE para pular", True, (168, 154, 126))
+        confirm_label = self.input_manager.get_prompt_button("confirm")
+        back_label = self.input_manager.get_prompt_button("back")
+        hint = self.subtitle_font.render(f"{confirm_label}/{back_label} para pular", True, (168, 154, 126))
         self.screen.blit(hint, hint.get_rect(center=(self.width // 2, int(self.height * 0.93))))

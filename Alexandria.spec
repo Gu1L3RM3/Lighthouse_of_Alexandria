@@ -5,7 +5,11 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(SPECPATH).resolve()
-ICON_PATH = PROJECT_ROOT / "assets" / "images" / "icon" / "game_icon.ico"
+ICON_CANDIDATES = [
+    PROJECT_ROOT / "assets" / "images" / "icon" / "game_icon.ico",
+    PROJECT_ROOT / "assets" / "images" / "icon" / "game_icon.png",
+]
+ICON_PATH = next((path for path in ICON_CANDIDATES if path.exists()), None)
 
 ASSET_ALLOWED_EXTS = {
     ".png",
@@ -130,7 +134,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(ICON_PATH),
+    icon=str(ICON_PATH) if ICON_PATH is not None else None,
 )
 
 coll = COLLECT(
