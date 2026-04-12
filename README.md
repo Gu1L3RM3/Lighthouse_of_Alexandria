@@ -6,16 +6,7 @@ Você joga como **Kevin**, atravessando fases com inimigos, portas e painéis el
 
 ## Galeria
 
-![Menu](assets/images/images_game/menu.png)
-![Home](assets/images/images_game/home.png)
-![Fase explicativa](assets/images/images_game/fase_explicativa.png)
-![Level 2](assets/images/images_game/level_2.png)
-![Painel](assets/images/images_game/pannel.png)
-![Circuito problema](assets/images/images_game/circuito_problema.png)
-![Bomba](assets/images/images_game/bomb.png)
-![Inimigos](assets/images/images_game/enemies.png)
-![Pai](assets/images/images_game/pai.png)
-![Game Over](assets/images/images_game/game_over.png)
+![Galeria animada do jogo](assets/images/images_game/gallery.gif)
 
 ## Enredo (sem grandes spoilers)
 
@@ -137,6 +128,10 @@ Guia detalhado em [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md).
 
 Projeto jogável com campanha em múltiplas fases, editor de circuito integrado e fluxo de build para Windows.
 
----
+## Roadmap
 
-Se você quiser, eu também posso preparar uma versão do README com **GIFs/screenshots**, seção de **roadmap** e seção de **contribuição** (`CONTRIBUTING.md`).
+- Melhorar compatibilidade de entrada para web (teclado/controle).
+- Refinar balanceamento das fases com bomba e inimigos.
+- Expandir conteúdo didático com novos desafios de circuitos.
+- Adicionar mais feedback visual/sonoro em transições e eventos.
+- Consolidar pipeline de release (build + pacote zip + checklist).
