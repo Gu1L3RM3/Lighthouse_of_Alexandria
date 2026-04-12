@@ -49,6 +49,25 @@ HELP_SECTIONS: list[dict[str, list[str] | str]] = [
         ],
     },
     {
+        "title": "Editor no Controle (Resumo Rapido)",
+        "lines": [
+            "Analagico esquerdo / D-Pad: move o foco no grid.",
+            "A: aplica acao no grid (colocar, selecionar ou editar conforme a ferramenta ativa).",
+            "Y: gira o brush atual quando houver um componente em uso.",
+            "B: cancela o brush atual (equivalente ao Esc no teclado).",
+            "LB/RB: navega entre os botoes do menu do editor.",
+            "L3: confirma/clica no botao do menu que esta focado.",
+        ],
+    },
+    {
+        "title": "Editor: O que significam S, B e D",
+        "lines": [
+            "S (botao da barra lateral): Select. Permite selecionar um componente do circuito para reposicionar.",
+            "D (botao da barra lateral): Delete. Remove componentes editaveis do circuito.",
+            "B (botao do controle): Back/Cancelar. Sai da ferramenta atual sem fechar o editor.",
+        ],
+    },
+    {
         "title": "Editor: Atalhos de Teclado",
         "lines": [
             "N: selecionar Node.",

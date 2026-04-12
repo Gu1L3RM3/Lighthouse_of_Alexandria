@@ -5,6 +5,7 @@ from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
+from core.managers.input_manager import InputManager
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -15,12 +16,14 @@ class CreditsScene(BaseScene):
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
+        self.input_manager = InputManager.get()
         self.width = width
         self.height = height
 
         self.title_font = self.resources.load_font("PressStart2P-Regular.ttf", 28)
         self.subtitle_font = self.resources.load_font("PressStart2P-Regular.ttf", 14)
         self.text_font = self.resources.load_font("PressStart2P-Regular.ttf", 12)
+        self.hint_font = self.resources.load_font("PressStart2P-Regular.ttf", 10)
 
         self._create_buttons()
 
@@ -155,6 +158,10 @@ class CreditsScene(BaseScene):
         pygame.mouse.set_visible(True)
 
     def process_input(self, events: list[Event]) -> None:
+        if self.input_manager.is_action_just_pressed("back"):
+            self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+            self.go_back()
+            return
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
@@ -217,5 +224,8 @@ class CreditsScene(BaseScene):
             self.screen.blit(line, (content_rect.left, y))
             y += line_h + line_gap
         self.screen.set_clip(prev_clip)
+
+        back_hint = self.hint_font.render("Controle: aperte B para voltar ao menu", True, (222, 204, 158))
+        self.screen.blit(back_hint, back_hint.get_rect(center=(panel.centerx, panel.bottom - 18)))
 
         self.ui_manager.draw(self.screen)

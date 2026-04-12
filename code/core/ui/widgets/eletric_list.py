@@ -50,6 +50,7 @@ class EletricList(Widget):
         self.content_view_rect = Rect(0, 0, 0, 0)
         self.content_height = 0
         self._last_revision = self.storage_manager.revision
+        self.controller_focus_index = 0
 
         self.set_alert_dialog()
         self._create_buttons()
@@ -114,6 +115,7 @@ class EletricList(Widget):
     def _create_buttons(self):
         self.buttons.clear()
         self.visible_buttons.clear()
+        self.controller_focus_index = 0
         if self.list_type not in self.data:
             return
 
@@ -156,11 +158,52 @@ class EletricList(Widget):
             y += h + self.spacing
 
         self._update_visible_buttons()
+        self._clamp_controller_focus()
 
     def _update_visible_buttons(self):
         self.visible_buttons = [
             button for button in self.buttons if button._rect.colliderect(self.content_view_rect)
         ]
+        self._clamp_controller_focus()
+
+    def _clamp_controller_focus(self):
+        if not self.buttons:
+            self.controller_focus_index = 0
+            return
+        self.controller_focus_index = max(0, min(len(self.buttons) - 1, self.controller_focus_index))
+
+    def _focused_button(self) -> Button | None:
+        if not self.buttons:
+            return None
+        self._clamp_controller_focus()
+        return self.buttons[self.controller_focus_index]
+
+    def _ensure_focus_visible(self):
+        btn = self._focused_button()
+        if btn is None:
+            return
+        if btn._rect.top < self.content_view_rect.top:
+            self._set_scroll(self.scroll_offset - (self.content_view_rect.top - btn._rect.top))
+        elif btn._rect.bottom > self.content_view_rect.bottom:
+            self._set_scroll(self.scroll_offset + (btn._rect.bottom - self.content_view_rect.bottom))
+
+    def controller_move_focus(self, step: int):
+        if not self.buttons:
+            return
+        self.controller_focus_index = (self.controller_focus_index + step) % len(self.buttons)
+        self._ensure_focus_visible()
+        self._update_visible_buttons()
+
+    def controller_activate_focused(self) -> bool:
+        btn = self._focused_button()
+        if btn is None:
+            return False
+        btn.activate()
+        return True
+
+    def controller_cancel(self):
+        if self.on_close:
+            self.on_close(self)
 
     def update_data(self):
         self.data = self.storage_manager.storage_circuit
@@ -209,8 +252,7 @@ class EletricList(Widget):
     def activate_hovered(self, mouse_pos: tuple[int, int]) -> bool:
         for btn in self.visible_buttons:
             if btn._rect.collidepoint(mouse_pos):
-                if btn.action:
-                    btn.action()
+                btn.activate()
                 return True
         return False
 
@@ -242,5 +284,9 @@ class EletricList(Widget):
         for btn in self.visible_buttons:
             btn.draw(surface)
         surface.set_clip(previous_clip)
+
+        focused = self._focused_button()
+        if focused is not None and focused in self.visible_buttons:
+            pygame.draw.rect(surface, (245, 230, 170), focused._rect.inflate(6, 6), 2, border_radius=4)
 
         self._draw_scrollbar(surface)

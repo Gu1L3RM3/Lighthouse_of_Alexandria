@@ -46,14 +46,38 @@ class InputManager:
         self._xinput_connected = False
         self._virtual_mouse_target: tuple[int, int] | None = None
 
-        self._button_to_actions = {
+        self._button_to_actions_joystick = {
             0: ("confirm", "interact"),
             1: ("back",),
             2: ("bomb",),
             3: ("open_editor",),
+            4: ("tool_prev",),
+            5: ("tool_next",),
+            8: ("menu_confirm",),  # L3 (common on generic joystick mapping)
             6: ("help",),
             7: ("pause",),
-            9: ("pause",),
+        }
+        self._button_to_actions_sdl2 = {
+            0: ("confirm", "interact"),
+            1: ("back",),
+            2: ("bomb",),
+            3: ("open_editor",),
+            4: ("help",),       # Back/View
+            6: ("pause",),      # Start/Menu
+            7: ("menu_confirm",),  # Left stick click (L3)
+            9: ("tool_prev",),  # LB/L1
+            10: ("tool_next",), # RB/R1
+        }
+        self._button_to_actions_xinput = {
+            0: ("confirm", "interact"),
+            1: ("back",),
+            2: ("bomb",),
+            3: ("open_editor",),
+            4: ("tool_prev",),  # LB
+            5: ("tool_next",),  # RB
+            6: ("help",),       # Back
+            7: ("pause",),      # Start
+            8: ("menu_confirm",),  # Left thumb (L3)
         }
         self._action_to_keys = {
             "confirm": (pygame.K_RETURN, KEY_NEXT_SCENE),
@@ -69,6 +93,10 @@ class InputManager:
             "pause": "ESC",
             "open_editor": "NUCLEO",
             "help": "F1",
+            "tool_prev": "Q",
+            "tool_next": "E",
+            "menu_confirm": "L3",
+            "select_tool": "S",
         }
         self._controller_action_labels_by_layout = {
             "xbox": {
@@ -81,6 +109,8 @@ class InputManager:
                 "help": "BACK",
                 "tool_prev": "LB",
                 "tool_next": "RB",
+                "menu_confirm": "L3",
+                "select_tool": "A",
             },
             "playstation": {
                 "confirm": "CROSS",
@@ -92,6 +122,8 @@ class InputManager:
                 "help": "SHARE",
                 "tool_prev": "L1",
                 "tool_next": "R1",
+                "menu_confirm": "L3",
+                "select_tool": "CROSS",
             },
         }
 
@@ -125,6 +157,11 @@ class InputManager:
             augmented_events.append(event)
 
             if event.type == pygame.KEYDOWN:
+                synthetic_controller_key = bool(getattr(event, "synthetic_controller", False))
+                if synthetic_controller_key:
+                    self.last_input_source = "controller"
+                    self.mouse_visible = False
+                    continue
                 self.last_input_source = "keyboard"
                 self.just_pressed_keys.add(event.key)
                 self.mouse_visible = True
@@ -133,6 +170,11 @@ class InputManager:
             if event.type == pygame.MOUSEMOTION:
                 if self._virtual_mouse_target is not None and tuple(event.pos) == self._virtual_mouse_target:
                     self._virtual_mouse_target = None
+                    continue
+                # Quando estamos em fluxo de controle, ignora movimento de mouse
+                # para evitar "flicker" de fonte por eventos sinteticos/ruido.
+                if self.last_input_source == "controller" and not self.mouse_visible:
+                    continue
                 else:
                     self.last_input_source = "mouse"
                     self.mouse_visible = True
@@ -154,13 +196,18 @@ class InputManager:
             if event.type == pygame.JOYBUTTONDOWN:
                 self.last_input_source = "controller"
                 self.mouse_visible = False
-                augmented_events.extend(self._handle_button_change(event.button, is_pressed=True))
+                # Evita mapeamento duplicado/conflitante quando SDL2/XInput ja estao ativos.
+                if self.controllers or self._xinput_connected:
+                    continue
+                augmented_events.extend(self._handle_button_change(event.button, is_pressed=True, source="joystick"))
                 continue
 
             if event.type == pygame.JOYBUTTONUP:
                 self.last_input_source = "controller"
                 self.mouse_visible = False
-                augmented_events.extend(self._handle_button_change(event.button, is_pressed=False))
+                if self.controllers or self._xinput_connected:
+                    continue
+                augmented_events.extend(self._handle_button_change(event.button, is_pressed=False, source="joystick"))
                 continue
 
             if event.type == pygame.JOYHATMOTION:
@@ -176,7 +223,6 @@ class InputManager:
 
         augmented_events.extend(self._poll_controller_state())
         augmented_events.extend(self._poll_analog_navigation())
-        self.apply_mouse_visibility()
         return augmented_events
 
     def get_movement_vector(self) -> Vector2:
@@ -261,16 +307,28 @@ class InputManager:
         if context == "circuit_editor":
             if self.last_input_source == "controller":
                 return [
-                    ("D-PAD", "cursor"),
-                    (self.get_prompt_button("confirm"), "clicar"),
+                    (self.get_prompt_button("help"), "menu/grid"),
+                    ("D-PAD/L", "mover"),
+                    (self.get_prompt_button("confirm"), "aplicar"),
                     (self.get_prompt_button("bomb"), "wire"),
-                    (self.get_prompt_button("open_editor"), "rotate"),
+                    (self.get_prompt_button("open_editor"), "rotate/select"),
                     (self.get_prompt_button("tool_prev"), "tool-"),
                     (self.get_prompt_button("tool_next"), "tool+"),
                     (self.get_prompt_button("back"), "cancelar"),
                     (self.get_prompt_button("pause"), "sair"),
                 ]
             return [("MOUSE", "cursor"), ("N/W/G", "ferramentas"), ("R/S/DEL", "editar"), ("ESC", "cancelar")]
+        if context == "circuit_editor_grid":
+            return [
+                ("D-PAD/L", "mover"),
+                (self.get_prompt_button("confirm"), "aplicar"),
+                (self.get_prompt_button("open_editor"), "girar"),
+                (self.get_prompt_button("back"), "cancelar"),
+                (self.get_prompt_button("tool_prev"), "menu-"),
+                (self.get_prompt_button("tool_next"), "menu+"),
+                (self.get_prompt_button("menu_confirm"), "clicar menu"),
+                (self.get_prompt_button("pause"), "sair"),
+            ]
         return []
 
     def _connect_joystick(self, device_index: int):
@@ -324,8 +382,15 @@ class InputManager:
             return "playstation"
         return "xbox"
 
-    def _handle_button_change(self, button: int, is_pressed: bool) -> list[pygame.event.Event]:
-        actions = self._button_to_actions.get(button, ())
+    def _button_actions_for_source(self, source: str, button: int) -> tuple[str, ...]:
+        if source == "sdl2":
+            return self._button_to_actions_sdl2.get(button, ())
+        if source == "xinput":
+            return self._button_to_actions_xinput.get(button, ())
+        return self._button_to_actions_joystick.get(button, ())
+
+    def _handle_button_change(self, button: int, is_pressed: bool, source: str = "joystick") -> list[pygame.event.Event]:
+        actions = self._button_actions_for_source(source, button)
         synthetic_events: list[pygame.event.Event] = []
 
         for action in actions:
@@ -468,11 +533,14 @@ class InputManager:
             }
 
         for button_index in range(button_count):
+            source = "joystick"
             if self._xinput_connected:
                 pressed_now = self._xinput_button_pressed(button_index)
+                source = "xinput"
             elif controller is not None:
                 try:
                     pressed_now = bool(controller.get_button(button_index))
+                    source = "sdl2"
                 except Exception:
                     pressed_now = False
             elif self.joysticks:
@@ -484,7 +552,7 @@ class InputManager:
                 self.last_input_source = "controller"
                 self.mouse_visible = False
                 synthetic_events.extend(
-                    self._handle_button_change(button_index, is_pressed=pressed_now)
+                    self._handle_button_change(button_index, is_pressed=pressed_now, source=source)
                 )
                 self._prev_button_states[button_index] = pressed_now
 
@@ -605,12 +673,12 @@ class InputManager:
                 return None
             self._pressed_virtual_keys.add(key)
             self.just_pressed_keys.add(key)
-            return pygame.event.Event(pygame.KEYDOWN, key=key)
+            return pygame.event.Event(pygame.KEYDOWN, key=key, synthetic_controller=True)
 
         if key not in self._pressed_virtual_keys:
             return None
         self._pressed_virtual_keys.remove(key)
-        return pygame.event.Event(pygame.KEYUP, key=key)
+        return pygame.event.Event(pygame.KEYUP, key=key, synthetic_controller=True)
 
 
 class XINPUT_GAMEPAD(ctypes.Structure):

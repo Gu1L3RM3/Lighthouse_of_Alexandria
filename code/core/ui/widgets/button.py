@@ -1,3 +1,4 @@
+import pygame
 from pygame import Surface
 from core.ui.widgets.widget import Widget
 from core.ui.widgets.gesture_detector import *
@@ -41,6 +42,9 @@ class Button(Widget):
         self.audio = AudioManager.get()
         self._was_hovered_last_frame = False
         self._was_pressed_last_frame = False
+        self._pressed_feedback_timer = 0.0
+        self._suppress_next_press_sound = False
+        self._is_focused = False
         self.set_text()
 
     def set_gesture_detector(self):
@@ -62,13 +66,31 @@ class Button(Widget):
                 font_name=self.font
             )
 
+    def set_focused(self, focused: bool):
+        self._is_focused = focused
+
+    def activate(self, press_feedback_seconds: float = 0.14, trigger_action: bool = True):
+        self._pressed_feedback_timer = max(self._pressed_feedback_timer, max(0.0, press_feedback_seconds))
+        self._suppress_next_press_sound = True
+        self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+        if trigger_action and self.action:
+            self.action()
+
     def update(self, dt):
         self.gesture_detector.update(dt)
-        pressed = self.gesture_detector._hold_state if self.click_type == ClickType.HOLD else self.gesture_detector.is_pressed
+        if self._pressed_feedback_timer > 0:
+            self._pressed_feedback_timer = max(0.0, self._pressed_feedback_timer - dt)
+        gesture_pressed = self.gesture_detector._hold_state if self.click_type == ClickType.HOLD else self.gesture_detector.is_pressed
+        pressed = gesture_pressed or self._pressed_feedback_timer > 0
         if self.gesture_detector.is_hovered and not self._was_hovered_last_frame:
             self.audio.play_ui("sfx/ui_hover.wav", volume=0.75)
         if pressed and not self._was_pressed_last_frame:
-            self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+            if self._suppress_next_press_sound:
+                self._suppress_next_press_sound = False
+            else:
+                self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+        if not pressed:
+            self._suppress_next_press_sound = False
         self._was_hovered_last_frame = self.gesture_detector.is_hovered
         self._was_pressed_last_frame = pressed
         self.current_surf = self.surface_pressed if pressed else self.init_surface
@@ -79,6 +101,8 @@ class Button(Widget):
 
     def draw(self, surface):
         surface.blit(self.current_surf, self._rect)
+        if self._is_focused:
+            pygame.draw.rect(surface, (245, 230, 170), self._rect.inflate(8, 8), 3, border_radius=6)
         if self.text_widget:
             self.text_widget.draw(surface)
         if self.draw_gesture_detector:

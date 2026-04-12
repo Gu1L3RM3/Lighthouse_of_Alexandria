@@ -1,5 +1,9 @@
 {
-    "Resistor": {},
+    "Resistor": {
+        "180": 1,
+        "8.2k": 1,
+        "2.7": 1
+    },
     "VoutageSource": {},
     "CurrentSource": {}
 }
