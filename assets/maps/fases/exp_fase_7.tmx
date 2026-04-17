@@ -78,7 +78,7 @@
  </objectgroup>
  <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="159.39" y="206.606" width="64.7586" height="83.3938">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Nesta etapa vamos estudar máxima transferência de potência em resistores.;Arquimedes: O circuito visto pela carga pode ser trocado pelo equivalente de Thévenin Vth em série com Rth.;Arquimedes: A potência na carga RL é máxima quando RL for igual a Rth.;Arquimedes: Essa condição vem da derivada da potência em RL em função de RL igual a zero.;Arquimedes: Primeiro encontre Vth e Rth nos terminais onde a carga será conectada.;Arquimedes: Depois ajuste RL para o valor de Rth e calcule corrente, tensão e potência entregue.;Arquimedes: Nessa condição, a eficiência para uma fonte ideal de Thévenin fica em torno de cinquenta por cento.;Arquimedes: Use GND como referência para evitar medidas ambíguas de tensão.;Arquimedes: Nos painéis, valide RL alvo e compare a potência obtida com o valor esperado.;Arquimedes: Se houver mais de uma opção de RL, escolha a mais próxima de Rth para maximizar a transferência."/>

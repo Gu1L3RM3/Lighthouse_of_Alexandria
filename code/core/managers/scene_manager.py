@@ -4,6 +4,7 @@ from scenes.base_scene import BaseScene
 from core.managers.event_manager import EventManager
 from core.managers.life_manager import LifeManager
 from core.managers.save_game_manager import SaveGameManager
+from core.managers.scene_factory import SceneFactory
 
 from core.settings import *
 
@@ -13,6 +14,7 @@ class SceneManager:
 
     def __init__(self):
         self.scenes: Dict[str, BaseScene] = {}
+        self._scenes_needing_reset: set[str] = set()
         self.active_scene: BaseScene = None
         self.active_scene_name: str | None = None
 
@@ -43,6 +45,38 @@ class SceneManager:
             self.active_scene_name = name
             self.active_scene.start()
 
+    def _recreate_scene_instance(self, name: str) -> BaseScene:
+        scene = self.scenes.get(name)
+        if scene is None:
+            raise KeyError(f"Scene '{name}' not registered.")
+        recreated = SceneFactory.get().recreate(scene)
+        self.scenes[name] = recreated
+        self._scenes_needing_reset.discard(name)
+        return recreated
+
+    def _resolve_scene_for_activation(self, name: str) -> BaseScene:
+        if name not in self.scenes:
+            raise KeyError(f"Scene '{name}' not registered.")
+        if name in self._scenes_needing_reset:
+            return self._recreate_scene_instance(name)
+        return self.scenes[name]
+
+    def start_new_journey(self, start_scene_name: str = "home_scene", duration: float = 0.6):
+        save_manager = SaveGameManager.get()
+        self.resume_scene_name = None
+        self.help_resume_scene_name = None
+
+        # Marca apenas cenas de gameplay para reset; menu/help/creditos permanecem.
+        for scene_name in list(self.scenes.keys()):
+            if save_manager.should_persist_scene(scene_name):
+                self._scenes_needing_reset.add(scene_name)
+
+        # A cena inicial da nova jornada precisa estar limpa imediatamente.
+        if start_scene_name in self.scenes:
+            self._recreate_scene_instance(start_scene_name)
+
+        self.start_fade(start_scene_name, duration)
+
     def change(self, name: str):
         if name not in self.scenes:
             raise KeyError(f"Scene '{name}' not registered.")
@@ -50,7 +84,7 @@ class SceneManager:
             self.active_scene.end()
 
         EventManager.get().clear()
-        self.active_scene = self.scenes[name]
+        self.active_scene = self._resolve_scene_for_activation(name)
         self.active_scene_name = name
         self.active_scene.start()
 
@@ -105,12 +139,14 @@ class SceneManager:
         if not self.active_scene:
             self.change(name)
             return
-        self._begin_transition(self.scenes[name], name, duration)
+        target_scene = self._resolve_scene_for_activation(name)
+        self._begin_transition(target_scene, name, duration)
 
     def replace_scene_and_fade(self, scene_name: str, new_scene: BaseScene, duration: float = 0.5):
         if scene_name not in self.scenes:
             raise KeyError(f"Scene '{scene_name}' not registered.")
         self.scenes[scene_name] = new_scene
+        self._scenes_needing_reset.discard(scene_name)
         if not self.active_scene:
             self.change(scene_name)
             return

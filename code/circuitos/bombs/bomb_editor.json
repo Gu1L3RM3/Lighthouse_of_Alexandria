@@ -23,15 +23,51 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "bottom",
                     "top",
-                    "down"
+                    "bottom",
+                    "down",
+                    "up"
                 ]
             },
             {
                 "type": "Dropped",
                 "can_dropped": false
+            }
+        ]
+    },
+    {
+        "entity_type": "VoutageSource",
+        "components": [
+            {
+                "type": "Position",
+                "x": 512.0,
+                "y": 384.0
+            },
+            {
+                "type": "Sprite",
+                "image_path": "eletric_components/voltage_source.png",
+                "offset_x": 0,
+                "offset_y": 0,
+                "angle": 90.0
+            },
+            {
+                "type": "LabelComponent",
+                "font_path": "PressStart2P-Regular.ttf",
+                "name": "V1",
+                "value": "10"
+            },
+            {
+                "type": "Connectable",
+                "connections": [
+                    "top",
+                    "bottom",
+                    "down",
+                    "up"
+                ]
+            },
+            {
+                "type": "Dropped",
+                "can_dropped": true
             }
         ]
     },
@@ -53,8 +89,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
-                    "left"
+                    "left",
+                    "down"
                 ]
             },
             {
@@ -81,9 +117,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
+                    "left",
                     "down",
-                    "left"
+                    "up"
                 ]
             },
             {
@@ -110,8 +146,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -138,8 +174,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -166,8 +202,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -194,8 +230,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -222,8 +258,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -250,8 +286,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "down"
+                    "down",
+                    "right"
                 ]
             },
             {
@@ -306,8 +342,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -334,8 +370,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -362,8 +398,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "right",
-                    "left"
+                    "left",
+                    "right"
                 ]
             },
             {
@@ -390,44 +426,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "top"
-                ]
-            },
-            {
-                "type": "Dropped",
-                "can_dropped": true
-            }
-        ]
-    },
-    {
-        "entity_type": "VoutageSource",
-        "components": [
-            {
-                "type": "Position",
-                "x": 512.0,
-                "y": 384.0
-            },
-            {
-                "type": "Sprite",
-                "image_path": "eletric_components/voltage_source.png",
-                "offset_x": 0,
-                "offset_y": 0,
-                "angle": 90.0
-            },
-            {
-                "type": "LabelComponent",
-                "font_path": "PressStart2P-Regular.ttf",
-                "name": "V1",
-                "value": "10"
-            },
-            {
-                "type": "Connectable",
-                "connections": [
-                    "up",
-                    "bottom",
                     "top",
-                    "down"
+                    "up"
                 ]
             },
             {

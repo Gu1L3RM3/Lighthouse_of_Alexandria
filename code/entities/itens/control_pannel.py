@@ -100,7 +100,19 @@ class ControlPannel(Item):
 
     def open_circuit_editor(self):
         from core.managers.scene_manager import SceneManager
-        SceneManager.get().active_scene = CircuitEditor(pygame.display.get_surface(), file=self.name_file)
+        scene_manager = SceneManager.get()
+        current_scene = scene_manager.active_scene
+        if (
+            current_scene is not None
+            and hasattr(current_scene, "_preserve_component_overload_on_next_start")
+        ):
+            current_scene._preserve_component_overload_on_next_start = True
+        if (
+            current_scene is not None
+            and hasattr(current_scene, "_preserve_runtime_state_on_next_start")
+        ):
+            current_scene._preserve_runtime_state_on_next_start = True
+        scene_manager.active_scene = CircuitEditor(pygame.display.get_surface(), file=self.name_file)
 
     def on_collect(self, entity: Entity):
         _ = entity

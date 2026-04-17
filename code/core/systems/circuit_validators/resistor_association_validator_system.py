@@ -278,6 +278,12 @@ class ResistorAssotiationValidatorSystem(System):
         if not circuit_data:
             return
 
+        resistor_values = self.circuit_manager.get_circuit_values(control_pannel.name_file)
+        if not resistor_values:
+            return
+        if len(resistor_values) != 1:
+            return
+
         req_player = circuit_data.get("resistance", None)
         if req_player is None:
             return

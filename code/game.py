@@ -140,8 +140,7 @@ class Game:
             else:
                 print(f"[ALEX_PROFILE] warning: scene '{self.profile_start_scene}' not found")
 
-        #self.scene_manager.change("exp_fase_7")
-        #self.scene_manager.active_scene = CircuitEditor(self.screen,'bombs/bomb_editor',debug_mode=True)
+        self.scene_manager.active_scene = CircuitEditor(self.screen,'final_fase/fase_8/pannel2',debug_mode=True)
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 

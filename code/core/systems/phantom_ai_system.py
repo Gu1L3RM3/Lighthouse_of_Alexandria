@@ -104,7 +104,7 @@ class PhantomAISystem(System):
                 self._start_chase(phantom, ai)
 
             if ai.state == PhantomAI.STATE_CHASE:
-                self._chase_player(phantom, ai, player_center)
+                self._chase_player(phantom, ai, player, player_center)
             elif ai.state == PhantomAI.STATE_RETURN:
                 self._update_return_state(phantom, ai)
             elif ai.state == PhantomAI.STATE_PATROL:
@@ -146,7 +146,7 @@ class PhantomAISystem(System):
                 self._start_chase(phantom, ai)
         self.chasing_before_stealth.clear()
 
-    def _chase_player(self, phantom: Entity, ai: PhantomAI, player_center: Vector2):
+    def _chase_player(self, phantom: Entity, ai: PhantomAI, player: Entity, player_center: Vector2):
         if phantom.has(PathFollower):
             phantom.remove(PathFollower)
         pos: Position = phantom.get(Position)
@@ -156,7 +156,25 @@ class PhantomAISystem(System):
             vel.vel.update(0, 0)
             return
         direction = direction.normalize()
-        vel.vel = direction * ai.chase_speed
+        chase_speed = float(ai.chase_speed)
+
+        # Ajuste adaptativo: quanto mais lento o player estiver por peso,
+        # maior a pressão de perseguição para o efeito ficar perceptível.
+        player_mult = 1.0
+        if hasattr(player, "get_external_speed_multiplier"):
+            try:
+                player_mult = float(player.get_external_speed_multiplier())
+            except Exception:
+                player_mult = 1.0
+        player_mult = max(0.35, min(1.2, player_mult))
+        overload_ratio = max(0.0, min(1.0, 1.0 - player_mult))
+
+        distance = (player_center - pos.center_pos()).length()
+        far_pressure = 0.08 if distance >= (ai.detection_radius * 0.65) else 0.0
+        adaptive_boost = 1.0 + min(0.45, overload_ratio * 0.9) + far_pressure
+        chase_speed *= adaptive_boost
+
+        vel.vel = direction * chase_speed
         if hasattr(phantom, "set_direction"):
             phantom.set_direction(direction)
 

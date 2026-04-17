@@ -218,8 +218,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -248,8 +248,8 @@
                 "connections": [
                     "down",
                     "right",
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -305,8 +305,8 @@
                 "type": "Connectable",
                 "connections": [
                     "right",
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -335,8 +335,8 @@
                 "connections": [
                     "down",
                     "right",
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -671,9 +671,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -700,9 +700,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -729,9 +729,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -902,47 +902,13 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
                 "type": "Dropped",
                 "can_dropped": false
-            }
-        ]
-    },
-    {
-        "entity_type": "Resistor",
-        "components": [
-            {
-                "type": "Position",
-                "x": 384.0,
-                "y": 256.0
-            },
-            {
-                "type": "Sprite",
-                "image_path": "eletric_components/resistor.png",
-                "offset_x": 0,
-                "offset_y": 0,
-                "angle": 0.0
-            },
-            {
-                "type": "LabelComponent",
-                "font_path": "PressStart2P-Regular.ttf",
-                "name": "R3",
-                "value": "270k"
-            },
-            {
-                "type": "Connectable",
-                "connections": [
-                    "right",
-                    "left"
-                ]
-            },
-            {
-                "type": "Dropped",
-                "can_dropped": true
             }
         ]
     }

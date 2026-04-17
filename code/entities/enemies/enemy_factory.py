@@ -1,6 +1,7 @@
 from entities.enemies.spider_enemy import SpiderEnemy
 from entities.enemies.phantom_enemy import PhantomEnemy
 from core.settings import (
+    SPIDER_STANDARD_SPEED,
     SPIDER_WEB_AMBUSH_COOLDOWN_SECONDS,
     SPIDER_WEB_AMBUSH_DURATION_SECONDS,
     SPIDER_WEB_AMBUSH_PREDICTION_SECONDS,
@@ -42,6 +43,9 @@ class EnemyFactory:
 
         props = props or {}
         speed = float(props.get("speed", 42))
+        if key == "spider":
+            # Padroniza velocidade de aranha em todas as fases.
+            speed = float(SPIDER_STANDARD_SPEED)
         kwargs = {
             "x": x,
             "y": y,

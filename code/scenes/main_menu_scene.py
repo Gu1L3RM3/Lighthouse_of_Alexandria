@@ -209,7 +209,7 @@ class MainMenuScene(BaseScene):
     def start_new_game(self):
         self.save_manager.clear_save()
         self.life_manager.reset_lives()
-        self.scene_manager.start_fade("home_scene", 0.6)
+        self.scene_manager.start_new_journey("home_scene", 0.6)
 
     def open_credits(self):
         self.scene_manager.start_fade("credits", 0.45)

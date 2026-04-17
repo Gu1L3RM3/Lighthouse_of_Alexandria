@@ -78,7 +78,7 @@
  </objectgroup>
  <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="160" y="194.41" width="62.9292" height="95.5898">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Nesta etapa vamos dominar a Lei de Ohm e introduzir potência de forma prática.;Arquimedes: Tensão é a força que empurra as cargas, corrente é o fluxo, resistência é a oposição ao fluxo.;Arquimedes: A relação central é V igual a R vezes I e ela conecta as três grandezas.;Arquimedes: Potência elétrica é a taxa de energia no circuito e pode ser calculada por P igual a V vezes I.;Arquimedes: Quando você usar o valor da resistência, aplique P igual a I ao quadrado vezes R ou P igual a V ao quadrado dividido por R.;Arquimedes: Exemplo rápido com resistor R igual a 6 ohms e V igual a 12 volts, então I é 2 amperes e P é 24 watts.;Arquimedes: Em série, as resistências se somam, primeiro ache Req e depois aplique a Lei de Ohm.;Arquimedes: GND é a sigla de Ground e representa a referência de zero volt do circuito.;Arquimedes: Sem conectar o GND, o circuito pode não funcionar e as medições ficam incorretas.;Arquimedes: Nos painéis desta fase podem aparecer metas de tensão, corrente ou potência no resistor alvo.;Arquimedes: Agora você está pronto, pegue a chave e vá para a fase 3 resolver os desafios."/>

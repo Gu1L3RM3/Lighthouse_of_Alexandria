@@ -23,7 +23,6 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.voltage_source_item import VoutageSourceItem
 from scenes.fases.generic_levels import BaseGenericLevel
-from utils.setter_values import SetterValues
 
 
 class GenericLevel6(BaseGenericLevel):
@@ -242,33 +241,25 @@ class GenericLevel6(BaseGenericLevel):
             if not isinstance(solution_values, dict):
                 continue
 
-            parts = []
             expected = solution_values.get("expected", {})
             mode = solution_values.get("mode")
             source_kind = expected.get("source_kind")
-            source_label = expected.get("source_label")
-            source_value = expected.get("source_value")
-            resistance_label = expected.get("resistance_label")
-            resistance_value = expected.get("resistance_value")
+            if mode not in ("thevenin", "norton") or source_kind not in ("voltage", "current"):
+                continue
 
-            if (
-                mode in ("thevenin", "norton")
-                and source_kind in ("voltage", "current")
-                and source_label
-                and resistance_label
-                and source_value is not None
-                and resistance_value is not None
-            ):
-                source_unit = "V" if source_kind == "voltage" else "A"
-                parts.append(
-                    f"{mode.title()} (aprox): {source_label} ~= {SetterValues.format_eng(float(source_value), source_unit)}, "
-                    f"{resistance_label} ~= {SetterValues.format_eng(float(resistance_value), '')}"
+            if mode == "thevenin":
+                method_hint = (
+                    "isole os terminais de R1, calcule Vth e Rth e monte o equivalente com fonte de tensão em série com resistência."
+                )
+            else:
+                method_hint = (
+                    "isole os terminais de R1, calcule In e Rn e monte o equivalente com fonte de corrente em paralelo com resistência."
                 )
 
-            if parts:
-                text_list.append(
-                    f"Arquimedes: Para ativar o painel {p.pannel_id}, monte o equivalente visto por R1: {' | '.join(parts)}"
-                )
+            text_list.append(
+                f"Arquimedes: Painel {p.pannel_id}: {method_hint} "
+                "Dica extra: desligue as fontes independentes para achar a resistência equivalente."
+            )
 
         if text_list:
             dialogue_area.add_dialogue_text(text_list)

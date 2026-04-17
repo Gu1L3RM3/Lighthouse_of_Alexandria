@@ -23,9 +23,9 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "bottom",
                     "top",
-                    "down",
                     "up"
                 ]
             },
@@ -53,8 +53,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
-                    "right"
+                    "right",
+                    "down"
                 ]
             },
             {
@@ -73,7 +73,7 @@
             },
             {
                 "type": "Sprite",
-                "image_path": "eletric_components/node/node_left.png",
+                "image_path": "eletric_components/node/node_left_bottom.png",
                 "offset_x": 0,
                 "offset_y": 0,
                 "angle": 0.0
@@ -81,6 +81,7 @@
             {
                 "type": "Connectable",
                 "connections": [
+                    "down",
                     "left"
                 ]
             },
@@ -100,7 +101,7 @@
             },
             {
                 "type": "Sprite",
-                "image_path": "eletric_components/node/node_left.png",
+                "image_path": "eletric_components/node/node_left_top.png",
                 "offset_x": 0,
                 "offset_y": 0,
                 "angle": 0.0
@@ -108,7 +109,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -135,8 +137,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
                     "right",
+                    "down",
                     "left"
                 ]
             },
@@ -332,8 +334,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {

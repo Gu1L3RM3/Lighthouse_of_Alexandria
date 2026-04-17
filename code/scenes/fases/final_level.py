@@ -52,10 +52,12 @@ class FinalLevel(BaseMaxPowerLevel):
         self._panel_timer_font = pygame.font.SysFont("consolas", 12, bold=True)
 
     def start(self):
-        self.panel_timers.clear()
-        self.collected_components_by_area.clear()
-        self.initial_components_by_area.clear()
-        self.crystal_respawn_queue.clear()
+        preserve_runtime = bool(getattr(self, "_preserve_runtime_state_on_next_start", False))
+        if not preserve_runtime:
+            self.panel_timers.clear()
+            self.collected_components_by_area.clear()
+            self.initial_components_by_area.clear()
+            self.crystal_respawn_queue.clear()
         self._won = False
         self.player_dead_by_enemy = False
         if hasattr(self, "phantom_ai_system"):
@@ -67,6 +69,8 @@ class FinalLevel(BaseMaxPowerLevel):
         self._configure_final_dialogues()
 
     def end(self):
+        if self._should_skip_progress_reset_on_end():
+            return
         self.panel_timers.clear()
         self.collected_components_by_area.clear()
         self.initial_components_by_area.clear()
@@ -85,6 +89,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.event_manager.unsubscribe("current_source_collected", self._on_current_source_collected)
         self.event_manager.unsubscribe("voltage_source_collected", self._on_voltage_source_collected)
         self.event_manager.unsubscribe("crystal_invisibility_collected", self._on_crystal_collected)
+        self.event_manager.unsubscribe("panel_solved", self._on_final_panel_solved_gain_bombs)
 
         self.event_manager.subscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
         self.event_manager.subscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
@@ -93,6 +98,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.event_manager.subscribe("current_source_collected", self._on_current_source_collected)
         self.event_manager.subscribe("voltage_source_collected", self._on_voltage_source_collected)
         self.event_manager.subscribe("crystal_invisibility_collected", self._on_crystal_collected)
+        self.event_manager.subscribe("panel_solved", self._on_final_panel_solved_gain_bombs)
 
     def set_systems(self):
         self.animation_system = AnimationSystem()
@@ -228,7 +234,12 @@ class FinalLevel(BaseMaxPowerLevel):
         self._register_collected_component(event, "voltage_source")
 
     def _register_collected_component(self, event: dict, kind: str):
-        area_id = int(event.get("area_id", -1))
+        super()._register_collected_component(event, kind)
+
+        try:
+            area_id = int(event.get("area_id", -1))
+        except (TypeError, ValueError):
+            area_id = -1
         value = str(event.get("value", ""))
         spawn_x = float(event.get("spawn_x", 0))
         spawn_y = float(event.get("spawn_y", 0))
@@ -255,6 +266,13 @@ class FinalLevel(BaseMaxPowerLevel):
                 "respawn_delay": float(event.get("respawn_delay", 20.0)),
             }
         )
+
+    def _on_final_panel_solved_gain_bombs(self, event: dict):
+        _ = event
+        reward_amount = 2
+        self.bomb_manager.max_bombs += reward_amount
+        self.bomb_manager.remaining_bombs += reward_amount
+        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
 
     def _update_crystal_respawns(self, dt: float):
         still_waiting: list[dict] = []
@@ -284,22 +302,41 @@ class FinalLevel(BaseMaxPowerLevel):
             self.scene_manager.start_fade("ending_lighthouse", self.FINAL_FADE_SECONDS)
             return
 
-        for panel in panels:
-            if panel.done and panel.pannel_id not in self.panel_timers:
-                hold_time = float(getattr(panel, "solved_hold_seconds", self.DEFAULT_PANEL_HOLD_SECONDS))
-                if hold_time <= 0:
-                    hold_time = self.DEFAULT_PANEL_HOLD_SECONDS
-                self.panel_timers[panel.pannel_id] = hold_time
-            elif not panel.done:
-                self.panel_timers.pop(panel.pannel_id, None)
-
+        # Remove timers de paineis atualmente "errados".
         for panel in panels:
             if not panel.done:
-                continue
+                self.panel_timers.pop(panel.pannel_id, None)
+
+        solved_panels = [panel for panel in panels if panel.done]
+        if not solved_panels:
+            return
+
+        # Novo comportamento da fase final:
+        # quando um novo painel e resolvido, o timer dele inicia
+        # e os timers dos outros paineis resolvidos voltam ao valor cheio.
+        newly_solved = [panel for panel in solved_panels if panel.pannel_id not in self.panel_timers]
+        if newly_solved:
+            for panel in solved_panels:
+                self.panel_timers[panel.pannel_id] = self._panel_hold_time(panel)
+            return
+
+        expired_panels: list[ControlPannel] = []
+        for panel in solved_panels:
             panel_id = panel.pannel_id
-            self.panel_timers[panel_id] = self.panel_timers.get(panel_id, self.DEFAULT_PANEL_HOLD_SECONDS) - dt
-            if self.panel_timers[panel_id] <= 0:
-                self._reset_panel(panel)
+            current = self.panel_timers.get(panel_id, self._panel_hold_time(panel))
+            current -= dt
+            self.panel_timers[panel_id] = current
+            if current <= 0:
+                expired_panels.append(panel)
+
+        for panel in expired_panels:
+            self._reset_panel(panel)
+
+    def _panel_hold_time(self, panel: ControlPannel) -> float:
+        hold_time = float(getattr(panel, "solved_hold_seconds", self.DEFAULT_PANEL_HOLD_SECONDS))
+        if hold_time <= 0:
+            hold_time = self.DEFAULT_PANEL_HOLD_SECONDS
+        return hold_time
 
     def _reset_panel(self, panel: ControlPannel):
         area_id = int(panel.component_for_area)

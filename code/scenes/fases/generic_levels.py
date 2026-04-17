@@ -15,6 +15,8 @@ from scenes.circuit_editor import CircuitEditor
 from entities.dialogue_area import DialogueArea
 from entities.animated_tiles.iron_gate import IronGate
 from entities.enemies.phantom_enemy import PhantomEnemy
+from entities.itens.current_source_item import CurrentSourceItem
+from entities.itens.voltage_source_item import VoutageSourceItem
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
@@ -39,6 +41,7 @@ from core.managers.circuit_manager import CircuitManager
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.button import Button
 from core.ui.widgets.bomb_status_widget import BombStatusWidget
+from core.ui.widgets.component_overload_widget import ComponentOverloadWidget
 from core.ui.widgets.gesture_detector import ClickType
 from core.systems.generic_level_interaction_system import GenericLevelInteractionSystem
 from core.systems.generic_level_ghost_system import GenericLevelGhostSystem
@@ -48,6 +51,7 @@ from core.ui.renderers.generic_level_bomb_renderer import GenericLevelBombRender
 from core.ui.renderers.generic_level_ghost_renderer import GenericLevelGhostRenderer
 from core.managers.input_manager import InputManager
 from core.ui.prompt_ui import draw_prompt_hint_row
+from scenes.fases.component_overload_service import ComponentOverloadService
 
 class BaseGenericLevel(BaseScene):
     def __init__(self, screen: Surface, level_path: str):
@@ -77,6 +81,11 @@ class BaseGenericLevel(BaseScene):
         self.bomb_world_sprite = None
         self.bomb_prefuze_frames: list[pygame.Surface] = []
         self.bomb_boom_frames: list[pygame.Surface] = []
+        self.component_overload = ComponentOverloadService(
+            speed_multiplier_applier=self._apply_player_speed_multiplier,
+            total_components_provider=self._total_map_components,
+            total_areas_provider=self._total_component_areas,
+        )
         # Sistemas de suporte precisam existir antes de set_map(),
         # porque o fluxo do mapa já prepara templates de fantasmas.
         self.ghost_system = GenericLevelGhostSystem(self)
@@ -112,6 +121,8 @@ class BaseGenericLevel(BaseScene):
         self._temporary_light_timer = 0.0
         self._temporary_light_restore_enabled = None
         self._scene_change_target_name: str | None = None
+        self._preserve_runtime_state_on_next_start = False
+        self._preserve_component_overload_on_next_start = False
         
         # Subclasses will override this
         self.set_systems() 
@@ -172,7 +183,20 @@ class BaseGenericLevel(BaseScene):
             color_text=(245, 230, 170),
         )
         self.bomb_status_widget = BombStatusWidget(self.bomb_manager, pos=(10, 86))
-        self.ui_manager.add(self.menu_button, self.help_button, self.edit_bomb_button, self.bomb_status_widget)
+        bomb_x, bomb_y = self.bomb_status_widget.pos
+        overload_y = bomb_y + 68 + 8
+        self.component_overload_widget = ComponentOverloadWidget(
+            self.screen.get_size(),
+            self,
+            anchor_pos=(bomb_x + 2, overload_y),
+        )
+        self.ui_manager.add(
+            self.menu_button,
+            self.help_button,
+            self.edit_bomb_button,
+            self.bomb_status_widget,
+            self.component_overload_widget,
+        )
         self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
         self.ui_manager.add(self.interaction_key_widget)
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
@@ -335,6 +359,7 @@ class BaseGenericLevel(BaseScene):
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type='Resistor',value=value)
         self.storage_circuit.save_eletric_storage()
+        self._register_collected_component(event, "resistor")
 
     def update_storage_circuit_generic(self, event, component_type):
         value = event["value"]
@@ -342,11 +367,26 @@ class BaseGenericLevel(BaseScene):
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
+        normalized = component_type.lower()
+        if "current" in normalized:
+            kind = "current_source"
+        elif "voutage" in normalized or "voltage" in normalized:
+            kind = "voltage_source"
+        else:
+            kind = "resistor"
+        self._register_collected_component(event, kind)
         
     def kill_entity_event(self,event):
         entity_id = event['id']
         entity = self.entity_mn.get_entity_by_id(entity_id)
-        if entity and entity.has(PhantomAI):
+        is_phantom = bool(
+            entity
+            and (
+                entity.has(PhantomAI)
+                or isinstance(entity, PhantomEnemy)
+            )
+        )
+        if is_phantom:
             death_x = None
             death_y = None
             if entity.has(Position):
@@ -358,6 +398,8 @@ class BaseGenericLevel(BaseScene):
 
     def open_bomb_editor(self):
         self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
+        # Ao voltar do editor, manter filas de runtime (ex.: respawn de fantasma).
+        self._preserve_runtime_state_on_next_start = True
         # Preserva contagem de nucleos ao abrir/fechar o editor durante a mesma fase.
         self._saved_bomb_counts = (
             int(self.bomb_manager.max_bombs),
@@ -512,12 +554,22 @@ class BaseGenericLevel(BaseScene):
             pygame.draw.circle(self.screen, (90, 210, 255), center_scaled, radius_scaled, 1)
 
     def common_subscribes(self):
-        self.pending_bombs.clear()
-        self.active_explosions.clear()
-        self.crystal_respawn_queue.clear()
-        self.ghost_respawn_queue.clear()
-        self.ghost_rebirth_effects.clear()
-        self.ghost_system.bind_existing_ghost_entities_to_templates()
+        preserve_runtime = bool(getattr(self, "_preserve_runtime_state_on_next_start", False))
+        self._preserve_runtime_state_on_next_start = False
+        if not preserve_runtime:
+            self.pending_bombs.clear()
+            self.active_explosions.clear()
+            self.crystal_respawn_queue.clear()
+            self.ghost_respawn_queue.clear()
+            self.ghost_rebirth_effects.clear()
+        preserve_overload = bool(getattr(self, "_preserve_component_overload_on_next_start", False)) or preserve_runtime
+        if preserve_overload:
+            self._apply_player_speed_multiplier(self.component_overload.multiplier)
+            self._preserve_component_overload_on_next_start = False
+        else:
+            self.component_overload.reset()
+        if not preserve_runtime:
+            self.ghost_system.bind_existing_ghost_entities_to_templates()
         if self._restore_bombs_after_editor and self._saved_bomb_counts is not None:
             max_bombs, remaining_bombs = self._saved_bomb_counts
             self.bomb_manager.max_bombs = max(0, int(max_bombs))
@@ -545,6 +597,7 @@ class BaseGenericLevel(BaseScene):
         if not self.environment_system.uses_custom_crystal_respawn():
             self.event_manager.subscribe("crystal_invisibility_collected", self.environment_system.on_crystal_invisibility_collected)
         self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
+        self.event_manager.subscribe("panel_solved", self._on_panel_solved_overload)
         self.event_manager.subscribe("panel_bomb_reward", self._on_panel_bomb_reward)
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
@@ -593,6 +646,10 @@ class BaseGenericLevel(BaseScene):
     def on_scene_will_change(self, target_scene_name: str):
         self._scene_change_target_name = target_scene_name
         if target_scene_name in {"main_menu", "help"}:
+            self._preserve_runtime_state_on_next_start = True
+            self._preserve_component_overload_on_next_start = True
+        self.component_overload.clear_speed_penalty()
+        if target_scene_name in {"main_menu", "help"}:
             return
         self.reset_bomb_circuit_to_default()
 
@@ -627,3 +684,56 @@ class BaseGenericLevel(BaseScene):
 
     def _update_crystal_respawn_queue(self, dt: float):
         self.environment_system.update_crystal_respawn_queue(dt)
+
+    def _register_collected_component(self, event: dict, kind: str):
+        self.component_overload.register_component(event, kind)
+
+    def _on_panel_solved_overload(self, event: dict):
+        payload = dict(event or {})
+        if "area_id" not in payload:
+            panel_id = payload.get("pannel_id")
+            pannels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
+            for panel in pannels:
+                if getattr(panel, "pannel_id", None) == panel_id:
+                    try:
+                        payload["area_id"] = int(panel.component_for_area)
+                    except (TypeError, ValueError):
+                        payload["area_id"] = -1
+                    break
+        self.component_overload.on_panel_solved(payload)
+
+    def get_component_overload_snapshot(self) -> dict:
+        return self.component_overload.get_snapshot()
+
+    def _apply_player_speed_multiplier(self, multiplier: float):
+        if self.player and hasattr(self.player, "set_external_speed_multiplier"):
+            self.player.set_external_speed_multiplier(multiplier)
+
+    def _active_component_areas(self) -> set[int]:
+        areas: set[int] = set()
+        pannels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
+        for panel in pannels:
+            if bool(getattr(panel, "done", False)):
+                continue
+            try:
+                areas.add(int(panel.component_for_area))
+            except (TypeError, ValueError):
+                continue
+        return areas
+
+    def _total_map_components(self) -> int:
+        total = 0
+        total += len(self.entity_mn.get_entities_by_class(ResistorItem))
+        total += len(self.entity_mn.get_entities_by_class(CurrentSourceItem))
+        total += len(self.entity_mn.get_entities_by_class(VoutageSourceItem))
+        return max(1, total)
+
+    def _total_component_areas(self) -> int:
+        areas: set[int] = set()
+        pannels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
+        for panel in pannels:
+            try:
+                areas.add(int(panel.component_for_area))
+            except (TypeError, ValueError):
+                continue
+        return max(1, len(areas))

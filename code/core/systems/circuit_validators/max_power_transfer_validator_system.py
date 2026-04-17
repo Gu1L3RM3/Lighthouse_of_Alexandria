@@ -27,6 +27,8 @@ class MaxPowerTransferValidatorSystem(System):
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
         self.debug = True  # habilita logs simples no console
+        # Evita spam: loga validacao apenas quando o estado do painel muda.
+        self._last_validation_state: dict[int, bool] = {}
 
     # ------------------------------------------------------
     # Utilidades
@@ -255,6 +257,7 @@ class MaxPowerTransferValidatorSystem(System):
         }
 
     def set_solutions(self, event: dict, entity_manager: EntityManager):
+        self._last_validation_state.clear()
         sources_per_area = event.get("sources", {})
         resistors_per_area = event.get("resistors", {})
         raw_panel_ids = event.get("panel_ids")
@@ -407,14 +410,19 @@ class MaxPowerTransferValidatorSystem(System):
             if all_ok and "current" in requested_types:
                 all_ok = all_ok and self._float_equals_percent(ans_i, float(expected["current"]), self.tolerance_percent)
 
-            self._log(
-                f"Painel {cp.pannel_id}: medido P={ans_p:.3g}W V={ans_v:.3g}V I={ans_i:.3g}A R={ans_r:.3g} Ohm "
-                f"| esperado P={expected['power']:.3g}W V={expected['voltage']:.3g}V I={expected['current']:.3g}A "
-                f"RL={expected['rl']:.3g} Ohm -> {'OK' if all_ok else 'FAIL'}"
-            )
+            panel_id = int(cp.pannel_id)
+            previous_state = self._last_validation_state.get(panel_id)
+            if previous_state is None or previous_state != all_ok:
+                self._last_validation_state[panel_id] = all_ok
+                self._log(
+                    f"Painel {cp.pannel_id}: medido P={ans_p:.3g}W V={ans_v:.3g}V I={ans_i:.3g}A R={ans_r:.3g} Ohm "
+                    f"| esperado P={expected['power']:.3g}W V={expected['voltage']:.3g}V I={expected['current']:.3g}A "
+                    f"RL={expected['rl']:.3g} Ohm -> {'OK' if all_ok else 'FAIL'}"
+                )
 
             if all_ok:
                 cp.action()
+                self._last_validation_state.pop(panel_id, None)
 
 
 

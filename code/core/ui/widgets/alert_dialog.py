@@ -4,6 +4,8 @@ from core.ui.widgets.widget import Widget
 from core.ui.widgets.gesture_detector import  ClickType
 from core.ui.widgets.button import Button
 from core.managers.event_manager import EventManager
+from core.managers.input_manager import InputManager
+from core.ui.prompt_ui import draw_prompt_hint_row
 from typing import Callable, Optional
 
 
@@ -25,6 +27,10 @@ class AlertDialog(Widget):
         self.buttons: list[Button] = []
         self.screen_size = pygame.display.get_window_size()
         self._dialog_size = (int(dialog_size[0]), int(dialog_size[1]))
+        self.input_manager = InputManager.get()
+        self.prompt_chip_font = pygame.font.Font(None, 18)
+        self.prompt_text_font = pygame.font.Font(None, 18)
+        self._closed = False
 
         self.set_dialog_rect(self._dialog_size)
         if self.make_freeze:
@@ -87,6 +93,9 @@ class AlertDialog(Widget):
 
 
     def _close(self):
+        if self._closed:
+            return
+        self._closed = True
         if self.make_freeze:
             self.em.post({'type':'release_freeze'})
         if not self.on_close:
@@ -119,3 +128,23 @@ class AlertDialog(Widget):
 
 
         self.close_button.draw(surface)
+        self._draw_close_hint(surface)
+
+    def _draw_close_hint(self, surface: Surface):
+        if self.input_manager.last_input_source == "controller":
+            items = [
+                (self.input_manager.get_prompt_button("confirm"), "fechar"),
+                (self.input_manager.get_prompt_button("back"), "voltar"),
+            ]
+        else:
+            items = [("ESC", "fechar"), ("ENTER", "confirmar")]
+
+        draw_prompt_hint_row(
+            surface,
+            self.prompt_chip_font,
+            self.prompt_text_font,
+            items,
+            anchor=(surface.get_width() - 18, surface.get_height() - 24),
+            align="right",
+            gap=10,
+        )

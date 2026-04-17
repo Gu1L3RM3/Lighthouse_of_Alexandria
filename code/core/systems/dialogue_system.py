@@ -10,10 +10,14 @@ from core.managers.input_manager import InputManager
 from core.ui.widgets.dialog_box import DialogueBoxWidget  
 from core.managers.ui_manager import UIManager
 from entities.dialogue_area import DialogueArea
+from entities.npcs.arquimedes import Arquimedes
+from entities.npcs.father import FatherNPC
 
 
 
 class DialogueSystem:
+    NPC_DIALOG_FOCUS_MAX_DISTANCE = 128.0
+
     def __init__(self, ui_manager:UIManager):
         self.event_manager = EventManager.get()
         self.input_manager = InputManager.get()
@@ -70,16 +74,85 @@ class DialogueSystem:
 
             if entity_dialogue.auto_start and not entity_dialogue.triggered:
                 entity_dialogue.triggered = True
-                self._start_dialogue(entity,player)
+                self._start_dialogue(entity_mn, entity, player)
                 break
 
             elif not entity_dialogue.auto_start and self.input_manager.is_key_just_pressed(KEY_DIALOG):
-                self._start_dialogue(entity,player)
+                self._start_dialogue(entity_mn, entity, player)
                 break
     
 
-    def _start_dialogue(self, entity: Entity,player:Entity):
+    def _get_entity_center(self, entity: Entity) -> pygame.Vector2 | None:
+        if not entity.has(Position):
+            return None
+        pos: Position = entity.get(Position)
+        return pos.center_pos()
+
+    def _get_dialogue_area_rect(self, area: DialogueArea) -> pygame.Rect | None:
+        if not area.has(Position) or not area.has(Dialogue):
+            return None
+        pos: Position = area.get(Position)
+        dialogue: Dialogue = area.get(Dialogue)
+        return dialogue.get_area(pos.x, pos.y)
+
+    def _distance_sq_point_to_rect(self, point: pygame.Vector2, rect: pygame.Rect) -> float:
+        dx = 0.0
+        if point.x < rect.left:
+            dx = float(rect.left - point.x)
+        elif point.x > rect.right:
+            dx = float(point.x - rect.right)
+
+        dy = 0.0
+        if point.y < rect.top:
+            dy = float(rect.top - point.y)
+        elif point.y > rect.bottom:
+            dy = float(point.y - rect.bottom)
+
+        return dx * dx + dy * dy
+
+    def _nearest_dialogue_npc_for_area(self, entity_mn: EntityManager, area_rect: pygame.Rect) -> pygame.Vector2 | None:
+        if area_rect is None:
+            return None
+
+        nearest = None
+        nearest_dist_sq = None
+        candidates = []
+        candidates.extend(entity_mn.get_entities_by_class(Arquimedes))
+        candidates.extend(entity_mn.get_entities_by_class(FatherNPC))
+
+        for npc in candidates:
+            center = self._get_entity_center(npc)
+            if center is None:
+                continue
+            dist_sq = self._distance_sq_point_to_rect(center, area_rect)
+            if nearest is None or dist_sq < nearest_dist_sq:
+                nearest = center
+                nearest_dist_sq = dist_sq
+
+        if nearest is None:
+            return None
+
+        max_dist_sq = self.NPC_DIALOG_FOCUS_MAX_DISTANCE * self.NPC_DIALOG_FOCUS_MAX_DISTANCE
+        if nearest_dist_sq > max_dist_sq:
+            return None
+
+        return nearest
+
+    def _resolve_dialogue_focus_target(self, entity_mn: EntityManager, dialogue_entity: Entity) -> pygame.Vector2 | None:
+        if isinstance(dialogue_entity, (Arquimedes, FatherNPC)):
+            return self._get_entity_center(dialogue_entity)
+
+        if isinstance(dialogue_entity, DialogueArea):
+            area_rect = self._get_dialogue_area_rect(dialogue_entity)
+            return self._nearest_dialogue_npc_for_area(entity_mn, area_rect)
+
+        return None
+
+    def _start_dialogue(self, entity_mn: EntityManager, entity: Entity, player: Entity):
         player.stay_idle()
+        focus_target = self._resolve_dialogue_focus_target(entity_mn, entity)
+        if focus_target is not None and hasattr(player, "look_at_world_position"):
+            player.look_at_world_position(focus_target)
 
         self.active_dialogue= entity
 

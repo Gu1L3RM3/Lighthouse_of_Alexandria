@@ -78,7 +78,7 @@
  </objectgroup>
  <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="159.39" y="199.898" width="65.9782" height="90.1016">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Nesta etapa você vai dominar os teoremas de Thévenin e Norton.;Arquimedes: Thévenin substitui a rede por uma fonte de tensão Vth em série com Rth.;Arquimedes: Norton substitui a rede por uma fonte de corrente In em paralelo com Rn.;Arquimedes: As relações são Rth igual a Rn, Vth igual a In vezes Rth e In igual a Vth dividido por Rth.;Arquimedes: Para achar Vth, retire a carga e calcule a tensão de circuito aberto.;Arquimedes: Para achar Rth, desligue as fontes independentes e veja a resistência vista dos terminais.;Arquimedes: Para Norton, use a corrente de curto-circuito nos terminais para obter In.;Arquimedes: Sempre use GND Ground como referência de zero volt para as medições.;Arquimedes: Sem GND, os resultados podem ficar indefinidos ou incorretos.;Arquimedes: Nos painéis, identifique os terminais, calcule o equivalente e valide com cuidado."/>

@@ -324,8 +324,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -354,8 +354,8 @@
                 "connections": [
                     "down",
                     "right",
-                    "up",
-                    "left"
+                    "left",
+                    "up"
                 ]
             },
             {
@@ -831,9 +831,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
                     "bottom",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
@@ -922,49 +922,13 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "top",
-                    "up"
+                    "up",
+                    "top"
                 ]
             },
             {
                 "type": "Dropped",
                 "can_dropped": false
-            }
-        ]
-    },
-    {
-        "entity_type": "Resistor",
-        "components": [
-            {
-                "type": "Position",
-                "x": 768.0,
-                "y": 384.0
-            },
-            {
-                "type": "Sprite",
-                "image_path": "eletric_components/resistor.png",
-                "offset_x": 0,
-                "offset_y": 0,
-                "angle": 90.0
-            },
-            {
-                "type": "LabelComponent",
-                "font_path": "PressStart2P-Regular.ttf",
-                "name": "R3",
-                "value": "10"
-            },
-            {
-                "type": "Connectable",
-                "connections": [
-                    "top",
-                    "down",
-                    "bottom",
-                    "up"
-                ]
-            },
-            {
-                "type": "Dropped",
-                "can_dropped": true
             }
         ]
     }

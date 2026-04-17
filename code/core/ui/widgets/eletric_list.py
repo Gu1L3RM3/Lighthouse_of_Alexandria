@@ -90,7 +90,7 @@ class EletricList(Widget):
         self.scroll_offset = int(value)
         self._clamp_scroll()
         if self.scroll_offset != old_value:
-            self._create_buttons()
+            self._create_buttons(preserve_focus=True)
 
     def _scroll_by(self, delta: int):
         self._set_scroll(self.scroll_offset + delta)
@@ -112,10 +112,11 @@ class EletricList(Widget):
         self._update_content_rect()
         self._clamp_scroll()
 
-    def _create_buttons(self):
+    def _create_buttons(self, preserve_focus: bool = True):
+        previous_focus_index = self.controller_focus_index if preserve_focus else 0
         self.buttons.clear()
         self.visible_buttons.clear()
-        self.controller_focus_index = 0
+        self.controller_focus_index = max(0, int(previous_focus_index))
         if self.list_type not in self.data:
             return
 
@@ -208,7 +209,7 @@ class EletricList(Widget):
     def update_data(self):
         self.data = self.storage_manager.storage_circuit
         self.set_alert_dialog()
-        self._create_buttons()
+        self._create_buttons(preserve_focus=False)
         self._last_revision = self.storage_manager.revision
 
     def handle_events(self, event):

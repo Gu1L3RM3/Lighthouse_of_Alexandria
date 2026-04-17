@@ -25,6 +25,7 @@ class Player(Entity):
         self._direction = Vector2(0, 0)
         self._old_direction = Vector2(0, 1)
         self._speed = 100
+        self._external_speed_multiplier = 1.0
         self._current_animation_state = "" 
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
@@ -61,6 +62,22 @@ class Player(Entity):
         dir_name = self._get_dir_name(self._old_direction)
         self._set_animation(f"idle_{dir_name}")
 
+    def look_at_world_position(self, target):
+        if not self.has(Position):
+            return
+        pos: Position = self.get(Position)
+        target_vec = Vector2(target)
+        direction = target_vec - pos.center_pos()
+        if direction.length_squared() <= 1e-6:
+            return
+
+        if abs(direction.x) >= abs(direction.y):
+            self._old_direction = Vector2(1, 0) if direction.x > 0 else Vector2(-1, 0)
+        else:
+            self._old_direction = Vector2(0, 1) if direction.y > 0 else Vector2(0, -1)
+
+        self.stay_idle()
+
     def _set_animation(self, new_state: str):
         if self._current_animation_state != new_state:
             anim: AnimateSprite = self.get(AnimateSprite)
@@ -77,7 +94,8 @@ class Player(Entity):
         self._direction = self.input_manager.get_movement_vector()
 
         if self._direction.length_squared() > 0:
-            vel.vxy = (self._direction.x * self._speed, self._direction.y * self._speed)
+            speed = self._speed * self._external_speed_multiplier
+            vel.vxy = (self._direction.x * speed, self._direction.y * speed)
             self._old_direction = self._direction.copy()
             dir_name = self._get_dir_name(self._direction)
             self._set_animation(f"walk_{dir_name}")
@@ -124,3 +142,13 @@ class Player(Entity):
                 frame = frame.subsurface(bbox).copy()
             frames.append(frame)
         return frames
+
+    def set_external_speed_multiplier(self, multiplier: float):
+        try:
+            value = float(multiplier)
+        except (TypeError, ValueError):
+            value = 1.0
+        self._external_speed_multiplier = max(0.35, min(1.2, value))
+
+    def get_external_speed_multiplier(self) -> float:
+        return float(self._external_speed_multiplier)

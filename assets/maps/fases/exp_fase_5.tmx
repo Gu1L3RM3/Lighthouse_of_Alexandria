@@ -78,7 +78,7 @@
  </objectgroup>
  <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="160" y="207.216" width="63.539" height="82.784">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Agora você vai aprender método dos nós com as Leis de Kirchhoff.;Arquimedes: KCL diz que a soma das correntes que entram em um nó é igual à soma das que saem.;Arquimedes: No método dos nós, você escolhe um nó de referência GND e calcula as tensões dos outros nós.;Arquimedes: Para cada nó desconhecido, escreva a equação de corrente usando V dividido por R.;Arquimedes: KVL diz que a soma das tensões em uma malha fechada é zero e ajuda nas relações do circuito.;Arquimedes: Resolva o sistema de equações e obtenha as tensões e correntes pedidas.;Arquimedes: Sempre conecte o GND Ground, porque ele define a referência de zero volt.;Arquimedes: Sem GND, o circuito pode não funcionar e as medições podem ficar erradas.;Arquimedes: Nos painéis, siga passo a passo, identifique o nó, monte as equações e valide os resultados."/>

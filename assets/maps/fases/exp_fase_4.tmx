@@ -78,7 +78,7 @@
  </objectgroup>
  <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="160" y="208.436" width="62.3194" height="81.5644">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Agora vamos estudar associação de resistores para você dominar a fase 4.;Arquimedes: Em série, a corrente é a mesma em todos os resistores e a resistência equivalente é a soma.;Arquimedes: Exemplo em série: R1 mais R2 mais R3 gera a resistência total do bloco.;Arquimedes: Em paralelo, a tensão é a mesma em cada ramo e usamos a soma dos inversos.;Arquimedes: No paralelo, a resistência equivalente sempre fica menor que o menor resistor.;Arquimedes: Em circuitos mistos, reduza por blocos: primeiro paralelo, depois série, ou o contrário.;Arquimedes: O divisor de tensão em série ajuda a achar tensões nos pontos do circuito.;Arquimedes: Não esqueça: GND significa Ground e define a referência de zero volt.;Arquimedes: Sem GND, o circuito pode não funcionar e as medições podem ficar incorretas.;Arquimedes: Siga esses passos nos painéis, pegue a chave e avance para a fase 4."/>

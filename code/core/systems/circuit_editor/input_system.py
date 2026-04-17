@@ -1,4 +1,5 @@
 import pygame
+import traceback
 from pygame import Rect
 from pathlib import Path
 from typing import Tuple,Dict
@@ -64,6 +65,12 @@ class InputSystem(System):
         self.set_empty_boxes_for_debug()
 
         self.angle_deg=90
+
+    def _log_solve_error_debug(self, message: str):
+        if not self.debug_mode:
+            return
+        print(f"[CircuitEditor][Solve][ERRO] {message}")
+        print(traceback.format_exc())
 
 
     def set_empty_boxes_for_debug(self):
@@ -358,6 +365,9 @@ class InputSystem(System):
 
             return True
         except Exception as e:
+            self._log_solve_error_debug(
+                f"arquivo='{self.full_file}' net='{self.net_file}' detalhe='{e}'"
+            )
             CircuitManager.get().clear_circuit(self.full_file)
             return False
 
