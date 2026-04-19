@@ -22,7 +22,8 @@ class CircuitSolver:
     def _load_and_clean_netlist(self) -> str:
         circuit_str = ''
         try:
-            with open(self.netlist_path, "r", encoding="utf-8") as file:
+            # Usa utf-8-sig para tolerar netlists com BOM no inicio do arquivo.
+            with open(self.netlist_path, "r", encoding="utf-8-sig") as file:
                 for line in file.readlines():
                     if line.startswith(('.', '*')):
                         continue

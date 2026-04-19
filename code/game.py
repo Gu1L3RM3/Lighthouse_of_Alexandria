@@ -8,6 +8,7 @@ from core.managers.life_manager  import LifeManager
 from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
+from core.circuit_tools.serialization_manager import SerializationManager
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -126,21 +127,37 @@ class Game:
         profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
         self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
         self.profile_start_scene = os.getenv("ALEX_START_SCENE", "").strip()
+        # Boot opcional direto no editor (debug). Quando ativo, preserva storage.
+        self.boot_circuit_editor_file = os.getenv("ALEX_BOOT_EDITOR_FILE", "").strip()
+        self.boot_circuit_editor_debug = os.getenv("ALEX_BOOT_EDITOR_DEBUG", "0") == "1"
         try:
             self.profile_auto_seconds = max(0.0, float(os.getenv("ALEX_PROFILE_SECONDS", "0") or 0))
         except ValueError:
             self.profile_auto_seconds = 0.0
         self._profile_elapsed = 0.0
 
+        preserve_storage_on_boot = bool(self.boot_circuit_editor_file and self.boot_circuit_editor_debug)
+        if not preserve_storage_on_boot:
+            SerializationManager.clear_eletric_storage()
     
         self.register_fases()
-        if self.profile_start_scene:
+        if self.boot_circuit_editor_file:
+            self.scene_manager.active_scene = CircuitEditor(
+                self.screen,
+                self.boot_circuit_editor_file,
+                debug_mode=self.boot_circuit_editor_debug,
+            )
+            self.scene_manager.active_scene_name = "circuit_editor_boot"
+        elif self.profile_start_scene:
             if self.profile_start_scene in self.scene_manager.scenes:
                 self.scene_manager.change(self.profile_start_scene)
             else:
                 print(f"[ALEX_PROFILE] warning: scene '{self.profile_start_scene}' not found")
 
-        self.scene_manager.active_scene = CircuitEditor(self.screen,'final_fase/fase_8/pannel2',debug_mode=True)
+       # Exemplo de boot via env:
+       # ALEX_BOOT_EDITOR_FILE=final_fase/fase_8/pannel4
+       # ALEX_BOOT_EDITOR_DEBUG=1
+        #self.scene_manager.change('fase_5')
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 
@@ -201,6 +218,9 @@ class Game:
     def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0
+            # Evita "tunneling" de colisao apos frames com travada (ex.: reset pesado de painel).
+            # 50 ms e um teto seguro para manter estabilidade da fisica.
+            dt = min(dt, 0.05)
             self.profiler.start_frame()
             
             events = pygame.event.get()

@@ -101,21 +101,29 @@ class GenericLevel7(BaseMaxPowerLevel):
         if isinstance(solution, dict):
             target = solution.get("target", "R1")
 
-            hints = [
-                "Arquimedes: Kevin, seu pai esta logo atrás desse portão de ferro. Mantenha a calma.",
-                f"Arquimedes: O painel avalia o resistor alvo {target}, que já está fixo no circuito.",
-                "Arquimedes: Para abrir, busque máxima transferência de potência no resistor alvo.",
-                "Arquimedes: Use Thevenin nos terminais da carga e ajuste RL para casar com Rth.",
-                "Arquimedes: Monte com cuidado e valide no painel. Estamos muito perto de libertá-lo.",
-            ]
-        else:
-            hints = [
-                "Arquimedes: Kevin, seu pai esta preso adiante. Este painel controla o portão da cela.",
-                "Arquimedes: Para vencer esta etapa, use máxima transferência de potência.",
-                "Arquimedes: Primeiro ache o equivalente de Thevenin nos terminais da carga, com GND como referência.",
-                "Arquimedes: A regra principal é RL igual a Rth.",
-                "Arquimedes: Não chute. Monte, meça e ajuste até o painel aceitar.",
-            ]
+            if target:
+                hints = [
+                    "Arquimedes: Kevin... eu não esperava isso. Aquele homem é mesmo seu pai?",
+                    "Kevin: É ele. E foi ele quem quase destruiu o Farol para mudar a história.",
+                    "Arquimedes: Meu Deus... ele quase condenou Alexandria inteira.",
+                    "Kevin: Eu sei. Mas agora ele está preso e ainda é meu pai.",
+                    "Arquimedes: Depois de tudo isso, você ainda quer resgatá-lo?",
+                    "Kevin: Quero. Se eu não tentar, eu viro as costas para quem eu sou.",
+                    "Kevin: Eu vou impedir o erro dele, mas não vou abandonar meu pai.",
+                    "Arquimedes: ...Certo. Então vamos tirá-lo daqui e terminar isso juntos.",
+                    f"Arquimedes: Foque no resistor alvo {target}.",
+                    "Arquimedes: Encontre Thévenin nos terminais da carga e ajuste RL para casar com Rth.",
+                ]
+            else:
+                hints = [
+                    "Arquimedes: Kevin... eu ainda estou em choque. Aquele homem é seu pai.",
+                    "Kevin: Sim. E eu não vou deixar ele destruir o Farol.",
+                    "Arquimedes: Ele quase apagou a luz de Alexandria...",
+                    "Kevin: E por isso mesmo eu preciso chegar nele antes que seja tarde.",
+                    "Arquimedes: Entendi. Vamos abrir essa cela juntos.",
+                    "Arquimedes: Para isso, use máxima transferência de potência no painel.",
+                    "Arquimedes: Ache Thévenin nos terminais da carga e ajuste RL para ficar igual a Rth.",
+                ]
 
         for arquimedes in self.entity_mn.get_entities_by_class(Arquimedes):
             if not arquimedes.has(Dialogue):
@@ -139,67 +147,71 @@ class GenericLevel7(BaseMaxPowerLevel):
     def _configure_father_dialogue(self):
         father_lines = [
 
-                "Pai: Kevin... então você chegou até aqui.",
-                "Pai: Eu sabia que apenas você entenderia os circuitos deste lugar.",
+            "Pai: Kevin... então você chegou até aqui.",
+            "Pai: Eu sabia que apenas você entenderia os circuitos deste lugar.",
 
-                "Pai: Este farol não é apenas uma torre.",
-                "Pai: Ele é um amplificador de energia... e de história.",
+            "Pai: Este farol não é apenas uma torre.",
+            "Pai: Ele é um amplificador de energia... e de história.",
 
-                "Pai: No topo está o Coração de Fóton.",
-                "Pai: Um núcleo capaz de concentrar luz, calor... e algo muito mais raro.",
+            "Pai: No topo está o Coração de Fóton.",
+            "Pai: Um núcleo capaz de concentrar luz, calor... e algo muito mais raro.",
 
-                "Pai: Probabilidade.",
+            "Pai: Possibilidades.",
 
-                "Kevin: Probabilidade...?",
+            "Kevin: Possibilidades...?",
 
-                "Pai: Cada grande evento da história depende de pequenas condições.",
-                "Pai: Um vento diferente... uma chama apagada... um farol que deixa de brilhar.",
+            "Pai: Cada grande evento da história nasce de detalhes quase invisíveis.",
+            "Pai: Um vento diferente... uma chama apagada... um farol que deixa de brilhar.",
 
-                "Pai: Eu estudei os registros históricos.",
-                "Pai: Existe uma linha do tempo onde Alexandria foi atacada nesta noite.",
+            "Pai: Eu estudei registros, mapas e relatos esquecidos.",
+            "Pai: Existe uma linha do tempo em que Alexandria foi atacada nesta noite.",
 
-                "Pai: Uma frota inimiga atravessa o Mediterrâneo e chega sem ser vista.",
-                "Pai: Porque o farol... não estava funcionando.",
+            "Pai: Uma frota inimiga cruza o Mediterrâneo e alcança o porto sem ser vista.",
+            "Pai: Porque o farol... estava apagado.",
 
-                "Pai: A cidade cai.",
-                "Pai: Milhares morrem.",
+            "Pai: A cidade cai.",
+            "Pai: Milhares morrem.",
 
-                "Pai: Mas uma pessoa sobrevive.",
+            "Pai: Mas uma criança escapa no caos.",
 
-                "Kevin: ...minha avó.",
+            "Kevin: Uma criança...?",
 
-                "Pai: Sim.",
+            "Pai: Anos depois, ela forma uma família.",
+            "Pai: Décadas depois... você nasce por causa disso.",
 
-                "Pai: Nesta linha do tempo, o farol permanece aceso.",
-                "Pai: A frota inimiga vê a luz a quilômetros no mar e muda de rota.",
+            "Kevin: ...minha avó.",
 
-                "Pai: A cidade é salva.",
-                "Pai: Mas sua avó morre anos depois... de uma doença que nunca teria enfrentado.",
+            "Pai: Sim.",
 
-                "Kevin: Então você quer apagar o farol para matar a cidade inteira?!",
+            "Pai: Na linha do tempo atual, o farol permanece aceso.",
+            "Pai: A frota vê a luz a quilômetros no mar e recua.",
 
-                "Pai: Eu não estou 'matando' ninguém.",
+            "Pai: Alexandria é salva.",
+            "Pai: Mas aquela criança nunca foge... nunca vive... nunca chega a existir.",
 
-                "Pai: Eu estou restaurando a linha histórica correta.",
+            "Kevin: Então você quer apagar o farol para condenar a cidade inteira?!",
 
-                "Pai: O Coração de Fóton permite alterar um único evento crítico.",
-                "Pai: Se o topo do farol cair, o fogo se apagará.",
+            "Pai: Eu não escolhi esse preço.",
 
-                "Pai: Sem luz... os navios não verão o porto.",
-                "Pai: Eles chegarão à cidade sem serem detectados.",
+            "Pai: Eu apenas encontrei a equação.",
 
-                "Pai: E a história seguirá o curso onde ela vive.",
+            "Pai: O Coração de Fóton permite alterar um único evento crítico.",
+            "Pai: Se o topo do farol cair, a chama se apagará.",
 
-                "Kevin: Isso é loucura.",
+            "Pai: Sem luz... os navios entrarão sem serem percebidos.",
+            "Pai: E a história seguirá o caminho em que ela vive.",
 
-                "Pai: Não.",
+            "Kevin: Isso é loucura.",
 
-                "Pai: Isso é engenharia.",
+            "Pai: Não.",
 
-                "Pai: Agora saia do meu caminho.",
+            "Pai: Isso é lógica.",
 
-                "Pai: Eu preciso destruir o topo do farol."
-                ]
+            "Pai: Agora saia do meu caminho.",
+
+            "Pai: Eu preciso destruir o topo do farol."
+        ]
+
 
 
         for father in self.entity_mn.get_entities_by_class(FatherNPC):
@@ -299,7 +311,7 @@ class GenericLevel7(BaseMaxPowerLevel):
             Position(player_pos.x, player_pos.y),
             Dialogue(
                 lines=[
-                    "Kevin: Não... ele realmente enlouqueceu.",
+                    "Kevin: Nãoo... ele realmente enlouqueceu.",
                     "Kevin: Se eu deixar isso acontecer, Alexandria sera destruida.",
                     "Kevin: Eu vou impedir meu pai, custe o que custar.",
                 ],
@@ -394,3 +406,4 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
+

@@ -18,7 +18,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R1",
-                "value": "1k"
+                "value": "10"
             },
             {
                 "type": "Connectable",
@@ -92,8 +92,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -127,8 +127,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -155,9 +155,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
                     "right",
-                    "up"
+                    "up",
+                    "down"
                 ]
             },
             {
@@ -184,9 +184,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
                     "right",
-                    "left"
+                    "left",
+                    "down"
                 ]
             },
             {
@@ -213,9 +213,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
+                    "up",
                     "left",
-                    "up"
+                    "down"
                 ]
             },
             {
@@ -242,10 +242,10 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
                     "right",
+                    "up",
                     "left",
-                    "up"
+                    "down"
                 ]
             },
             {
@@ -385,9 +385,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -415,9 +415,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -445,9 +445,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -502,9 +502,9 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -538,8 +538,8 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -566,8 +566,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
-                    "right"
+                    "right",
+                    "down"
                 ]
             },
             {
@@ -594,8 +594,8 @@
             {
                 "type": "Connectable",
                 "connections": [
-                    "down",
-                    "left"
+                    "left",
+                    "down"
                 ]
             },
             {
@@ -623,9 +623,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {
@@ -653,9 +653,9 @@
                 "type": "Connectable",
                 "connections": [
                     "down",
-                    "bottom",
                     "up",
-                    "top"
+                    "top",
+                    "bottom"
                 ]
             },
             {

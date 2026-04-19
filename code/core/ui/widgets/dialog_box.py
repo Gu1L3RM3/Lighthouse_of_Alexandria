@@ -28,14 +28,25 @@ class DialogueBoxWidget(Widget):
         hint_surf = self.hint_font.render("continuar", True, (200, 220, 255))
         chip_w = max(34, self.hint_font.size(chip_label)[0] + 18)
         chip_h = max(24, self.hint_font.get_height() + 10)
+        gap = 8
+        box = self.dialogue.dialog_box_rect
+
+        # Prioriza desenhar o hint fora da caixa, abaixo do box de dialogo.
         hint_rect = hint_surf.get_rect(
-            bottomright=(self.dialogue.dialog_box_rect.right - 18, self.dialogue.dialog_box_rect.bottom - 12)
+            topright=(box.right - 18, box.bottom + gap)
         )
         chip_rect = pygame.Rect(
             hint_rect.left - chip_w - 10,
-            hint_rect.bottom - chip_h,
+            hint_rect.top,
             chip_w,
             chip_h,
         )
+
+        # Se nao houver espaco abaixo, desenha fora da caixa por cima.
+        if chip_rect.bottom > surface.get_height() - 4:
+            hint_rect.top = max(4, box.top - hint_surf.get_height() - gap)
+            chip_rect.top = max(4, hint_rect.top)
+            chip_rect.bottom = chip_rect.top + chip_h
+
         draw_prompt_chip(surface, self.hint_font, chip_label, chip_rect)
         surface.blit(hint_surf, hint_rect)

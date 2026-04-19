@@ -24,8 +24,7 @@ class ResistorPairValidatorSystem(System):
         self._panel_status_cache: dict[int, str] = {}
 
     def _log(self, message: str):
-        if self.debug:
-            print(f"[fase_5][validator] {message}")
+        _ = message
 
     def _set_panel_status(self, panel_id: int, status: str, details: str = ""):
         if self._panel_status_cache.get(panel_id) == status:

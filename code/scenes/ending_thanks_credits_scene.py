@@ -5,6 +5,7 @@ from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.input_manager import InputManager
+from core.managers.save_game_manager import SaveGameManager
 
 
 class EndingThanksCreditsScene(BaseScene):
@@ -13,6 +14,7 @@ class EndingThanksCreditsScene(BaseScene):
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
         self.input_manager = InputManager.get()
+        self.save_manager = SaveGameManager.get()
         self.width = width
         self.height = height
 
@@ -47,6 +49,8 @@ class EndingThanksCreditsScene(BaseScene):
     def start(self):
         self.timer = 0.0
         self._resolved = False
+        # Ao zerar o jogo, limpa o progresso salvo para reinicio completo.
+        self.save_manager.clear_save()
         pygame.mouse.set_visible(True)
 
     def process_input(self, events: list[Event]) -> None:

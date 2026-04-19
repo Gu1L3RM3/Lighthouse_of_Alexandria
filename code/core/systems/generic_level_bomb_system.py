@@ -1,5 +1,6 @@
 import pygame
 
+from core.circuit_tools.solve_circuit import CircuitSolver
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
 from core.components.health import Health
@@ -13,6 +14,7 @@ from core.settings import (
     GENERIC_LEVEL_BOMB_EDITOR_FILE,
     GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN,
     GENERIC_LEVEL_BOMB_TARGET_RESISTOR,
+    path_in_ltspice,
 )
 
 
@@ -49,6 +51,16 @@ class GenericLevelBombSystem(System):
 
     def sync_bomb_runtime(self):
         bomb_results = self.scene.circuit_manager.get_circuit_values(GENERIC_LEVEL_BOMB_EDITOR_FILE)
+        if not bomb_results:
+            try:
+                solver = CircuitSolver(str(path_in_ltspice(f"{GENERIC_LEVEL_BOMB_EDITOR_FILE}.net")))
+                if solver.is_solved:
+                    bomb_results = solver.get_resistor_results()
+                    total_values = solver.get_total_values()
+                    self.scene.circuit_manager.add_circuit_values(GENERIC_LEVEL_BOMB_EDITOR_FILE, bomb_results)
+                    self.scene.circuit_manager.add_total_values(GENERIC_LEVEL_BOMB_EDITOR_FILE, total_values)
+            except Exception:
+                bomb_results = None
         self.scene.bomb_manager.update_from_resistor_results(
             bomb_results,
             target_resistor=GENERIC_LEVEL_BOMB_TARGET_RESISTOR,
@@ -202,4 +214,3 @@ class GenericLevelBombSystem(System):
             )
             return
         self.scene.death_flow_manager.handle_player_death()
-

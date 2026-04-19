@@ -3,6 +3,7 @@ import pygame
 import json
 
 from core.components.animation_sprite import AnimateSprite
+from core.circuit_tools.serialization_manager import SerializationManager
 from core.components.freeze import Freeze
 from core.components.dialogue import Dialogue
 from core.components.label_component import LabelComponent
@@ -22,6 +23,7 @@ from entities.itens.resistor_item import ResistorItem
 from entities.itens.voltage_source_item import VoutageSourceItem
 from core.components.position import Position
 from core.components.sprite import Sprite
+from core.components.velocity import Velocity
 from entities.npcs.arquimedes import Arquimedes
 from scenes.fases.max_power_level_base import BaseMaxPowerLevel
 from core.settings import (
@@ -48,6 +50,8 @@ class FinalLevel(BaseMaxPowerLevel):
         self._final_hooks_bound = False
         self._won = False
         self.player_dead_by_enemy = False
+        self._fixed_target_resistor_label = "10"
+        self._post_reset_player_lock_frames = 0
         super().__init__(screen, level_path, tolerance_percent)
         self._panel_timer_font = pygame.font.SysFont("consolas", 12, bold=True)
 
@@ -130,6 +134,9 @@ class FinalLevel(BaseMaxPowerLevel):
         )
 
     def update(self, dt):
+        if self._post_reset_player_lock_frames > 0:
+            self._halt_player_motion()
+            self._post_reset_player_lock_frames = max(0, self._post_reset_player_lock_frames - 1)
         super().update(dt)
         if self._won:
             return
@@ -347,8 +354,70 @@ class FinalLevel(BaseMaxPowerLevel):
         # Ordem obrigatoria: devolver itens ao mapa e retirar do storage antes do reroll.
         self._respawn_components_for_area(area_id, panel_id)
         self._restore_panel_json(panel_id)
+        self._force_panel_target_resistor(panel_id)
         self.circuit_manager.clear_circuit(panel.name_file)
         self._reroll_panel_area(area_id, panel_id)
+        self._stabilize_after_panel_reset()
+
+    def _halt_player_motion(self):
+        player = self.entity_mn.get_player()
+        if not player or not player.has(Velocity):
+            return
+        player.get(Velocity).vxy = (0, 0)
+
+    def _stabilize_after_panel_reset(self):
+        # Segura o movimento por alguns frames para evitar atravessar colisores
+        # durante o frame imediatamente apos um reset pesado de painel.
+        self._post_reset_player_lock_frames = max(self._post_reset_player_lock_frames, 2)
+        self._halt_player_motion()
+        try:
+            self.physics_system.cache_static_colliders(self.entity_mn)
+        except Exception:
+            pass
+
+    def _force_panel_target_resistor(self, panel_id: int):
+        target_name = "R1"
+        applied_value = self._fixed_target_resistor_label
+        panel_name = f"pannel{panel_id}"
+        json_base = path_in_circuitos(self.level_path)
+        netlist_base = path_in_ltspice(self.level_path)
+
+        json_paths = [
+            json_base / f"{panel_name}.json",
+            json_base / f"{panel_name}_solution.json",
+        ]
+        for json_path in json_paths:
+            if not json_path.exists():
+                continue
+            try:
+                data = json.loads(json_path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            changed = False
+            for entity in data:
+                if entity.get("entity_type") != "Resistor":
+                    continue
+                for component in entity.get("components", []):
+                    if component.get("type") != "LabelComponent":
+                        continue
+                    if component.get("name") != target_name:
+                        continue
+                    component["value"] = applied_value
+                    changed = True
+            if changed:
+                try:
+                    json_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
+                except Exception:
+                    pass
+
+        for suffix in ("", "_solution"):
+            net_path = netlist_base / f"{panel_name}{suffix}.net"
+            if not net_path.exists():
+                continue
+            try:
+                SerializationManager.update_component_value(str(net_path), target_name, applied_value)
+            except Exception:
+                pass
 
     def _restore_panel_json(self, panel_id: int):
         panel_name = f"pannel{panel_id}"

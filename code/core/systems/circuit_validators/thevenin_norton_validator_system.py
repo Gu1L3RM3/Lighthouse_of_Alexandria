@@ -54,8 +54,7 @@ class TheveninNortonValidatorSystem(System):
     # LOG
     # =========================================================
     def _log(self, message: str):
-        if self.debug_panel_logs:
-            print(f"[fase_6][validator] {message}")
+        _ = message
 
     def _set_panel_status(self, panel_id: int, status: str):
         if self._panel_status_cache.get(panel_id) == status:

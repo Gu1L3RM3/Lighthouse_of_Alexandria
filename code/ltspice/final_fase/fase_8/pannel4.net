@@ -1,11 +1,11 @@
 * Netlist gerada automaticamente a partir do circuit.json
 .tran 1
 
-R2 N001 0 820
-R3 N002 0 39
-R1 N003 0 33k
-R4 N001 N002 39
-R5 N002 N003 3.3k
+R2 N001 0 2.7
+R3 N002 0 56
+R1 N003 0 10
+R4 N001 N002 1.8
+R5 N002 N003 680k
 I1 0 N001 12
 
 .end

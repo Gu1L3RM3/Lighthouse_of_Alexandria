@@ -123,6 +123,7 @@ class BaseGenericLevel(BaseScene):
         self._scene_change_target_name: str | None = None
         self._preserve_runtime_state_on_next_start = False
         self._preserve_component_overload_on_next_start = False
+        self._startup_player_lock_frames = 0
         
         # Subclasses will override this
         self.set_systems() 
@@ -133,13 +134,6 @@ class BaseGenericLevel(BaseScene):
         self._set_bomb_visuals()
 
     def _configure_bomb_balance_profile(self):
-        level_name = Path(self.level_path).stem.lower()
-        if level_name in {"fase_8", "final_level"}:
-            self.bomb_manager.set_balance_profile("final")
-            return
-        if level_name in {"fase_6", "fase_7"}:
-            self.bomb_manager.set_balance_profile("challenging")
-            return
         self.bomb_manager.set_balance_profile("standard")
             
     def set_ui(self):
@@ -483,6 +477,9 @@ class BaseGenericLevel(BaseScene):
         self.interaction_system.handle_old_paper_interaction(events)
 
     def update(self, dt):
+        if self._startup_player_lock_frames > 0:
+            self._halt_player_motion()
+            self._startup_player_lock_frames = max(0, self._startup_player_lock_frames - 1)
         self._last_frame_dt = dt
         self.bomb_system.update_bombs(dt)
         self.environment_system.update(self.entity_mn, dt)
@@ -603,6 +600,16 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("close_old_paper",self.after_close_old_paper)
         self.subscribe_panels()
         self.subscribe_iron_gates()
+        # Evita atravessar parede se o player estiver segurando movimento
+        # durante os frames iniciais de carga/rebind da fase.
+        self._startup_player_lock_frames = max(self._startup_player_lock_frames, 2)
+        self._halt_player_motion()
+
+    def _halt_player_motion(self):
+        player = self.entity_mn.get_player()
+        if not player or not player.has(Velocity):
+            return
+        player.get(Velocity).vxy = (0, 0)
 
     def _on_panel_bomb_reward(self, event):
         amount_raw = event.get("amount", 0)
@@ -635,9 +642,17 @@ class BaseGenericLevel(BaseScene):
     def reset_bomb_circuit_to_default(self):
         default_json = path_in_circuitos("bombs", "default_bomb.json")
         editor_json = path_in_circuitos("bombs", "bomb_editor.json")
+        default_net = path_in_ltspice("bombs", "default_bomb.net")
+        editor_net = path_in_ltspice("bombs", "bomb_editor.net")
+        default_asc = path_in_ltspice("bombs", "default_bomb.asc")
+        editor_asc = path_in_ltspice("bombs", "bomb_editor.asc")
         try:
             editor_json.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(default_json, editor_json)
+            editor_net.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(default_net, editor_net)
+            if default_asc.exists():
+                shutil.copyfile(default_asc, editor_asc)
         except Exception:
             pass
         self.circuit_manager.clear_circuit(GENERIC_LEVEL_BOMB_EDITOR_FILE)

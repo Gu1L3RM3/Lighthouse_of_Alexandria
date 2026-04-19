@@ -37,46 +37,19 @@ class BombManager:
         self.current_params = self.default_params
 
     def set_balance_profile(self, profile: str):
-        profile_name = (profile or "standard").strip().lower()
-        profiles = {
-            # Perfil recomendado para a maior parte do jogo.
-            "standard": {
-                "delay_min": 1.20,
-                "delay_max": 2.40,
-                "radius_min": 42.0,
-                "radius_max": 140.0,
-                "damage_min": 12.0,
-                "damage_max": 180.0,
-                "k_delay": 0.06,
-                "k_radius": 1800.0,
-                "k_damage": 850.0,
-            },
-            # Mais rapido, mas ainda com tempo razoavel de reacao.
-            "challenging": {
-                "delay_min": 1.00,
-                "delay_max": 2.00,
-                "radius_min": 40.0,
-                "radius_max": 145.0,
-                "damage_min": 14.0,
-                "damage_max": 185.0,
-                "k_delay": 0.065,
-                "k_radius": 1850.0,
-                "k_damage": 900.0,
-            },
-            # Final mais tenso, sem cair para explosao instantanea.
-            "final": {
-                "delay_min": 1.00,
-                "delay_max": 1.80,
-                "radius_min": 42.0,
-                "radius_max": 150.0,
-                "damage_min": 16.0,
-                "damage_max": 200.0,
-                "k_delay": 0.07,
-                "k_radius": 1900.0,
-                "k_damage": 950.0,
-            },
+        _ = profile
+        # Mantemos a API por compatibilidade, mas usamos um unico perfil fixo.
+        values = {
+            "delay_min": 1.20,
+            "delay_max": 2.40,
+            "radius_min": 42.0,
+            "radius_max": 140.0,
+            "damage_min": 12.0,
+            "damage_max": 180.0,
+            "k_delay": 0.06,
+            "k_radius": 1800.0,
+            "k_damage": 850.0,
         }
-        values = profiles.get(profile_name, profiles["standard"])
 
         self._delay_min = float(values["delay_min"])
         self._delay_max = float(values["delay_max"])
@@ -124,7 +97,7 @@ class BombManager:
                 explosion_delay=_clamp(self._delay_max - (v * self._k_delay), self._delay_min, self._delay_max),
                 explosion_radius=_clamp(i * self._k_radius, self._radius_min, self._radius_max),
                 damage=_clamp((v * i) * self._k_damage, self._damage_min, self._damage_max),
-                used_fallback=True,
+                used_fallback=False,
             )
         except Exception:
             return hardcoded

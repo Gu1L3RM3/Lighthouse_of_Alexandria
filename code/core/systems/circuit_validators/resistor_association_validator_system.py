@@ -69,20 +69,13 @@ class ResistorAssotiationValidatorSystem(System):
         req_com: float | None,
         status: str,
     ):
-        req_real_text = "None" if req_real is None else SetterValues.format_eng(req_real, "")
-        req_com_text = "None" if req_com is None else SetterValues.format_eng(req_com, "")
-        print(
-            f"[fase_4][set_solutions] panel={panel_id} area={area} "
-            f"req_real={req_real_text} req_com={req_com_text} status={status}"
-        )
+        _ = (panel_id, area, req_real, req_com, status)
 
     def _log_area_distribution(self, area: int, items: list[ResistorItem], targets: list[float]):
-        assigned = [str(item.value) for item in items]
-        target_labels = [SetterValues.format_eng(v, "") for v in targets]
-        print(
-            f"[fase_4][set_solutions] area={area} targets={target_labels} "
-            f"assigned_items={assigned}"
-        )
+        _ = (area, items, targets)
+
+    def _print_panel_answers(self, control_pannels: list[ControlPannel]):
+        _ = control_pannels
 
     def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
@@ -252,6 +245,7 @@ class ResistorAssotiationValidatorSystem(System):
 
             self._log_area_distribution(area, area_items, target_values)
 
+        self._print_panel_answers(control_pannels)
         self.event_manager.post({"type": "solutions_done"})
 
     def update(self, entity_mn, dt):
