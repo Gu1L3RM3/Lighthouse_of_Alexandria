@@ -82,6 +82,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Onde eu estou?;Que lugar é este?;Quero voltar para casa!!"/>
+    <property name="dialogo_en" value="Where am I?;What place is this?;I want to go back home!!"/>
    </properties>
   </object>
  </objectgroup>

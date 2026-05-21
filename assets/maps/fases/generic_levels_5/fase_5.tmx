@@ -410,6 +410,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Olá meu jovem!;Que bom te ver denovo!; Bom, nesta fase você deve aplicar as Leis de Kirchoff"/>
+    <property name="dialogo_en" value="Hello, young man!;It is good to see you again!;Well, in this stage you must apply Kirchhoff's Laws."/>
    </properties>
   </object>
  </objectgroup>

@@ -357,6 +357,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Olá meu jovem!;Arquimedes: Bom te ver novamente!;Arquimedes: Uma certa pessoa acabou destruindo esse andar.;Arquimedes: E, por isso, as coisas não estão funcionando direito, infelizmente."/>
+    <property name="dialogo_en" value="Arquimedes: Hello, young man!;Arquimedes: It is good to see you again!;Arquimedes: A certain person ended up destroying this floor.;Arquimedes: And because of that, things are not working properly, unfortunately."/>
    </properties>
   </object>
  </objectgroup>

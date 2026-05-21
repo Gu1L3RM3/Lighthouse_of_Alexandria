@@ -53,6 +53,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="O que?!?;O que aconteceu??; Como voltei aqui derrepente?!?;Hmm...;Acho que consegui impedir meu pai!;...;Talvez, eu diria;Mas, uma lição que ficou é que circuitos elétricos não são tão chatos assim...;Eu aprendi muito com essa aventura inesperada!; Não acredito que passei por tudo isso, foi incrível!;Pena que meu pai não era uma pessoa boa."/>
+    <property name="dialogo_en" value="What?!?;What happened??;How did I suddenly come back here?!?;Hmm...;I think I managed to stop my father!;...;Maybe, I would say;But one lesson that remains is that electrical circuits are not that boring after all...;I learned a lot from this unexpected adventure!;I cannot believe I went through all of this, it was incredible!;Too bad my father was not a good person."/>
    </properties>
   </object>
  </objectgroup>

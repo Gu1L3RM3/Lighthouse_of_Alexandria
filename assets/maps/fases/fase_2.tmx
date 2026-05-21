@@ -88,12 +88,24 @@ Arquimedes: Ao contrário do que muitos pensam, aqui em Alexandria já utilizamo
 Arquimedes: Mas, infelizmente, um homem quase destruiu todo o farol, e alguns andares ficaram inacessíveis devido ao alto perigo!;
 Arquimedes: Por sorte, conseguimos prendê-lo!;
 Arquimedes: Antes de mais nada, que tal dar uma olhada neste circuito, hein?</property>
+    <property name="dialogo_en">Arquimedes: Hello, young man.;
+Arquimedes: You are a time traveler, am I right?;
+Arquimedes: Welcome to the Lighthouse of Alexandria!;
+Kevin: Hello! I came here to look for my father. I believe I need to go up to the top floor to find him.;
+Kevin: Can you help me with that?;
+Arquimedes: Of course, young man!;
+Arquimedes: But before you begin your journey, you need to learn the basic concepts of electrical circuits, since reaching the top of the lighthouse will not be easy at all.;
+Arquimedes: Contrary to what many people think, here in Alexandria we already use electrical energy for everything!;
+Arquimedes: But unfortunately, one man almost destroyed the whole lighthouse, and some floors became inaccessible because of the danger!;
+Arquimedes: Luckily, we managed to imprison him!;
+Arquimedes: Before anything else, how about taking a look at this circuit?</property>
    </properties>
   </object>
   <object id="22" name="dialog_2" x="200" y="295.667" width="81.3333" height="148">
    <properties>
     <property name="active_status" type="bool" value="false"/>
     <property name="dialogo" value="Hmmm;Que interessante!;É o que eu vi nas aulas!;O circuito possui uma bateria, um resistor e uma lampada;Vejo que quando o eletron passa pela lâmpada, ela ascende;A , e os elétrons aceleram quando passam pela bateria; E desaceleram quando passam pelo resistor e pela lâmpada;Outro fato é que o sentido da corrente é a convencional, ou seja, o fluxo de energia vai do positivo da bateria para o negativo dela.Interessante!;Ok, vamos ver o que ele tem a me ensinar."/>
+    <property name="dialogo_en" value="Hmmm;How interesting!;It is what I saw in class!;The circuit has a battery, a resistor, and a lamp;I see that when the electron passes through the lamp, it lights up;Oh, and the electrons speed up when they pass through the battery;And they slow down when they pass through the resistor and the lamp;Another fact is that the current direction is the conventional one, that is, the energy flow goes from the battery's positive terminal to its negative terminal. Interesting!;Okay, let us see what he has to teach me."/>
    </properties>
   </object>
   <object id="25" name="dialog_3" x="513.333" y="295.333" width="68.6667" height="45.3333">
@@ -110,6 +122,17 @@ Arquimedes: E lembre-se, Kevin: quanto maior a resistência, menor será a corre
 Arquimedes: Agora que você entende como a eletricidade flui, poderá usar esse conhecimento para resolver os desafios à frente.;
 Arquimedes: Vamos ver se consegue aplicar o que aprendeu!;
 Kevin: Pode deixar, Arquimedes! Estou pronto para o próximo desafio!</property>
+    <property name="dialogo_en">Arquimedes: I see that you observed carefully, young Kevin!;
+Arquimedes: This circuit is a simple example, but it contains everything we need to understand the basics of electricity.;
+Arquimedes: The battery is the energy source, responsible for pushing the electrons through the circuit - that is what we call voltage.;
+Arquimedes: The resistor, in turn, makes it harder for the electrons to pass, turning part of the electrical energy into heat.;
+Arquimedes: The lamp works in a similar way, but it transforms electrical energy into light and heat.;
+Arquimedes: Electric current is the ordered flow of those electrons, which leave the battery's positive terminal and return to the negative one. That is the convention we use, of course - the real direction is the opposite.;
+Arquimedes: Ah, and one very important detail: the circuit must be closed so that current can flow! If there is an interruption, the lamp will not light up.;
+Arquimedes: And remember, Kevin: the greater the resistance, the smaller the current!;
+Arquimedes: Now that you understand how electricity flows, you will be able to use that knowledge to solve the challenges ahead.;
+Arquimedes: Let us see whether you can apply what you learned!;
+Kevin: You can count on me, Arquimedes! I am ready for the next challenge!</property>
    </properties>
   </object>
  </objectgroup>

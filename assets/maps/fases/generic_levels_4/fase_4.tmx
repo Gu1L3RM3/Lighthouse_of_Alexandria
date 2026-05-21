@@ -317,6 +317,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Olá meu jovem!;Vejo que seus conhecimentos em circuitos estão evoluindo bastante!;Nesse andar você terá que concertar cada painel; Para resolver cada um, basta calcular substituir os resistores de cada painel pelo seu respectivo resistor equivalente!; Boa sorte!"/>
+    <property name="dialogo_en" value="Hello, young man!;I see that your knowledge of circuits is improving a lot!;On this floor you will have to repair each panel;To solve each one, simply replace the resistors on each panel with their equivalent resistor!;Good luck!"/>
    </properties>
   </object>
  </objectgroup>

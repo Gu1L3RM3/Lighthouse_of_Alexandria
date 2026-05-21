@@ -60,18 +60,21 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Nossa,que curso chato!!;Eu não entendo nada nas aulas;Parece que os professores falam grego!;Acho que o curso de engenharia elétrica não é para mim;Vou dar uma olhada nos meus livros"/>
+    <property name="dialogo_en" value="Wow, this course is so boring!!;I do not understand anything in class;It feels like the professors are speaking Greek!;I guess electrical engineering is not for me;I will take a look at my books"/>
    </properties>
   </object>
   <object id="12" name="dialog_2" x="51" y="67" width="50.5" height="42.5">
    <properties>
     <property name="active_status" type="bool" value="false"/>
     <property name="dialogo" value="Minha mãe sempre me disse para nunca desistir;Ela me dizia: 'É melhor receber pedras do que flores.Recebendo pedras,você se adapta, melhora e se torna uma pessoa mais forte.Já recebendo flores, você continua como está, nunca vai melhorar.';Ela está certa. Mas como posso fazer isso?;Como posso aprender todos esses conceitos de circuitos elétricos?;É a matéria mais importante do curso!!;Queria que meu pai estivesse aqui.Ele era um cientista muito inteligente;Minha mãe me disse que ele desapareceu 10 anos atrás;Mesmo antes de sumir vivia ausente. Minha mãe disse que ele trabalhava em um equipamento para viajar no tempo. Mas , não houveram avanços depois que ele sumiu."/>
+    <property name="dialogo_en" value="My mother always told me never to give up;She used to say: 'It is better to receive stones than flowers. When you receive stones, you adapt, improve, and become a stronger person. But when you receive flowers, you stay as you are and never improve.';She is right. But how can I do that?;How can I learn all these electrical circuit concepts?;It is the most important subject in the course!!;I wish my father were here. He was a very intelligent scientist;My mother told me he disappeared 10 years ago;Even before he vanished, he was always absent. My mother said he was working on a machine for time travel. But there was no progress after he disappeared."/>
    </properties>
   </object>
   <object id="14" name="dialog_3" x="126" y="46.5" width="89.5" height="70">
    <properties>
     <property name="active_status" type="bool" value="false"/>
     <property name="dialogo" value="Que papél é esse???"/>
+    <property name="dialogo_en" value="What is this paper???"/>
    </properties>
   </object>
  </objectgroup>
