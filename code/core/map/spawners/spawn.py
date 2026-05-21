@@ -22,6 +22,8 @@ from entities.animate_circuit.circuit_components import *
 from entities.npcs.npc_factory import NPCFactory
 from core.components.npc_routine import NPCRoutine
 from core.managers.entity_manager import EntityManager
+from core.managers.language_service import LanguageService
+from core.localization.tmx_dialogue_resolver import TmxDialogueResolver
 from core.map.tile_map import TileMap
 from abc import ABC,abstractmethod
 from typing import Type
@@ -101,7 +103,9 @@ class CircuitSpawner(EntitySpawner):
 
 class DialogueAreaSpawner(EntitySpawner):
     def spawn(self, obj, entity_mn, tilemap):
-        list_dialogue = obj.properties["dialogo"].split(";")
+        language = LanguageService.get().get_current_language()
+        resolver = TmxDialogueResolver(language=language)
+        list_dialogue = resolver.resolve_lines(obj.properties)
         active_status: bool = obj.properties["active_status"]
         auto_start = bool(obj.properties.get("auto_start", False))
         stealth_bonus_duration = float(obj.properties.get("stealth_bonus_duration", 4.0))
