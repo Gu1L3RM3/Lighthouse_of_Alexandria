@@ -7,6 +7,7 @@ from core.managers.scene_manager import SceneManager
 from core.managers.life_manager import LifeManager
 from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
+from core.managers.language_service import LanguageService
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 from core.managers.input_manager import InputManager
@@ -22,6 +23,7 @@ class MainMenuScene(BaseScene):
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
         self.save_manager = SaveGameManager.get()
+        self.language_service = LanguageService.get()
         self.width = width
         self.height = height
         self.low_res_size = (320, 180)
@@ -134,7 +136,7 @@ class MainMenuScene(BaseScene):
             pos_center=(center_x, first_y),
             click_type=ClickType.AFTER_RELEASED,
             action=self.resume_current_scene,
-            text="RETOMAR FASE",
+            text=self.language_service.get_menu_label("resume_initial"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -145,7 +147,7 @@ class MainMenuScene(BaseScene):
             pos_center=(center_x, first_y + gap),
             click_type=ClickType.AFTER_RELEASED,
             action=self.start_new_game,
-            text="INICIAR JORNADA",
+            text=self.language_service.get_menu_label("start"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -155,7 +157,7 @@ class MainMenuScene(BaseScene):
             pos_center=(center_x, first_y + gap * 2),
             click_type=ClickType.AFTER_RELEASED,
             action=self.open_credits,
-            text="CREDITOS",
+            text=self.language_service.get_menu_label("credits"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -165,28 +167,59 @@ class MainMenuScene(BaseScene):
             pos_center=(center_x, first_y + gap * 3),
             click_type=ClickType.AFTER_RELEASED,
             action=self.exit_game,
-            text="SAIR",
+            text=self.language_service.get_menu_label("exit"),
             font_size=12,
             color_text=(245, 230, 170),
         )
-        self.ui_manager.add(self.resume_button, self.start_button, self.credits_button, self.exit_button)
+        self.language_button = Button(
+            init_surface=idle.copy(),
+            surface_pressed=pressed.copy(),
+            pos_center=(center_x, first_y + gap * 4),
+            click_type=ClickType.AFTER_RELEASED,
+            action=self.toggle_language,
+            text=self.language_service.get_menu_label("language_button"),
+            font_size=12,
+            color_text=(245, 230, 170),
+        )
+        self.ui_manager.add(
+            self.resume_button,
+            self.start_button,
+            self.credits_button,
+            self.exit_button,
+            self.language_button,
+        )
         self.menu_buttons = [
             self.resume_button,
             self.start_button,
             self.credits_button,
             self.exit_button,
+            self.language_button,
         ]
 
     def _refresh_resume_button(self):
         can_resume = self.scene_manager.can_resume_scene() or self.save_manager.has_save()
         if can_resume:
-            self.resume_button.change_text("CONTINUAR JORNADA")
+            self.resume_button.change_text(self.language_service.get_menu_label("resume_continue"))
             self.resume_button.text_widget.font_color = (245, 230, 170)
         else:
-            self.resume_button.change_text("SEM SAVE ATIVO")
+            self.resume_button.change_text(self.language_service.get_menu_label("resume_empty"))
             self.resume_button.text_widget.font_color = (166, 154, 126)
             if self.selected_button_index == 0:
                 self.selected_button_index = 1
+
+    def _refresh_static_labels(self):
+        self.start_button.change_text(self.language_service.get_menu_label("start"))
+        self.credits_button.change_text(self.language_service.get_menu_label("credits"))
+        self.exit_button.change_text(self.language_service.get_menu_label("exit"))
+        self.language_button.change_text(self.language_service.get_menu_label("language_button"))
+
+    def _refresh_labels(self):
+        self._refresh_static_labels()
+        self._refresh_resume_button()
+
+    def toggle_language(self):
+        self.language_service.toggle_language()
+        self._refresh_labels()
 
     def resume_current_scene(self):
         if self.scene_manager.can_resume_scene():
@@ -221,7 +254,7 @@ class MainMenuScene(BaseScene):
     def start(self):
         pygame.mouse.set_visible(True)
         self.selected_button_index = 0
-        self._refresh_resume_button()
+        self._refresh_labels()
 
     def _move_selection(self, delta: int):
         if not self.menu_buttons:
@@ -311,8 +344,8 @@ class MainMenuScene(BaseScene):
         title_top = panel_rect.top + 52
         title1 = self.title_font.render("FAROL DE", True, (240, 208, 132))
         title2 = self.title_font.render("ALEXANDRIA", True, (247, 218, 151))
-        subtitle = self.subtitle_font.render("Historia, enigmas e eletricidade", True, (204, 180, 126))
-        line = self.subtitle_font.render("pixel adventure", True, (167, 145, 102))
+        subtitle = self.subtitle_font.render(self.language_service.get_menu_label("title_subtitle"), True, (204, 180, 126))
+        line = self.subtitle_font.render(self.language_service.get_menu_label("title_tagline"), True, (167, 145, 102))
 
         self.screen.blit(title1, title1.get_rect(center=(self.width // 2, title_top)))
         self.screen.blit(title2, title2.get_rect(center=(self.width // 2, title_top + 52)))
