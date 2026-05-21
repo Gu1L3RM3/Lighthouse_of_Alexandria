@@ -1,22 +1,26 @@
-from core.components.dialogue import Dialogue
+import pygame
+from pygame import Vector2
+
 from core.components.collider import Collider
+from core.components.dialogue import Dialogue
 from core.components.freeze import Freeze
 from core.components.position import Position
 from core.components.velocity import Velocity
 from core.ecs import Entity
+from core.localization.story_dialogue_catalog import StoryDialogueCatalog
+from core.managers.language_service import LanguageService
+from core.settings import KEY_DIALOG
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
+from core.systems.circuit_validators.max_power_transfer_validator_system import (
+    MaxPowerTransferValidatorSystem,
+)
 from core.systems.freeze_system import FreezeSystem
-from core.systems.circuit_validators.max_power_transfer_validator_system import MaxPowerTransferValidatorSystem
-from pygame import Vector2
-from entities.animated_tiles.iron_gate import IronGate
 from entities.dialogue_area import DialogueArea
 from entities.itens.control_pannel import ControlPannel
 from entities.npcs.arquimedes import Arquimedes
 from entities.npcs.father import FatherNPC
 from scenes.fases.max_power_level_base import BaseMaxPowerLevel
-import pygame
-from core.settings import KEY_DIALOG
 
 
 class GenericLevel7(BaseMaxPowerLevel):
@@ -76,6 +80,9 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.father_npc = fathers[0] if fathers else None
         self._enable_story_test_shortcut()
 
+    def _story_catalog(self) -> StoryDialogueCatalog:
+        return StoryDialogueCatalog(LanguageService.get().get_current_language())
+
     def _enforce_single_panel_mode(self):
         pannels = self.entity_mn.get_entities_by_class(ControlPannel)
         if not pannels:
@@ -97,33 +104,8 @@ class GenericLevel7(BaseMaxPowerLevel):
         pannels = self.entity_mn.get_entities_by_class(ControlPannel)
         active_panel = next((p for p in pannels if p.active), None)
         solution = active_panel.solution_value if active_panel else None
-
-        if isinstance(solution, dict):
-            target = solution.get("target", "R1")
-
-            if target:
-                hints = [
-                    "Arquimedes: Kevin... eu não esperava isso. Aquele homem é mesmo seu pai?",
-                    "Kevin: É ele. E foi ele quem quase destruiu o Farol para mudar a história.",
-                    "Arquimedes: Meu Deus... ele quase condenou Alexandria inteira.",
-                    "Kevin: Eu sei. Mas agora ele está preso e ainda é meu pai.",
-                    "Arquimedes: Depois de tudo isso, você ainda quer resgatá-lo?",
-                    "Kevin: Quero. Se eu não tentar, eu viro as costas para quem eu sou.",
-                    "Kevin: Eu vou impedir o erro dele, mas não vou abandonar meu pai.",
-                    "Arquimedes: ...Certo. Então vamos tirá-lo daqui e terminar isso juntos.",
-                    f"Arquimedes: Foque no resistor alvo {target}.",
-                    "Arquimedes: Encontre Thévenin nos terminais da carga e ajuste RL para casar com Rth.",
-                ]
-            else:
-                hints = [
-                    "Arquimedes: Kevin... eu ainda estou em choque. Aquele homem é seu pai.",
-                    "Kevin: Sim. E eu não vou deixar ele destruir o Farol.",
-                    "Arquimedes: Ele quase apagou a luz de Alexandria...",
-                    "Kevin: E por isso mesmo eu preciso chegar nele antes que seja tarde.",
-                    "Arquimedes: Entendi. Vamos abrir essa cela juntos.",
-                    "Arquimedes: Para isso, use máxima transferência de potência no painel.",
-                    "Arquimedes: Ache Thévenin nos terminais da carga e ajuste RL para ficar igual a Rth.",
-                ]
+        target = solution.get("target", "R1") if isinstance(solution, dict) else None
+        hints = self._story_catalog().get_generic_level_7_arquimedes_hints(target)
 
         for arquimedes in self.entity_mn.get_entities_by_class(Arquimedes):
             if not arquimedes.has(Dialogue):
@@ -145,74 +127,7 @@ class GenericLevel7(BaseMaxPowerLevel):
             dialogue.triggered = False
 
     def _configure_father_dialogue(self):
-        father_lines = [
-
-            "Pai: Kevin... então você chegou até aqui.",
-            "Pai: Eu sabia que apenas você entenderia os circuitos deste lugar.",
-
-            "Pai: Este farol não é apenas uma torre.",
-            "Pai: Ele é um amplificador de energia... e de história.",
-
-            "Pai: No topo está o Coração de Fóton.",
-            "Pai: Um núcleo capaz de concentrar luz, calor... e algo muito mais raro.",
-
-            "Pai: Possibilidades.",
-
-            "Kevin: Possibilidades...?",
-
-            "Pai: Cada grande evento da história nasce de detalhes quase invisíveis.",
-            "Pai: Um vento diferente... uma chama apagada... um farol que deixa de brilhar.",
-
-            "Pai: Eu estudei registros, mapas e relatos esquecidos.",
-            "Pai: Existe uma linha do tempo em que Alexandria foi atacada nesta noite.",
-
-            "Pai: Uma frota inimiga cruza o Mediterrâneo e alcança o porto sem ser vista.",
-            "Pai: Porque o farol... estava apagado.",
-
-            "Pai: A cidade cai.",
-            "Pai: Milhares morrem.",
-
-            "Pai: Mas uma criança escapa no caos.",
-
-            "Kevin: Uma criança...?",
-
-            "Pai: Anos depois, ela forma uma família.",
-            "Pai: Décadas depois... você nasce por causa disso.",
-
-            "Kevin: ...minha avó.",
-
-            "Pai: Sim.",
-
-            "Pai: Na linha do tempo atual, o farol permanece aceso.",
-            "Pai: A frota vê a luz a quilômetros no mar e recua.",
-
-            "Pai: Alexandria é salva.",
-            "Pai: Mas aquela criança nunca foge... nunca vive... nunca chega a existir.",
-
-            "Kevin: Então você quer apagar o farol para condenar a cidade inteira?!",
-
-            "Pai: Eu não escolhi esse preço.",
-
-            "Pai: Eu apenas encontrei a equação.",
-
-            "Pai: O Coração de Fóton permite alterar um único evento crítico.",
-            "Pai: Se o topo do farol cair, a chama se apagará.",
-
-            "Pai: Sem luz... os navios entrarão sem serem percebidos.",
-            "Pai: E a história seguirá o caminho em que ela vive.",
-
-            "Kevin: Isso é loucura.",
-
-            "Pai: Não.",
-
-            "Pai: Isso é lógica.",
-
-            "Pai: Agora saia do meu caminho.",
-
-            "Pai: Eu preciso destruir o topo do farol."
-        ]
-
-
+        father_lines = self._story_catalog().get_generic_level_7_father_dialogue()
 
         for father in self.entity_mn.get_entities_by_class(FatherNPC):
             if not father.has(Dialogue):
@@ -261,7 +176,11 @@ class GenericLevel7(BaseMaxPowerLevel):
             self._start_father_escape()
             return
 
-        if self.player_thought_dialogue and entity.id == self.player_thought_dialogue.id and not self.player_thought_done:
+        if (
+            self.player_thought_dialogue
+            and entity.id == self.player_thought_dialogue.id
+            and not self.player_thought_done
+        ):
             self.player_thought_done = True
             self._finish_story_sequence()
 
@@ -310,11 +229,7 @@ class GenericLevel7(BaseMaxPowerLevel):
         thought.add(
             Position(player_pos.x, player_pos.y),
             Dialogue(
-                lines=[
-                    "Kevin: Nãoo... ele realmente enlouqueceu.",
-                    "Kevin: Se eu deixar isso acontecer, Alexandria sera destruida.",
-                    "Kevin: Eu vou impedir meu pai, custe o que custar.",
-                ],
+                lines=self._story_catalog().get_generic_level_7_player_thought_dialogue(),
                 size_dialogue=(44, 36),
                 auto_start=True,
                 active_status=True,
@@ -406,4 +321,3 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
-

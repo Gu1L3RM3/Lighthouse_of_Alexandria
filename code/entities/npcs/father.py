@@ -2,14 +2,16 @@ from pygame import Vector2
 
 from core.components.animation_sprite import AnimateSprite
 from core.components.collider import Collider
+from core.components.depth_anchor import DepthAnchor
 from core.components.dialogue import Dialogue
 from core.components.freeze import Freeze
 from core.components.position import Position
+from core.components.render_layer import RenderLayer
 from core.components.sprite import Sprite
 from core.components.velocity import Velocity
-from core.components.render_layer import RenderLayer
-from core.components.depth_anchor import DepthAnchor
 from core.ecs import Entity
+from core.localization.story_dialogue_catalog import StoryDialogueCatalog
+from core.managers.language_service import LanguageService
 from core.managers.resource_manager import ResourceManager
 
 
@@ -34,7 +36,12 @@ class FatherNPC(Entity):
             anim,
             Velocity(),
             Freeze(),
-            Dialogue(["Oi filho, vamos continuar os estudos de circuitos?"], (44, 36)),
+            Dialogue(
+                StoryDialogueCatalog(
+                    LanguageService.get().get_current_language()
+                ).get_npc_dialogue("father"),
+                (44, 36),
+            ),
             RenderLayer(RenderLayer.ACTOR),
             DepthAnchor(offset_y=23),
         )

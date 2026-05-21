@@ -1,22 +1,23 @@
-from pygame import  Vector2
-from core.ecs import Entity
-from core.components.position import Position
+from pygame import Vector2
+
+from core.components.animation_sprite import AnimateSprite
 from core.components.collider import Collider
-from core.components.sprite import Sprite
 from core.components.dialogue import Dialogue
 from core.components.freeze import Freeze
+from core.components.position import Position
+from core.components.sprite import Sprite
 from core.components.velocity import Velocity
-from core.components.animation_sprite import AnimateSprite
-from core.settings import *
+from core.ecs import Entity
+from core.localization.story_dialogue_catalog import StoryDialogueCatalog
+from core.managers.language_service import LanguageService
 from core.managers.resource_manager import ResourceManager
-
 
 
 class GuardNPC(Entity):
     def __init__(self, x, y, props=None):
         super().__init__()
         self.rm = ResourceManager.get()
-        animations = self.rm.load_sprite_sheet("player")   
+        animations = self.rm.load_sprite_sheet("player")
         spr = Sprite(animations["idle_front"][0])
         anim = AnimateSprite(animations, fps=6, loop=True)
 
@@ -27,14 +28,18 @@ class GuardNPC(Entity):
             anim,
             Velocity(),
             Freeze(),
-            Dialogue(["Tenho que estudar para a prova de amanhã"],(20,16))
+            Dialogue(
+                StoryDialogueCatalog(
+                    LanguageService.get().get_current_language()
+                ).get_npc_dialogue("guard"),
+                (20, 16),
+            ),
         )
         self.props = props or {}
         self._direction = Vector2(0, 1)
         self._current_animation_state = "idle_front"
 
     def set_direction(self, direction: Vector2):
-        """Atualiza a animação de acordo com a direção"""
         anim: AnimateSprite = self.get(AnimateSprite)
         dir_name = self._get_dir_name(direction)
         state = f"walk_{dir_name}" if direction.length_squared() > 0 else f"idle_{dir_name}"
