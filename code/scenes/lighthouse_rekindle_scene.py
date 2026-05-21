@@ -2,8 +2,10 @@ import pygame
 from pygame import Event, Surface
 
 from scenes.base_scene import BaseScene
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
+from core.managers.language_service import LanguageService
 
 
 class LighthouseRekindleScene(BaseScene):
@@ -11,6 +13,7 @@ class LighthouseRekindleScene(BaseScene):
         width, height = screen.get_size()
         super().__init__(screen, width, height)
         self.scene_manager = SceneManager.get()
+        self.copy = SceneCopyCatalog(LanguageService.get().get_current_language())
         self.width = width
         self.height = height
         self.low_res_size = (320, 180)
@@ -141,9 +144,10 @@ class LighthouseRekindleScene(BaseScene):
         self.screen.blit(core, core.get_rect(center=(light_x, light_y + 2)))
 
     def _draw_texts(self):
-        title = self.title_font.render("A LUZ DO FAROL RENASCE", True, (247, 219, 146))
-        subtitle = self.small_font.render("Alexandria volta a enxergar o horizonte.", True, (216, 195, 152))
-        hint = self.small_font.render("ENTER para pular", True, (160, 150, 122))
+        title = self.title_font.render(self.copy.get("lighthouse_title"), True, (247, 219, 146))
+        subtitle = self.small_font.render(self.copy.get("lighthouse_subtitle"), True, (216, 195, 152))
+        hint_text = self.copy.get("lighthouse_skip_hint").format(confirm="ENTER")
+        hint = self.small_font.render(hint_text, True, (160, 150, 122))
 
         self.screen.blit(title, title.get_rect(center=(self.width // 2, int(self.height * 0.84))))
         self.screen.blit(subtitle, subtitle.get_rect(center=(self.width // 2, int(self.height * 0.89))))

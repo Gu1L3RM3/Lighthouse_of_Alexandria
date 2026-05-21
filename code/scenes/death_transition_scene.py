@@ -4,10 +4,12 @@ import pygame
 from pygame import Event, Surface
 
 from scenes.base_scene import BaseScene
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 from core.settings import BLACK
 from core.managers.death_flow_manager import DeathFlowManager
 from core.managers.audio_manager import AudioManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
 
 
 class DeathTransitionScene(BaseScene):
@@ -17,6 +19,7 @@ class DeathTransitionScene(BaseScene):
         self.death_flow_manager = DeathFlowManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
+        self.copy = SceneCopyCatalog(LanguageService.get().get_current_language())
         self.title_font = self.resources.load_font("PressStart2P-Regular.ttf", 34)
         self.main_font = self.resources.load_font("PressStart2P-Regular.ttf", 20)
         self.small_font = self.resources.load_font("PressStart2P-Regular.ttf", 14)
@@ -126,8 +129,8 @@ class DeathTransitionScene(BaseScene):
         pygame.draw.rect(board, (201, 164, 94, 180), inner, width=2, border_radius=10)
         self.screen.blit(board, panel.topleft)
 
-        title = "GAME OVER" if self.is_game_over else "TENTATIVA PERDIDA"
-        subtitle = "As sombras vencem por ora; voltamos ao inicio da jornada para tentar de novo." if self.is_game_over else "Respire e tente novamente."
+        title = "GAME OVER" if self.is_game_over else self.copy.get("death_retry_title")
+        subtitle = self.copy.get("death_game_over_subtitle") if self.is_game_over else self.copy.get("death_retry_subtitle")
         title_color = (244, 132, 98) if self.is_game_over else (245, 214, 132)
         title_surf = self.title_font.render(title, True, title_color)
         sub_surf = self.small_font.render(subtitle, True, (215, 196, 151))
@@ -139,7 +142,7 @@ class DeathTransitionScene(BaseScene):
         lives_text_before = self.main_font.render(str(self.lives_before), True, (238, 206, 126))
         lives_text_after = self.main_font.render(str(self.lives_after), True, (244, 136, 110) if self.is_game_over else (175, 236, 148))
 
-        label = self.small_font.render("TENTATIVAS", True, (220, 188, 130))
+        label = self.small_font.render(self.copy.get("death_lives_label"), True, (220, 188, 130))
         self.screen.blit(label, label.get_rect(center=(panel.centerx, panel.centery - 22)))
 
         before_scaled = pygame.transform.scale(
@@ -160,7 +163,7 @@ class DeathTransitionScene(BaseScene):
 
         if self.timer >= 1.0:
             hint_button = self.input_manager.get_prompt_button("confirm")
-            hint = f"{hint_button} para avancar"
+            hint = self.copy.get("death_advance_hint").format(confirm=hint_button)
         else:
             hint = "..."
         hint_surf = self.small_font.render(hint, True, (177, 156, 120))

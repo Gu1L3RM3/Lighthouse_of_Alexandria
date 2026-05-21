@@ -6,6 +6,8 @@ from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 
@@ -17,6 +19,7 @@ class CreditsScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
+        self.copy = SceneCopyCatalog(LanguageService.get().get_current_language())
         self.width = width
         self.height = height
 
@@ -27,33 +30,7 @@ class CreditsScene(BaseScene):
 
         self._create_buttons()
 
-        self.credit_lines = [
-            "Projeto",
-            "Farol de Alexandria",
-            "",
-            "Autor",
-            "Guilherme Abreu Cavazzani",
-            "",
-            "Orientador",
-            "Samir Martins",
-            "",
-            "Instituicao e grupo",
-            "Projeto desenvolvido no GCoM",
-            "https://www.ufsj.edu.br/gcom/",
-            "",
-            "Creditos de assets e bibliotecas",
-            "Top Down Adventure Pack v1.0 - o_lobster",
-            "https://o-lobster.itch.io/adventure-pack",
-            "2D Pixel Dungeon Asset Pack v2.0",
-            "Usado em tiles e elementos visuais do jogo",
-            "SMNA (Symbolic Modified Nodal Analysis)",
-            "https://github.com/Tiburonboy/Symbolic-modified-nodal-analysis",
-            "Fonte: PressStart2P-Regular.ttf",
-            "Licenca conforme distribuicao original da fonte",
-            "",
-            "AVISO",
-            "Nao e permitido vender este jogo sem autorizacao do autor.",
-        ]
+        self.credit_lines = self.copy.get("credits_lines")
 
     def _wrap_line(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
         words = text.split(" ")
@@ -148,7 +125,7 @@ class CreditsScene(BaseScene):
             pos_center=(self.width // 2, int(self.height * 0.88)),
             click_type=ClickType.AFTER_RELEASED,
             action=self.go_back,
-            text="VOLTAR AO MENU",
+            text=self.copy.get("credits_back_button"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -196,8 +173,8 @@ class CreditsScene(BaseScene):
         pygame.draw.rect(board, (195, 162, 100, 180), inner, width=2, border_radius=8)
         self.screen.blit(board, panel.topleft)
 
-        title = self.title_font.render("CREDITOS", True, (246, 215, 144))
-        subtitle = self.subtitle_font.render("Referencias e atribuicoes do projeto", True, (214, 192, 142))
+        title = self.title_font.render(self.copy.get("credits_title"), True, (246, 215, 144))
+        subtitle = self.subtitle_font.render(self.copy.get("credits_subtitle"), True, (214, 192, 142))
         self.screen.blit(title, title.get_rect(center=(panel.centerx, panel.top + 52)))
         self.screen.blit(subtitle, subtitle.get_rect(center=(panel.centerx, panel.top + 92)))
 
@@ -228,7 +205,7 @@ class CreditsScene(BaseScene):
             y += line_h + line_gap
         self.screen.set_clip(prev_clip)
 
-        back_hint = self.hint_font.render("Controle: aperte B para voltar ao menu", True, (222, 204, 158))
+        back_hint = self.hint_font.render(self.copy.get("credits_back_hint"), True, (222, 204, 158))
         self.screen.blit(back_hint, back_hint.get_rect(center=(panel.centerx, panel.bottom - 18)))
 
         self.ui_manager.draw(self.screen)

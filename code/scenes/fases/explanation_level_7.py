@@ -1,6 +1,7 @@
 from pygame import Surface
 
-from scenes.fases.explanation_content import get_phase_dialogue_media
+from core.managers.language_service import LanguageService
+from scenes.fases.explanation_content import get_phase_dialogue_media_for_language
 from scenes.fases.explanation_level import BaseExplanationLevel
 
 
@@ -13,4 +14,7 @@ class ExplanationLevel7(BaseExplanationLevel):
         )
 
     def get_dialogue_image_sequences(self) -> dict:
-        return get_phase_dialogue_media("exp_fase_7")
+        return get_phase_dialogue_media_for_language(
+            "exp_fase_7",
+            LanguageService.get().get_current_language(),
+        )

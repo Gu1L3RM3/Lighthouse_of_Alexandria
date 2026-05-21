@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from core.localization.scene_copy_catalog import SceneCopyCatalog, resolve_explanation_image_path
+
 
 EXPLANATION_CONTENT: dict[str, dict[str, dict[str, list[str]]]] = {
     "exp_fase_3": {
@@ -147,3 +149,28 @@ EXPLANATION_CONTENT: dict[str, dict[str, dict[str, list[str]]]] = {
 
 def get_phase_dialogue_media(map_path: str) -> dict[str, dict[str, list[str]]]:
     return EXPLANATION_CONTENT.get(map_path, {})
+
+
+def get_phase_dialogue_media_for_language(
+    map_path: str,
+    language: str,
+) -> dict[str, dict[str, list[str]]]:
+    media = get_phase_dialogue_media(map_path)
+    if not media:
+        return {}
+
+    copy = SceneCopyCatalog(language)
+    localized: dict[str, dict[str, list[str]]] = {}
+    for dialogue_name, entry in media.items():
+        images = [
+            resolve_explanation_image_path(path, language)
+            for path in entry.get("images", [])
+        ]
+        captions = copy.get_explanation_captions(map_path, dialogue_name)
+        if captions is None:
+            captions = list(entry.get("captions", []))
+        localized[dialogue_name] = {
+            "images": images,
+            "captions": captions,
+        }
+    return localized

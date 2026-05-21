@@ -2,6 +2,8 @@ import pygame
 from core.ui.widgets.widget import Widget
 from core.components.dialogue import Dialogue
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 from core.ui.prompt_ui import draw_prompt_chip
 
 class DialogueBoxWidget(Widget):
@@ -25,7 +27,8 @@ class DialogueBoxWidget(Widget):
             self.dialogue.typewriter.draw(surface)
 
         chip_label = self.input_manager.get_prompt_button("interact")
-        hint_surf = self.hint_font.render("continuar", True, (200, 220, 255))
+        hint_text = SceneCopyCatalog(LanguageService.get().get_current_language()).get("dialog_continue")
+        hint_surf = self.hint_font.render(hint_text, True, (200, 220, 255))
         chip_w = max(34, self.hint_font.size(chip_label)[0] + 18)
         chip_h = max(24, self.hint_font.get_height() + 10)
         gap = 8

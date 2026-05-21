@@ -5,6 +5,8 @@ from scenes.base_scene import BaseScene
 from core.settings import BLACK
 from core.managers.scene_manager import SceneManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 from core.managers.save_game_manager import SaveGameManager
 
 
@@ -15,6 +17,7 @@ class EndingThanksCreditsScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.input_manager = InputManager.get()
         self.save_manager = SaveGameManager.get()
+        self.copy = SceneCopyCatalog(LanguageService.get().get_current_language())
         self.width = width
         self.height = height
 
@@ -27,24 +30,7 @@ class EndingThanksCreditsScene(BaseScene):
         self.timer = 0.0
         self._resolved = False
 
-        self.lines = [
-            "AGRADECIMENTOS",
-            "Obrigado por jogar Farol de Alexandria.",
-            "",
-            "CREDITOS",
-            "Autor: Guilherme Abreu Cavazzani",
-            "Orientador: Samir Martins",
-            "Projeto desenvolvido no GCoM",
-            "https://www.ufsj.edu.br/gcom/",
-            "",
-            "Assets e bibliotecas:",
-            "Top Down Adventure Pack v1.0 - o_lobster",
-            "2D Pixel Dungeon Asset Pack v2.0",
-            "SMNA (Symbolic Modified Nodal Analysis)",
-            "Fonte: PressStart2P-Regular.ttf",
-            "",
-            "Nao e permitido vender este jogo sem autorizacao do autor.",
-        ]
+        self.lines = self.copy.get("ending_lines")
 
     def start(self):
         self.timer = 0.0
@@ -100,8 +86,8 @@ class EndingThanksCreditsScene(BaseScene):
         pygame.draw.rect(board, (195, 162, 100, 180), inner, width=2, border_radius=8)
         self.screen.blit(board, panel.topleft)
 
-        title = self.title_font.render("FAROL DE ALEXANDRIA", True, (246, 215, 144))
-        subtitle = self.subtitle_font.render("Agradecimentos e creditos finais", True, (214, 192, 142))
+        title = self.title_font.render(self.copy.get("ending_title"), True, (246, 215, 144))
+        subtitle = self.subtitle_font.render(self.copy.get("ending_subtitle"), True, (214, 192, 142))
         self.screen.blit(title, title.get_rect(center=(panel.centerx, panel.top + 54)))
         self.screen.blit(subtitle, subtitle.get_rect(center=(panel.centerx, panel.top + 90)))
 
@@ -118,5 +104,6 @@ class EndingThanksCreditsScene(BaseScene):
 
         confirm_label = self.input_manager.get_prompt_button("confirm")
         back_label = self.input_manager.get_prompt_button("back")
-        hint = self.subtitle_font.render(f"{confirm_label}/{back_label} para pular", True, (168, 154, 126))
+        hint_text = self.copy.get("ending_skip_hint").format(confirm=confirm_label, back=back_label)
+        hint = self.subtitle_font.render(hint_text, True, (168, 154, 126))
         self.screen.blit(hint, hint.get_rect(center=(self.width // 2, int(self.height * 0.93))))

@@ -10,10 +10,13 @@ from core.ui.widgets.eletric_list import EletricList
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.managers.resource_manager import ResourceManager
 from core.managers.scene_manager import SceneManager
+from core.managers.language_service import LanguageService
+from core.localization.scene_copy_catalog import SceneCopyCatalog
 
 
 class ConfirmActionDialog(AlertDialog):
     def __init__(self, title: str, on_confirm, on_close, parent: Widget | None = None):
+        self.copy = SceneCopyCatalog(LanguageService.get().get_current_language())
         super().__init__(
             title=title,
             on_close=on_close,
@@ -42,7 +45,7 @@ class ConfirmActionDialog(AlertDialog):
             pos_center=(self.dialog_rect.centerx - 86, center_y),
             click_type=ClickType.AFTER_RELEASED,
             action=self._confirm,
-            text="SIM",
+            text=self.copy.get("confirm_yes"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -52,7 +55,7 @@ class ConfirmActionDialog(AlertDialog):
             pos_center=(self.dialog_rect.centerx + 86, center_y),
             click_type=ClickType.AFTER_RELEASED,
             action=self._close,
-            text="NAO",
+            text=self.copy.get("confirm_no"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -171,10 +174,12 @@ class MenuEditCircuit(Widget):
         self.ui_manager.add(dialog)
 
     def _request_clear(self):
-        self._open_confirmation("LIMPAR TODO O CIRCUITO?", self.input_system.clear_all)
+        title = SceneCopyCatalog(LanguageService.get().get_current_language()).get("clear_circuit_title")
+        self._open_confirmation(title, self.input_system.clear_all)
 
     def _request_exit(self):
-        self._open_confirmation("SALVAR E SAIR?", self.exit)
+        title = SceneCopyCatalog(LanguageService.get().get_current_language()).get("save_exit_title")
+        self._open_confirmation(title, self.exit)
 
     def set_menu_top(self):
         self.surface_top = Surface((self.screen_width, self.cell_size * 2))

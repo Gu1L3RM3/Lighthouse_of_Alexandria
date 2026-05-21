@@ -2,6 +2,8 @@ import math
 import pygame
 from pygame import Surface
 
+from core.localization.scene_copy_catalog import SceneCopyCatalog
+from core.managers.language_service import LanguageService
 from core.ui.widgets.widget import Widget
 from core.managers.resource_manager import ResourceManager
 from core.managers.life_manager import LifeManager
@@ -27,7 +29,8 @@ class LivesWidget(Widget):
     def draw(self, surface: Surface):
         lives = self.life_manager.current_lives
         max_lives = self.life_manager.max_lives
-        text = self.font.render(f"TENTATIVAS x{lives}", True, (240, 214, 140))
+        label = SceneCopyCatalog(LanguageService.get().get_current_language()).get("lives_label")
+        text = self.font.render(f"{label} x{lives}", True, (240, 214, 140))
         text_rect = text.get_rect(topleft=self.pos)
 
         pad_x, pad_y = 8, 6

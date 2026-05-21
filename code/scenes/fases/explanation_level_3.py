@@ -1,15 +1,14 @@
 from pygame import Surface
 
 from core.components.dialogue import Dialogue
-from core.settings import EXPLANATION_LEVEL3_BOMB_INTRO_LINES
+from core.localization.scene_copy_catalog import SceneCopyCatalog
+from core.managers.language_service import LanguageService
 from entities.dialogue_area import DialogueArea
-from scenes.fases.explanation_content import get_phase_dialogue_media
+from scenes.fases.explanation_content import get_phase_dialogue_media_for_language
 from scenes.fases.explanation_level import BaseExplanationLevel
 
 
 class ExplanationLevel3(BaseExplanationLevel):
-    BOMB_INTRO_LINES = list(EXPLANATION_LEVEL3_BOMB_INTRO_LINES)
-
     def __init__(self, screen: Surface):
         super().__init__(
             screen=screen,
@@ -23,11 +22,14 @@ class ExplanationLevel3(BaseExplanationLevel):
         super().start()
 
     def _configure_bomb_intro_dialogue(self):
+        bomb_intro_lines = SceneCopyCatalog(
+            LanguageService.get().get_current_language()
+        ).get("explanation_level3_bomb_intro_lines")
         for area in self.entity_mn.get_entities_by_class(DialogueArea):
             if area.name != "dialog_1" or not area.has(Dialogue):
                 continue
             dialogue: Dialogue = area.get(Dialogue)
-            merged_lines = self._dialog_1_base_lines + self.BOMB_INTRO_LINES
+            merged_lines = self._dialog_1_base_lines + bomb_intro_lines
             area.list_dialogue = merged_lines[:]
             dialogue.lines = merged_lines[:]
             dialogue.active_status = True
@@ -44,4 +46,7 @@ class ExplanationLevel3(BaseExplanationLevel):
         return []
 
     def get_dialogue_image_sequences(self) -> dict:
-        return get_phase_dialogue_media("exp_fase_3")
+        return get_phase_dialogue_media_for_language(
+            "exp_fase_3",
+            LanguageService.get().get_current_language(),
+        )
