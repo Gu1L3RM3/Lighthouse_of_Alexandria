@@ -53,6 +53,8 @@ CIRCUITOS_DIR, LTSPICE_DIR = _resolve_runtime_data_dirs()
 ASSETS_DIR = str(BUNDLE_ROOT / "assets")
 SAVE_DIR = CIRCUITOS_DIR.parent / "save"
 SAVE_FILE = SAVE_DIR / "savegame.json"
+PREFERENCES_FILE = SAVE_DIR / "preferences.json"
+DEFAULT_LANGUAGE = "en"
 SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 

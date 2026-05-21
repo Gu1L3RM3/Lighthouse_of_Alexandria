@@ -8,6 +8,7 @@ from core.managers.life_manager  import LifeManager
 from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
 from core.circuit_tools.serialization_manager import SerializationManager
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
@@ -119,6 +120,7 @@ class Game:
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
         self.save_manager = SaveGameManager.get()
+        self.language_service = LanguageService.get()
         self.input_manager = InputManager.get()
         self.input_manager.initialize()
         self.life_manager.set_max_lives(10)
