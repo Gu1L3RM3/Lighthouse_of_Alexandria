@@ -1,6 +1,7 @@
 import pygame
 
 from core.settings import FONT
+from core.managers.language_service import LanguageService
 from core.managers.input_manager import InputManager
 from core.managers.resource_manager import ResourceManager
 from core.ui.prompt_ui import draw_prompt_chip
@@ -8,9 +9,11 @@ from core.ui.widgets.widget import Widget
 
 
 class InteractionKeyWidget(Widget):
-    def __init__(self, screen_size: tuple[int, int], label: str = "ENTRAR"):
+    def __init__(self, screen_size: tuple[int, int], label: str | None = None):
         super().__init__()
         self.visible = False
+        if label is None:
+            label = LanguageService.get().get_ui_label("enter")
         self.label = label
         self.action = "interact"
         self.screen_w, self.screen_h = screen_size

@@ -2,6 +2,7 @@ from core.components.collider import Collider
 from core.components.dialogue import Dialogue
 from core.components.position import Position
 from core.managers.entity_manager import EntityManager
+from core.managers.language_service import LanguageService
 from core.systems.dialogue_system import DialogueSystem
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from entities.dialogue_area import DialogueArea
@@ -18,14 +19,17 @@ class DialogueInteractionHUDController:
         self.dialogue_system = dialogue_system
         self.widget = widget
 
-    def update(self, player, extra_interaction: bool = False, extra_prompt_label: str = "INTERAGIR"):
+    def update(self, player, extra_interaction: bool = False, extra_prompt_label: str | None = None):
         if self.dialogue_system.active_dialogue:
             self.widget.set_visible(False)
             return
 
+        language = LanguageService.get()
+        if extra_prompt_label is None:
+            extra_prompt_label = language.get_ui_label("interact")
         has_dialogue_interaction = self._find_dialogue_interaction_target(player) is not None
         if has_dialogue_interaction:
-            self.widget.set_prompt("interact", "CONVERSAR")
+            self.widget.set_prompt("interact", language.get_ui_label("talk"))
         else:
             self.widget.set_prompt("interact", extra_prompt_label)
         self.widget.set_visible(bool(extra_interaction or has_dialogue_interaction))

@@ -2,11 +2,12 @@ import pygame
 from pygame import Event, Surface
 
 from scenes.base_scene import BaseScene
-from scenes.help_content import HELP_SECTIONS
+from scenes.help_content import get_help_page_copy, get_help_sections
 from core.settings import BLACK, HELP_SCROLL_STEP
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
 from core.ui.prompt_ui import draw_prompt_hint_row
 from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
@@ -21,6 +22,8 @@ class HelpScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
+        self.language_service = LanguageService.get()
+        self.language = self.language_service.get_current_language()
         self.width = width
         self.height = height
 
@@ -31,7 +34,8 @@ class HelpScene(BaseScene):
         self.hint_font = self.resources.load_font("PressStart2P-Regular.ttf", 9)
         self.hint_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
-        self.sections = HELP_SECTIONS
+        self.sections = get_help_sections(self.language)
+        self.help_copy = get_help_page_copy(self.language)
         self.scroll_offset = 0.0
         self.max_scroll = 0.0
 
@@ -50,7 +54,7 @@ class HelpScene(BaseScene):
             pos_center=(self.width // 2, int(self.height * 0.91)),
             click_type=ClickType.AFTER_RELEASED,
             action=self.go_back,
-            text="VOLTAR",
+            text=self.language_service.get_ui_label("help_back"),
             font_size=12,
             color_text=(245, 230, 170),
         )
@@ -145,7 +149,7 @@ class HelpScene(BaseScene):
         entries: list[tuple[str, pygame.font.Font | None, tuple[int, int, int] | None, int]] = []
         total_height = 0
 
-        intro = "Guia rapido do Farol de Alexandria"
+        intro = self.help_copy["intro"]
         entries.append((intro, self.subtitle_font, (212, 196, 156), 14))
         total_height += self.subtitle_font.get_linesize() + 14
 
@@ -203,8 +207,8 @@ class HelpScene(BaseScene):
         pygame.draw.rect(board, (197, 166, 108, 180), inner, width=2, border_radius=8)
         self.screen.blit(board, panel.topleft)
 
-        title = self.title_font.render("HELP - COMO JOGAR", True, (246, 215, 144))
-        subtitle = self.subtitle_font.render("Movimento, atalhos e editor de circuito", True, (216, 196, 148))
+        title = self.title_font.render(self.help_copy["title"], True, (246, 215, 144))
+        subtitle = self.subtitle_font.render(self.help_copy["subtitle"], True, (216, 196, 148))
         self.screen.blit(title, title.get_rect(center=(panel.centerx, panel.top + 46)))
         self.screen.blit(subtitle, subtitle.get_rect(center=(panel.centerx, panel.top + 82)))
 

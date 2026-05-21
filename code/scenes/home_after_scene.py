@@ -35,10 +35,14 @@ class HomeAfterScene(BaseScene):
         loader = TileMapLoader()
         self.tile_map = loader.load("house_after.tmx")
         self.scale = 2
+        self.language_service = LanguageService.get()
         super().__init__(screen, self.tile_map.map_width * self.scale, self.tile_map.map_height * self.scale)
 
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
-        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.interaction_key_widget = InteractionKeyWidget(
+            self.screen.get_size(),
+            label=self.language_service.get_ui_label("enter"),
+        )
         self.ui_manager.add(self.interaction_key_widget)
         self._set_hud_buttons()
         self.set_map()
@@ -69,11 +73,11 @@ class HomeAfterScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
-        self.language_service = LanguageService.get()
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
     def _set_hud_buttons(self):
+        language_service = self.language_service
         top_button_gap = 20
         top_button_step = 142 + top_button_gap
         help_x = self.screen.get_width() - 92
@@ -86,7 +90,7 @@ class HomeAfterScene(BaseScene):
             pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
-            text="MENU",
+            text=language_service.get_ui_label("top_menu"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -96,7 +100,7 @@ class HomeAfterScene(BaseScene):
             pos_center=(help_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_help(0.35),
-            text="HELP",
+            text=language_service.get_ui_label("top_help"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -233,7 +237,12 @@ class HomeAfterScene(BaseScene):
         self.player.input(events)
 
     def update(self, dt):
-        self.dialogue_hud.update(self.player, extra_interaction=self._can_old_paper_interact())
+        extra_prompt = self.language_service.get_ui_label("read") if self._can_old_paper_interact() else None
+        self.dialogue_hud.update(
+            self.player,
+            extra_interaction=self._can_old_paper_interact(),
+            extra_prompt_label=extra_prompt,
+        )
         self.dialog_system.update(self.entity_mn, self.player, dt)
 
         self.update_systems(dt)

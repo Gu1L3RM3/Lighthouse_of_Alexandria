@@ -34,6 +34,7 @@ class Level1(BaseScene):
         loader = TileMapLoader()
         self.tile_map=loader.load("fases/fase_1.tmx")
         self.scale = 2
+        self.language_service = LanguageService.get()
         super().__init__(screen, self.tile_map.map_width*self.scale, self.tile_map.map_height*self.scale)
 
         
@@ -52,7 +53,6 @@ class Level1(BaseScene):
 
         self.attention_manager       = AttentionManager(self.entity_mn)
         self.input_manager = InputManager.get()
-        self.language_service = LanguageService.get()
         self.dialogue_hud = DialogueInteractionHUDController(
             self.entity_mn,
             self.dialog_system,
@@ -77,6 +77,7 @@ class Level1(BaseScene):
         self.door:Door = self.entity_mn.get_entities_by_class(Door)[0]
         self.door.next_scene = 'level_2'
     def set_ui(self):
+        language_service = self.language_service
         lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(lives)
         top_button_gap = 20
@@ -91,7 +92,7 @@ class Level1(BaseScene):
             pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
-            text="MENU",
+            text=language_service.get_ui_label("top_menu"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -101,12 +102,15 @@ class Level1(BaseScene):
             pos_center=(help_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_help(0.35),
-            text="HELP",
+            text=language_service.get_ui_label("top_help"),
             font_size=11,
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(self.menu_button, self.help_button)
-        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.interaction_key_widget = InteractionKeyWidget(
+            self.screen.get_size(),
+            label=language_service.get_ui_label("enter"),
+        )
         self.ui_manager.add(self.interaction_key_widget)
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
@@ -239,7 +243,15 @@ class Level1(BaseScene):
     def update(self, dt):
         can_door_interact = self.door.can_player_interact(self.player) if self.door and self.player else False
         can_paper_interact = self._can_old_paper_interact()
-        prompt_label = "LER" if can_paper_interact else ("ENTRAR" if can_door_interact else "INTERAGIR")
+        prompt_label = (
+            self.language_service.get_ui_label("read")
+            if can_paper_interact
+            else (
+                self.language_service.get_ui_label("enter")
+                if can_door_interact
+                else self.language_service.get_ui_label("interact")
+            )
+        )
         self.dialogue_hud.update(
             self.player,
             extra_interaction=(can_door_interact or can_paper_interact),

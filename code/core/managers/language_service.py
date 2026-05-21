@@ -29,6 +29,92 @@ class LanguageService:
             "title_tagline": "aventura pixel",
         },
     }
+    UI_LABELS = {
+        "en": {
+            "top_menu": "MENU",
+            "top_help": "HELP",
+            "help_back": "BACK",
+            "core_button": "CORE",
+            "enter": "ENTER",
+            "interact": "INTERACT",
+            "talk": "TALK",
+            "read": "READ",
+            "open": "OPEN",
+            "bomb_status_title": "CORES",
+            "bomb_status_fallback": "STANDARD",
+            "bomb_status_time": "Time",
+            "bomb_status_area": "Area",
+            "bomb_status_pulse": "Pulse",
+        },
+        "pt-BR": {
+            "top_menu": "MENU",
+            "top_help": "AJUDA",
+            "help_back": "VOLTAR",
+            "core_button": "NUCLEO",
+            "enter": "ENTRAR",
+            "interact": "INTERAGIR",
+            "talk": "CONVERSAR",
+            "read": "LER",
+            "open": "ABRIR",
+            "bomb_status_title": "NUCLEOS",
+            "bomb_status_fallback": "PADRAO",
+            "bomb_status_time": "Tempo",
+            "bomb_status_area": "Area",
+            "bomb_status_pulse": "Pulso",
+        },
+    }
+    PROMPT_TEXTS = {
+        "en": {
+            "navigate": "navigate",
+            "confirm": "confirm",
+            "back": "back",
+            "scroll": "scroll",
+            "up": "up",
+            "down": "down",
+            "bomb": "bomb",
+            "editor": "editor",
+            "help": "help",
+            "menu": "menu",
+            "move": "move",
+            "apply": "apply",
+            "wire": "wire",
+            "rotate_select": "rotate/select",
+            "tool_prev": "tool-",
+            "tool_next": "tool+",
+            "cancel": "cancel",
+            "exit": "exit",
+            "cursor": "cursor",
+            "tools": "tools",
+            "edit": "edit",
+            "menu_grid": "menu/grid",
+            "click_menu": "click menu",
+        },
+        "pt-BR": {
+            "navigate": "navegar",
+            "confirm": "confirmar",
+            "back": "voltar",
+            "scroll": "rolar",
+            "up": "subir",
+            "down": "descer",
+            "bomb": "bomba",
+            "editor": "editor",
+            "help": "ajuda",
+            "menu": "menu",
+            "move": "mover",
+            "apply": "aplicar",
+            "wire": "fio",
+            "rotate_select": "girar/selecionar",
+            "tool_prev": "ferramenta-",
+            "tool_next": "ferramenta+",
+            "cancel": "cancelar",
+            "exit": "sair",
+            "cursor": "cursor",
+            "tools": "ferramentas",
+            "edit": "editar",
+            "menu_grid": "menu/grid",
+            "click_menu": "clicar menu",
+        },
+    }
 
     def __init__(self, repository: LanguagePreferencesRepository | None = None):
         self.repository = repository or LanguagePreferencesRepository()
@@ -64,4 +150,12 @@ class LanguageService:
 
     def get_menu_label(self, key: str) -> str:
         labels = self.MENU_LABELS.get(self.current_language, self.MENU_LABELS[DEFAULT_LANGUAGE])
+        return labels.get(key, key)
+
+    def get_ui_label(self, key: str) -> str:
+        labels = self.UI_LABELS.get(self.current_language, self.UI_LABELS[DEFAULT_LANGUAGE])
+        return labels.get(key, key)
+
+    def get_prompt_text(self, key: str) -> str:
+        labels = self.PROMPT_TEXTS.get(self.current_language, self.PROMPT_TEXTS[DEFAULT_LANGUAGE])
         return labels.get(key, key)

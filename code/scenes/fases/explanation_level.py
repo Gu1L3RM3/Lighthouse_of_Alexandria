@@ -21,6 +21,7 @@ from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
 from core.managers.attention_manager import AttentionManager
+from core.managers.language_service import LanguageService
 from core.managers.scene_manager import SceneManager
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.dialogue_image_sequence import DialogueImageSequenceWidget
@@ -83,6 +84,7 @@ class BaseExplanationLevel(BaseScene):
         )
 
     def set_ui(self):
+        language_service = LanguageService.get()
         top_button_gap = 20
         top_button_step = 142 + top_button_gap
         menu_x = self.screen.get_width() - 92
@@ -95,7 +97,7 @@ class BaseExplanationLevel(BaseScene):
             pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
-            text="MENU",
+            text=language_service.get_ui_label("top_menu"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -105,12 +107,15 @@ class BaseExplanationLevel(BaseScene):
             pos_center=(help_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_help(0.35),
-            text="HELP",
+            text=language_service.get_ui_label("top_help"),
             font_size=11,
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(self.menu_button, self.help_button)
-        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.interaction_key_widget = InteractionKeyWidget(
+            self.screen.get_size(),
+            label=language_service.get_ui_label("enter"),
+        )
         self.ui_manager.add(self.interaction_key_widget)
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
@@ -311,7 +316,7 @@ class BaseExplanationLevel(BaseScene):
         self.dialogue_hud.update(
             self.player,
             extra_interaction=can_door_interact,
-            extra_prompt_label="ENTRAR",
+            extra_prompt_label=LanguageService.get().get_ui_label("enter"),
         )
         self.dialog_system.update(self.entity_mn, self.player, dt)
         self.update_systems(dt)

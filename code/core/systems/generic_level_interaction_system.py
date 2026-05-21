@@ -4,6 +4,7 @@ from core.ecs import System
 from core.components.area_trigger import AreaTrigger
 from core.components.collider import Collider
 from core.components.position import Position
+from core.managers.language_service import LanguageService
 from core.settings import KEY_DIALOG
 from core.ui.widgets.alert_dialog import AlertDialog
 from entities.itens.control_pannel import ControlPannel
@@ -95,15 +96,16 @@ class GenericLevelInteractionSystem(System):
     def resolve_interaction_prompt(self, player) -> str | None:
         if not player:
             return None
+        language = LanguageService.get()
 
         for panel in self.scene.entity_mn.get_entities_by_class(ControlPannel):
             if panel.can_player_interact(player):
-                return "ABRIR"
+                return language.get_ui_label("open")
 
         if self._resolve_target_door(player):
-            return "ENTRAR"
+            return language.get_ui_label("enter")
 
         if self.can_old_paper_interact():
-            return "LER"
+            return language.get_ui_label("read")
 
         return None

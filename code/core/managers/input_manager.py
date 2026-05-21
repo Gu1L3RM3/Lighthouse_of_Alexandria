@@ -6,6 +6,7 @@ try:
 except Exception:
     sdl2_controller = None
 
+from core.managers.language_service import LanguageService
 from core.settings import (
     KEY_DIALOG,
     KEY_NEXT_SCENE,
@@ -91,7 +92,7 @@ class InputManager:
             "back": "ESC",
             "bomb": "B",
             "pause": "ESC",
-            "open_editor": "NUCLEO",
+            "open_editor": "CORE",
             "help": "F1",
             "tool_prev": "Q",
             "tool_next": "E",
@@ -273,61 +274,69 @@ class InputManager:
             )
         else:
             labels = self._keyboard_action_labels
-        return labels.get(action, action.upper())
+        label = labels.get(action, action.upper())
+        if action == "open_editor" and self.last_input_source != "controller":
+            return LanguageService.get().get_ui_label("core_button")
+        return label
 
     def get_prompt_items(self, context: str) -> list[tuple[str, str]]:
+        language = LanguageService.get()
         if context == "menu":
             if self.last_input_source == "controller":
-                return [("D-PAD", "navegar"), (self.get_prompt_button("confirm"), "confirmar"), (self.get_prompt_button("back"), "voltar")]
-            return [("W/S", "navegar"), ("ENTER", "confirmar"), ("ESC", "voltar")]
+                return [
+                    ("D-PAD", language.get_prompt_text("navigate")),
+                    (self.get_prompt_button("confirm"), language.get_prompt_text("confirm")),
+                    (self.get_prompt_button("back"), language.get_prompt_text("back")),
+                ]
+            return [("W/S", language.get_prompt_text("navigate")), ("ENTER", language.get_prompt_text("confirm")), ("ESC", language.get_prompt_text("back"))]
         if context == "help":
             if self.last_input_source == "controller":
-                return [("D-PAD", "rolar"), (self.get_prompt_button("back"), "voltar")]
-            return [("W/S", "rolar"), ("PGUP", "subir"), ("PGDN", "descer"), ("ESC", "voltar")]
+                return [("D-PAD", language.get_prompt_text("scroll")), (self.get_prompt_button("back"), language.get_prompt_text("back"))]
+            return [("W/S", language.get_prompt_text("scroll")), ("PGUP", language.get_prompt_text("up")), ("PGDN", language.get_prompt_text("down")), ("ESC", language.get_prompt_text("back"))]
         if context == "generic_level":
             if self.last_input_source == "controller":
                 return [
-                    (self.get_prompt_button("bomb"), "bomba"),
-                    (self.get_prompt_button("open_editor"), "nucleo"),
-                    (self.get_prompt_button("help"), "help"),
-                    (self.get_prompt_button("pause"), "menu"),
+                    (self.get_prompt_button("bomb"), language.get_prompt_text("bomb")),
+                    (self.get_prompt_button("open_editor"), language.get_prompt_text("editor")),
+                    (self.get_prompt_button("help"), language.get_prompt_text("help")),
+                    (self.get_prompt_button("pause"), language.get_prompt_text("menu")),
                 ]
-            return [("B", "bomba"), ("NUCLEO", "editor"), ("F1", "help"), ("ESC", "menu")]
+            return [("B", language.get_prompt_text("bomb")), (self.get_prompt_button("open_editor"), language.get_prompt_text("editor")), ("F1", language.get_prompt_text("help")), ("ESC", language.get_prompt_text("menu"))]
         if context == "basic_level":
             if self.last_input_source == "controller":
-                return [(self.get_prompt_button("help"), "help"), (self.get_prompt_button("pause"), "menu")]
-            return [("F1", "help"), ("ESC", "menu")]
+                return [(self.get_prompt_button("help"), language.get_prompt_text("help")), (self.get_prompt_button("pause"), language.get_prompt_text("menu"))]
+            return [("F1", language.get_prompt_text("help")), ("ESC", language.get_prompt_text("menu"))]
         if context == "home":
             if self.last_input_source == "controller":
                 return [
-                    (self.get_prompt_button("pause"), "menu"),
-                    (self.get_prompt_button("help"), "help"),
+                    (self.get_prompt_button("pause"), language.get_prompt_text("menu")),
+                    (self.get_prompt_button("help"), language.get_prompt_text("help")),
                 ]
-            return [("ESC", "menu"), ("F1", "help")]
+            return [("ESC", language.get_prompt_text("menu")), ("F1", language.get_prompt_text("help"))]
         if context == "circuit_editor":
             if self.last_input_source == "controller":
                 return [
-                    (self.get_prompt_button("help"), "menu/grid"),
-                    ("D-PAD/L", "mover"),
-                    (self.get_prompt_button("confirm"), "aplicar"),
-                    (self.get_prompt_button("bomb"), "wire"),
-                    (self.get_prompt_button("open_editor"), "rotate/select"),
-                    (self.get_prompt_button("tool_prev"), "tool-"),
-                    (self.get_prompt_button("tool_next"), "tool+"),
-                    (self.get_prompt_button("back"), "cancelar"),
-                    (self.get_prompt_button("pause"), "sair"),
+                    (self.get_prompt_button("help"), language.get_prompt_text("menu_grid")),
+                    ("D-PAD/L", language.get_prompt_text("move")),
+                    (self.get_prompt_button("confirm"), language.get_prompt_text("apply")),
+                    (self.get_prompt_button("bomb"), language.get_prompt_text("wire")),
+                    (self.get_prompt_button("open_editor"), language.get_prompt_text("rotate_select")),
+                    (self.get_prompt_button("tool_prev"), language.get_prompt_text("tool_prev")),
+                    (self.get_prompt_button("tool_next"), language.get_prompt_text("tool_next")),
+                    (self.get_prompt_button("back"), language.get_prompt_text("cancel")),
+                    (self.get_prompt_button("pause"), language.get_prompt_text("exit")),
                 ]
-            return [("MOUSE", "cursor"), ("N/W/G", "ferramentas"), ("R/S/DEL", "editar"), ("ESC", "cancelar")]
+            return [("MOUSE", language.get_prompt_text("cursor")), ("N/W/G", language.get_prompt_text("tools")), ("R/S/DEL", language.get_prompt_text("edit")), ("ESC", language.get_prompt_text("cancel"))]
         if context == "circuit_editor_grid":
             return [
-                ("D-PAD/L", "mover"),
-                (self.get_prompt_button("confirm"), "aplicar"),
-                (self.get_prompt_button("open_editor"), "girar"),
-                (self.get_prompt_button("back"), "cancelar"),
-                (self.get_prompt_button("tool_prev"), "menu-"),
-                (self.get_prompt_button("tool_next"), "menu+"),
-                (self.get_prompt_button("menu_confirm"), "clicar menu"),
-                (self.get_prompt_button("pause"), "sair"),
+                ("D-PAD/L", language.get_prompt_text("move")),
+                (self.get_prompt_button("confirm"), language.get_prompt_text("apply")),
+                (self.get_prompt_button("open_editor"), language.get_prompt_text("rotate_select")),
+                (self.get_prompt_button("back"), language.get_prompt_text("cancel")),
+                (self.get_prompt_button("tool_prev"), language.get_prompt_text("tool_prev")),
+                (self.get_prompt_button("tool_next"), language.get_prompt_text("tool_next")),
+                (self.get_prompt_button("menu_confirm"), language.get_prompt_text("click_menu")),
+                (self.get_prompt_button("pause"), language.get_prompt_text("exit")),
             ]
         return []
 

@@ -140,6 +140,7 @@ class BaseGenericLevel(BaseScene):
         self.bomb_manager.set_balance_profile("standard")
             
     def set_ui(self):
+        language_service = LanguageService.get()
         lives = LivesWidget(pos=(10, 42))
         self.ui_manager.add(lives)
         top_button_gap = 20
@@ -155,7 +156,7 @@ class BaseGenericLevel(BaseScene):
             pos_center=(menu_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_menu(0.35),
-            text="MENU",
+            text=language_service.get_ui_label("top_menu"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -165,7 +166,7 @@ class BaseGenericLevel(BaseScene):
             pos_center=(help_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=lambda: SceneManager.get().open_help(0.35),
-            text="HELP",
+            text=language_service.get_ui_label("top_help"),
             font_size=11,
             color_text=(245, 230, 170),
         )
@@ -175,7 +176,7 @@ class BaseGenericLevel(BaseScene):
             pos_center=(nucleo_x, 44),
             click_type=ClickType.AFTER_RELEASED,
             action=self.open_bomb_editor,
-            text="NUCLEO",
+            text=language_service.get_ui_label("core_button"),
             font_size=10,
             color_text=(245, 230, 170),
         )
@@ -194,7 +195,10 @@ class BaseGenericLevel(BaseScene):
             self.bomb_status_widget,
             self.component_overload_widget,
         )
-        self.interaction_key_widget = InteractionKeyWidget(self.screen.get_size(), label="ENTRAR")
+        self.interaction_key_widget = InteractionKeyWidget(
+            self.screen.get_size(),
+            label=language_service.get_ui_label("enter"),
+        )
         self.ui_manager.add(self.interaction_key_widget)
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
@@ -494,7 +498,7 @@ class BaseGenericLevel(BaseScene):
         self.dialogue_hud.update(
             self.player,
             extra_interaction=prompt_label is not None,
-            extra_prompt_label=prompt_label or "INTERAGIR",
+            extra_prompt_label=prompt_label or self.language_service.get_ui_label("interact"),
         )
         self.dialog_system.update(self.entity_mn, self.player,dt)
         self.update_systems(dt)

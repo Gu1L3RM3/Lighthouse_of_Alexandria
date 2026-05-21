@@ -1,5 +1,6 @@
 import pygame
 
+from core.managers.language_service import LanguageService
 from core.managers.resource_manager import ResourceManager
 from core.settings import FONT
 from core.ui.widgets.widget import Widget
@@ -36,8 +37,10 @@ class BombStatusWidget(Widget):
 
         params = self.bomb_manager.current_params
         bombs = self.bomb_manager.remaining_bombs
-        fallback = "PADRAO" if params.used_fallback else "R1"
-        title = self.font_title.render(f"NUCLEOS x{bombs} ({fallback})", True, (245, 230, 170))
+        language = LanguageService.get()
+        fallback = language.get_ui_label("bomb_status_fallback") if params.used_fallback else "R1"
+        title_label = language.get_ui_label("bomb_status_title")
+        title = self.font_title.render(f"{title_label} x{bombs} ({fallback})", True, (245, 230, 170))
         title_x = x + 8
         if self.icon is not None:
             surface.blit(self.icon, (x + 8, y + 6))
@@ -47,8 +50,11 @@ class BombStatusWidget(Widget):
         v_label = SetterValues.format_eng(float(params.voltage_r1), "V")
         i_label = SetterValues.format_eng(float(params.current_r1), "A")
         info_1 = self.font_info.render(f"V_R1: {v_label}  I_R1: {i_label}", True, (225, 225, 225))
+        time_label = language.get_ui_label("bomb_status_time")
+        area_label = language.get_ui_label("bomb_status_area")
+        pulse_label = language.get_ui_label("bomb_status_pulse")
         info_2 = self.font_info.render(
-            f"Tempo: {params.explosion_delay:0.2f}s  Area: {int(params.explosion_radius)}  Pulso: {int(params.damage)}",
+            f"{time_label}: {params.explosion_delay:0.2f}s  {area_label}: {int(params.explosion_radius)}  {pulse_label}: {int(params.damage)}",
             True,
             (225, 225, 225),
         )
