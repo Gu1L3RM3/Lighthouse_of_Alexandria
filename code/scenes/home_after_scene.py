@@ -21,6 +21,8 @@ from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
 from core.managers.audio_manager import AudioManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
+from core.localization.letter_asset_resolver import LetterAssetResolver
 from core.ui.prompt_ui import draw_prompt_hint_row
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
@@ -67,6 +69,7 @@ class HomeAfterScene(BaseScene):
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
+        self.language_service = LanguageService.get()
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
 
@@ -165,7 +168,10 @@ class HomeAfterScene(BaseScene):
             self.ui_manager.remove(widget)
             self.event_manager.post({"type": "close_old_paper"})
 
-        paper: Surface = self.resources.load_image("letters/letter_4.png")
+        paper_path = LetterAssetResolver(
+            language=self.language_service.get_current_language()
+        ).resolve("letter_4")
+        paper: Surface = self.resources.load_image(paper_path)
         alert_dialog = AlertDialog(
             title="",
             surface=paper,

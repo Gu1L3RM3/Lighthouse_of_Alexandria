@@ -20,6 +20,8 @@ from core.systems.area_trigger_system import AreaTriggerSystem
 from core.systems.freeze_system import FreezeSystem
 from core.managers.attention_manager import AttentionManager
 from core.managers.scene_manager import SceneManager
+from core.managers.language_service import LanguageService
+from core.localization.letter_asset_resolver import LetterAssetResolver
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.interaction_key_widget import InteractionKeyWidget
 from core.ui.widgets.button import Button
@@ -50,6 +52,7 @@ class Level1(BaseScene):
 
         self.attention_manager       = AttentionManager(self.entity_mn)
         self.input_manager = InputManager.get()
+        self.language_service = LanguageService.get()
         self.dialogue_hud = DialogueInteractionHUDController(
             self.entity_mn,
             self.dialog_system,
@@ -143,7 +146,10 @@ class Level1(BaseScene):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
 
-        paper :Surface= self.resources.load_image('letters/letter_2.png')
+        paper_path = LetterAssetResolver(
+            language=self.language_service.get_current_language()
+        ).resolve("letter_2")
+        paper :Surface= self.resources.load_image(paper_path)
         alert_dialog = AlertDialog(
             title='',
             surface=paper,

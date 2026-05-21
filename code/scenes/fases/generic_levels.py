@@ -35,9 +35,11 @@ from core.map.map_renderer import MapRenderer
 from core.managers.scene_manager import SceneManager
 from core.managers.death_flow_manager import DeathFlowManager
 from core.managers.audio_manager import AudioManager
+from core.managers.language_service import LanguageService
 from core.managers.bomb_manager import BombManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.managers.circuit_manager import CircuitManager
+from core.localization.letter_asset_resolver import LetterAssetResolver
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
 from core.ui.widgets.button import Button
 from core.ui.widgets.bomb_status_widget import BombStatusWidget
@@ -108,6 +110,7 @@ class BaseGenericLevel(BaseScene):
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
+        self.language_service = LanguageService.get()
         self.death_flow_manager = DeathFlowManager.get()
         self.circuit_manager = CircuitManager.get()
         self.dialogue_hud = DialogueInteractionHUDController(
@@ -328,7 +331,10 @@ class BaseGenericLevel(BaseScene):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
 
-        paper :Surface= self.resources.load_image('letters/letter_3.png')
+        paper_path = LetterAssetResolver(
+            language=self.language_service.get_current_language()
+        ).resolve("letter_3")
+        paper :Surface= self.resources.load_image(paper_path)
         alert_dialog = AlertDialog(
             title='',
             surface=paper,
