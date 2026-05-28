@@ -106,6 +106,8 @@ class MenuEditCircuit(Widget):
         self.controller_tab = "components"
         self.focus_index = 0
         self.active_confirmation_dialog: ConfirmActionDialog | None = None
+        self.language_service = LanguageService.get()
+        self.copy = SceneCopyCatalog(self.language_service.get_current_language())
         self.set_eletric_lists()
         self.set_menu_top()
         self.set_menu_right()
@@ -121,7 +123,7 @@ class MenuEditCircuit(Widget):
 
         self.resistor_list = EletricList(
             data,
-            "Resistor",
+            self.language_service.get_ui_label("editor_resistor"),
             storage_manager=storage,
             action=self.on_eletric_list_click,
             on_close=self.on_close,
@@ -129,7 +131,7 @@ class MenuEditCircuit(Widget):
 
         self.v_source_list = EletricList(
             data,
-            "VoutageSource",
+            self.language_service.get_ui_label("editor_v_source"),
             storage_manager=storage,
             action=self.on_eletric_list_click,
             on_close=self.on_close,
@@ -137,7 +139,7 @@ class MenuEditCircuit(Widget):
 
         self.c_source_list = EletricList(
             data,
-            "CurrentSource",
+            self.language_service.get_ui_label("editor_i_source"),
             storage_manager=storage,
             action=self.on_eletric_list_click,
             on_close=self.on_close,
@@ -174,11 +176,11 @@ class MenuEditCircuit(Widget):
         self.ui_manager.add(dialog)
 
     def _request_clear(self):
-        title = SceneCopyCatalog(LanguageService.get().get_current_language()).get("clear_circuit_title")
+        title = self.copy.get("clear_circuit_title")
         self._open_confirmation(title, self.input_system.clear_all)
 
     def _request_exit(self):
-        title = SceneCopyCatalog(LanguageService.get().get_current_language()).get("save_exit_title")
+        title = self.copy.get("save_exit_title")
         self._open_confirmation(title, self.exit)
 
     def set_menu_top(self):
@@ -201,7 +203,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x, pos_y),
-                text="Node",
+                text=self.language_service.get_ui_label("editor_node"),
                 font_size=font_size,
             ),
         )
@@ -215,7 +217,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 3, pos_y),
-                text="V Source",
+                text=self.language_service.get_ui_label("editor_v_source"),
                 font_size=font_size,
             ),
         )
@@ -229,7 +231,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 6, pos_y),
-                text="Resistor",
+                text=self.language_service.get_ui_label("editor_resistor"),
                 font_size=font_size,
             ),
         )
@@ -243,7 +245,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 9, pos_y),
-                text="I Source",
+                text=self.language_service.get_ui_label("editor_i_source"),
                 font_size=font_size,
             ),
         )
@@ -257,7 +259,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 12, pos_y),
-                text="GND",
+                text=self.language_service.get_ui_label("editor_gnd"),
                 font_size=font_size,
             ),
         )
@@ -271,7 +273,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 15, pos_y),
-                text="Wire",
+                text=self.language_service.get_ui_label("editor_wire"),
                 font_size=font_size,
             ),
         )
@@ -288,7 +290,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(init_pos_x + self.cell_size * 17, pos_y - 5),
-                text="X",
+                text=self.language_service.get_ui_label("editor_close"),
                 font_size=font_size,
             ),
         )
@@ -367,7 +369,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(pos_x, start_y + self.cell_size * 6),
-                text="Solve",
+                text=self.language_service.get_ui_label("editor_solve"),
                 font_size=font_size,
             ),
         )
@@ -381,7 +383,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(pos_x, start_y + self.cell_size * 8),
-                text="Load",
+                text=self.language_service.get_ui_label("editor_load"),
                 font_size=font_size,
             ),
         )
@@ -395,7 +397,7 @@ class MenuEditCircuit(Widget):
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
                 pos_center=(pos_x, start_y + self.cell_size * 10),
-                text="Clear",
+                text=self.language_service.get_ui_label("editor_clear"),
                 font_size=font_size - 2,
             ),
         )

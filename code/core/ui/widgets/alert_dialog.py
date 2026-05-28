@@ -5,6 +5,7 @@ from core.ui.widgets.gesture_detector import  ClickType
 from core.ui.widgets.button import Button
 from core.managers.event_manager import EventManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
 from core.ui.prompt_ui import draw_prompt_hint_row
 from typing import Callable, Optional
 
@@ -131,13 +132,14 @@ class AlertDialog(Widget):
         self._draw_close_hint(surface)
 
     def _draw_close_hint(self, surface: Surface):
+        language = LanguageService.get()
         if self.input_manager.last_input_source == "controller":
             items = [
-                (self.input_manager.get_prompt_button("confirm"), "fechar"),
-                (self.input_manager.get_prompt_button("back"), "voltar"),
+                (self.input_manager.get_prompt_button("confirm"), language.get_prompt_text("close")),
+                (self.input_manager.get_prompt_button("back"), language.get_prompt_text("back")),
             ]
         else:
-            items = [("ESC", "fechar"), ("ENTER", "confirmar")]
+            items = [("ESC", language.get_prompt_text("close")), ("ENTER", language.get_prompt_text("confirm"))]
 
         draw_prompt_hint_row(
             surface,

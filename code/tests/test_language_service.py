@@ -67,8 +67,27 @@ class LanguageServiceTest(unittest.TestCase):
 
     def test_menu_labels_follow_current_language(self):
         self.assertEqual(self.service.get_menu_label("start"), "NEW JOURNEY")
+        self.assertEqual(self.service.get_menu_label("title_line1"), "LIGHTHOUSE OF")
         self.service.set_language("pt-BR")
         self.assertEqual(self.service.get_menu_label("start"), "INICIAR JORNADA")
+        self.assertEqual(self.service.get_menu_label("title_line1"), "FAROL DE")
+
+    def test_panel_label_follows_current_language(self):
+        self.assertEqual(self.service.get_ui_label("panel_label"), "PANEL")
+        self.service.set_language("pt-BR")
+        self.assertEqual(self.service.get_ui_label("panel_label"), "PAINEL")
+
+    def test_editor_labels_follow_current_language(self):
+        self.assertEqual(self.service.get_ui_label("editor_solve"), "Solve")
+        self.assertEqual(self.service.get_ui_label("editor_wire"), "Wire")
+        self.service.set_language("pt-BR")
+        self.assertEqual(self.service.get_ui_label("editor_solve"), "Resolver")
+        self.assertEqual(self.service.get_ui_label("editor_wire"), "Fio")
+
+    def test_window_title_follows_current_language(self):
+        self.assertEqual(self.service.get_system_label("window_title"), "Lighthouse of Alexandria")
+        self.service.set_language("pt-BR")
+        self.assertEqual(self.service.get_system_label("window_title"), "Farol de Alexandria")
 
 
 class _DummySceneManager:
@@ -175,7 +194,10 @@ class MainMenuSceneLanguageTest(unittest.TestCase):
         self.assertEqual(scene.exit_button.text_widget.debug_text, "EXIT")
         self.assertEqual(scene.resume_button.text_widget.debug_text, "NO SAVE AVAILABLE")
         self.assertTrue(hasattr(scene, "language_button"))
-        self.assertEqual(scene.language_button.text_widget.debug_text, "LANGUAGE: ENGLISH")
+        self.assertEqual(scene.language_button.text_widget.debug_text, "EN / PT-BR")
+        self.assertGreater(scene.language_button._rect.centerx, int(scene.width * 0.58))
+        self.assertGreater(scene.language_button._rect.centery, int(scene.height * 0.7))
+        self.assertLess(scene.language_button._rect.width, scene.start_button._rect.width)
 
     def test_menu_scene_updates_labels_after_language_toggle(self):
         original_set_text = Text.set_text
@@ -204,7 +226,7 @@ class MainMenuSceneLanguageTest(unittest.TestCase):
         self.assertEqual(scene.credits_button.text_widget.debug_text, "CREDITOS")
         self.assertEqual(scene.exit_button.text_widget.debug_text, "SAIR")
         self.assertEqual(scene.resume_button.text_widget.debug_text, "SEM SAVE ATIVO")
-        self.assertEqual(scene.language_button.text_widget.debug_text, "IDIOMA: PORTUGUES")
+        self.assertEqual(scene.language_button.text_widget.debug_text, "PT-BR / EN")
 
 
 if __name__ == "__main__":

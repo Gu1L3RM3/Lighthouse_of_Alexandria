@@ -229,14 +229,6 @@ FINAL_LEVEL_STORAGE_TYPE_BY_KIND = {
     "voltage_source": "VoutageSource",
 }
 
-EXPLANATION_LEVEL3_BOMB_INTRO_LINES = [
-    "Arquimedes: Kevin, antes da fase 3 voce vai usar cargas de foton, nao explosivos comuns.",
-    "Arquimedes: Elas liberam um pulso curto que desestabiliza as sombras e abre passagem nos paineis.",
-    "Arquimedes: O pulso depende do NUCLEO; se a calibracao estiver ruim, o efeito cai.",
-    "Arquimedes: Em campo, pressione B para posicionar a carga e use o botao NUCLEO para ajustar no painel.",
-    "Arquimedes: Use com estrategia. Cada carga precisa contar ate acendermos o caminho do farol.",
-]
-
 # Sistemas
 DAY_NIGHT_KEY_FRAMES = [
     (0, NIGHT_COLOR),

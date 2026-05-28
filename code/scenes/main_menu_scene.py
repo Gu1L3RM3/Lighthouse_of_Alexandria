@@ -124,11 +124,37 @@ class MainMenuScene(BaseScene):
         surf_pressed = pygame.transform.scale(self.resources.load_image("buttons/wide_pressed.png"), (310, 94))
         return surf_idle, surf_pressed
 
+    def _menu_panel_rect(self) -> pygame.Rect:
+        panel_w = min(780, int(self.width * 0.66))
+        panel_h = min(640, int(self.height * 0.84))
+        panel_rect = pygame.Rect(0, 0, panel_w, panel_h)
+        panel_rect.center = (self.width // 2, self.height // 2 + 28)
+        return panel_rect
+
+    def _language_button_surfaces(self) -> tuple[Surface, Surface]:
+        size = (196, 52)
+        idle = pygame.Surface(size, pygame.SRCALPHA)
+        pressed = pygame.Surface(size, pygame.SRCALPHA)
+
+        pygame.draw.rect(idle, (29, 25, 21, 236), idle.get_rect(), border_radius=14)
+        pygame.draw.rect(idle, (166, 138, 88, 255), idle.get_rect(), width=3, border_radius=14)
+        inner_idle = idle.get_rect().inflate(-10, -10)
+        pygame.draw.rect(idle, (63, 54, 43, 220), inner_idle, border_radius=10)
+
+        pygame.draw.rect(pressed, (44, 38, 30, 245), pressed.get_rect(), border_radius=14)
+        pygame.draw.rect(pressed, (214, 182, 114, 255), pressed.get_rect(), width=3, border_radius=14)
+        inner_pressed = pressed.get_rect().inflate(-10, -10)
+        pygame.draw.rect(pressed, (88, 74, 58, 230), inner_pressed, border_radius=10)
+
+        return idle, pressed
+
     def _create_buttons(self):
         idle, pressed = self._button_surfaces()
         center_x = self.width // 2
         first_y = int(self.height * 0.47)
         gap = 96
+        panel_rect = self._menu_panel_rect()
+        lang_idle, lang_pressed = self._language_button_surfaces()
 
         self.resume_button = Button(
             init_surface=idle.copy(),
@@ -172,13 +198,13 @@ class MainMenuScene(BaseScene):
             color_text=(245, 230, 170),
         )
         self.language_button = Button(
-            init_surface=idle.copy(),
-            surface_pressed=pressed.copy(),
-            pos_center=(center_x, first_y + gap * 4),
+            init_surface=lang_idle,
+            surface_pressed=lang_pressed,
+            pos_center=(panel_rect.right - 122, panel_rect.bottom - 52),
             click_type=ClickType.AFTER_RELEASED,
             action=self.toggle_language,
             text=self.language_service.get_menu_label("language_button"),
-            font_size=12,
+            font_size=10,
             color_text=(245, 230, 170),
         )
         self.ui_manager.add(
@@ -326,10 +352,7 @@ class MainMenuScene(BaseScene):
         self.screen.blit(frame, (self.width - frame.get_width() - margin, y))
 
     def _draw_title_and_panel(self):
-        panel_w = min(780, int(self.width * 0.66))
-        panel_h = min(640, int(self.height * 0.84))
-        panel_rect = pygame.Rect(0, 0, panel_w, panel_h)
-        panel_rect.center = (self.width // 2, self.height // 2 + 28)
+        panel_rect = self._menu_panel_rect()
 
         # Painel de pedra/bronze
         panel = pygame.Surface(panel_rect.size, pygame.SRCALPHA)
@@ -342,8 +365,8 @@ class MainMenuScene(BaseScene):
         self.screen.blit(panel, panel_rect)
 
         title_top = panel_rect.top + 52
-        title1 = self.title_font.render("FAROL DE", True, (240, 208, 132))
-        title2 = self.title_font.render("ALEXANDRIA", True, (247, 218, 151))
+        title1 = self.title_font.render(self.language_service.get_menu_label("title_line1"), True, (240, 208, 132))
+        title2 = self.title_font.render(self.language_service.get_menu_label("title_line2"), True, (247, 218, 151))
         subtitle = self.subtitle_font.render(self.language_service.get_menu_label("title_subtitle"), True, (204, 180, 126))
         line = self.subtitle_font.render(self.language_service.get_menu_label("title_tagline"), True, (167, 145, 102))
 

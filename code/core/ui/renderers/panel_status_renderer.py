@@ -4,6 +4,7 @@ from pygame import Rect
 from functools import lru_cache
 
 from core.components.panel_status import PanelStatus
+from core.managers.language_service import LanguageService
 
 
 class PanelStatusRenderer:
@@ -33,7 +34,8 @@ class PanelStatusRenderer:
     def _draw_panel_id_label(self, surface: pygame.Surface, draw_rect: Rect, panel_id: int | None, scale: float):
         if panel_id is None:
             return
-        label_text = f"PAINEL {int(panel_id):02d}"
+        language = LanguageService.get()
+        label_text = f"{language.get_ui_label('panel_label')} {int(panel_id):02d}"
         scale_key = int(max(50, min(300, scale * 100)))
         plate_surface = self._build_label_surfaces(label_text, scale_key)
         plate_rect = plate_surface.get_rect(

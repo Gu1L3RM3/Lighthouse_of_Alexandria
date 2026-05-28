@@ -112,15 +112,15 @@ class Game:
             pygame.FULLSCREEN
         )
         self._set_window_icon()
-        pygame.display.set_caption("Farol de Alexandria")
         self.clock = pygame.time.Clock()
-        
+
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
         self.save_manager = SaveGameManager.get()
         self.language_service = LanguageService.get()
+        pygame.display.set_caption(self.language_service.get_system_label("window_title"))
         self.input_manager = InputManager.get()
         self.input_manager.initialize()
         self.life_manager.set_max_lives(10)

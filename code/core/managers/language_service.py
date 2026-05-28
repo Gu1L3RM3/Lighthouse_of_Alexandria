@@ -5,6 +5,14 @@ from core.repositories.language_preferences_repository import LanguagePreference
 class LanguageService:
     _instance = None
     SUPPORTED_LANGUAGES = ("en", "pt-BR")
+    SYSTEM_LABELS = {
+        "en": {
+            "window_title": "Lighthouse of Alexandria",
+        },
+        "pt-BR": {
+            "window_title": "Farol de Alexandria",
+        },
+    }
     MENU_LABELS = {
         "en": {
             "resume_initial": "RESUME LEVEL",
@@ -13,7 +21,9 @@ class LanguageService:
             "start": "NEW JOURNEY",
             "credits": "CREDITS",
             "exit": "EXIT",
-            "language_button": "LANGUAGE: ENGLISH",
+            "language_button": "EN / PT-BR",
+            "title_line1": "LIGHTHOUSE OF",
+            "title_line2": "ALEXANDRIA",
             "title_subtitle": "Story, puzzles and electricity",
             "title_tagline": "pixel adventure",
         },
@@ -24,7 +34,9 @@ class LanguageService:
             "start": "INICIAR JORNADA",
             "credits": "CREDITOS",
             "exit": "SAIR",
-            "language_button": "IDIOMA: PORTUGUES",
+            "language_button": "PT-BR / EN",
+            "title_line1": "FAROL DE",
+            "title_line2": "ALEXANDRIA",
             "title_subtitle": "Historia, enigmas e eletricidade",
             "title_tagline": "aventura pixel",
         },
@@ -45,6 +57,17 @@ class LanguageService:
             "bomb_status_time": "Time",
             "bomb_status_area": "Area",
             "bomb_status_pulse": "Pulse",
+            "editor_node": "Node",
+            "editor_v_source": "V Source",
+            "editor_resistor": "Resistor",
+            "editor_i_source": "I Source",
+            "editor_gnd": "GND",
+            "editor_wire": "Wire",
+            "editor_solve": "Solve",
+            "editor_load": "Load",
+            "editor_clear": "Clear",
+            "editor_close": "X",
+            "panel_label": "PANEL",
         },
         "pt-BR": {
             "top_menu": "MENU",
@@ -61,6 +84,17 @@ class LanguageService:
             "bomb_status_time": "Tempo",
             "bomb_status_area": "Area",
             "bomb_status_pulse": "Pulso",
+            "editor_node": "No",
+            "editor_v_source": "Fonte V",
+            "editor_resistor": "Resistor",
+            "editor_i_source": "Fonte I",
+            "editor_gnd": "GND",
+            "editor_wire": "Fio",
+            "editor_solve": "Resolver",
+            "editor_load": "Carregar",
+            "editor_clear": "Limpar",
+            "editor_close": "X",
+            "panel_label": "PAINEL",
         },
     }
     PROMPT_TEXTS = {
@@ -83,6 +117,7 @@ class LanguageService:
             "tool_next": "tool+",
             "cancel": "cancel",
             "exit": "exit",
+            "close": "close",
             "cursor": "cursor",
             "tools": "tools",
             "edit": "edit",
@@ -108,6 +143,7 @@ class LanguageService:
             "tool_next": "ferramenta+",
             "cancel": "cancelar",
             "exit": "sair",
+            "close": "fechar",
             "cursor": "cursor",
             "tools": "ferramentas",
             "edit": "editar",
@@ -150,6 +186,10 @@ class LanguageService:
 
     def get_menu_label(self, key: str) -> str:
         labels = self.MENU_LABELS.get(self.current_language, self.MENU_LABELS[DEFAULT_LANGUAGE])
+        return labels.get(key, key)
+
+    def get_system_label(self, key: str) -> str:
+        labels = self.SYSTEM_LABELS.get(self.current_language, self.SYSTEM_LABELS[DEFAULT_LANGUAGE])
         return labels.get(key, key)
 
     def get_ui_label(self, key: str) -> str:

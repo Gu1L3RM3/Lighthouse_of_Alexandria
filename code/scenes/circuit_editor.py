@@ -409,7 +409,8 @@ class CircuitEditor(BaseScene):
         if self._using_controller():
             items = self.input_manager.get_prompt_items("circuit_editor_grid")
         else:
-            items = [("MOUSE", "cursor"), ("N/W/G", "ferramentas"), ("R/S/DEL", "editar"), ("ESC", "cancelar")]
+            self.input_manager.last_input_source = "keyboard"
+            items = self.input_manager.get_prompt_items("circuit_editor")
         draw_prompt_hint_row(
             self.screen,
             self.prompt_chip_font,
