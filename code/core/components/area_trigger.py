@@ -16,6 +16,7 @@ class AreaTrigger(Component):
         once: bool = False,
         active: bool = True,
         on_entered: Optional[Callable[[object], None]] = None,
+        on_stayed: Optional[Callable[[object], None]] = None,
         on_exit: Optional[Callable[[object], None]] = None,
     ):
         super().__init__()
@@ -27,6 +28,7 @@ class AreaTrigger(Component):
         self.once = once
 
         self.on_entered = on_entered
+        self.on_stayed = on_stayed
         self.on_exit = on_exit
 
     def get_rect(self, x, y)->Rect:
@@ -47,6 +49,9 @@ class AreaTrigger(Component):
                 self.on_entered(entity)
             if self.once:
                 self.active = False
+        elif in_area and entity in self.triggered_entities:
+            if self.on_stayed:
+                self.on_stayed(entity)
 
         elif not in_area and entity in self.triggered_entities:
             self.triggered_entities.remove(entity)
