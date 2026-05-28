@@ -41,25 +41,25 @@ class StoryDialogueCatalog:
     GENERIC_LEVEL_7 = {
         "en": {
             "arquimedes_hints_with_target": [
-                "Arquimedes: Kevin... I did not expect this. Is that man really your father?",
+                "Archimedes: Kevin... I did not expect this. Is that man really your father?",
                 "Kevin: It is him. And he was the one who almost destroyed the Lighthouse to rewrite history.",
-                "Arquimedes: My God... he almost doomed all of Alexandria.",
+                "Archimedes: My God... he almost doomed all of Alexandria.",
                 "Kevin: I know. But now he is trapped, and he is still my father.",
-                "Arquimedes: After everything, do you still want to rescue him?",
+                "Archimedes: After everything, do you still want to rescue him?",
                 "Kevin: I do. If I do not try, I turn my back on who I am.",
                 "Kevin: I will stop his mistake, but I will not abandon my father.",
-                "Arquimedes: ...All right. Then let us get him out of here and finish this together.",
-                "Arquimedes: Focus on the target resistor {target}.",
-                "Arquimedes: Find Thevenin at the load terminals and tune RL to match Rth.",
+                "Archimedes: ...All right. Then let us get him out of here and finish this together.",
+                "Archimedes: Focus on the target resistor {target}.",
+                "Archimedes: Find Thevenin at the load terminals and tune RL to match Rth.",
             ],
             "arquimedes_hints_without_target": [
-                "Arquimedes: Kevin... I am still in shock. That man is your father.",
+                "Archimedes: Kevin... I am still in shock. That man is your father.",
                 "Kevin: Yes. And I will not let him destroy the Lighthouse.",
-                "Arquimedes: He almost erased the light of Alexandria...",
+                "Archimedes: He almost erased the light of Alexandria...",
                 "Kevin: And that is exactly why I need to reach him before it is too late.",
-                "Arquimedes: I understand. Let us open this cell together.",
-                "Arquimedes: To do that, use maximum power transfer on the panel.",
-                "Arquimedes: Find Thevenin at the load terminals and set RL equal to Rth.",
+                "Archimedes: I understand. Let us open this cell together.",
+                "Archimedes: To do that, use maximum power transfer on the panel.",
+                "Archimedes: Find Thevenin at the load terminals and set RL equal to Rth.",
             ],
             "father_dialogue": [
                 "Father: Kevin... so you made it this far.",
@@ -177,6 +177,54 @@ class StoryDialogueCatalog:
         },
     }
 
+    GENERIC_LEVEL_PANEL_HINTS = {
+        "en": {
+            "level3_voltage": "Archimedes: To activate panel {panel_id}, the resistor in the circuit must have a voltage close to {value}.",
+            "level3_power": "Archimedes: To activate panel {panel_id}, the resistor in the circuit must have power close to {value}.",
+            "level3_current": "Archimedes: To activate panel {panel_id}, the resistor in the circuit must have current close to {value}.",
+            "level5_voltage": "Archimedes: To activate panel {panel_id}, the voltages should be approximately: {parts}",
+            "level5_current": "Archimedes: To activate panel {panel_id}, the currents should be approximately: {parts}",
+            "level6_thevenin": "Archimedes: Panel {panel_id}: isolate the terminals of R1, calculate Vth and Rth, and build the equivalent with a voltage source in series with a resistance. Extra hint: turn off the independent sources to find the equivalent resistance.",
+            "level6_norton": "Archimedes: Panel {panel_id}: isolate the terminals of R1, calculate In and Rn, and build the equivalent with a current source in parallel with a resistance. Extra hint: turn off the independent sources to find the equivalent resistance.",
+        },
+        "pt-BR": {
+            "level3_voltage": "Arquimedes: Para ativar o painel {panel_id} o resistor do circuito deve ter tensao proxima de {value}.",
+            "level3_power": "Arquimedes: Para ativar o painel {panel_id} o resistor do circuito deve ter potencia proxima de {value}.",
+            "level3_current": "Arquimedes: Para ativar o painel {panel_id} o resistor do circuito deve ter corrente proxima de {value}.",
+            "level5_voltage": "Arquimedes: Para ativar o painel {panel_id}, as tensoes devem ser aproximadamente: {parts}",
+            "level5_current": "Arquimedes: Para ativar o painel {panel_id}, as correntes devem ser aproximadamente: {parts}",
+            "level6_thevenin": "Arquimedes: Painel {panel_id}: isole os terminais de R1, calcule Vth e Rth e monte o equivalente com fonte de tensao em serie com resistencia. Dica extra: desligue as fontes independentes para achar a resistencia equivalente.",
+            "level6_norton": "Arquimedes: Painel {panel_id}: isole os terminais de R1, calcule In e Rn e monte o equivalente com fonte de corrente em paralelo com resistencia. Dica extra: desligue as fontes independentes para achar a resistencia equivalente.",
+        },
+    }
+
+    FINAL_LEVEL_INTRO = {
+        "en": [
+            "Archimedes: Kevin, your father ran to the top with the Photon Heart.",
+            "Archimedes: He wants to extinguish the lighthouse to force your grandmother's timeline.",
+            "Archimedes: This room is the final seal. There are four active panels at the same time.",
+            "Archimedes: Each solved panel lasts only a short while. If time runs out, it resets.",
+            "Archimedes: Tip: on each panel, focus on target resistor R1 and aim for maximum transfer.",
+            "Archimedes: First find the Thevenin equivalent at the load terminals.",
+            "Archimedes: Key rule: for maximum power, adjust RL so it is approximately equal to Rth.",
+            "Archimedes: The panel checks power and resistance. Confirm both before you finish.",
+            "Archimedes: Strategy: leave components near the panels and solve them in sequence without stopping.",
+            "Archimedes: If we fail here, Alexandria falls before dawn.",
+        ],
+        "pt-BR": [
+            "Arquimedes: Kevin, seu pai correu para o topo com o Coracao de Foton.",
+            "Arquimedes: Ele quer apagar o farol para forcar a linha do tempo da sua avo.",
+            "Arquimedes: Esta sala e o ultimo selo. Sao quatro paineis ativos ao mesmo tempo.",
+            "Arquimedes: Cada painel resolvido dura pouco. Se o tempo acabar, ele reinicia.",
+            "Arquimedes: Dica: em cada painel, foque no resistor alvo R1 e busque maxima transferencia.",
+            "Arquimedes: Primeiro encontre o equivalente de Thevenin nos terminais da carga.",
+            "Arquimedes: Regra-chave: para maxima potencia, ajuste RL para ficar aproximadamente igual a Rth.",
+            "Arquimedes: O painel cobra potencia e resistencia. Confira os dois antes de fechar.",
+            "Arquimedes: Estrategia: deixe componentes perto dos paineis e resolva em sequencia sem parar.",
+            "Arquimedes: Se falharmos aqui, Alexandria cai antes do amanhecer.",
+        ],
+    }
+
     def __init__(self, language: str = "en"):
         self.language = language if language in ("en", "pt-BR") else "en"
 
@@ -195,3 +243,25 @@ class StoryDialogueCatalog:
 
     def get_generic_level_7_player_thought_dialogue(self) -> list[str]:
         return list(self.GENERIC_LEVEL_7[self.language]["player_thought"])
+
+    def get_level3_panel_hint(self, panel_id: int, solution_type: str, value: str) -> str:
+        key = {
+            "voltage": "level3_voltage",
+            "power": "level3_power",
+            "current": "level3_current",
+        }[solution_type]
+        return self.GENERIC_LEVEL_PANEL_HINTS[self.language][key].format(panel_id=panel_id, value=value)
+
+    def get_level5_panel_hint(self, panel_id: int, solution_type: str, parts: str) -> str:
+        key = {
+            "voltage": "level5_voltage",
+            "current": "level5_current",
+        }[solution_type]
+        return self.GENERIC_LEVEL_PANEL_HINTS[self.language][key].format(panel_id=panel_id, parts=parts)
+
+    def get_level6_panel_hint(self, panel_id: int, mode: str) -> str:
+        key = "level6_thevenin" if mode == "thevenin" else "level6_norton"
+        return self.GENERIC_LEVEL_PANEL_HINTS[self.language][key].format(panel_id=panel_id)
+
+    def get_final_level_intro(self) -> list[str]:
+        return list(self.FINAL_LEVEL_INTRO[self.language])

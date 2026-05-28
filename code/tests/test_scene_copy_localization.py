@@ -50,12 +50,12 @@ class SceneCopyCatalogTest(unittest.TestCase):
         self.assertEqual(copy.get("death_lives_label"), "ATTEMPTS")
         self.assertEqual(copy.get("confirm_yes"), "YES")
 
-    def test_explanation_content_uses_english_captions_with_image_fallback(self):
+    def test_explanation_content_uses_english_captions_with_english_images_when_available(self):
         media = get_phase_dialogue_media_for_language("exp_fase_3", "en")
         entry = media["dialog_1"]
 
         self.assertEqual(entry["captions"][0], "Ohm's Law: overview of the basic concepts.")
-        self.assertTrue(entry["images"][0].endswith("ohm_law_ptbr/01_visao_geral.png"))
+        self.assertTrue(entry["images"][0].endswith("ohm_law_en/01_visao_geral.png"))
 
     def test_explanation_image_path_prefers_english_variant_when_it_exists(self):
         with tempfile.TemporaryDirectory() as temp_dir:

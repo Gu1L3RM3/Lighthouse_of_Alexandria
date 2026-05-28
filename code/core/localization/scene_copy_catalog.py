@@ -73,11 +73,11 @@ class SceneCopyCatalog:
             "clear_circuit_title": "CLEAR THE ENTIRE CIRCUIT?",
             "save_exit_title": "SAVE AND EXIT?",
             "explanation_level3_bomb_intro_lines": [
-                "Arquimedes: Kevin, before stage 3 you will use photon charges, not ordinary explosives.",
-                "Arquimedes: They release a short pulse that destabilizes the shadows and opens a path through the panels.",
-                "Arquimedes: The pulse depends on the CORE; if the calibration is poor, the effect weakens.",
-                "Arquimedes: In the field, press B to place the charge and use the CORE button to adjust it on the panel.",
-                "Arquimedes: Use them strategically. Every charge must count until we light the lighthouse path.",
+                "Archimedes: Kevin, before stage 3 you will use photon charges, not ordinary explosives.",
+                "Archimedes: They release a short pulse that destabilizes the shadows and opens a path through the panels.",
+                "Archimedes: The pulse depends on the CORE; if the calibration is poor, the effect weakens.",
+                "Archimedes: In the field, press B to place the charge and use the CORE button to adjust it on the panel.",
+                "Archimedes: Use them strategically. Every charge must count until we light the lighthouse path.",
             ],
         },
         "pt-BR": {
