@@ -70,17 +70,9 @@ class DeathFlowManager:
 
         if context["is_game_over"]:
             self.life_manager.reset_lives()
-            self.scene_manager.resume_scene_name = None
-            if self.game_over_return_scene not in self.scene_manager.scenes:
-                self.scene_manager.start_fade(self.game_over_return_scene, duration)
-                return
-            fresh_scene = self.scene_factory.recreate(
-                self.scene_manager.scenes[self.game_over_return_scene]
-            )
-            self.scene_manager.replace_scene_and_fade(
-                self.game_over_return_scene,
-                fresh_scene,
-                duration,
+            self.scene_manager.start_new_journey(
+                start_scene_name=self.game_over_return_scene,
+                duration=duration,
             )
             return
 
