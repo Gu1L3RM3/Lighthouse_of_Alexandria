@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -15,6 +16,7 @@ IMAGES_DIR = ASSETS_DIR / "images"
 if str(CODE_DIR) not in sys.path:
     sys.path.insert(0, str(CODE_DIR))
 
+from core.localization.explanation_asset_audit import audit_explanation_assets  # noqa: E402
 from scenes.fases.explanation_content import EXPLANATION_CONTENT  # noqa: E402
 
 
@@ -90,7 +92,34 @@ def validate_phase(phase: str, tmx_path: Path, config: dict) -> list[str]:
     return errors
 
 
-def main() -> int:
+def validate_localized_assets(language: str, require_localized_images: bool) -> list[str]:
+    issues = audit_explanation_assets(
+        EXPLANATION_CONTENT,
+        images_root=IMAGES_DIR,
+        language=language,
+        require_localized_images=require_localized_images,
+    )
+    return [issue.to_message() for issue in issues]
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Valida midias das fases explicativas.")
+    parser.add_argument(
+        "--language",
+        choices=("pt-BR", "en", "all"),
+        default="all",
+        help="Idioma a validar para os assets explicativos.",
+    )
+    parser.add_argument(
+        "--require-english-assets",
+        action="store_true",
+        help="Falha se assets em ingles ainda estiverem usando fallback para _ptbr.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     all_errors: list[str] = []
     for phase, tmx_path in PHASE_MAP_FILES.items():
         config = EXPLANATION_CONTENT.get(phase, {})
@@ -98,6 +127,11 @@ def main() -> int:
             all_errors.append(f"{phase}: sem entrada em EXPLANATION_CONTENT.")
             continue
         all_errors.extend(validate_phase(phase, tmx_path, config))
+
+    languages = ("pt-BR", "en") if args.language == "all" else (args.language,)
+    for language in languages:
+        require_localized = language == "en" and args.require_english_assets
+        all_errors.extend(validate_localized_assets(language, require_localized))
 
     if all_errors:
         print("VALIDACAO FALHOU")
@@ -111,4 +145,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
