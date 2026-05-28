@@ -101,7 +101,7 @@
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="dialogo" value="Arquimedes: Kevin, para libertar seu pai precisamos abrir este portao de ferro.;Arquimedes: Resolva o painel com maxima transferencia de potencia e ajuste a carga para o ponto ideal.;Arquimedes: Lembre-se RL igual a Rth para maxima potencia entregue na carga."/>
-    <property name="dialogo_en" value="Arquimedes: Kevin, to free your father we need to open this iron gate.;Arquimedes: Solve the panel with maximum power transfer and adjust the load to the ideal point.;Arquimedes: Remember, RL equals Rth for maximum power delivered to the load."/>
+    <property name="dialogo_en" value="Archimedes: Kevin, to free your father we need to open this iron gate.;Archimedes: Solve the panel with maximum power transfer and adjust the load to the ideal point.;Archimedes: Remember, RL equals Rth for maximum power delivered to the load."/>
    </properties>
   </object>
  </objectgroup>

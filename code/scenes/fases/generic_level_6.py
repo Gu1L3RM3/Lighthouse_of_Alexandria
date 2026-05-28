@@ -16,6 +16,8 @@ from core.systems.spider_web_system import SpiderWebSystem
 from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
+from core.localization.story_dialogue_catalog import StoryDialogueCatalog
+from core.managers.language_service import LanguageService
 from entities.dialogue_area import DialogueArea
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
@@ -119,17 +121,9 @@ class GenericLevel6(BaseGenericLevel):
             values += sample(pool, k=min(len(pool), remaining))
         return values
 
-    def _post_solutions_event(
-        self,
-        resistors_per_area: dict[int, list[str]],
-        sources_per_area: dict[int, dict[str, list[str]]]
-    ):
+    def _post_solutions_event(self, resistors_per_area: dict[int, list[str]], sources_per_area: dict[int, dict[str, list[str]]]):
         self._log("postando evento set_solutions")
-        self.event_manager.post({
-            "type": "set_solutions",
-            "resistors": resistors_per_area,
-            "sources": sources_per_area
-        })
+        self.event_manager.post({"type": "set_solutions", "resistors": resistors_per_area, "sources": sources_per_area})
 
     def end(self):
         if self._should_skip_progress_reset_on_end():
@@ -143,7 +137,7 @@ class GenericLevel6(BaseGenericLevel):
     def clear_all_pannels_json(self):
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
         for i in range(amount_pannels):
-            panel_name = f"pannel{i+1}"
+            panel_name = f"pannel{i + 1}"
             json_base = path_in_circuitos(self.level_path)
             netlist_base = path_in_ltspice(self.level_path)
 
@@ -173,25 +167,26 @@ class GenericLevel6(BaseGenericLevel):
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
 
-        self.circuit_validator_system = TheveninNortonValidatorSystem(
-            level_path=self.level_path,
-            tolerance_percent=self.tolerance_percent
+        self.circuit_validator_system = TheveninNortonValidatorSystem(level_path=self.level_path, tolerance_percent=self.tolerance_percent)
+
+        self.systems.update(
+            [
+                self.freeze_system,
+                self.phantom_ai_system,
+                self.path_following_system,
+                self.spider_web_system,
+                self.enemy_touch_game_over_system,
+                self.physics_system,
+                self.animation_system,
+                self.area_trigger_system,
+                self.circuit_validator_system,
+                self.render_system,
+            ]
         )
 
-        self.systems.update([
-            self.freeze_system,
-            self.phantom_ai_system,
-            self.path_following_system,
-            self.spider_web_system,
-            self.enemy_touch_game_over_system,
-            self.physics_system,
-            self.animation_system,
-            self.area_trigger_system, self.circuit_validator_system, self.render_system,
-        ])
-
     def set_subscribes(self):
-        self.event_manager.subscribe('set_solutions', lambda event: self.circuit_validator_system.set_solutions(event, self.entity_mn))
-        self.event_manager.subscribe('solutions_done', self.set_dialogue)
+        self.event_manager.subscribe("set_solutions", lambda event: self.circuit_validator_system.set_solutions(event, self.entity_mn))
+        self.event_manager.subscribe("solutions_done", self.set_dialogue)
         self.event_manager.subscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
         self.event_manager.subscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
         self.event_manager.subscribe("player_touched_enemy", self.on_player_touched_enemy)
@@ -232,12 +227,13 @@ class GenericLevel6(BaseGenericLevel):
         if not dialogues:
             return
         dialogue_area: DialogueArea = dialogues[0]
+        catalog = StoryDialogueCatalog(LanguageService.get().get_current_language())
 
         text_list = []
         pannels: list[ControlPannel] = self.entity_mn.get_entities_by_class(ControlPannel)
 
-        for p in pannels:
-            solution_values = p.solution_value
+        for pannel in pannels:
+            solution_values = pannel.solution_value
             if not isinstance(solution_values, dict):
                 continue
 
@@ -247,19 +243,7 @@ class GenericLevel6(BaseGenericLevel):
             if mode not in ("thevenin", "norton") or source_kind not in ("voltage", "current"):
                 continue
 
-            if mode == "thevenin":
-                method_hint = (
-                    "isole os terminais de R1, calcule Vth e Rth e monte o equivalente com fonte de tensão em série com resistência."
-                )
-            else:
-                method_hint = (
-                    "isole os terminais de R1, calcule In e Rn e monte o equivalente com fonte de corrente em paralelo com resistência."
-                )
-
-            text_list.append(
-                f"Arquimedes: Painel {p.pannel_id}: {method_hint} "
-                "Dica extra: desligue as fontes independentes para achar a resistência equivalente."
-            )
+            text_list.append(catalog.get_level6_panel_hint(pannel.pannel_id, mode))
 
         if text_list:
             dialogue_area.add_dialogue_text(text_list)

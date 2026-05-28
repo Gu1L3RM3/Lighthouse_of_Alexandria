@@ -26,6 +26,8 @@ from core.components.sprite import Sprite
 from core.components.velocity import Velocity
 from entities.npcs.arquimedes import Arquimedes
 from scenes.fases.max_power_level_base import BaseMaxPowerLevel
+from core.localization.story_dialogue_catalog import StoryDialogueCatalog
+from core.managers.language_service import LanguageService
 from core.settings import (
     FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS,
     FINAL_LEVEL_FINAL_FADE_SECONDS,
@@ -211,6 +213,7 @@ class FinalLevel(BaseMaxPowerLevel):
     "Arquimedes: Estratégia: deixe componentes perto dos painéis e resolva em sequência sem parar.",
     "Arquimedes: Se falharmos aqui, Alexandria cai antes do amanhecer.",
 ]
+        lines = StoryDialogueCatalog(LanguageService.get().get_current_language()).get_final_level_intro()
 
         for arquimedes in self.entity_mn.get_entities_by_class(Arquimedes):
             if not arquimedes.has(Dialogue):
