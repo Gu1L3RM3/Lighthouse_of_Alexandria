@@ -567,8 +567,9 @@
  <objectgroup id="3" name="itens">
   <object id="5" name="control_pannel" x="784" y="16">
    <properties>
-    <property name="action" value="luz"/>
+    <property name="action" value="bomb_bonus"/>
     <property name="active_status" type="bool" value="true"/>
+    <property name="bomb_reward" type="int" value="6"/>
     <property name="component_for_area" value="3"/>
     <property name="pannel_id" value="4"/>
     <property name="target_component" value="R1"/>

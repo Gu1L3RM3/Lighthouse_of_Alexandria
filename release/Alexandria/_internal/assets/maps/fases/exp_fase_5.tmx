@@ -1,10 +1,10 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="23" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="21">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="100" columns="10">
-  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160" />
+  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160"/>
  </tileset>
  <tileset firstgid="101" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
-  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208" />
+  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
  <layer id="1" name="ground" width="23" height="21">
   <data encoding="csv">
@@ -59,44 +59,44 @@
  <objectgroup id="9" name="door">
   <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16">
    <properties>
-    <property name="next_scene" value="fase_5" />
+    <property name="next_scene" value="fase_5"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="6" name="player">
   <object id="1" name="player" x="218.5" y="273.5">
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <objectgroup id="5" name="attention_point" locked="1">
   <object id="5" name="1" x="171" y="281">
    <properties>
-    <property name="positions" value="[]" />
+    <property name="positions" value="[]"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
- <objectgroup id="4" name="attention_points" />
+ <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="160" y="207.216" width="63.539" height="82.784">
    <properties>
-    <property name="active_status" type="bool" value="true" />
-    <property name="dialogo" value="Arquimedes: Agora voce vai aprender metodo dos nos com as leis de Kirchhoff.;Arquimedes: KCL diz que a soma das correntes que entram em um no e igual a soma das que saem.;Arquimedes: No metodo dos nos voce escolhe um no de referencia GND e calcula as tensoes dos outros nos.;Arquimedes: Para cada no desconhecido escreva a equacao de corrente usando V dividido por R.;Arquimedes: KVL diz que a soma das tensoes em uma malha fechada e zero e ajuda nas relacoes do circuito.;Arquimedes: Resolva o sistema de equacoes e obtenha as tensoes e correntes pedidas.;Arquimedes: Sempre conecte o GND Ground porque ele define a referencia de zero volt.;Arquimedes: Sem GND o circuito pode nao funcionar e as medicoes podem ficar erradas.;Arquimedes: Nos paineis siga passo a passo identifique o no monte as equacoes e valide os resultados." />
+    <property name="active_status" type="bool" value="true"/>
+    <property name="dialogo" value="Arquimedes: Agora você vai aprender método dos nós com as Leis de Kirchhoff.;Arquimedes: KCL diz que a soma das correntes que entram em um nó é igual à soma das que saem.;Arquimedes: No método dos nós, você escolhe um nó de referência GND e calcula as tensões dos outros nós.;Arquimedes: Para cada nó desconhecido, escreva a equação de corrente usando V dividido por R.;Arquimedes: KVL diz que a soma das tensões em uma malha fechada é zero e ajuda nas relações do circuito.;Arquimedes: Resolva o sistema de equações e obtenha as tensões e correntes pedidas.;Arquimedes: Sempre conecte o GND Ground, porque ele define a referência de zero volt.;Arquimedes: Sem GND, o circuito pode não funcionar e as medições podem ficar erradas.;Arquimedes: Nos painéis, siga passo a passo, identifique o nó, monte as equações e valide os resultados."/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="2" name="itens">
   <object id="15" name="key" x="40" y="217">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
   <object id="19" name="old_paper" x="169" y="190">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <layer id="8" name="ground2" width="23" height="21">
@@ -124,4 +124,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
-<objectgroup id="10" name="npc"><object id="20" name="arquimedes" type="arquimedes" x="152" y="228"><point /></object></objectgroup></map>
+ <objectgroup id="10" name="npc">
+  <object id="20" name="arquimedes" type="arquimedes" x="152" y="228">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

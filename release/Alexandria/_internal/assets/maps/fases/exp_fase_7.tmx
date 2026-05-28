@@ -1,10 +1,10 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="23" height="21" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="21">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="100" columns="10">
-  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160" />
+  <image source="../../images/2D Pixel Dungeon Asset Pack v2.0/2D Pixel Dungeon Asset Pack/character and tileset/Dungeon_Tileset.png" width="160" height="160"/>
  </tileset>
  <tileset firstgid="101" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
-  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208" />
+  <image source="../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
  <layer id="1" name="ground" width="23" height="21">
   <data encoding="csv">
@@ -59,44 +59,44 @@
  <objectgroup id="9" name="door">
   <object id="13" name="door" gid="131" x="160" y="112" width="16" height="16">
    <properties>
-    <property name="next_scene" value="home_scene" />
+    <property name="next_scene" value="home_scene"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="6" name="player">
   <object id="1" name="player" x="218.5" y="273.5">
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <objectgroup id="5" name="attention_point" locked="1">
   <object id="5" name="1" x="171" y="281">
    <properties>
-    <property name="positions" value="[]" />
+    <property name="positions" value="[]"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
- <objectgroup id="4" name="attention_points" />
+ <objectgroup id="4" name="attention_points"/>
  <objectgroup id="3" name="areas_dialog">
-  <object id="16" name="dialog_1" x="160" y="256" width="30" height="34">
+  <object id="16" name="dialog_1" x="159.39" y="206.606" width="64.7586" height="83.3938">
    <properties>
-    <property name="active_status" type="bool" value="true" />
-    <property name="dialogo" value="Arquimedes: Nesta etapa vamos estudar maxima transferencia de potencia em resistores.;Arquimedes: O circuito visto pela carga pode ser trocado pelo equivalente de Thevenin Vth em serie com Rth.;Arquimedes: A potencia na carga RL e maxima quando RL for igual a Rth.;Arquimedes: Essa condicao vem da derivada da potencia em RL em funcao de RL igual a zero.;Arquimedes: Primeiro encontre Vth e Rth nos terminais onde a carga sera conectada.;Arquimedes: Depois ajuste RL para o valor de Rth e calcule corrente tensao e potencia entregue.;Arquimedes: Nessa condicao a eficiencia para uma fonte ideal de Thevenin fica em torno de cinquenta por cento.;Arquimedes: Use GND como referencia para evitar medidas ambiguas de tensao.;Arquimedes: Nos paineis valide RL alvo e compare a potencia obtida com o valor esperado.;Arquimedes: Se houver mais de uma opcao de RL escolha a mais proxima de Rth para maximizar a transferencia." />
+    <property name="active_status" type="bool" value="true"/>
+    <property name="dialogo" value="Arquimedes: Nesta etapa vamos estudar máxima transferência de potência em resistores.;Arquimedes: O circuito visto pela carga pode ser trocado pelo equivalente de Thévenin Vth em série com Rth.;Arquimedes: A potência na carga RL é máxima quando RL for igual a Rth.;Arquimedes: Essa condição vem da derivada da potência em RL em função de RL igual a zero.;Arquimedes: Primeiro encontre Vth e Rth nos terminais onde a carga será conectada.;Arquimedes: Depois ajuste RL para o valor de Rth e calcule corrente, tensão e potência entregue.;Arquimedes: Nessa condição, a eficiência para uma fonte ideal de Thévenin fica em torno de cinquenta por cento.;Arquimedes: Use GND como referência para evitar medidas ambíguas de tensão.;Arquimedes: Nos painéis, valide RL alvo e compare a potência obtida com o valor esperado.;Arquimedes: Se houver mais de uma opção de RL, escolha a mais próxima de Rth para maximizar a transferência."/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup id="2" name="itens">
   <object id="15" name="key" x="40" y="217">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
   <object id="19" name="old_paper" x="169" y="190">
    <properties>
-    <property name="active_status" type="bool" value="false" />
+    <property name="active_status" type="bool" value="false"/>
    </properties>
-   <point />
+   <point/>
   </object>
  </objectgroup>
  <layer id="8" name="ground2" width="23" height="21">
@@ -124,4 +124,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
-<objectgroup id="10" name="npc"><object id="20" name="arquimedes" type="arquimedes" x="152" y="228"><point /></object></objectgroup></map>
+ <objectgroup id="10" name="npc">
+  <object id="20" name="arquimedes" type="arquimedes" x="152" y="228">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

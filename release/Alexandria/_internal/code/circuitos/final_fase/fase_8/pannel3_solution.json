@@ -18,7 +18,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "V1",
-                "value": "15"
+                "value": "9"
             },
             {
                 "type": "Connectable",
@@ -985,7 +985,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R2",
-                "value": "150k"
+                "value": "47k"
             },
             {
                 "type": "Connectable",
@@ -1021,7 +1021,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R3",
-                "value": "120k"
+                "value": "39k"
             },
             {
                 "type": "Connectable",
@@ -1057,7 +1057,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R4",
-                "value": "82k"
+                "value": "27"
             },
             {
                 "type": "Connectable",
@@ -1093,7 +1093,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R5",
-                "value": "12"
+                "value": "1.8"
             },
             {
                 "type": "Connectable",
@@ -1129,7 +1129,7 @@
                 "type": "LabelComponent",
                 "font_path": "PressStart2P-Regular.ttf",
                 "name": "R1",
-                "value": "25k"
+                "value": "10"
             },
             {
                 "type": "Connectable",

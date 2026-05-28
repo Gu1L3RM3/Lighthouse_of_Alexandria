@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="52" height="72" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="1098">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="52" height="72" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="1103">
  <tileset firstgid="1" name="Dungeon_Tileset" tilewidth="16" tileheight="16" tilecount="156" columns="12">
   <image source="../../../images/Top_Down_Adventure_Pack_v.1.0/Dungeon_Tileset.png" width="192" height="208"/>
  </tileset>
@@ -299,7 +299,6 @@
   <object id="804" gid="142" x="464" y="304" width="16" height="16" rotation="180"/>
   <object id="805" gid="142" x="480" y="304" width="16" height="16" rotation="180"/>
   <object id="806" gid="142" x="496" y="304" width="16" height="16" rotation="180"/>
-  <object id="807" gid="142" x="304" y="288" width="16" height="16" rotation="180"/>
   <object id="808" gid="142" x="304" y="304" width="16" height="16" rotation="180"/>
   <object id="809" gid="142" x="320" y="304" width="16" height="16" rotation="180"/>
   <object id="810" gid="142" x="336" y="304" width="16" height="16" rotation="180"/>
@@ -364,7 +363,6 @@
   <object id="874" gid="142" x="112" y="560" width="16" height="16" rotation="180"/>
   <object id="875" gid="142" x="144" y="560" width="16" height="16" rotation="180"/>
   <object id="876" gid="142" x="128" y="560" width="16" height="16" rotation="180"/>
-  <object id="877" gid="142" x="320" y="544" width="16" height="16" rotation="180"/>
   <object id="878" gid="142" x="320" y="560" width="16" height="16" rotation="180"/>
   <object id="879" gid="142" x="320" y="576" width="16" height="16" rotation="180"/>
   <object id="880" gid="142" x="320" y="592" width="16" height="16" rotation="180"/>
@@ -426,7 +424,6 @@
   <object id="943" gid="142" x="768" y="640" width="16" height="16" rotation="90"/>
   <object id="944" gid="142" x="784" y="656" width="16" height="16" rotation="90"/>
   <object id="945" gid="142" x="784" y="640" width="16" height="16" rotation="90"/>
-  <object id="946" gid="142" x="656" y="544" width="16" height="16" rotation="90"/>
   <object id="947" gid="142" x="656" y="560" width="16" height="16" rotation="90"/>
   <object id="948" gid="142" x="656" y="592" width="16" height="16" rotation="90"/>
   <object id="949" gid="142" x="656" y="640" width="16" height="16" rotation="90"/>
@@ -451,7 +448,6 @@
   <object id="968" gid="142" x="544" y="880" width="16" height="16" rotation="90"/>
   <object id="969" gid="142" x="528" y="864" width="16" height="16" rotation="90"/>
   <object id="970" gid="142" x="544" y="864" width="16" height="16" rotation="90"/>
-  <object id="971" gid="142" x="288" y="832" width="16" height="16" rotation="90"/>
   <object id="972" gid="142" x="288" y="848" width="16" height="16" rotation="90"/>
   <object id="973" gid="142" x="288" y="864" width="16" height="16" rotation="90"/>
   <object id="974" gid="142" x="288" y="880" width="16" height="16" rotation="90"/>
@@ -477,7 +473,6 @@
   <object id="995" gid="142" x="352" y="992" width="16" height="16" rotation="90"/>
   <object id="996" gid="142" x="368" y="992" width="16" height="16" rotation="90"/>
   <object id="997" gid="142" x="368" y="1008" width="16" height="16" rotation="90"/>
-  <object id="998" gid="142" x="400" y="832" width="16" height="16" rotation="90"/>
   <object id="999" gid="142" x="400" y="848" width="16" height="16" rotation="90"/>
   <object id="1000" gid="142" x="400" y="880" width="16" height="16" rotation="90"/>
   <object id="1001" gid="142" x="400" y="864" width="16" height="16" rotation="90"/>
@@ -627,7 +622,7 @@
    </properties>
    <point/>
   </object>
-  <object id="1086" name="resistor" x="481.697" y="96.91">
+  <object id="1086" name="resistor" x="94.697" y="367.91">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="1"/>
@@ -763,6 +758,30 @@
    </properties>
    <point/>
   </object>
+  <object id="1098" name="resistor" x="700.848" y="344.697">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="4"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1099" name="resistor" x="432.848" y="387.697">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="4"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1100" name="resistor" x="385.848" y="672.697">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="4"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
   <object id="1088" name="resistor" x="366.848" y="561.697">
    <properties>
     <property name="active_status" type="bool" value="true"/>
@@ -788,6 +807,14 @@
    <point/>
   </object>
   <object id="1080" name="resistor" x="764.667" y="603.03">
+   <properties>
+    <property name="active_status" type="bool" value="true"/>
+    <property name="area" value="3"/>
+    <property name="valor" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="1101" name="resistor" x="455.667" y="1009.03">
    <properties>
     <property name="active_status" type="bool" value="true"/>
     <property name="area" value="3"/>
