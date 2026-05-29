@@ -49,6 +49,7 @@ Desktop.ini
 build/
 dist/
 release/
+*.zip
 *.spec.bak
 obf_src/
 obf_test/
@@ -56,6 +57,12 @@ obf_test/
 .pyarmor_home/
 dist_obf/
 Alexandria_obf.spec
+codex_*/
+tmp_*/
+tmp_*.png
+tmp_*.gif
+tmp_*.pdf
+tmp_*.txt
 
 # Artefatos comuns de empacotamento Python
 *.egg-info/
@@ -68,6 +75,10 @@ pip-wheel-metadata/
 code/save/
 logs/
 *.log
+pyarmor.bug.log
+
+# Artefatos locais de documentacao/inspecao
+docs/generated/
 
 # Configuracao local sensivel
 .env

@@ -5,8 +5,9 @@ import textwrap
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_MD = PROJECT_ROOT / "GDD.md"
-OUTPUT_PDF = PROJECT_ROOT / "GDD_Lighthouse_of_Alexandria.pdf"
+DOCS_DIR = PROJECT_ROOT / "docs"
+SOURCE_MD = DOCS_DIR / "GDD.md"
+OUTPUT_PDF = DOCS_DIR / "GDD_Lighthouse_of_Alexandria.pdf"
 
 PAGE_WIDTH = 612
 PAGE_HEIGHT = 792

@@ -6,7 +6,7 @@ You play as **Kevin**, moving through enemy-filled stages, locked passages, and 
 
 ## Gallery
 
-![Animated game gallery](assets/images/images_game/gallery.gif)
+![Animated game gallery](docs/media/images_game/gallery.gif)
 
 ## Story
 

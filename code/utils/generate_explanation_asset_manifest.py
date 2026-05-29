@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 CODE_DIR = ROOT_DIR / "code"
 ASSETS_DIR = ROOT_DIR / "assets"
 IMAGES_DIR = ASSETS_DIR / "images"
-MANIFEST_PATH = ROOT_DIR / "EXPLANATION_IMAGE_CHECKLIST_EN.md"
+MANIFEST_PATH = ROOT_DIR / "docs" / "plans" / "EXPLANATION_IMAGE_CHECKLIST_EN.md"
 
 if str(CODE_DIR) not in sys.path:
     sys.path.insert(0, str(CODE_DIR))
