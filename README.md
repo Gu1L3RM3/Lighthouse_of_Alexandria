@@ -1,137 +1,147 @@
-﻿# Alexandria
+# Lighthouse of Alexandria
 
-**Alexandria** é um jogo 2D em Python/Pygame que mistura exploração, narrativa e desafios de análise de circuitos elétricos.
+**Lighthouse of Alexandria** is a 2D Python/Pygame game that blends exploration, story-driven progression, and electrical circuit analysis challenges.
 
-Você joga como **Kevin**, atravessando fases com inimigos, portas e painéis elétricos, enquanto tenta impedir uma mudança catastrófica na linha do tempo de Alexandria.
+You play as **Kevin**, moving through enemy-filled stages, locked passages, and interactive electrical panels while trying to prevent a catastrophic shift in Alexandria's timeline.
 
-## Galeria
+## Gallery
 
-![Galeria animada do jogo](assets/images/images_game/gallery.gif)
+![Animated game gallery](assets/images/images_game/gallery.gif)
 
-## Enredo (sem grandes spoilers)
+## Story
 
-Kevin descobre que o Farol de Alexandria está no centro de uma decisão impossível: salvar a cidade pode custar sua própria história familiar. Ao longo das fases, os painéis elétricos deixam de ser apenas puzzles e viram parte direta do conflito narrativo.
+Kevin discovers that the Lighthouse of Alexandria stands at the center of an impossible choice: saving the city may cost him his own family history. As the game progresses, electrical panels stop being isolated puzzles and become part of the narrative conflict itself.
 
-Temas principais:
-- ciência e engenharia como ferramenta de decisão;
-- escolhas com consequências históricas;
-- relação entre pai e filho em rota de colisão.
+Core themes:
+- science and engineering as decision-making tools;
+- historical consequences shaped by player action;
+- a father-and-son relationship on a collision course.
 
-## Principais Mecânicas
+## Current Features
 
-- Exploração em mapa top-down.
-- Interação com NPCs, portas e painéis.
-- Editor de circuitos com componentes coletáveis:
+- Top-down exploration across story, combat, and puzzle stages.
+- NPC interaction, doors, collectible objects, and scripted scenes.
+- Circuit editor with collectible components:
   - resistor;
-  - fonte de tensão;
-  - fonte de corrente;
-  - nós, fios e GND.
-- Validação automática de circuito via solver simbólico/numérico.
-- Progressão por fases com conteúdo didático de eletricidade.
-- Sistema de bomba (fases específicas) calibrado por circuito.
+  - voltage source;
+  - current source;
+  - nodes, wires, and GND.
+- Automatic circuit validation powered by symbolic and numeric analysis.
+- Bomb mechanics in specific stages, tied to circuit progression.
+- Ghost enemies with radial proximity damage and audio chase feedback.
+- Fairer fall-ground traps with warning audio and delayed activation.
+- English and Portuguese support across UI, dialogue, letters, and explanation content.
 
-## Conteúdo Educacional por Fase
+## Educational Content
 
-As fases explicativas cobrem:
-- Lei de Ohm e potência elétrica;
-- associação de resistores;
-- Leis de Kirchhoff (KCL/KVL);
-- equivalentes de Thévenin e Norton;
-- máxima transferência de potência.
+The explanation stages currently cover:
+- Ohm's law and electric power;
+- resistor association;
+- Kirchhoff's laws (KCL/KVL);
+- Thevenin and Norton equivalents;
+- maximum power transfer.
 
-## Controles
+## Controls
 
-- `W A S D`: movimentação.
-- `E`: interagir (painéis, portas, objetos).
-- `B`: posicionar bomba (quando disponível).
-- `L`: alternar luz da fase.
+- `W A S D`: movement
+- `E`: interact with panels, doors, and objects
+- `B`: place bomb when available
+- `L`: toggle stage light
 
-No editor de circuito:
-- `N`: Node
-- `W`: Wire
+In the circuit editor:
+- `N`: node
+- `W`: wire
 - `G`: GND
-- `R`: rotacionar
-- `S`: Select
-- `Delete`: Delete
-- `Esc`: cancelar ferramenta atual
+- `R`: rotate
+- `S`: select
+- `Delete`: delete
+- `Esc`: cancel current tool
 
-## Requisitos
+## Requirements
 
 - Python `3.11+`
-- Dependências em [`requirements.txt`](requirements.txt):
+- Runtime dependencies from [`requirements.txt`](requirements.txt):
   - `pygame-ce==2.5.3`
   - `numpy==2.2.5`
   - `pandas==2.2.3`
   - `PyTMX==3.32`
   - `sympy==1.13.3`
   - `pathfinding==1.0.18`
-- Dependências de build (opcional) em [`requirements-build.txt`](requirements-build.txt):
+- Optional build dependencies from [`requirements-build.txt`](requirements-build.txt):
   - `pyinstaller==6.16.0`
 
-## Como Executar (desenvolvimento)
+## Running Locally
 
-1. Criar e ativar ambiente virtual.
-2. Instalar dependências:
+1. Create and activate a virtual environment.
+2. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. (Opcional) Instalar dependências de build:
+3. Optionally install build tooling:
 
 ```bash
 pip install -r requirements-build.txt
 ```
 
-4. Rodar o jogo:
+4. Start the game:
 
 ```bash
 python main.py
 ```
 
-## Build para Windows
+## Windows Build
 
-Exemplo de build manual com PyInstaller:
+Example manual build with PyInstaller:
 
 ```powershell
 pyinstaller --noconfirm Alexandria.spec
 ```
 
-Guia detalhado em [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md).
+For the packaged release flow, see [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md) and the release specs such as [`Alexandria_release.spec`](Alexandria_release.spec).
 
-## Salvamento e Dados de Runtime
+## Saves and Runtime Data
 
-- Em desenvolvimento, os dados ficam em `code/` (circuitos, netlists e save).
-- No executável Windows, arquivos graváveis são copiados para:
-  - `%LOCALAPPDATA%\Alexandria\code\circuitos`
-  - `%LOCALAPPDATA%\Alexandria\code\ltspice`
+During development, writable data lives inside `code/`, including circuits, LTspice support files, and local save snapshots.
 
-## Estrutura do Projeto
+In the Windows executable, writable runtime data may be copied to:
+- `%LOCALAPPDATA%\Alexandria\code\circuitos`
+- `%LOCALAPPDATA%\Alexandria\code\ltspice`
 
-- `main.py`: ponto de entrada.
-- `code/game.py`: loop principal e registro das cenas.
-- `code/scenes/`: cenas do jogo (menu, fases, editor, finais).
-- `code/core/`: ECS, managers, sistemas, ferramentas de circuito.
-- `code/circuitos/`: circuitos em JSON.
-- `code/ltspice/`: netlists/arquivos auxiliares.
-- `assets/`: imagens, fontes, mapas e áudio.
+Release packages for itch.io are distributed as zip archives that include the executable, the `_internal` folder, and execution instructions in both Portuguese and English.
 
-## Stack Técnica
+## Project Structure
+
+- `main.py`: entry point
+- `code/game.py`: main loop and scene registration
+- `code/scenes/`: game scenes, menus, stages, endings, and circuit editor
+- `code/core/`: ECS systems, managers, UI, localization, and map tooling
+- `code/circuitos/`: JSON circuit data
+- `code/ltspice/`: LTspice-related support files and netlists
+- `assets/`: images, fonts, maps, and audio
+- `code/tests/`: automated coverage for gameplay, localization, and regression scenarios
+
+## Tech Stack
 
 - Python + `pygame-ce`
-- ECS próprio (Entity/Component/System)
-- Solver de circuitos com `sympy` + `numpy/pandas`
-- Mapas via `PyTMX`
-- Navegação em grid com A* (`pathfinding`)
+- Custom ECS architecture
+- Circuit solving with `sympy`, `numpy`, and `pandas`
+- Tiled maps via `PyTMX`
+- Grid navigation with A* from `pathfinding`
 
 ## Status
 
-Projeto jogável com campanha em múltiplas fases, editor de circuito integrado e fluxo de build para Windows.
+The project is currently playable end-to-end, with:
+- a multi-stage campaign;
+- integrated educational circuit content;
+- Portuguese/English localization support;
+- Windows build and packaging flow;
+- automated tests covering localization, fall-ground fairness, and phantom behavior.
 
 ## Roadmap
 
-- Melhorar compatibilidade de entrada para web (teclado/controle).
-- Refinar balanceamento das fases com bomba e inimigos.
-- Expandir conteúdo didático com novos desafios de circuitos.
-- Adicionar mais feedback visual/sonoro em transições e eventos.
-- Consolidar pipeline de release (build + pacote zip + checklist).
+- Continue balancing enemy pressure and bomb-based stages.
+- Expand educational content and explanation media.
+- Improve release automation for executable and itch.io packaging.
+- Refine audiovisual feedback across transitions, hazards, and combat.
