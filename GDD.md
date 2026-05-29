@@ -1,554 +1,378 @@
-# Documento de Game Design - Farol de Alexandria
+# Game Design Document - Lighthouse of Alexandria
 
-## 1. Identificacao do Projeto
+## 1. Project Identity
 
-**Titulo:** Farol de Alexandria  
-**Genero:** aventura 2D top-down com puzzles educacionais de circuitos eletricos  
-**Plataforma atual:** Windows desktop  
-**Tecnologia principal:** Python com `pygame-ce`  
-**Natureza do projeto:** jogo digital com finalidade ludica e educacional
+- Title: Lighthouse of Alexandria
+- Genre: top-down 2D adventure with educational circuit-analysis puzzles
+- Current platform: Windows desktop
+- Engine and language: Python with `pygame-ce`
+- Project type: narrative educational game with a complete single-player campaign
 
-## 2. Apresentacao
+## 2. High Concept
 
-**Farol de Alexandria** e um jogo digital 2D que combina exploracao, narrativa e resolucao de desafios de analise de circuitos eletricos. O jogador assume o papel de **Kevin**, personagem que atravessa uma sequencia de fases enquanto investiga eventos ligados ao Farol de Alexandria e ao risco de uma alteracao catasrofica na linha do tempo.
+Lighthouse of Alexandria is a story-driven 2D game where the player explores hostile maps, talks to characters, gathers electrical components, and solves circuit panels that gate progression. The same systems that teach electricity also drive tension, combat pressure, and narrative stakes.
 
-O projeto foi concebido para integrar conteudos de eletricidade e circuitos a uma experiencia jogavel completa, evitando que os desafios tecnicos aparecam apenas como exercicios desconectados da progressao narrativa. Dessa forma, a resolucao de paineis eletricos passa a ser a propria linguagem de avancar no mundo, compreender a historia e enfrentar os conflitos centrais da campanha.
+The player controls Kevin, who becomes involved in a conflict around the Lighthouse of Alexandria, time-line manipulation, and a painful family decision. The game uses electrical reasoning not as a detached quiz, but as the main way the player advances through the world.
 
-## 3. Proposta do Jogo
+## 3. Vision Statement
 
-A proposta central do jogo e oferecer uma experiencia em que o jogador:
+The project aims to merge three forms of engagement into one coherent experience:
 
-- explore mapas em perspectiva top-down;
-- interaja com personagens, objetos e mecanismos;
-- colete componentes eletricos distribuidos nas fases;
-- monte circuitos em um editor integrado;
-- valide solucoes com base em principios reais de analise de circuitos;
-- avance na narrativa a partir do sucesso tecnico e estrategico.
+- spatial exploration in top-down levels;
+- dramatic motivation through narrative scenes and dialogue;
+- structured learning through circuit construction and validation.
 
-O diferencial do projeto esta na integracao entre **conteudo didatico** e **estrutura dramatica**. Em vez de separar "fase de historia" e "fase de exercicio", o jogo utiliza os conceitos eletricos como parte do conflito, da progressao e do desafio geral.
+The core design promise is simple: learning the system should help the player survive, progress, and understand the story.
 
-## 4. Justificativa
+## 4. Design Goals
 
-Jogos educacionais frequentemente enfrentam o desafio de equilibrar dois objetivos: manter o engajamento ludico e preservar a consistencia pedagogica. Em muitos casos, os conteudos escolares aparecem de forma superficial ou artificial, reduzindo seu impacto tanto como jogo quanto como instrumento de aprendizagem.
+- Make circuit reasoning feel like a meaningful gameplay verb, not a separate worksheet.
+- Deliver a full campaign with rising narrative and mechanical stakes.
+- Introduce electrical concepts in a staged learning curve.
+- Balance educational challenge with map pressure, enemies, and hazards.
+- Support both Portuguese and English throughout gameplay-facing content.
 
-**Farol de Alexandria** busca enfrentar esse problema por meio de tres principios:
+## 5. Player Fantasy
 
-1. o conteudo eletrico deve ser funcional dentro do sistema de jogo;
-2. a progressao de dificuldade deve acompanhar a progressao conceitual;
-3. o contexto narrativo deve motivar a resolucao dos desafios.
+The player fantasy is to feel like an explorer-engineer solving real problems under pressure. Kevin is not just traversing rooms and defeating enemies; he is restoring systems, interpreting technical situations, and preventing a historical catastrophe.
 
-Essa abordagem torna o projeto relevante em contexto academico, especialmente em areas ligadas a:
+## 6. Audience
 
-- jogos educacionais;
-- metodologias ativas de ensino;
-- ensino de circuitos eletricos;
-- design de sistemas interativos com finalidade formativa.
+Primary audience:
 
-## 5. Objetivos
+- students learning introductory electricity and circuit analysis;
+- teachers and researchers interested in educational games;
+- players who enjoy puzzle-heavy adventure games with narrative context.
 
-### 5.1 Objetivo Geral
+Secondary audience:
 
-Desenvolver um jogo digital 2D que integre exploracao, narrativa e resolucao de circuitos eletricos, com foco na aplicacao de conceitos de eletricidade em uma experiencia ludica e progressiva.
+- academic showcases and capstone/demo environments;
+- players interested in lightweight action mixed with technical problem solving.
 
-### 5.2 Objetivos Especificos
+## 7. Core Pillars
 
-- apresentar conceitos fundamentais de circuitos ao longo da campanha;
-- utilizar um editor de circuitos como mecanica principal de progressao;
-- estruturar fases que articulem risco, exploracao e raciocinio tecnico;
-- construir uma narrativa que reforce a motivacao do jogador;
-- implementar validacao automatica das solucoes montadas pelo jogador;
-- oferecer suporte ingame por meio de ajuda, prompts e fases explicativas;
-- manter uma progressao coerente entre conteudo pedagogico e desafio jogavel.
+### 7.1 Circuits Are The Main Progression System
 
-## 6. Publico-Alvo
+Panels, locks, and key interactions depend on circuit assembly and validation. Circuits are not optional side content.
 
-O projeto se dirige principalmente a:
+### 7.2 Learning Through Escalation
 
-- estudantes iniciantes ou intermediarios de eletricidade e circuitos;
-- docentes e pesquisadores interessados em jogos educacionais;
-- jogadores que apreciam puzzles sistemicos e experiencias narrativas;
-- contextos academicos de demonstracao, extensao ou apoio didatico.
+Each major learning topic is introduced in an explanation scene and then applied in a dangerous playable level.
 
-## 7. High Concept
+### 7.3 Narrative And Mechanics Reinforce Each Other
 
-O jogador explora ambientes 2D, interage com NPCs e resolve paineis eletricos por meio da montagem de circuitos corretos. Cada fase apresenta desafios associados a um conceito especifico de circuitos, enquanto a narrativa conduz o personagem por um conflito envolvendo familia, historia e responsabilidade sobre o destino de Alexandria.
+The story creates a reason to solve each problem, while the puzzle systems create the means to move the story forward.
 
-## 8. Pilares de Design
+### 7.4 Pressure Makes Knowledge Matter
 
-Os pilares de design do projeto sao os seguintes.
+The game asks the player to think while navigating enemies, hazards, limited safety windows, and spatial routing.
 
-### 8.1 Circuitos Como Mecanica Nuclear
+## 8. Game Structure
 
-Os circuitos nao atuam como acessorio ou minijogo secundario. Eles constituem o principal mecanismo de progressao do jogador.
+The current campaign flow is:
 
-### 8.2 Progressao Pedagogica Estruturada
+1. Main menu
+2. Intro home scene
+3. Level 1
+4. Level 2
+5. Explanation stage 3
+6. Generic level 3
+7. Explanation stage 4
+8. Generic level 4
+9. Explanation stage 5
+10. Generic level 5
+11. Explanation stage 6
+12. Generic level 6
+13. Explanation stage 7
+14. Generic level 7
+15. Final level
+16. Lighthouse rekindle ending scene
+17. Home-after ending scene
+18. Ending thanks and credits
 
-Os conceitos eletricos sao introduzidos de forma gradual, com fases explicativas seguidas por fases aplicadas.
+This makes the project a complete campaign rather than a narrow prototype.
 
-### 8.3 Integracao entre Sistema e Narrativa
+## 9. Core Gameplay Loop
 
-As acoes do jogador sobre os paineis, portas e mecanismos sao coerentes com o universo ficcional e com a progressao dramatica da campanha.
+The dominant loop inside puzzle-combat levels is:
 
-### 8.4 Pressao Ludica Sobre o Conhecimento
+1. Explore the map
+2. Read the situation through dialogue, layout, and interactables
+3. Gather required components
+4. Reach a panel or objective
+5. Open the circuit editor
+6. Assemble and validate a circuit
+7. Trigger an environmental or progression change
+8. Survive enemies and hazards
+9. Reach the next objective or exit
 
-O jogador nao apenas "resolve exercicios". Ele resolve problemas sob condicoes de exploracao, ameaca, escassez de recursos e urgencia.
+This loop combines observation, routing, technical reasoning, and execution.
 
-## 9. Visao Geral da Experiencia
+## 10. Controls
 
-O fluxo completo atualmente identificado no projeto e o seguinte:
+### 10.1 Exploration
 
-1. menu principal;
-2. cena introdutoria na casa;
-3. fase 1;
-4. fase 2;
-5. fase explicativa 3;
-6. fase 3;
-7. fase explicativa 4;
-8. fase 4;
-9. fase explicativa 5;
-10. fase 5;
-11. fase explicativa 6;
-12. fase 6;
-13. fase explicativa 7;
-14. fase 7;
-15. fase final;
-16. cena de reacendimento do farol;
-17. cena final em casa;
-18. agradecimentos e creditos.
-
-Essa estrutura indica que o projeto ultrapassa o escopo de prototipo mecanico, apresentando uma campanha fechada com abertura, desenvolvimento, climax e encerramento.
-
-## 10. Loop Principal de Gameplay
-
-O loop principal das fases pode ser descrito da seguinte forma:
-
-1. explorar o mapa;
-2. interagir com NPCs, portas, cartas ou areas de dialogo;
-3. localizar componentes eletricos necessarios;
-4. aproximar-se de um painel;
-5. abrir o editor de circuitos;
-6. montar o circuito com os componentes disponiveis;
-7. validar a solucao;
-8. receber uma consequencia no ambiente;
-9. sobreviver aos perigos da fase;
-10. avancar para a proxima etapa.
-
-Esse loop mistura observacao, planejamento, resolucao tecnica e execucao espacial.
-
-## 11. Controles
-
-### 11.1 Exploracao
-
-- `W A S D`: movimentacao
-- `E`: interacao
-- `B`: posicionamento de bomba, quando habilitado
-- `L`: alternancia de luz
+- `W A S D`: movement
+- `E`: interact
+- `B`: place bomb in stages that use the bomb/core system
+- `L`: toggle light in stages that support it
 - `Esc`: menu
-- `F1`: ajuda
+- `F1`: help
 
-### 11.2 Editor de Circuitos
+### 10.2 Circuit Editor
 
 - `N`: node
 - `W`: wire
 - `G`: GND
-- `R`: rotacao
-- `S`: selecao
-- `Delete`: remocao
-- `Esc`: cancelamento da ferramenta atual
+- `R`: rotate
+- `S`: select
+- `Delete`: delete tool
+- `Esc`: cancel current tool
 
-## 12. Sistemas Principais
+The game also includes controller-oriented support described in the help scene.
 
-### 12.1 Movimento e Exploracao
+## 11. Main Systems
 
-O jogo utiliza movimentacao em perspectiva top-down, com camera seguindo o personagem, colisao com o ambiente e interacoes contextuais por proximidade.
+### 11.1 Exploration, Collision, And Scene Progression
 
-### 12.2 Dialogos e Progressao Narrativa
+The player moves through top-down maps with collision, contextual prompts, doors, and scene transitions. Camera and scene transitions support the pacing between puzzle and narrative beats.
 
-A progressao narrativa depende de dialogos acionados por NPCs, areas de interacao ou objetos. Esses dialogos podem:
+### 11.2 Dialogue And Story Delivery
 
-- desbloquear novas etapas;
-- ativar papeis/cartas;
-- liberar chaves;
-- alterar o estado de personagens;
-- conduzir o jogador entre cenas.
+NPCs, old papers, scripted areas, and ending scenes communicate story context. Dialogue can unlock progression, explain stakes, and orient the player toward puzzle goals.
 
-### 12.3 Editor de Circuitos
+### 11.3 Circuit Editor
 
-O editor de circuitos e a interface central do projeto. Nele, o jogador pode montar circuitos com:
+The circuit editor is the central gameplay interface. It supports:
 
-- resistores;
-- fontes de tensao;
-- fontes de corrente;
-- fios;
-- nos;
+- resistors;
+- voltage sources;
+- current sources;
+- nodes;
+- wires;
 - GND.
 
-O editor permite criar, ajustar, validar, limpar e carregar configuracoes relacionadas a cada painel.
+Players can place, rotate, connect, save, clear, load, and solve configurations tied to specific panel files.
 
-### 12.4 Sistema de Validacao
+### 11.4 Circuit Validation
 
-O jogo conta com validadores especializados para diferentes tipos de desafio. A validacao considera o circuito construído pelo jogador e verifica sua conformidade com os criterios esperados pela fase.
+The game validates player-built circuits against expected challenge conditions. Current validator coverage includes:
 
-Foram identificadas no codigo as seguintes categorias principais:
+- resistor electrical quantities;
+- resistor association and reduction logic;
+- pair and relation-based resistor checks;
+- Thevenin and Norton equivalent validation;
+- maximum power transfer validation.
 
-- validacao de grandezas eletricas em resistor;
-- validacao de associacao de resistores;
-- validacao baseada em pares ou relacoes entre resistores;
-- validacao de equivalentes de Thevenin e Norton;
-- validacao de maxima transferencia de potencia.
+### 11.5 Component Collection And Storage
 
-### 12.5 Coleta e Armazenamento de Componentes
+Map exploration feeds the editor. Components picked up in the world are stored and later used in puzzles, linking spatial progression and technical problem solving.
 
-Os componentes distribuidos no mapa sao coletados pelo jogador e enviados para um armazenamento logico que alimenta o editor. Essa mecanica conecta diretamente exploracao e resolucao de problemas.
+### 11.6 Bomb/Core System
 
-### 12.6 Inimigos e Pressao de Mapa
+Some stages include a bomb-core subsystem with its own editor and calibration flow. This creates an alternate puzzle pressure model where electrical setup changes combat or stage interaction outcomes.
 
-As fases intermediarias e finais apresentam ameacas como:
+### 11.7 Enemies And Threat Systems
 
-- fantasmas;
-- aranhas e armadilhas de teia;
-- morte por contato;
-- invisibilidade temporaria;
-- eventos de respawn.
+The campaign includes multiple pressure systems:
 
-Esses elementos aumentam a tensao e impedem que o jogo se reduza a uma experiencia puramente contemplativa ou teorica.
+- phantoms with radial proximity-based lethality;
+- spiders and web ambush/slow mechanics;
+- map hazards such as fall-ground traps;
+- death and respawn flows tied to stage logic.
 
-### 12.7 Sistema de Bomba / Nucleo
+Recent fairness work now makes phantoms respawn at their original spawns, uses a dedicated chase-start sound, and keeps fall-ground traps readable through warning audio and a short arm delay.
 
-Algumas fases contam com um sistema de bomba calibrado por circuito. O jogador pode acessar um editor proprio de "nucleo", ajustando o comportamento desse recurso e utilizando-o em situacoes especificas da fase.
+### 11.8 Light And Visibility
 
-### 12.8 Sistema de Luz
+Some stages use permanent or temporary light as both atmosphere and gameplay state. Light can affect readability, mood, and player planning.
 
-Determinadas fases utilizam luz permanente ou temporaria como camada funcional e atmosferica. O sistema contribui para ambientacao e para a percepcao do estado do mapa.
+### 11.9 Life, Death, And Retry Flow
 
-### 12.9 Vida, Morte e Reentrada
+The game uses a life manager, death transition handling, and scene-specific re-entry rules. Failure can restart sections while preserving the broader campaign state flow.
 
-O jogo possui gerenciamento global de vidas e fluxo de morte. Em caso de falha, a cena pode ser reiniciada com regras proprias de preservacao ou limpeza de estado.
+### 11.10 Save And Preferences
 
-### 12.10 Salvamento
+The save system tracks:
 
-O sistema de save registra:
+- current scene;
+- current lives;
+- maximum lives.
 
-- cena atual;
-- quantidade atual de vidas;
-- quantidade maxima de vidas.
+The game also stores preferences such as language selection. Runtime data for packaged builds is copied to the user profile under `%LOCALAPPDATA%`.
 
-As cenas de menu, ajuda e finais nao compoem estado persistente de retomada.
+## 12. Educational Progression
 
-## 13. Estrutura de Cenas
+### 12.1 Level 3 Topic
 
-### 13.1 Menu Principal
+- Ohm's law
+- electric power
+- ground reference
+- reading voltage, current, and power relationships
 
-O menu principal oferece:
+### 12.2 Level 4 Topic
 
-- continuar jornada;
-- iniciar nova jornada;
-- creditos;
-- sair.
+- series association
+- parallel association
+- mixed reduction
+- voltage division
 
-Sua funcao e estabelecer tom, identidade visual e acesso rapido ao estado salvo ou a uma nova partida.
+### 12.3 Level 5 Topic
 
-### 13.2 Casa Inicial
+- Kirchhoff's laws
+- nodal reasoning
+- circuit equation setup
 
-A casa inicial cumpre papel introdutorio. Trata-se de uma cena mais narrativa, focada em contextualizacao e disparo da aventura principal.
+### 12.4 Level 6 Topic
 
-### 13.3 Fases 1 e 2
+- Thevenin equivalent
+- Norton equivalent
+- deriving `Vth`, `Rth`, `In`, and related values
 
-As fases 1 e 2 funcionam como onboarding do universo do jogo, apresentando:
+### 12.5 Level 7 Topic
 
-- exploracao;
-- interacao com portas;
-- uso de chaves;
-- leitura de objetos narrativos;
-- estrutura basica de progressao.
+- maximum power transfer
 
-### 13.4 Fases Explicativas
+### 12.6 Final Level Topic
 
-As fases `exp_fase_3` a `exp_fase_7` introduzem conteudo teorico por meio de dialogos e sequencias visuais. Sua funcao e preparar o jogador para os desafios aplicados subsequentes.
+- applying learned concepts under pressure, with timing and route efficiency
 
-### 13.5 Fases de Aplicacao
+## 13. Level Roles
 
-As fases 3 a 7 compoem o nucleo do jogo, combinando:
+### 13.1 Home Scene
 
-- coleta de componentes;
-- puzzles com painel;
-- inimigos e risco espacial;
-- aplicacao direta de conceitos eletricos.
+Narrative opening and emotional grounding.
 
-### 13.6 Fase Final
+### 13.2 Levels 1 And 2
 
-A fase final introduz maior pressao sistemica, exigindo resolucao sucessiva de multiplos paineis ativos, com temporizacao e possibilidade de reinicio parcial do desafio.
+Onboarding for movement, interaction, doors, key objects, and world logic.
 
-### 13.7 Finais
+### 13.3 Explanation Scenes
 
-O encerramento do jogo se distribui em:
+The explanation scenes present theory, visual guidance, and concept framing before each applied challenge.
 
-- reacendimento do farol;
-- retorno a casa;
-- carta final;
-- creditos e agradecimentos.
+### 13.4 Generic Levels 3 To 7
 
-## 14. Progressao Pedagogica
+These are the main educational-action stages, combining:
 
-O projeto apresenta uma progressao conceitual clara.
+- component search;
+- panel solving;
+- enemy avoidance;
+- stage-specific environmental pressure.
 
-### 14.1 Fase 3
+### 13.5 Final Level
 
-Conceitos centrais:
+The final level acts as the campaign exam, requiring sustained execution and repeated panel handling with high pressure.
 
-- Lei de Ohm;
-- potencia eletrica;
-- GND como referencia;
-- leitura de tensao, corrente e potencia.
+### 13.6 Ending Scenes
 
-### 14.2 Fase 4
+The final scenes resolve the symbolic and emotional outcome of the campaign and close the player journey.
 
-Conceitos centrais:
+## 14. Narrative Summary
 
-- associacao em serie;
-- associacao em paralelo;
-- reducao de circuitos mistos;
-- divisor de tensao.
+Kevin learns that the Lighthouse of Alexandria sits at the center of a disastrous timeline decision. His father intends to alter a key historical outcome in a way that may save Kevin's grandmother but destroy Alexandria. The conflict places personal loss, moral responsibility, and technical action in direct collision.
 
-### 14.3 Fase 5
+The story tone combines:
 
-Conceitos centrais:
+- historical fantasy;
+- family drama;
+- technical problem solving;
+- urgency around irreversible consequences.
 
-- Leis de Kirchhoff;
-- metodo nodal;
-- formulacao de equacoes de circuito.
+## 15. Main Characters
 
-### 14.4 Fase 6
+### 15.1 Kevin
 
-Conceitos centrais:
+Playable protagonist. He represents the bridge between technical reasoning and personal stakes.
 
-- equivalente de Thevenin;
-- equivalente de Norton;
-- obtencao de `Vth`, `Rth`, `In` e `Rn`.
+### 15.2 Kevin's Father
 
-### 14.5 Fase 7
+Tragic antagonist. His goal is emotionally understandable even when the consequences are catastrophic.
 
-Conceito central:
+### 15.3 Archimedes
 
-- maxima transferencia de potencia.
+Guide and support figure. He helps anchor both the intellectual and narrative dimensions of the campaign.
 
-### 14.6 Fase Final
+## 16. Localization And Accessibility Support
 
-Conceito central:
+The current game supports Portuguese and English across:
 
-- aplicacao sob pressao da maxima transferencia de potencia e do gerenciamento eficiente de recursos e tempo.
+- main menu labels;
+- help scene content;
+- UI prompts;
+- dialogue and story text;
+- letters;
+- explanation-stage media and panel-support assets.
 
-## 15. Ficha Resumida de Fases
+Language can be toggled from the main menu, and the chosen preference is persisted.
 
-### 15.1 Casa Inicial
+## 17. UX And Feedback
 
-- funcao: introducao narrativa;
-- foco: ambientacao e gatilho inicial;
-- transicao: fase 1.
+Current player-support layers include:
 
-### 15.2 Fase 1
+- context prompts for interaction;
+- help scene with controls and editor guidance;
+- life display;
+- bomb status;
+- stealth timer and overload indicators where relevant;
+- dedicated audio feedback for phantom chase starts;
+- dedicated warning audio for fall-ground activation.
 
-- funcao: introducao de interacao e progressao;
-- foco: chave, porta, papel e dialogo;
-- transicao: fase 2.
+These systems help the player understand danger, state changes, and available interactions.
 
-### 15.3 Fase 2
+## 18. Technical Architecture
 
-- funcao: consolidacao do fluxo inicial;
-- foco: sequencia narrativa e preparacao didatica;
-- transicao: fase explicativa 3.
+The project uses:
 
-### 15.4 Fase 3
+- Python and `pygame-ce`;
+- a custom ECS-style architecture;
+- map-driven scene construction via `PyTMX`;
+- circuit solving support built around `sympy`, `numpy`, and `pandas`;
+- scene registration and transition management through central managers.
 
-- funcao: primeira fase fortemente tecnico-ludica;
-- foco: grandezas eletricas;
-- pressao adicional: inimigos e morte por toque.
+Automated tests cover localization flows, fall-ground fairness behavior, phantom behavior, and related gameplay regressions.
 
-### 15.5 Fase 4
+## 19. Current Production Status
 
-- funcao: consolidacao de associacao de resistores;
-- foco: equivalencia e arranjo de componentes;
-- pressao adicional: ameaças e teias.
+The game is currently a playable end-to-end campaign with:
 
-### 15.6 Fase 5
+- a complete scene flow from intro to ending;
+- multiple explanation and applied puzzle stages;
+- an integrated circuit editor;
+- specialized validation logic for several electricity topics;
+- two-language support;
+- Windows build and itch.io packaging workflows;
+- automated test coverage for critical systems.
 
-- funcao: aumento da carga analitica;
-- foco: relacoes entre valores e leituras de circuito;
-- pressao adicional: exploracao em ambiente hostil.
+## 20. Known Design Challenges
 
-### 15.7 Fase 6
+### 20.1 Cognitive Load
 
-- funcao: introducao de Thevenin/Norton em contexto jogavel;
-- foco: equivalentes e fontes;
-- pressao adicional: combinacao de coleta, validacao e ameaca.
+The game asks the player to read, move, evade danger, and reason about circuits, sometimes in the same stage. This is a strength, but it also requires careful pacing.
 
-### 15.8 Fase 7
+### 20.2 Balancing Puzzle Difficulty And Spatial Pressure
 
-- funcao: climax narrativo intermediario;
-- foco: maxima transferencia de potencia;
-- diferencial: confronto com o pai e disparo do arco final.
+Enemy aggression, map layout, retries, and technical difficulty must stay aligned so the game feels demanding without becoming unreadable.
 
-### 15.9 Fase Final
+### 20.3 Teaching Clarity
 
-- funcao: prova final de dominio mecanico e conceitual;
-- foco: resolucao sequencial de paineis temporizados;
-- diferencial: resets parciais, necessidade de rota eficiente e alta pressao de execucao.
+The player must be able to tell whether failure came from:
 
-## 16. Narrativa
+- a wrong concept;
+- a wrong circuit layout;
+- a wrong component value;
+- poor route execution under pressure.
 
-### 16.1 Premissa
+## 21. Opportunities For Future Work
 
-Kevin descobre que o Farol de Alexandria esta no centro de um evento capaz de alterar profundamente a historia. Seu pai pretende modificar uma condicao critica do farol para favorecer uma linha temporal em que a avo de Kevin sobreviveria, ainda que isso implique a destruicao de Alexandria.
+- continue balancing bomb-heavy and enemy-heavy stages;
+- expand explanation media and teaching support;
+- strengthen release automation for executable and zip generation;
+- add more user-test findings to guide pacing and fairness improvements;
+- append per-level validator notes and puzzle acceptance criteria.
 
-### 16.2 Conflito Central
+## 22. Conclusion
 
-O conflito dramático do jogo se organiza entre tres eixos:
+Lighthouse of Alexandria is a full educational adventure game that turns electrical reasoning into a real dramatic and mechanical progression system. Its strongest differentiator is the way circuit analysis, environmental pressure, and narrative motivation reinforce each other across a complete campaign.
 
-- salvar Alexandria;
-- impedir o plano do pai;
-- lidar com o fato de que a propria existencia de Kevin esta associada a uma linha temporal alternativa.
-
-### 16.3 Tom Narrativo
-
-O tom do jogo combina:
-
-- aventura historico-ficcional;
-- drama familiar;
-- urgencia moral;
-- racionalidade cientifica aplicada a escolhas irreversiveis.
-
-## 17. Personagens Principais
-
-### 17.1 Kevin
-
-Protagonista jogavel. Representa a articulacao entre curiosidade tecnica, responsabilidade historica e conflito afetivo.
-
-### 17.2 Pai de Kevin
-
-Antagonista tragico. Sua motivacao nao se reduz a destrutividade, mas a uma tentativa de reescrever um resultado historico com impacto direto sobre sua propria familia.
-
-### 17.3 Arquimedes
-
-Figura de apoio tecnico e narrativo. Atua como guia, conselheiro e reforco da compreensao dos desafios enfrentados pelo jogador.
-
-## 18. Interface e Apoio ao Jogador
-
-O projeto apresenta elementos de HUD e apoio contextual, incluindo:
-
-- indicador de vidas;
-- prompts contextuais de interacao;
-- acesso rapido a menu e ajuda;
-- status de bomba;
-- barra de stealth;
-- indicador de sobrecarga de componentes.
-
-Adicionalmente, existe uma cena de ajuda com instrucoes sobre controles, funcionamento do editor e fluxo recomendado para resolucao.
-
-## 19. Regras de Falha
-
-As principais condicoes de falha observadas no projeto sao:
-
-- contato letal com inimigos;
-- quedas ou eventos ambientais;
-- falha em manter certos estados de painel na fase final;
-- perda de controle espacial em fases com maior pressao.
-
-As consequencias da falha podem envolver morte, reinicio de secao, limpeza de componentes ou necessidade de recomposicao de circuitos.
-
-## 20. Audio e Atmosfera
-
-O jogo utiliza musicas e efeitos sonoros para delimitar contextos de jogo, incluindo:
-
-- trechos narrativos e domesticos;
-- fases explicativas;
-- fases gerais de exploracao;
-- fase 7, com atmosfera propria;
-- fase final e encerramentos.
-
-Os efeitos sonoros reforcam interacoes, resolucao de paineis, coleta, explosoes, morte e o momento simbólico de reacendimento do farol.
-
-## 21. Estado Atual do Projeto
-
-Com base no codigo analisado, o projeto ja apresenta:
-
-- campanha completa com encadeamento de cenas;
-- menu principal funcional;
-- sistema de ajuda;
-- editor de circuitos integrado ao fluxo de jogo;
-- validadores especializados por topico;
-- fases explicativas com apoio visual;
-- sistema de save;
-- sistema de vidas;
-- sistema de inimigos;
-- sistema de bomba;
-- cenas finais e creditos.
-
-Portanto, o estado atual caracteriza um jogo jogavel com estrutura completa, ainda que sujeito a refinamentos de documentacao, balanceamento e apresentacao.
-
-## 22. Potencial Academico do Projeto
-
-Do ponto de vista academico, o projeto apresenta potencial de contribuicao em:
-
-- investigacao sobre integracao entre ludicidade e ensino de circuitos;
-- estudo de progressao pedagogica em jogos digitais;
-- aplicacao de simulacao e validacao automatica em contexto educacional;
-- experimentacao com narrativa como fator de motivacao para aprendizagem.
-
-Tambem oferece um caso interessante de articulacao entre:
-
-- design de jogo;
-- programacao de sistemas interativos;
-- conteudo tecnico-cientifico;
-- interface educacional.
-
-## 23. Limitacoes e Desafios
-
-Alguns desafios de design e pesquisa devem ser considerados.
-
-### 23.1 Sobrecarga Cognitiva
-
-O jogo exige simultaneamente:
-
-- leitura de dialogos;
-- exploracao espacial;
-- identificacao de perigo;
-- raciocinio tecnico;
-- operacao do editor.
-
-Isso exige cuidado com onboarding e clareza de objetivos.
-
-### 23.2 Balanceamento
-
-E necessario equilibrar:
-
-- dificuldade conceitual;
-- dificuldade espacial;
-- ritmo narrativo;
-- tempo de tentativa e erro.
-
-### 23.3 Clareza Didatica
-
-Os objetivos de cada painel devem permanecer explicitamente compreensiveis para que o jogador identifique se o problema esta:
-
-- na interpretacao conceitual;
-- na montagem do circuito;
-- na escolha dos valores;
-- na estrategia de execucao da fase.
-
-## 24. Recomendações para Evolucao do Documento
-
-Esta versao do GDD funciona como base academica inicial. Recomenda-se, como trabalho futuro:
-
-1. inserir imagens e capturas de tela por fase;
-2. adicionar fluxogramas da campanha;
-3. registrar criterios de validacao em apendice tecnico;
-4. detalhar roteiro e dialogos principais;
-5. documentar licencas e origem de assets;
-6. incluir observacoes de testes com usuarios;
-7. registrar dados de balanceamento por fase.
-
-## 25. Consideracoes Finais
-
-**Farol de Alexandria** configura-se como um jogo digital que articula exploracao, narrativa e analise de circuitos em uma campanha estruturada. Sua principal contribuicao de design esta em transformar conteudos tecnicos de eletricidade em instrumentos reais de progressao dramatica e sistemica, aproximando o aprendizado de uma experiencia jogavel significativa.
-
-Sob perspectiva academica, o projeto demonstra potencial tanto como produto interativo quanto como objeto de estudo em jogos educacionais, design de sistemas e ensino mediado por tecnologia.
+As it stands, the project is already suitable both as a playable game and as an academic artifact for discussion around educational game design, technical content integration, and system-driven narrative progression.

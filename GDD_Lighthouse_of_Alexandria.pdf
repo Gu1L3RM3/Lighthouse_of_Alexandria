@@ -1,0 +1,1646 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 1601 >>
+stream
+BT
+/F2 20 Tf
+1 0 0 1 54 732 Tm
+(Game Design Document - Lighthouse of Alexandria) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 639 Tm
+(1. Project Identity) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 573 Tm
+(- Title: Lighthouse of Alexandria) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 540 Tm
+(- Genre: top-down 2D adventure with educational circuit-analysis puzzles) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 507 Tm
+(- Current platform: Windows desktop) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 474 Tm
+(- Engine and language: Python with `pygame-ce`) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 441 Tm
+(- Project type: narrative educational game with a complete single-player campaign) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 392 Tm
+(2. High Concept) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 326 Tm
+(Lighthouse of Alexandria is a story-driven 2D game where the player explores hostile) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 310 Tm
+(maps, talks to characters, gathers electrical components, and solves circuit panels that) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 294 Tm
+(gate progression. The same systems that teach electricity also drive tension, combat) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 278 Tm
+(pressure, and narrative stakes.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 229 Tm
+(The player controls Kevin, who becomes involved in a conflict around the Lighthouse of) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 213 Tm
+(Alexandria, time-line manipulation, and a painful family decision. The game uses) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 197 Tm
+(electrical reasoning not as a detached quiz, but as the main way the player advances) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 181 Tm
+(through the world.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 132 Tm
+(3. Vision Statement) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Length 1691 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(The project aims to merge three forms of engagement into one coherent experience:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 683 Tm
+(- spatial exploration in top-down levels;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 650 Tm
+(- dramatic motivation through narrative scenes and dialogue;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 617 Tm
+(- structured learning through circuit construction and validation.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 568 Tm
+(The core design promise is simple: learning the system should help the player survive,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 552 Tm
+(progress, and understand the story.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 503 Tm
+(4. Design Goals) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 437 Tm
+(- Make circuit reasoning feel like a meaningful gameplay verb, not a separate) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 421 Tm
+(worksheet.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 388 Tm
+(- Deliver a full campaign with rising narrative and mechanical stakes.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 355 Tm
+(- Introduce electrical concepts in a staged learning curve.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 322 Tm
+(- Balance educational challenge with map pressure, enemies, and hazards.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 289 Tm
+(- Support both Portuguese and English throughout gameplay-facing content.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 240 Tm
+(5. Player Fantasy) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 174 Tm
+(The player fantasy is to feel like an explorer-engineer solving real problems under) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 158 Tm
+(pressure. Kevin is not just traversing rooms and defeating enemies; he is restoring) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 142 Tm
+(systems, interpreting technical situations, and preventing a historical catastrophe.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 1292 >>
+stream
+BT
+/F2 15 Tf
+1 0 0 1 54 732 Tm
+(6. Audience) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(Primary audience:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 617 Tm
+(- students learning introductory electricity and circuit analysis;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 584 Tm
+(- teachers and researchers interested in educational games;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 551 Tm
+(- players who enjoy puzzle-heavy adventure games with narrative context.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 502 Tm
+(Secondary audience:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 453 Tm
+(- academic showcases and capstone/demo environments;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 420 Tm
+(- players interested in lightweight action mixed with technical problem solving.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 371 Tm
+(7. Core Pillars) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 305 Tm
+(7.1 Circuits Are The Main Progression System) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 250 Tm
+(Panels, locks, and key interactions depend on circuit assembly and validation. Circuits) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 234 Tm
+(are not optional side content.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 185 Tm
+(7.2 Learning Through Escalation) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 130 Tm
+(Each major learning topic is introduced in an explanation scene and then applied in a) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 114 Tm
+(dangerous playable level.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Length 1190 >>
+stream
+BT
+/F2 12 Tf
+1 0 0 1 54 732 Tm
+(7.3 Narrative And Mechanics Reinforce Each Other) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 677 Tm
+(The story creates a reason to solve each problem, while the puzzle systems create the) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 661 Tm
+(means to move the story forward.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 612 Tm
+(7.4 Pressure Makes Knowledge Matter) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 557 Tm
+(The game asks the player to think while navigating enemies, hazards, limited safety) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 541 Tm
+(windows, and spatial routing.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 492 Tm
+(8. Game Structure) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 426 Tm
+(The current campaign flow is:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 377 Tm
+(1. Main menu) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 344 Tm
+(2. Intro home scene) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 311 Tm
+(3. Level 1) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 278 Tm
+(4. Level 2) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 245 Tm
+(5. Explanation stage 3) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 212 Tm
+(6. Generic level 3) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 179 Tm
+(7. Explanation stage 4) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 146 Tm
+(8. Generic level 4) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 113 Tm
+(9. Explanation stage 5) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 1273 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(10. Generic level 5) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(11. Explanation stage 6) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(12. Generic level 6) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 633 Tm
+(13. Explanation stage 7) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 600 Tm
+(14. Generic level 7) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 567 Tm
+(15. Final level) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 534 Tm
+(16. Lighthouse rekindle ending scene) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 501 Tm
+(17. Home-after ending scene) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 468 Tm
+(18. Ending thanks and credits) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 419 Tm
+(This makes the project a complete campaign rather than a narrow prototype.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 370 Tm
+(9. Core Gameplay Loop) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 304 Tm
+(The dominant loop inside puzzle-combat levels is:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 255 Tm
+(1. Explore the map) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 222 Tm
+(2. Read the situation through dialogue, layout, and interactables) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 189 Tm
+(3. Gather required components) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 156 Tm
+(4. Reach a panel or objective) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 123 Tm
+(5. Open the circuit editor) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 90 Tm
+(6. Assemble and validate a circuit) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 1071 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(7. Trigger an environmental or progression change) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(8. Survive enemies and hazards) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(9. Reach the next objective or exit) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 617 Tm
+(This loop combines observation, routing, technical reasoning, and execution.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 568 Tm
+(10. Controls) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 502 Tm
+(10.1 Exploration) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 447 Tm
+(- `W A S D`: movement) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 414 Tm
+(- `E`: interact) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 381 Tm
+(- `B`: place bomb in stages that use the bomb/core system) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 348 Tm
+(- `L`: toggle light in stages that support it) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 315 Tm
+(- `Esc`: menu) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 282 Tm
+(- `F1`: help) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 233 Tm
+(10.2 Circuit Editor) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 178 Tm
+(- `N`: node) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 145 Tm
+(- `W`: wire) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 112 Tm
+(- `G`: GND) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Length 1345 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- `R`: rotate) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- `S`: select) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(- `Delete`: delete tool) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 633 Tm
+(- `Esc`: cancel current tool) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 584 Tm
+(The game also includes controller-oriented support described in the help scene.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 535 Tm
+(11. Main Systems) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 469 Tm
+(11.1 Exploration, Collision, And Scene Progression) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 414 Tm
+(The player moves through top-down maps with collision, contextual prompts, doors, and) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 398 Tm
+(scene transitions. Camera and scene transitions support the pacing between puzzle and) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 382 Tm
+(narrative beats.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 333 Tm
+(11.2 Dialogue And Story Delivery) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 278 Tm
+(NPCs, old papers, scripted areas, and ending scenes communicate story context. Dialogue) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 262 Tm
+(can unlock progression, explain stakes, and orient the player toward puzzle goals.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 213 Tm
+(11.3 Circuit Editor) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 158 Tm
+(The circuit editor is the central gameplay interface. It supports:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 109 Tm
+(- resistors;) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Length 1421 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- voltage sources;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- current sources;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(- nodes;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 633 Tm
+(- wires;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 600 Tm
+(- GND.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 551 Tm
+(Players can place, rotate, connect, save, clear, load, and solve configurations tied to) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 535 Tm
+(specific panel files.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 486 Tm
+(11.4 Circuit Validation) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 431 Tm
+(The game validates player-built circuits against expected challenge conditions. Current) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 415 Tm
+(validator coverage includes:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 366 Tm
+(- resistor electrical quantities;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 333 Tm
+(- resistor association and reduction logic;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 300 Tm
+(- pair and relation-based resistor checks;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 267 Tm
+(- Thevenin and Norton equivalent validation;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 234 Tm
+(- maximum power transfer validation.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 185 Tm
+(11.5 Component Collection And Storage) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 130 Tm
+(Map exploration feeds the editor. Components picked up in the world are stored and later) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 114 Tm
+(used in puzzles, linking spatial progression and technical problem solving.) Tj
+ET
+endstream
+endobj
+11 0 obj
+<< /Length 1537 >>
+stream
+BT
+/F2 12 Tf
+1 0 0 1 54 732 Tm
+(11.6 Bomb/Core System) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 677 Tm
+(Some stages include a bomb-core subsystem with its own editor and calibration flow. This) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 661 Tm
+(creates an alternate puzzle pressure model where electrical setup changes combat or) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 645 Tm
+(stage interaction outcomes.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 596 Tm
+(11.7 Enemies And Threat Systems) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 541 Tm
+(The campaign includes multiple pressure systems:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 492 Tm
+(- phantoms with radial proximity-based lethality;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 459 Tm
+(- spiders and web ambush/slow mechanics;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 426 Tm
+(- map hazards such as fall-ground traps;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 393 Tm
+(- death and respawn flows tied to stage logic.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 344 Tm
+(Recent fairness work now makes phantoms respawn at their original spawns, uses a) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 328 Tm
+(dedicated chase-start sound, and keeps fall-ground traps readable through warning audio) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 312 Tm
+(and a short arm delay.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 263 Tm
+(11.8 Light And Visibility) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 208 Tm
+(Some stages use permanent or temporary light as both atmosphere and gameplay state.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 192 Tm
+(Light can affect readability, mood, and player planning.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 143 Tm
+(11.9 Life, Death, And Retry Flow) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Length 1210 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(The game uses a life manager, death transition handling, and scene-specific re-entry) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 716 Tm
+(rules. Failure can restart sections while preserving the broader campaign state flow.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 667 Tm
+(11.10 Save And Preferences) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 612 Tm
+(The save system tracks:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 563 Tm
+(- current scene;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 530 Tm
+(- current lives;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 497 Tm
+(- maximum lives.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 448 Tm
+(The game also stores preferences such as language selection. Runtime data for packaged) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 432 Tm
+(builds is copied to the user profile under `%LOCALAPPDATA%`.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 383 Tm
+(12. Educational Progression) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 317 Tm
+(12.1 Level 3 Topic) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 262 Tm
+(- Ohm's law) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 229 Tm
+(- electric power) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 196 Tm
+(- ground reference) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 163 Tm
+(- reading voltage, current, and power relationships) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 114 Tm
+(12.2 Level 4 Topic) Tj
+ET
+endstream
+endobj
+13 0 obj
+<< /Length 924 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- series association) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- parallel association) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(- mixed reduction) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 633 Tm
+(- voltage division) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 584 Tm
+(12.3 Level 5 Topic) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 529 Tm
+(- Kirchhoff's laws) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 496 Tm
+(- nodal reasoning) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 463 Tm
+(- circuit equation setup) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 414 Tm
+(12.4 Level 6 Topic) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 359 Tm
+(- Thevenin equivalent) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 326 Tm
+(- Norton equivalent) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 293 Tm
+(- deriving `Vth`, `Rth`, `In`, and related values) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 244 Tm
+(12.5 Level 7 Topic) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 189 Tm
+(- maximum power transfer) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 140 Tm
+(12.6 Final Level Topic) Tj
+ET
+endstream
+endobj
+14 0 obj
+<< /Length 1063 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- applying learned concepts under pressure, with timing and route efficiency) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 683 Tm
+(13. Level Roles) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 617 Tm
+(13.1 Home Scene) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 562 Tm
+(Narrative opening and emotional grounding.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 513 Tm
+(13.2 Levels 1 And 2) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 458 Tm
+(Onboarding for movement, interaction, doors, key objects, and world logic.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 409 Tm
+(13.3 Explanation Scenes) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 354 Tm
+(The explanation scenes present theory, visual guidance, and concept framing before each) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 338 Tm
+(applied challenge.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 289 Tm
+(13.4 Generic Levels 3 To 7) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 234 Tm
+(These are the main educational-action stages, combining:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 185 Tm
+(- component search;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 152 Tm
+(- panel solving;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 119 Tm
+(- enemy avoidance;) Tj
+ET
+endstream
+endobj
+15 0 obj
+<< /Length 1444 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- stage-specific environmental pressure.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 683 Tm
+(13.5 Final Level) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 628 Tm
+(The final level acts as the campaign exam, requiring sustained execution and repeated) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 612 Tm
+(panel handling with high pressure.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 563 Tm
+(13.6 Ending Scenes) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 508 Tm
+(The final scenes resolve the symbolic and emotional outcome of the campaign and close) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 492 Tm
+(the player journey.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 443 Tm
+(14. Narrative Summary) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 377 Tm
+(Kevin learns that the Lighthouse of Alexandria sits at the center of a disastrous) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 361 Tm
+(timeline decision. His father intends to alter a key historical outcome in a way that) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 345 Tm
+(may save Kevin's grandmother but destroy Alexandria. The conflict places personal loss,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 329 Tm
+(moral responsibility, and technical action in direct collision.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 280 Tm
+(The story tone combines:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 231 Tm
+(- historical fantasy;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 198 Tm
+(- family drama;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 165 Tm
+(- technical problem solving;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 132 Tm
+(- urgency around irreversible consequences.) Tj
+ET
+endstream
+endobj
+16 0 obj
+<< /Length 1177 >>
+stream
+BT
+/F2 15 Tf
+1 0 0 1 54 732 Tm
+(15. Main Characters) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 666 Tm
+(15.1 Kevin) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 611 Tm
+(Playable protagonist. He represents the bridge between technical reasoning and personal) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 595 Tm
+(stakes.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 546 Tm
+(15.2 Kevin's Father) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 491 Tm
+(Tragic antagonist. His goal is emotionally understandable even when the consequences are) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 475 Tm
+(catastrophic.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 426 Tm
+(15.3 Archimedes) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 371 Tm
+(Guide and support figure. He helps anchor both the intellectual and narrative dimensions) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 355 Tm
+(of the campaign.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 306 Tm
+(16. Localization And Accessibility Support) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 240 Tm
+(The current game supports Portuguese and English across:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 191 Tm
+(- main menu labels;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 158 Tm
+(- help scene content;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 125 Tm
+(- UI prompts;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 92 Tm
+(- dialogue and story text;) Tj
+ET
+endstream
+endobj
+17 0 obj
+<< /Length 1243 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- letters;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- explanation-stage media and panel-support assets.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 650 Tm
+(Language can be toggled from the main menu, and the chosen preference is persisted.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 601 Tm
+(17. UX And Feedback) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 535 Tm
+(Current player-support layers include:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 486 Tm
+(- context prompts for interaction;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 453 Tm
+(- help scene with controls and editor guidance;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 420 Tm
+(- life display;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 387 Tm
+(- bomb status;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 354 Tm
+(- stealth timer and overload indicators where relevant;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 321 Tm
+(- dedicated audio feedback for phantom chase starts;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 288 Tm
+(- dedicated warning audio for fall-ground activation.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 239 Tm
+(These systems help the player understand danger, state changes, and available) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 223 Tm
+(interactions.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 174 Tm
+(18. Technical Architecture) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 108 Tm
+(The project uses:) Tj
+ET
+endstream
+endobj
+18 0 obj
+<< /Length 1466 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- Python and `pygame-ce`;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- a custom ECS-style architecture;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 666 Tm
+(- map-driven scene construction via `PyTMX`;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 633 Tm
+(- circuit solving support built around `sympy`, `numpy`, and `pandas`;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 600 Tm
+(- scene registration and transition management through central managers.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 551 Tm
+(Automated tests cover localization flows, fall-ground fairness behavior, phantom) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 535 Tm
+(behavior, and related gameplay regressions.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 486 Tm
+(19. Current Production Status) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 420 Tm
+(The game is currently a playable end-to-end campaign with:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 371 Tm
+(- a complete scene flow from intro to ending;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 338 Tm
+(- multiple explanation and applied puzzle stages;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 305 Tm
+(- an integrated circuit editor;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 272 Tm
+(- specialized validation logic for several electricity topics;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 239 Tm
+(- two-language support;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 206 Tm
+(- Windows build and itch.io packaging workflows;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 173 Tm
+(- automated test coverage for critical systems.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 124 Tm
+(20. Known Design Challenges) Tj
+ET
+endstream
+endobj
+19 0 obj
+<< /Length 1401 >>
+stream
+BT
+/F2 12 Tf
+1 0 0 1 54 732 Tm
+(20.1 Cognitive Load) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 677 Tm
+(The game asks the player to read, move, evade danger, and reason about circuits,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 661 Tm
+(sometimes in the same stage. This is a strength, but it also requires careful pacing.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 612 Tm
+(20.2 Balancing Puzzle Difficulty And Spatial Pressure) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 557 Tm
+(Enemy aggression, map layout, retries, and technical difficulty must stay aligned so the) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 541 Tm
+(game feels demanding without becoming unreadable.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54 492 Tm
+(20.3 Teaching Clarity) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 437 Tm
+(The player must be able to tell whether failure came from:) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 388 Tm
+(- a wrong concept;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 355 Tm
+(- a wrong circuit layout;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 322 Tm
+(- a wrong component value;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 289 Tm
+(- poor route execution under pressure.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 240 Tm
+(21. Opportunities For Future Work) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 174 Tm
+(- continue balancing bomb-heavy and enemy-heavy stages;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 141 Tm
+(- expand explanation media and teaching support;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 108 Tm
+(- strengthen release automation for executable and zip generation;) Tj
+ET
+endstream
+endobj
+20 0 obj
+<< /Length 1067 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 54 732 Tm
+(- add more user-test findings to guide pacing and fairness improvements;) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 699 Tm
+(- append per-level validator notes and puzzle acceptance criteria.) Tj
+ET
+BT
+/F2 15 Tf
+1 0 0 1 54 650 Tm
+(22. Conclusion) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 584 Tm
+(Lighthouse of Alexandria is a full educational adventure game that turns electrical) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 568 Tm
+(reasoning into a real dramatic and mechanical progression system. Its strongest) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 552 Tm
+(differentiator is the way circuit analysis, environmental pressure, and narrative) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 536 Tm
+(motivation reinforce each other across a complete campaign.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 487 Tm
+(As it stands, the project is already suitable both as a playable game and as an academic) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 471 Tm
+(artifact for discussion around educational game design, technical content integration,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54 455 Tm
+(and system-driven narrative progression.) Tj
+ET
+endstream
+endobj
+21 0 obj
+<< /Type /Pages /Kids [22 0 R 23 0 R 24 0 R 25 0 R 26 0 R 27 0 R 28 0 R 29 0 R 30 0 R 31 0 R 32 0 R 33 0 R 34 0 R 35 0 R 36 0 R 37 0 R 38 0 R 39 0 R] /Count 18 >>
+endobj
+22 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+23 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 4 0 R >>
+endobj
+24 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+25 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 6 0 R >>
+endobj
+26 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+27 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 8 0 R >>
+endobj
+28 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+29 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 10 0 R >>
+endobj
+30 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+31 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 12 0 R >>
+endobj
+32 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 13 0 R >>
+endobj
+33 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 14 0 R >>
+endobj
+34 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 15 0 R >>
+endobj
+35 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 16 0 R >>
+endobj
+36 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 17 0 R >>
+endobj
+37 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 18 0 R >>
+endobj
+38 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 19 0 R >>
+endobj
+39 0 obj
+<< /Type /Page /Parent 21 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 20 0 R >>
+endobj
+40 0 obj
+<< /Type /Catalog /Pages 21 0 R >>
+endobj
+xref
+0 41
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000001813 00000 n 
+0000003556 00000 n 
+0000004900 00000 n 
+0000006142 00000 n 
+0000007467 00000 n 
+0000008590 00000 n 
+0000009987 00000 n 
+0000011461 00000 n 
+0000013051 00000 n 
+0000014314 00000 n 
+0000015290 00000 n 
+0000016406 00000 n 
+0000017903 00000 n 
+0000019133 00000 n 
+0000020429 00000 n 
+0000021948 00000 n 
+0000023402 00000 n 
+0000024522 00000 n 
+0000024701 00000 n 
+0000024839 00000 n 
+0000024977 00000 n 
+0000025115 00000 n 
+0000025253 00000 n 
+0000025391 00000 n 
+0000025529 00000 n 
+0000025667 00000 n 
+0000025806 00000 n 
+0000025945 00000 n 
+0000026084 00000 n 
+0000026223 00000 n 
+0000026362 00000 n 
+0000026501 00000 n 
+0000026640 00000 n 
+0000026779 00000 n 
+0000026918 00000 n 
+0000027057 00000 n 
+0000027196 00000 n 
+trailer
+<< /Size 41 /Root 40 0 R >>
+startxref
+27247
+%%EOF
