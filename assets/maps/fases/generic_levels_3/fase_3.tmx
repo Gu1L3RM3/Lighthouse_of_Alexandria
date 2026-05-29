@@ -594,9 +594,10 @@
  <objectgroup id="19" name="enemies">
   <object id="260" name="phantom_guard_1" x="640" y="496">
    <properties>
-    <property name="chase_speed" type="float" value="62"/>
+    <property name="chase_speed" type="float" value="48"/>
     <property name="detection_radius" type="float" value="120"/>
     <property name="enemy_type" value="phantom"/>
+    <property name="hp" type="int" value="40"/>
     <property name="route_id" value="p3_route_a"/>
     <property name="speed" type="float" value="38"/>
     <property name="touch_radius" type="float" value="10"/>
