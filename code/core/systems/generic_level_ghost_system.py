@@ -149,8 +149,8 @@ class GenericLevelGhostSystem(System):
             {
                 "spawn_key": spawn_key,
                 "remaining": float(GENERIC_LEVEL_GHOST_RESPAWN_SECONDS),
-                "respawn_x": death_x,
-                "respawn_y": death_y,
+                "respawn_x": None,
+                "respawn_y": None,
             }
         )
 

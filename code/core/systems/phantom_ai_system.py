@@ -7,10 +7,11 @@ from core.components.position import Position
 from core.components.velocity import Velocity
 from core.components.freeze import Freeze
 from core.map.tile_map import TileMap
+from core.managers.audio_manager import AudioManager
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
 from core.managers.time_manager import TimeManager
-from core.settings import PHANTOM_AI_STEALTH_TIMER_NAME
+from core.settings import PHANTOM_AI_STEALTH_TIMER_NAME, PHANTOM_CHASE_START_SFX, PHANTOM_CHASE_START_VOLUME
 
 
 class PhantomAISystem(System):
@@ -19,6 +20,7 @@ class PhantomAISystem(System):
     def __init__(self, tile_map: TileMap):
         self.tile_map = tile_map
         self.event_manager = EventManager.get()
+        self.audio_manager = AudioManager.get()
         self.time_manager = TimeManager()
         self.stealth_active = False
         self.stealth_total_duration = 0.0
@@ -160,18 +162,9 @@ class PhantomAISystem(System):
 
         # Ajuste adaptativo: quanto mais lento o player estiver por peso,
         # maior a pressão de perseguição para o efeito ficar perceptível.
-        player_mult = 1.0
-        if hasattr(player, "get_external_speed_multiplier"):
-            try:
-                player_mult = float(player.get_external_speed_multiplier())
-            except Exception:
-                player_mult = 1.0
-        player_mult = max(0.35, min(1.2, player_mult))
-        overload_ratio = max(0.0, min(1.0, 1.0 - player_mult))
-
         distance = (player_center - pos.center_pos()).length()
         far_pressure = 0.08 if distance >= (ai.detection_radius * 0.65) else 0.0
-        adaptive_boost = 1.0 + min(0.45, overload_ratio * 0.9) + far_pressure
+        adaptive_boost = 1.0 + far_pressure
         chase_speed *= adaptive_boost
 
         vel.vel = direction * chase_speed
@@ -240,6 +233,7 @@ class PhantomAISystem(System):
         ai.state = PhantomAI.STATE_CHASE
         if phantom.has(PathFollower):
             phantom.remove(PathFollower)
+        self.audio_manager.play_sfx(PHANTOM_CHASE_START_SFX, volume=PHANTOM_CHASE_START_VOLUME)
 
     def _nearest_tile(self, start_tile: tuple[int, int], route: list[tuple[int, int]]) -> tuple[int, int] | None:
         if not route:

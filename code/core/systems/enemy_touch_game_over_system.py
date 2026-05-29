@@ -3,6 +3,7 @@ from core.components.position import Position
 from core.components.collider import Collider
 from core.components.team import Team
 from core.components.freeze import Freeze
+from core.components.phantom_ai import PhantomAI
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
 from entities.player import Player
@@ -30,6 +31,9 @@ class EnemyTouchGameOverSystem(System):
         for enemy in entity_mn.get_entities_with(Position, Collider, Team):
             team: Team = enemy.get(Team)
             if team.name != "enemy":
+                continue
+            if enemy.has(PhantomAI):
+                # Fantasmas usam morte radial dedicada no PhantomAISystem.
                 continue
 
             enemy_pos: Position = enemy.get(Position)
