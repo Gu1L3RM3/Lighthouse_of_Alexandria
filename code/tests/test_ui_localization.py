@@ -19,6 +19,7 @@ from core.repositories.language_preferences_repository import LanguagePreference
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.ui.widgets.text import Text
 from scenes.circuit_editor import CircuitEditor
+from scenes.help_content import get_help_sections
 from scenes.help_scene import HelpScene
 
 
@@ -104,6 +105,22 @@ class HelpSceneLocalizationTest(unittest.TestCase):
 
         self.assertEqual(scene.back_button.text_widget.debug_text, "VOLTAR")
         self.assertEqual(scene.sections[0]["title"], "Controles Basicos")
+
+    def test_help_content_for_web_only_does_not_reference_controller(self):
+        english_lines = [
+            line
+            for section in get_help_sections("en")
+            for line in section["lines"]
+        ]
+        portuguese_lines = [
+            line
+            for section in get_help_sections("pt-BR")
+            for line in section["lines"]
+        ]
+
+        self.assertFalse(any("controller" in line.lower() for line in english_lines))
+        self.assertFalse(any(" no controle" in line.lower() for line in portuguese_lines))
+        self.assertFalse(any("botao do controle" in line.lower() for line in portuguese_lines))
 
 
 class InputManagerLocalizationTest(unittest.TestCase):

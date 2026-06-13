@@ -1,10 +1,6 @@
 import pygame
 from pygame import Vector2
 import ctypes
-try:
-    from pygame._sdl2 import controller as sdl2_controller
-except Exception:
-    sdl2_controller = None
 
 from core.managers.language_service import LanguageService
 from core.settings import (
@@ -42,7 +38,7 @@ class InputManager:
             "up": False,
             "down": False,
         }
-        self._xinput = self._load_xinput()
+        self._xinput = None
         self._xinput_state = None
         self._xinput_connected = False
         self._virtual_mouse_target: tuple[int, int] | None = None
@@ -135,14 +131,12 @@ class InputManager:
         return cls._instance
 
     def initialize(self):
-        pygame.joystick.init()
-        if sdl2_controller is not None and not sdl2_controller.get_init():
-            sdl2_controller.init()
         self.joysticks.clear()
         self.controllers.clear()
-        for device_index in range(pygame.joystick.get_count()):
-            self._connect_joystick(device_index)
-        self._connect_controllers()
+        self._xinput_connected = False
+        self._xinput_state = None
+        self.axis_vector.xy = 0, 0
+        self.dpad_vector.xy = 0, 0
         self.apply_mouse_visibility()
 
     def begin_frame(self):
@@ -151,7 +145,6 @@ class InputManager:
 
     def process_events(self, events: list[pygame.event.Event]) -> list[pygame.event.Event]:
         self.begin_frame()
-        self._refresh_connected_joysticks()
         augmented_events: list[pygame.event.Event] = []
 
         for event in events:
@@ -251,7 +244,7 @@ class InputManager:
         return direction
 
     def has_controller(self) -> bool:
-        return bool(self.joysticks or self.controllers or self._xinput_connected)
+        return False
 
     def apply_mouse_visibility(self):
         pygame.mouse.set_visible(self.mouse_visible)

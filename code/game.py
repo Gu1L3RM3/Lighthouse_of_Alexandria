@@ -2,6 +2,8 @@ import pygame
 import time
 import os
 from core.settings               import FPS, ASSETS_DIR
+from core.display_config         import DisplayConfigResolver
+from core.web_lifecycle          import WebLifecycle
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
@@ -103,13 +105,13 @@ class FrameProfiler:
 class Game:
     def __init__(self):
         pygame.init()
-        info = pygame.display.Info()
-        self.screen_width = info.current_w
-        self.screen_height = info.current_h
+        display_config = DisplayConfigResolver.resolve()
+        self.screen_width = display_config.width
+        self.screen_height = display_config.height
 
         self.screen = pygame.display.set_mode(
             (self.screen_width, self.screen_height),
-            pygame.FULLSCREEN
+            display_config.flags
         )
         self._set_window_icon()
         self.clock = pygame.time.Clock()
@@ -125,6 +127,7 @@ class Game:
         self.input_manager.initialize()
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
+        self.web_lifecycle = WebLifecycle()
         self._last_scene_name = None
         profile_enabled = os.getenv("ALEX_PROFILE", "0") == "1"
         self.profiler = FrameProfiler(enabled=profile_enabled, report_interval=2.0)
@@ -159,7 +162,7 @@ class Game:
        # Exemplo de boot via env:
        # ALEX_BOOT_EDITOR_FILE=final_fase/fase_8/pannel4
        # ALEX_BOOT_EDITOR_DEBUG=1
-        #self.scene_manager.change('fase_5')
+       #self.scene_manager.change('fase_5')
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
 
@@ -231,6 +234,7 @@ class Game:
             filtered_events = []
 
             for e in events:
+                self.web_lifecycle.consume(e)
                 if e.type == pygame.QUIT:
                     self.save_manager.autosave_scene(
                         self.scene_manager.active_scene_name,
@@ -249,6 +253,8 @@ class Game:
                 self.audio_manager.on_scene_changed(self._last_scene_name)
             scene.process_input(filtered_events)
             self.profiler.mark("input")
+            if self.web_lifecycle.is_paused:
+                dt = 0.0
             scene.update(dt)
             self.input_manager.apply_mouse_visibility()
             self.profiler.mark("update")

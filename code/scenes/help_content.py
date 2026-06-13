@@ -16,10 +16,10 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
         {
             "title": "Basic Controls",
             "lines": [
-                "Keyboard: W A S D moves the character. Controller: left stick or D-Pad.",
-                "Keyboard: E interacts with doors, panels and nearby objects. Controller: A.",
-                "Keyboard: B places a bomb in stages that use cores. Controller: X.",
-                "Keyboard: Esc opens the menu. Controller: Start.",
+                "W A S D moves the character.",
+                "E interacts with doors, panels and nearby objects.",
+                "B places a bomb in stages that use cores.",
+                "Esc opens the menu.",
                 "L: toggles the stage light on and off.",
             ],
         },
@@ -34,8 +34,8 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
         {
             "title": "How To Open the Circuit Editor",
             "lines": [
-                "Move close to a control panel and press E on keyboard or A on controller.",
-                "In the bomb challenge, use the CORE button in the stage UI or Y on controller.",
+                "Move close to a control panel and press E.",
+                "In the bomb challenge, use the CORE button in the stage UI.",
                 "When the editor opens, build the circuit and click Solve to validate it.",
             ],
         },
@@ -63,22 +63,11 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
             ],
         },
         {
-            "title": "Controller Editor Shortcuts",
-            "lines": [
-                "Left stick / D-Pad: moves focus across the grid.",
-                "A: applies the action on the grid (place, select or edit depending on the active tool).",
-                "Y: rotates the current brush when a component is selected.",
-                "B: cancels the current brush (same as Esc on keyboard).",
-                "LB/RB: moves between editor menu buttons.",
-                "L3: confirms or clicks the currently focused menu button.",
-            ],
-        },
-        {
             "title": "Editor: What S, B and D Mean",
             "lines": [
                 "S (side bar button): Select. Lets you select a circuit component to reposition it.",
                 "D (side bar button): Delete. Removes editable components from the circuit.",
-                "B (controller button): Back/Cancel. Leaves the current tool without closing the editor.",
+                "Esc: Back/Cancel. Leaves the current tool without closing the editor.",
             ],
         },
         {
@@ -118,10 +107,10 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
         {
             "title": "Controles Basicos",
             "lines": [
-                "Teclado: W A S D movimenta o personagem. Controle: analogico esquerdo ou D-Pad.",
-                "Teclado: E interage com portas, paineis e objetos proximos. Controle: A.",
-                "Teclado: B posiciona bomba nas fases que usam nucleos. Controle: X.",
-                "Teclado: Esc abre o menu. Controle: Start.",
+                "W A S D movimenta o personagem.",
+                "E interage com portas, paineis e objetos proximos.",
+                "B posiciona bomba nas fases que usam nucleos.",
+                "Esc abre o menu.",
                 "L: alterna a luz da fase (acende/apaga).",
             ],
         },
@@ -136,8 +125,8 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
         {
             "title": "Como Abrir o Editor de Circuito",
             "lines": [
-                "Aproxime-se de um painel de controle e pressione E no teclado ou A no controle.",
-                "No desafio da bomba, use o botao NUCLEO na interface da fase ou Y no controle.",
+                "Aproxime-se de um painel de controle e pressione E.",
+                "No desafio da bomba, use o botao NUCLEO na interface da fase.",
                 "Ao abrir o editor, monte o circuito e clique em Solve para validar.",
             ],
         },
@@ -165,22 +154,11 @@ HELP_SECTIONS_BY_LANGUAGE: dict[str, list[dict[str, list[str] | str]]] = {
             ],
         },
         {
-            "title": "Editor no Controle (Resumo Rapido)",
-            "lines": [
-                "Analagico esquerdo / D-Pad: move o foco no grid.",
-                "A: aplica acao no grid (colocar, selecionar ou editar conforme a ferramenta ativa).",
-                "Y: gira o brush atual quando houver um componente em uso.",
-                "B: cancela o brush atual (equivalente ao Esc no teclado).",
-                "LB/RB: navega entre os botoes do menu do editor.",
-                "L3: confirma/clica no botao do menu que esta focado.",
-            ],
-        },
-        {
             "title": "Editor: O que significam S, B e D",
             "lines": [
                 "S (botao da barra lateral): Select. Permite selecionar um componente do circuito para reposicionar.",
                 "D (botao da barra lateral): Delete. Remove componentes editaveis do circuito.",
-                "B (botao do controle): Back/Cancelar. Sai da ferramenta atual sem fechar o editor.",
+                "Esc: Back/Cancelar. Sai da ferramenta atual sem fechar o editor.",
             ],
         },
         {

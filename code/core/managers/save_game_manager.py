@@ -1,8 +1,7 @@
-import json
 from datetime import datetime, timezone
-from pathlib import Path
 
-from core.settings import SAVE_FILE
+from core.storage.json_document_storage import JsonDocumentStorage
+from core.storage.storage_factory import StorageFactory
 
 
 class SaveGameManager:
@@ -17,9 +16,8 @@ class SaveGameManager:
         "ending_thanks_credits",
     }
 
-    def __init__(self):
-        self.save_file = Path(SAVE_FILE)
-        self.save_file.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, storage: JsonDocumentStorage | None = None):
+        self.storage = storage or StorageFactory.for_save()
 
     @classmethod
     def get(cls):
@@ -37,10 +35,7 @@ class SaveGameManager:
         return data is not None
 
     def clear_save(self):
-        try:
-            self.save_file.unlink(missing_ok=True)
-        except Exception:
-            pass
+        self.storage.clear()
 
     def autosave_scene(self, scene_name: str | None, current_lives: int, max_lives: int):
         if not self.should_persist_scene(scene_name):
@@ -57,17 +52,10 @@ class SaveGameManager:
                 "max": int(max_lives),
             },
         }
-        self._write_atomic(payload)
+        self.storage.save(payload)
 
     def load_game(self) -> dict | None:
-        if not self.save_file.exists():
-            return None
-
-        try:
-            data = json.loads(self.save_file.read_text(encoding="utf-8"))
-        except Exception:
-            return None
-
+        data = self.storage.load()
         if not isinstance(data, dict):
             return None
         if int(data.get("schema_version", -1)) != self.SCHEMA_VERSION:
@@ -90,15 +78,3 @@ class SaveGameManager:
             return None
 
         return data
-
-    def _write_atomic(self, data: dict):
-        tmp_file = self.save_file.with_suffix(self.save_file.suffix + ".tmp")
-        try:
-            tmp_file.write_text(
-                json.dumps(data, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            tmp_file.replace(self.save_file)
-        except Exception:
-            pass
-
