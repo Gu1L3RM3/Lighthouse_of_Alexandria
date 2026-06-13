@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 
 
@@ -80,7 +81,12 @@ class BombManager:
             return hardcoded
 
         try:
-            solver = CircuitSolver(str(default_netlist_path))
+            netlist_text = SerializationManager.load_netlist_text(default_netlist_path)
+            solver = (
+                CircuitSolver.from_netlist_content(netlist_text)
+                if netlist_text is not None
+                else CircuitSolver(str(default_netlist_path))
+            )
             if not solver.is_solved:
                 return hardcoded
             resistor_results = solver.get_resistor_results()

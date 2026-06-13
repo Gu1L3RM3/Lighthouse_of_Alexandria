@@ -7,6 +7,7 @@ from core.components.connectable import Connectable
 from core.components.sprite import Sprite
 from core.components.label_component import LabelComponent
 from core.managers.entity_manager import EntityManager
+from core.circuit_tools.serialization_manager import SerializationManager
 from entities.circuit_editor.eletric_components import *
 from core.settings import CELL_SIZE, CIRCUITOS_DIR
 
@@ -38,6 +39,23 @@ class LtSpiceGenerate:
         self.lines.append("SHEET 1 880 680")
         self.angles = {0: 90, 90: 0, 180: 270, 270: 180}
         self.angles_current = {0: 270, 90: 180, 180: 90, 270: 0}
+
+    @classmethod
+    def from_circuit_data(
+        cls,
+        circuit_data: list[dict],
+        entity_manager: EntityManager | None = None,
+        net_filepath: str | None = None,
+        lt_spice_filepath: str | None = None,
+    ) -> "LtSpiceGenerate":
+        generator = cls(
+            json_filepath="__in_memory__.json",
+            net_filepath=net_filepath or "",
+            lt_spice_filepath=lt_spice_filepath or "",
+            entity_manager=entity_manager,
+        )
+        generator.circuit_data = json.loads(json.dumps(circuit_data))
+        return generator
 
 
     # --- MÃ©todos de GeraÃ§Ã£o .asc (sem alteraÃ§Ãµes) ---
@@ -437,25 +455,18 @@ class LtSpiceGenerate:
 
     def save_netlist(self):
         """Salva a netlist dentro da pasta definida em net_filepath."""
+        content = self.build_netlist_text()
+        SerializationManager.save_netlist_text(self.net_filepath, content)
 
-        filepath = Path(self.net_filepath)
-
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-
+    def build_netlist_text(self) -> str:
         netlist = self.generate_netlist()
         header = ["* Netlist gerada automaticamente a partir do circuit.json", ".tran 1", ""]
-        content = "\n".join(header + netlist + ["", ".end"])
-
-        filepath.write_text(content, encoding="utf-8")
+        return "\n".join(header + netlist + ["", ".end"])
 
 
     def save_asc(self):
         """Salva o arquivo .asc dentro da pasta definida em lt_spice_filepath."""
-        filepath = Path(self.lt_spice_filepath)
-
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-
-        filepath.write_text("\n".join(self.lines), encoding="utf-8")
+        _ = self.lt_spice_filepath
 
     def run(self):
         """

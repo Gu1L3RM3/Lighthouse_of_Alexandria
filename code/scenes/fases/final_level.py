@@ -1,6 +1,5 @@
 from pathlib import Path
 import pygame
-import json
 
 from core.components.animation_sprite import AnimateSprite
 from core.circuit_tools.serialization_manager import SerializationManager
@@ -382,19 +381,15 @@ class FinalLevel(BaseMaxPowerLevel):
         target_name = "R1"
         applied_value = self._fixed_target_resistor_label
         panel_name = f"pannel{panel_id}"
-        json_base = path_in_circuitos(self.level_path)
         netlist_base = path_in_ltspice(self.level_path)
 
         json_paths = [
-            json_base / f"{panel_name}.json",
-            json_base / f"{panel_name}_solution.json",
+            f"{self.level_path}/{panel_name}.json",
+            f"{self.level_path}/{panel_name}_solution.json",
         ]
         for json_path in json_paths:
-            if not json_path.exists():
-                continue
-            try:
-                data = json.loads(json_path.read_text(encoding="utf-8"))
-            except Exception:
+            data = SerializationManager.load_entities_data(json_path)
+            if not isinstance(data, list) or not data:
                 continue
             changed = False
             for entity in data:
@@ -408,15 +403,10 @@ class FinalLevel(BaseMaxPowerLevel):
                     component["value"] = applied_value
                     changed = True
             if changed:
-                try:
-                    json_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
-                except Exception:
-                    pass
+                SerializationManager.save_entities_data(data, json_path)
 
         for suffix in ("", "_solution"):
             net_path = netlist_base / f"{panel_name}{suffix}.net"
-            if not net_path.exists():
-                continue
             try:
                 SerializationManager.update_component_value(str(net_path), target_name, applied_value)
             except Exception:
@@ -424,24 +414,19 @@ class FinalLevel(BaseMaxPowerLevel):
 
     def _restore_panel_json(self, panel_id: int):
         panel_name = f"pannel{panel_id}"
-        json_base = path_in_circuitos(self.level_path)
         netlist_base = path_in_ltspice(self.level_path)
 
-        edited_json = json_base / f"{panel_name}.json"
-        solution_json = json_base / f"{panel_name}_solution.json"
-        if solution_json.exists():
-            try:
-                edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-            except Exception:
-                pass
+        edited_json = f"{self.level_path}/{panel_name}.json"
+        solution_json = f"{self.level_path}/{panel_name}_solution.json"
+        solution_data = SerializationManager.load_entities_data(solution_json)
+        if isinstance(solution_data, list) and solution_data:
+            SerializationManager.save_entities_data(solution_data, edited_json)
 
         edited_net = netlist_base / f"{panel_name}.net"
         solution_net = netlist_base / f"{panel_name}_solution.net"
-        if solution_net.exists():
-            try:
-                edited_net.write_text(solution_net.read_text(encoding="utf-8"), encoding="utf-8")
-            except Exception:
-                pass
+        solution_net_text = SerializationManager.load_netlist_text(solution_net)
+        if solution_net_text is not None:
+            SerializationManager.save_netlist_text(edited_net, solution_net_text)
 
     def _respawn_components_for_area(self, area_id: int, panel_id: int | None = None):
         collected = self.collected_components_by_area.pop(area_id, [])
@@ -597,12 +582,9 @@ class FinalLevel(BaseMaxPowerLevel):
         }.get(str(entity_type))
 
     def _extract_dropped_components_from_panel(self, panel_id: int, area_id: int) -> list[dict]:
-        panel_json = path_in_circuitos(self.level_path, f"pannel{panel_id}.json")
-        if not panel_json.exists():
-            return []
-        try:
-            entities = json.loads(panel_json.read_text(encoding="utf-8"))
-        except Exception:
+        panel_json = f"{self.level_path}/pannel{panel_id}.json"
+        entities = SerializationManager.load_entities_data(panel_json)
+        if not isinstance(entities, list) or not entities:
             return []
 
         dropped_components: list[dict] = []

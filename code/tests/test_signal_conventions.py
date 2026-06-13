@@ -9,11 +9,27 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.circuit_tools.serialization_manager import SerializationManager
 from core.circuit_tools.solve_circuit import CircuitSolver
 from core.settings import CELL_SIZE
 
 
 class CircuitSignConventionsTest(unittest.TestCase):
+    def test_solver_can_solve_from_netlist_string_without_temp_file(self):
+        solver = CircuitSolver.from_netlist_content(
+            "\n".join(
+                [
+                    "R1 1 0 1k",
+                    "V1 1 0 10",
+                    "",
+                ]
+            )
+        )
+        self.assertTrue(solver.is_solved)
+        r1 = solver.get_resistor_results()["R1"]
+        self.assertAlmostEqual(float(r1["voltage"]["value"]), 10.0, places=6)
+        self.assertAlmostEqual(float(r1["current"]["value"]), 0.01, places=9)
+
     def _solve_netlist(self, netlist_content: str):
         fd, temp_path = tempfile.mkstemp(suffix=".net")
         os.close(fd)
@@ -54,6 +70,22 @@ class CircuitSignConventionsTest(unittest.TestCase):
         r1 = solver.get_resistor_results()["R1"]
         self.assertAlmostEqual(float(r1["voltage"]["value"]), 35.0, places=6)
         self.assertAlmostEqual(float(r1["current"]["value"]), 0.035, places=9)
+
+    def test_solver_reads_updated_netlist_overlay(self):
+        fd, temp_path = tempfile.mkstemp(suffix=".net")
+        os.close(fd)
+        try:
+            Path(temp_path).write_text("R1 1 0 1k\nV1 1 0 10\n", encoding="utf-8")
+            SerializationManager.update_component_value(temp_path, "R1", "2k")
+            solver = CircuitSolver(temp_path)
+            self.assertTrue(solver.is_solved)
+            r1 = solver.get_resistor_results()["R1"]
+            self.assertAlmostEqual(float(r1["current"]["value"]), 0.005, places=9)
+        finally:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
 
     def test_current_source_direction(self):
         downwards = "\n".join(
@@ -137,6 +169,43 @@ class LtSpiceTerminalsOrientationTest(unittest.TestCase):
         terms_270 = self.generator._get_terminals(self._build_entity("CurrentSource", 270))
         self.assertEqual(terms_270["from"], top)
         self.assertEqual(terms_270["to"], bottom)
+
+    def test_build_netlist_text_returns_spice_document_without_writing_file(self):
+        self.generator.circuit_data = [
+            {
+                "id": 0,
+                "entity_type": "Resistor",
+                "components": [
+                    {"type": "Position", "x": 0, "y": 0},
+                    {"type": "Connectable", "connections": ["left", "right"]},
+                    {"type": "Sprite", "angle": 0},
+                    {"type": "LabelComponent", "name": "R1", "value": "1k"},
+                ],
+            },
+            {
+                "id": 1,
+                "entity_type": "VoutageSource",
+                "components": [
+                    {"type": "Position", "x": 0, "y": 0},
+                    {"type": "Connectable", "connections": ["left", "right"]},
+                    {"type": "Sprite", "angle": 0},
+                    {"type": "LabelComponent", "name": "V1", "value": "10"},
+                ],
+            },
+            {
+                "id": 2,
+                "entity_type": "Ground",
+                "components": [
+                    {"type": "Position", "x": 0, "y": 0},
+                    {"type": "Connectable", "connections": ["top"]},
+                    {"type": "Sprite", "angle": 0},
+                ],
+            },
+        ]
+
+        text = self.generator.build_netlist_text()
+        self.assertIn("* Netlist gerada automaticamente", text)
+        self.assertIn(".end", text)
 
 
 if __name__ == "__main__":

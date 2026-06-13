@@ -242,14 +242,13 @@ class TheveninNortonValidatorSystem(System):
 
     def _net_has_component(self, netlist_path: str, component_name: str) -> bool:
         try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0] == component_name:
-                        return True
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if parts and parts[0] == component_name:
+                    return True
         except Exception:
             return False
         return False
@@ -261,16 +260,15 @@ class TheveninNortonValidatorSystem(System):
         """
         comps: dict[str, tuple[str, str]] = {}
         try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if len(parts) < 3:
-                        continue
-                    name, p_node, n_node = parts[0], parts[1], parts[2]
-                    comps[name] = (p_node, n_node)
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if len(parts) < 3:
+                    continue
+                name, p_node, n_node = parts[0], parts[1], parts[2]
+                comps[name] = (p_node, n_node)
         except Exception:
             pass
         return comps
@@ -278,17 +276,16 @@ class TheveninNortonValidatorSystem(System):
     def _list_resistors(self, netlist_path: str) -> list[str]:
         names: list[str] = []
         try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if not parts:
-                        continue
-                    comp = parts[0]
-                    if comp.lower().startswith("r"):
-                        names.append(comp)
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if not parts:
+                    continue
+                comp = parts[0]
+                if comp.lower().startswith("r"):
+                    names.append(comp)
         except Exception:
             pass
         return names

@@ -46,16 +46,15 @@ class CircuitValidatorSystem(System):
     def _list_resistor_names_in_netlist(self, netlist_path: str) -> list[str]:
         resistor_names: list[str] = []
         try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped or stripped.startswith(("*", ".")):
-                        continue
-                    parts = stripped.split()
-                    if not parts:
-                        continue
-                    if parts[0].lower().startswith("r"):
-                        resistor_names.append(parts[0])
+            for line in SerializationManager.iter_netlist_lines(netlist_path):
+                stripped = line.strip()
+                if not stripped or stripped.startswith(("*", ".")):
+                    continue
+                parts = stripped.split()
+                if not parts:
+                    continue
+                if parts[0].lower().startswith("r"):
+                    resistor_names.append(parts[0])
         except Exception:
             return []
         return resistor_names

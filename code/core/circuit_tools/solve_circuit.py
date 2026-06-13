@@ -1,5 +1,6 @@
 from pathlib import Path
 from core.circuit_tools.SMNA import smna, get_part_values
+from core.circuit_tools.serialization_manager import SerializationManager
 from core.settings import PREFIXES
 import sympy
 import pandas as pd
@@ -9,8 +10,9 @@ from utils.setter_values import SetterValues
 
 class CircuitSolver:
     
-    def __init__(self, netlist_path: str):
-        self.netlist_path = Path(netlist_path)
+    def __init__(self, netlist_path: str | None = None, netlist_content: str | None = None):
+        self.netlist_path = Path(netlist_path) if netlist_path is not None else None
+        self._netlist_content_override = netlist_content
 
         self.report: Optional[str] = None
         self.circuit_df: Optional[pd.DataFrame] = None
@@ -19,9 +21,32 @@ class CircuitSolver:
 
         self._solve_circuit()
 
+    @classmethod
+    def from_netlist_content(cls, netlist_content: str) -> "CircuitSolver":
+        return cls(netlist_content=netlist_content)
+
+    def _normalize_netlist(self, raw_netlist: str) -> str:
+        circuit_str = ''
+        for line in raw_netlist.splitlines():
+            if line.startswith(('.', '*')):
+                continue
+            clear_line = line.strip()
+            if not clear_line:
+                continue
+            clear_line = clear_line.replace("N00", "")
+            clear_line = clear_line.lower().replace('k', 'e3').replace('meg', 'e6')
+            clear_line = clear_line.replace('m', 'e-3').replace('u', 'e-6').replace('n', 'e-9')
+            circuit_str += f"{clear_line}\n"
+        return circuit_str
+
     def _load_and_clean_netlist(self) -> str:
+        if self._netlist_content_override is not None:
+            return self._normalize_netlist(self._netlist_content_override)
         circuit_str = ''
         try:
+            raw_netlist = SerializationManager.load_netlist_text(self.netlist_path)
+            if raw_netlist is not None:
+                return self._normalize_netlist(raw_netlist)
             # Usa utf-8-sig para tolerar netlists com BOM no inicio do arquivo.
             with open(self.netlist_path, "r", encoding="utf-8-sig") as file:
                 for line in file.readlines():
@@ -62,7 +87,10 @@ class CircuitSolver:
 
     def _solve_circuit(self):
         try:
-            netlist_content = self._load_and_clean_netlist()
+            if self._netlist_content_override is not None:
+                netlist_content = self._normalize_netlist(self._netlist_content_override)
+            else:
+                netlist_content = self._load_and_clean_netlist()
             self.report, self.circuit_df, self.solution = self._solve_netlist_string(netlist_content)
             self.is_solved = True
         except Exception:

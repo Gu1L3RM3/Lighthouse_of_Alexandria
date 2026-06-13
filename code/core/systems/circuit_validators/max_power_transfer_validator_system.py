@@ -1,5 +1,4 @@
 from random import choice
-import json
 import math
 
 from core.ecs import System
@@ -194,14 +193,13 @@ class MaxPowerTransferValidatorSystem(System):
     @staticmethod
     def _net_has_component(netlist_path: str, component_name: str) -> bool:
         try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0] == component_name:
-                        return True
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if parts and parts[0] == component_name:
+                    return True
         except Exception:
             return False
         return False
@@ -210,14 +208,13 @@ class MaxPowerTransferValidatorSystem(System):
     def _list_resistors(netlist_path: str) -> list[str]:
         names = []
         try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0].startswith("R"):
-                        names.append(parts[0])
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if parts and parts[0].startswith("R"):
+                    names.append(parts[0])
         except Exception:
             pass
         return names
@@ -225,17 +222,16 @@ class MaxPowerTransferValidatorSystem(System):
     @staticmethod
     def _read_component_value_from_netlist(netlist_path: str, component_name: str) -> tuple[str | None, float | None]:
         try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if not parts or parts[0] != component_name:
-                        continue
-                    label = parts[-1] if len(parts) >= 4 else None
-                    value = MaxPowerTransferValidatorSystem._label_to_value(label) if label is not None else None
-                    return label, value
+            for raw in SerializationManager.iter_netlist_lines(netlist_path):
+                line = raw.strip()
+                if not line or line.startswith("*") or line.startswith("."):
+                    continue
+                parts = line.split()
+                if not parts or parts[0] != component_name:
+                    continue
+                label = parts[-1] if len(parts) >= 4 else None
+                value = MaxPowerTransferValidatorSystem._label_to_value(label) if label is not None else None
+                return label, value
         except Exception:
             return None, None
         return None, None
@@ -293,10 +289,8 @@ class MaxPowerTransferValidatorSystem(System):
 
     @staticmethod
     def _update_component_label_value_in_json(json_path: str, component_name: str, new_value: str):
-        try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
+        data = SerializationManager.load_entities_data(json_path)
+        if not isinstance(data, list) or not data:
             return
 
         changed = False
@@ -311,11 +305,7 @@ class MaxPowerTransferValidatorSystem(System):
         if not changed:
             return
 
-        try:
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
-        except Exception:
-            return
+        SerializationManager.save_entities_data(data, json_path)
 
     @staticmethod
     def _update_resistor_label_value_in_json(json_path: str, resistor_name: str, new_value: str):

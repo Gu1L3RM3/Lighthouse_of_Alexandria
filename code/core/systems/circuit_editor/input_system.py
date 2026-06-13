@@ -356,7 +356,8 @@ class InputSystem(System):
 
     def solve_circuit(self):
         try:
-            circuit_solver= CircuitSolver(self.net_file)
+            netlist_text = self._build_current_netlist_text()
+            circuit_solver = CircuitSolver.from_netlist_content(netlist_text)
             self.resistor_results = circuit_solver.get_resistor_results()
             self.total_values = circuit_solver.get_total_values()
             CircuitManager.get().add_circuit_values(self.full_file,self.resistor_results)
@@ -371,7 +372,19 @@ class InputSystem(System):
             CircuitManager.get().clear_circuit(self.full_file)
             return False
 
-   
+    def _build_generator_from_entities(self, entities: list[Entity]) -> LtSpiceGenerate:
+        circuit_data = [entity.to_dict() for entity in entities]
+        return LtSpiceGenerate.from_circuit_data(
+            circuit_data=circuit_data,
+            entity_manager=self.entity_manager,
+            net_filepath=self.net_file,
+            lt_spice_filepath=self.lt_spice_file,
+        )
+
+    def _build_current_netlist_text(self) -> str:
+        entities_to_save = self.entity_manager.get_entities()
+        generator = self._build_generator_from_entities(entities_to_save)
+        return generator.build_netlist_text()
 
 
     def save_circuit(self):
@@ -380,7 +393,6 @@ class InputSystem(System):
         entities_to_save = self.entity_manager.get_entities()
         
         SerializationManager.save_entities_to_json(entities_to_save,self.json_file)
-        LtSpiceGenerate(self.json_file,self.net_file,self.lt_spice_file,self.entity_manager).run()
         self.storage_manager.save_eletric_storage()
         self.storage_manager.sync_baseline()
         self.solve_circuit()

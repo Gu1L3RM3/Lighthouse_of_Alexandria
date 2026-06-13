@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Dict
 import random
 
@@ -10,7 +9,7 @@ from core.ecs import System
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
-from core.settings import COMERCIAL_RESISTORS, CIRCUITOS_DIR, path_in_circuitos, path_in_ltspice
+from core.settings import COMERCIAL_RESISTORS, path_in_circuitos, path_in_ltspice
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from utils.setter_values import SetterValues
@@ -28,7 +27,6 @@ class ResistorAssotiationValidatorSystem(System):
         self._panel_rr_index = 0
 
         self.serialization_manager = SerializationManager()
-        self.serialization_manager.base_path = Path(CIRCUITOS_DIR)
 
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
@@ -119,11 +117,10 @@ class ResistorAssotiationValidatorSystem(System):
     def _randomize_resistors_in_netlist(self, netlist_path: str) -> Dict[str, str]:
         label_map: Dict[str, str] = {}
 
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-        except FileNotFoundError:
+        netlist_text = SerializationManager.load_netlist_text(netlist_path)
+        if netlist_text is None:
             return label_map
+        lines = netlist_text.splitlines()
 
         resistor_line_indices: list[int] = []
         for i, line in enumerate(lines):
@@ -144,11 +141,10 @@ class ResistorAssotiationValidatorSystem(System):
             formatted = SetterValues.format_eng(new_val, "")
 
             parts[3] = formatted
-            lines[idx] = " ".join(parts) + "\n"
+            lines[idx] = " ".join(parts)
             label_map[comp_name] = formatted
 
-        with open(netlist_path, "w", encoding="utf-8") as f:
-            f.writelines(lines)
+        SerializationManager.save_netlist_text(netlist_path, "\n".join(lines) + "\n")
 
         return label_map
 
