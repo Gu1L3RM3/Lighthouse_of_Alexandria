@@ -15,55 +15,36 @@ class ComponentOverloadService:
         speed_multiplier_applier: Callable[[float], None],
         total_components_provider: Callable[[], int] | None = None,
         total_areas_provider: Callable[[], int] | None = None,
+        inventory_service=None,
     ):
         self._speed_multiplier_applier = speed_multiplier_applier
         self._total_components_provider = total_components_provider
         self._total_areas_provider = total_areas_provider
+        self._inventory_service = inventory_service
         self.total_weight = 0.0
-        self._area_load: dict[int, float] = {}
-        self._relieved_areas: set[int] = set()
         self.multiplier = 1.0
         self.ratio = 0.0
+        if self._inventory_service is not None:
+            self._inventory_service.add_listener(self.sync_from_inventory)
+            self.sync_from_inventory()
 
     def reset(self):
-        self.total_weight = 0.0
-        self._area_load = {}
-        self._relieved_areas = set()
+        self.sync_from_inventory()
+
+    def sync_from_inventory(self):
+        if self._inventory_service is not None:
+            self.total_weight = max(0.0, float(self._inventory_service.current_weight))
         self._recompute()
 
     def register_component(self, event: dict, kind: str = "resistor"):
-        area_raw = event.get("area_id", -1)
-        try:
-            area_id = int(area_raw)
-        except (TypeError, ValueError):
-            area_id = -1
+        _ = event
         _ = kind
-        # Nova regra: cada componente coletado soma 1 unidade de peso.
-        self.total_weight += 1.0
-        self._area_load[area_id] = float(self._area_load.get(area_id, 0.0)) + 1.0
-        self._recompute()
+        self.sync_from_inventory()
 
     def on_panel_solved(self, event: dict):
-        area_raw = event.get("area_id", -1)
-        try:
-            area_id = int(area_raw)
-        except (TypeError, ValueError):
-            area_id = -1
-        if area_id in self._relieved_areas:
-            return
-
-        area_load = float(self._area_load.get(area_id, 0.0))
-        if area_load <= 0.0:
-            return
-
-        # Alivio inteligente: ao resolver o painel da area, remove o peso
-        # associado a essa area ate o teto da media por area da fase.
-        avg_per_area = self._get_phase_average_components_per_area()
-        relief = min(area_load, avg_per_area)
-        self._area_load[area_id] = max(0.0, area_load - relief)
-        self.total_weight = max(0.0, self.total_weight - relief)
-        self._relieved_areas.add(area_id)
-        self._recompute()
+        _ = event
+        # Solving is not a transfer. Weight changes only when inventory changes.
+        self.sync_from_inventory()
 
     def update_timers(self, dt: float):
         _ = dt
@@ -112,7 +93,7 @@ class ComponentOverloadService:
         if not multipliers:
             return 1.0
 
-        max_weight = self._get_phase_average_components_per_area()
+        max_weight = self._get_max_weight()
         ratio = max(0.0, min(1.0, weight / max_weight))
         idx = int(ratio * (len(multipliers) - 1))
         return multipliers[idx]
@@ -125,6 +106,11 @@ class ComponentOverloadService:
             return
 
         self.multiplier = self._resolve_speed_multiplier(self.total_weight)
-        max_threshold = self._get_phase_average_components_per_area()
+        max_threshold = self._get_max_weight()
         self.ratio = max(0.0, min(1.0, self.total_weight / max_threshold))
         self._speed_multiplier_applier(self.multiplier)
+
+    def _get_max_weight(self) -> float:
+        if self._inventory_service is not None:
+            return max(1.0, float(self._inventory_service.max_weight))
+        return self._get_phase_average_components_per_area()

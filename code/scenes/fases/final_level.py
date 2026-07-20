@@ -91,18 +91,12 @@ class FinalLevel(BaseMaxPowerLevel):
         self.event_manager.unsubscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
         self.event_manager.unsubscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
         self.event_manager.unsubscribe("player_touched_enemy", self.on_player_touched_enemy)
-        self.event_manager.unsubscribe("resistor_collected", self._on_resistor_collected)
-        self.event_manager.unsubscribe("current_source_collected", self._on_current_source_collected)
-        self.event_manager.unsubscribe("voltage_source_collected", self._on_voltage_source_collected)
         self.event_manager.unsubscribe("crystal_invisibility_collected", self._on_crystal_collected)
         self.event_manager.unsubscribe("panel_solved", self._on_final_panel_solved_gain_bombs)
 
         self.event_manager.subscribe("player_invisible_to_enemies_started", self.phantom_ai_system.on_crystal_collected)
         self.event_manager.subscribe("cancel_reaggro_after_invisibility", self.phantom_ai_system.on_flask_collected)
         self.event_manager.subscribe("player_touched_enemy", self.on_player_touched_enemy)
-        self.event_manager.subscribe("resistor_collected", self._on_resistor_collected)
-        self.event_manager.subscribe("current_source_collected", self._on_current_source_collected)
-        self.event_manager.subscribe("voltage_source_collected", self._on_voltage_source_collected)
         self.event_manager.subscribe("crystal_invisibility_collected", self._on_crystal_collected)
         self.event_manager.subscribe("panel_solved", self._on_final_panel_solved_gain_bombs)
 
@@ -244,6 +238,8 @@ class FinalLevel(BaseMaxPowerLevel):
         self._register_collected_component(event, "voltage_source")
 
     def _register_collected_component(self, event: dict, kind: str):
+        if not event.get("accepted", False):
+            return
         super()._register_collected_component(event, kind)
 
         try:
@@ -689,7 +685,7 @@ class FinalLevel(BaseMaxPowerLevel):
         storage_data = self.storage_circuit.storage_circuit.get(storage_type, {})
         if storage_data.get(value, 0) <= 0:
             return
-        self.storage_circuit.remove_component(storage_type, value)
+        self.component_inventory.try_remove(storage_type, value)
 
     def on_player_touched_enemy(self, event):
         _ = event
