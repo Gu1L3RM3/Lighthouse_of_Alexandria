@@ -23,6 +23,7 @@ class CircuitEditor(BaseScene):
         screen: Surface,
         file: str = "circuit",
         debug_mode=False,
+        inventory_service=None,
     ):
         self.screen = screen
         self.debug_mode = debug_mode
@@ -52,7 +53,12 @@ class CircuitEditor(BaseScene):
         self.input_manager = InputManager.get()
 
         self.node_manager = NodeManager()
-        self.storage_circuit_manager = StorageCircuitManager()
+        self.inventory_service = inventory_service
+        self.storage_circuit_manager = (
+            inventory_service.storage_manager
+            if inventory_service is not None
+            else StorageCircuitManager()
+        )
 
         self.set_gesture_canvas()
         self.set_rects_grid()
@@ -64,6 +70,7 @@ class CircuitEditor(BaseScene):
             self.file,
             self.storage_circuit_manager,
             self.debug_mode,
+            inventory_service=self.inventory_service,
         )
         self.set_canvas()
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)

@@ -38,6 +38,7 @@ from core.managers.audio_manager import AudioManager
 from core.managers.language_service import LanguageService
 from core.managers.bomb_manager import BombManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
+from core.circuit_tools.component_inventory_service import ComponentInventoryService
 from core.managers.circuit_manager import CircuitManager
 from core.localization.letter_asset_resolver import LetterAssetResolver
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
@@ -83,10 +84,17 @@ class BaseGenericLevel(BaseScene):
         self.bomb_world_sprite = None
         self.bomb_prefuze_frames: list[pygame.Surface] = []
         self.bomb_boom_frames: list[pygame.Surface] = []
+        self.storage_circuit = StorageCircuitManager()
+        self._component_capacity = float(COMPONENT_OVERLOAD_REFERENCE_COMPONENT_COUNT)
+        self.component_inventory = ComponentInventoryService(
+            self.storage_circuit,
+            max_weight_provider=lambda: self._component_capacity,
+        )
         self.component_overload = ComponentOverloadService(
             speed_multiplier_applier=self._apply_player_speed_multiplier,
             total_components_provider=self._total_map_components,
             total_areas_provider=self._total_component_areas,
+            inventory_service=self.component_inventory,
         )
         # Sistemas de suporte precisam existir antes de set_map(),
         # porque o fluxo do mapa já prepara templates de fantasmas.
@@ -98,6 +106,11 @@ class BaseGenericLevel(BaseScene):
         
         self.set_ui()
         self.set_map()
+        self._component_capacity = max(
+            1.0,
+            self._total_map_component_weight() / float(self._total_component_areas()),
+        )
+        self.component_overload.sync_from_inventory()
         self._configure_persistent_area_dialogues()
         self._disable_default_arquimedes_dialogue()
 
@@ -106,7 +119,6 @@ class BaseGenericLevel(BaseScene):
         self.camera.follow = self.player
         self.index_dialog_for_old_paper = '5'
         
-        self.storage_circuit = StorageCircuitManager()
         self.scene_manager = SceneManager.get()
         self.audio_manager = AudioManager.get()
         self.input_manager = InputManager.get()
@@ -359,17 +371,26 @@ class BaseGenericLevel(BaseScene):
 
     def update_storage_circuit(self,event):
         value = event['value']
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.reload_storage()
-        self.storage_circuit.add_component(type='Resistor',value=value)
-        self.storage_circuit.save_eletric_storage()
-        self._register_collected_component(event, "resistor")
+        accepted = self.component_inventory.try_add('Resistor', value)
+        event["accepted"] = accepted
+        if accepted:
+            self.storage_circuit.save_eletric_storage()
+            self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
+            self._register_collected_component(event, "resistor")
+        else:
+            self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.8)
+        return accepted
 
     def update_storage_circuit_generic(self, event, component_type):
         value = event["value"]
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.reload_storage()
-        self.storage_circuit.add_component(type=component_type, value=value)
+        accepted = self.component_inventory.try_add(component_type, value)
+        event["accepted"] = accepted
+        if not accepted:
+            self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.8)
+            return False
+        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.save_eletric_storage()
         normalized = component_type.lower()
         if "current" in normalized:
@@ -379,6 +400,7 @@ class BaseGenericLevel(BaseScene):
         else:
             kind = "resistor"
         self._register_collected_component(event, kind)
+        return True
         
     def kill_entity_event(self,event):
         entity_id = event['id']
@@ -414,6 +436,7 @@ class BaseGenericLevel(BaseScene):
             pygame.display.get_surface(),
             file=GENERIC_LEVEL_BOMB_EDITOR_FILE,
             debug_mode=False,
+            inventory_service=self.component_inventory,
         )
 
     def place_bomb(self):
@@ -731,8 +754,9 @@ class BaseGenericLevel(BaseScene):
         return self.component_overload.get_snapshot()
 
     def _apply_player_speed_multiplier(self, multiplier: float):
-        if self.player and hasattr(self.player, "set_external_speed_multiplier"):
-            self.player.set_external_speed_multiplier(multiplier)
+        player = getattr(self, "player", None)
+        if player and hasattr(player, "set_external_speed_multiplier"):
+            player.set_external_speed_multiplier(multiplier)
 
     def _active_component_areas(self) -> set[int]:
         areas: set[int] = set()
@@ -752,6 +776,13 @@ class BaseGenericLevel(BaseScene):
         total += len(self.entity_mn.get_entities_by_class(CurrentSourceItem))
         total += len(self.entity_mn.get_entities_by_class(VoutageSourceItem))
         return max(1, total)
+
+    def _total_map_component_weight(self) -> float:
+        total = 0.0
+        total += len(self.entity_mn.get_entities_by_class(ResistorItem)) * self.component_inventory.unit_weight("Resistor")
+        total += len(self.entity_mn.get_entities_by_class(CurrentSourceItem)) * self.component_inventory.unit_weight("CurrentSource")
+        total += len(self.entity_mn.get_entities_by_class(VoutageSourceItem)) * self.component_inventory.unit_weight("VoutageSource")
+        return max(1.0, total)
 
     def _total_component_areas(self) -> int:
         areas: set[int] = set()

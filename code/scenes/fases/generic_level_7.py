@@ -317,7 +317,4 @@ class GenericLevel7(BaseMaxPowerLevel):
                 break
 
     def update_storage_circuit_generic(self, event, component_type):
-        value = event["value"]
-        self.storage_circuit.reload_storage()
-        self.storage_circuit.add_component(type=component_type, value=value)
-        self.storage_circuit.save_eletric_storage()
+        return super().update_storage_circuit_generic(event, component_type)

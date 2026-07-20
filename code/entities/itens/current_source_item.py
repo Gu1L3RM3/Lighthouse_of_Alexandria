@@ -74,13 +74,13 @@ class CurrentSourceItem(Item):
         if not isinstance(entity,Player):
             return
         pos: Position = self.get(Position)
-        self.em.post(
-            events={
+        event = {
                 'type': 'current_source_collected',
                 'value': self.value,
                 'area_id': self.area_id,
                 'spawn_x': pos.x,
                 'spawn_y': pos.y,
             }
-        )
-        self.em.post(events={'type':'kill_entity','id':self.id})
+        self.em.post(events=event)
+        if event.get("accepted", False):
+            self.em.post(events={'type':'kill_entity','id':self.id})

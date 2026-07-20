@@ -112,7 +112,12 @@ class ControlPannel(Item):
             and hasattr(current_scene, "_preserve_runtime_state_on_next_start")
         ):
             current_scene._preserve_runtime_state_on_next_start = True
-        scene_manager.active_scene = CircuitEditor(pygame.display.get_surface(), file=self.name_file)
+        inventory_service = getattr(current_scene, "component_inventory", None)
+        scene_manager.active_scene = CircuitEditor(
+            pygame.display.get_surface(),
+            file=self.name_file,
+            inventory_service=inventory_service,
+        )
 
     def on_collect(self, entity: Entity):
         _ = entity

@@ -32,6 +32,7 @@ class InputSystem(System):
              
                  storage_manager:StorageCircuitManager,
                  debug_mode:bool,
+                 inventory_service=None,
                  ):
 
         super().__init__()
@@ -59,6 +60,7 @@ class InputSystem(System):
         self.node_manager   = node_mn
         self.grid_rects = grid_rects
         self.storage_manager=storage_manager
+        self.inventory_service = inventory_service
 
         self.debug_mode= debug_mode
         self.dict_empty_boxes :Dict[Tuple[float,float],EmptyBox]= {}
@@ -213,26 +215,36 @@ class InputSystem(System):
             return
         if not self.can_delete(target):
             return
+        if target.has(LabelComponent):
+            label: LabelComponent = target.get(LabelComponent)
+            if not self._try_add_to_inventory(target.__class__.__name__, label.value):
+                return False
         self.entity_manager.remove_entity(target)
         entities=self.entity_manager.get_entities()
         self.node_manager.refresh_after_remove(target,entities)
-        if not target.has(LabelComponent):
-            return
-        label :LabelComponent=target.get(LabelComponent)
-        self.storage_manager.add_component(target.__class__.__name__,label.value)    
+        return True
     def clear_all(self):
-  
-        for entity in self.entity_manager.get_entities_with(Dropped,
-                                                            filter=lambda e: self.can_change_all(e)):
-            self.entity_manager.remove_entity(entity)
+        removable = list(self.entity_manager.get_entities_with(
+            Dropped,
+            filter=lambda e: self.can_change_all(e),
+        ))
+        labelled = []
+        for entity in removable:
             if entity.has(LabelComponent):
-                label:LabelComponent = entity.get(LabelComponent)
-                self.storage_manager.add_component(entity.__class__.__name__,label.value)
-            
-    
+                label: LabelComponent = entity.get(LabelComponent)
+                labelled.append((entity.__class__.__name__, label.value, 1))
 
-        
-        self.storage_manager.set_completly_storage()
+        if labelled:
+            if self.inventory_service is not None:
+                if not self.inventory_service.try_add_many(labelled):
+                    return False
+            else:
+                for component_type, value, quantity in labelled:
+                    self.storage_manager.add_component(component_type, value, quantity=quantity)
+
+        for entity in removable:
+            self.entity_manager.remove_entity(entity)
+        return True
     def rotate_brush(self):
         if not self.brush or not self.brush.has(Connectable):
             return
@@ -305,8 +317,12 @@ class InputSystem(System):
 
         if self.brush.has(LabelComponent) and not self.select_mode:
             label :LabelComponent=self.brush.get(LabelComponent)
-            has_component =self.storage_manager.remove_component(self.brush.__class__.__name__,label.value) 
-            if not has_component:
+            removed = self._try_remove_from_inventory(self.brush.__class__.__name__, label.value)
+            if not removed:
+                self.entity_manager.remove_entity(new_entity)
+                self.node_manager.refresh_after_remove(new_entity, self.entity_manager.get_entities())
+                return
+            if self.storage_manager.component_count(self.brush.__class__.__name__, label.value) <= 0:
                 self.exit_current_tool()
                 return
             
@@ -322,9 +338,7 @@ class InputSystem(System):
 
         
     def exit_current_tool(self, set_mouse: bool = True):
-        if self.select_mode and self.brush and self.brush.has(LabelComponent):
-            label: LabelComponent = self.brush.get(LabelComponent)
-            self.storage_manager.add_component(self.brush.__class__.__name__, label.value)
+        if self.select_mode:
             self.select_mode = False
 
         if self.brush:
@@ -383,6 +397,8 @@ class InputSystem(System):
         LtSpiceGenerate(self.json_file,self.net_file,self.lt_spice_file,self.entity_manager).run()
         self.storage_manager.save_eletric_storage()
         self.storage_manager.sync_baseline()
+        if self.inventory_service is not None:
+            self.inventory_service.notify_changed()
         self.solve_circuit()
         self.set_empty_boxes_for_debug()
         
@@ -393,6 +409,8 @@ class InputSystem(System):
         self.node_manager.clear_all_nodes()
         self.storage_manager.reload_storage()
         self.storage_manager.sync_baseline()
+        if self.inventory_service is not None:
+            self.inventory_service.notify_changed()
         loaded_entities = SerializationManager.load_entities_from_json(self.json_file)
         for entity in loaded_entities:
             self.entity_manager.add_entity(entity)
@@ -405,6 +423,16 @@ class InputSystem(System):
             if dropped.can_dropped :
                 continue
             self.add_empty_box(entity)
+
+    def _try_add_to_inventory(self, component_type: str, value: str) -> bool:
+        if self.inventory_service is not None:
+            return self.inventory_service.try_add(component_type, value)
+        return bool(self.storage_manager.add_component(component_type, value))
+
+    def _try_remove_from_inventory(self, component_type: str, value: str) -> bool:
+        if self.inventory_service is not None:
+            return self.inventory_service.try_remove(component_type, value)
+        return bool(self.storage_manager.remove_component(component_type, value))
 
         
     
