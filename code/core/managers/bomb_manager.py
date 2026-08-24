@@ -106,7 +106,7 @@ class BombManager:
                 damage=_clamp((v * i) * self._k_damage, self._damage_min, self._damage_max),
                 used_fallback=False,
             )
-        except Exception:
+        except (KeyError, TypeError, ValueError):
             return hardcoded
 
     def reset_bombs(self, bombs_per_level: int | None = None):
@@ -162,5 +162,5 @@ class BombManager:
                 damage=damage,
                 used_fallback=False,
             )
-        except Exception:
+        except (KeyError, TypeError, ValueError):
             self.current_params = self.default_params

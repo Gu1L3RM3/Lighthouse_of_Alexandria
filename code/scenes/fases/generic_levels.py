@@ -660,7 +660,7 @@ class BaseGenericLevel(BaseScene):
         try:
             editor_json.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(default_json, editor_json)
-        except Exception:
+        except OSError:
             pass
         self.circuit_manager.clear_circuit(GENERIC_LEVEL_BOMB_EDITOR_FILE)
         self.bomb_manager.current_params = self.bomb_manager.default_params

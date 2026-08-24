@@ -64,7 +64,7 @@ class BaseMaxPowerLevel(BaseGenericLevel):
             if solution_json.exists():
                 try:
                     edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception:
+                except OSError:
                     pass
 
     def _build_random_values(self, pool: list[str], amount: int) -> list[str]:

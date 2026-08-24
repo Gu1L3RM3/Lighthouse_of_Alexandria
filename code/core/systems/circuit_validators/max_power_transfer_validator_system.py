@@ -115,12 +115,12 @@ class MaxPowerTransferValidatorSystem(System):
             if label.endswith(suf):
                 try:
                     return float(label[:-1]) * mult
-                except Exception:
+                except (TypeError, ValueError):
                     return None
 
         try:
             return float(label)
-        except Exception:
+        except (TypeError, ValueError):
             return None
 
     @staticmethod
@@ -165,7 +165,7 @@ class MaxPowerTransferValidatorSystem(System):
             rl = float(expected.get("rl", 0.0))
             rth = float(expected.get("rth", 0.0))
             vth = float(expected.get("vth", 0.0))
-        except Exception:
+        except (TypeError, ValueError):
             return False
 
         if not all(self._is_valid_number(x) for x in (v, i, p, rl, rth, vth)):
@@ -267,7 +267,7 @@ class MaxPowerTransferValidatorSystem(System):
         try:
             vth = float(th["voltage"]["value"])
             rth = float(th["resistance"]["value"])
-        except Exception:
+        except (KeyError, TypeError, ValueError):
             return None
 
         if not self._is_valid_number(vth) or not self._is_valid_number(rth):
@@ -305,7 +305,7 @@ class MaxPowerTransferValidatorSystem(System):
         if raw_panel_ids is not None:
             try:
                 panel_ids_filter = {int(pid) for pid in raw_panel_ids}
-            except Exception:
+            except (TypeError, ValueError):
                 panel_ids_filter = None
 
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
@@ -429,15 +429,15 @@ class MaxPowerTransferValidatorSystem(System):
                         resistors_per_area[area_key][replace_idx] = answer_label
                     else:
                         resistors_per_area[area_key].append(answer_label)
-                except Exception:
-                    pass
+                except (TypeError, ValueError):
+                    self._trace(cp, f"area invalida para item resposta: {area!r}")
 
             # Reflect answer item visually on one available resistor item of the same area.
             items = items_by_area.get(area, [])
             if not items:
                 try:
                     items = items_by_area.get(int(area), [])
-                except Exception:
+                except (TypeError, ValueError):
                     items = []
             if items:
                 item = choice(items)
@@ -506,7 +506,7 @@ class MaxPowerTransferValidatorSystem(System):
                 ans_v = float(target_data["voltage"]["value"])
                 ans_i = float(target_data["current"]["value"])
                 ans_p = float(target_data["power"]["value"])
-            except Exception:
+            except (KeyError, TypeError, ValueError):
                 panel_id = int(cp.pannel_id)
                 reason = "dados de medicao invalidos em target_data"
                 if self._last_skip_reason.get(panel_id) != reason:

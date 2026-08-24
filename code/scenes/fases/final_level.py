@@ -406,7 +406,7 @@ class FinalLevel(BaseMaxPowerLevel):
         if solution_json.exists():
             try:
                 edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-            except Exception:
+            except OSError:
                 pass
 
     def _respawn_components_for_area(self, area_id: int, panel_id: int | None = None):
@@ -523,7 +523,7 @@ class FinalLevel(BaseMaxPowerLevel):
                 props = getattr(obj, "properties", {}) or {}
                 try:
                     area_id = int(props.get("area", -1))
-                except Exception:
+                except (TypeError, ValueError):
                     area_id = -1
                 if area_id < 0:
                     continue

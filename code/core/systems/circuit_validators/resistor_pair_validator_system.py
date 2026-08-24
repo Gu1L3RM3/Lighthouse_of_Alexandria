@@ -5,6 +5,7 @@ from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from entities.itens.control_pannel import ControlPannel
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
+from core.circuit_tools.circuit_domain import CircuitError
 from core.settings import CELL_SIZE, path_in_circuitos
 
 
@@ -84,7 +85,7 @@ class ResistorPairValidatorSystem(System):
                     "R3",
                     resistor_chosen
                 )
-            except Exception:
+            except (CircuitError, OSError):
                 document_path = str(self._panel_json_path(control_pannel.pannel_id, "_solution"))
                 self.circuits.save_component_value(
                     document_path,
@@ -122,7 +123,7 @@ class ResistorPairValidatorSystem(System):
 
                 try:
                     solution_values[r_name] = float(entry["value"])
-                except Exception:
+                except (TypeError, ValueError):
                     continue
 
             if not solution_values:
@@ -187,7 +188,7 @@ class ResistorPairValidatorSystem(System):
 
             try:
                 answer = float(res_entry[solution_type]["value"])
-            except Exception:
+            except (KeyError, TypeError, ValueError):
                 all_ok = False
                 break
             measured_values[r_name] = answer

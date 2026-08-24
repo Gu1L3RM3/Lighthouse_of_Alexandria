@@ -53,7 +53,7 @@ class GenericLevel4(BaseGenericLevel):
             if solution_json.exists():
                 try:
                     edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception as e:
+                except OSError:
                     pass
 
     def set_systems(self):

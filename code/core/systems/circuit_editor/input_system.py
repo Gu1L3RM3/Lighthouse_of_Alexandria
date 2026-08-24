@@ -22,6 +22,7 @@ from core.components.sprite import Sprite
 from core.components.label_component import LabelComponent
 from core.managers.node_manager import NodeManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
+from core.circuit_tools.circuit_domain import CircuitError
 from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
 from core.circuit_tools.circuit_repository import CircuitJsonRepository
 from core.circuit_tools.circuit_result_adapter import CircuitResultAdapter
@@ -381,7 +382,7 @@ class InputSystem(System):
             self.set_voltage_current_resistors()
 
             return True
-        except Exception as e:
+        except (CircuitError, KeyError, TypeError, ValueError) as e:
             self._log_solve_error_debug(
                 f"arquivo='{self.full_file}' detalhe='{e}'"
             )

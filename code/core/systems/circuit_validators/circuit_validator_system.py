@@ -5,6 +5,7 @@ from core.managers.circuit_manager            import CircuitManager
 from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
+from core.circuit_tools.circuit_domain import CircuitError
 from core.settings import CELL_SIZE, path_in_circuitos
 
 
@@ -107,7 +108,7 @@ class CircuitValidatorSystem(System):
                     target_component,
                     resistor_chosen
                 )
-            except Exception as ex:
+            except (CircuitError, OSError) as ex:
                 self._set_panel_status(
                     int(control_pannel.pannel_id),
                     "missing_target_component",

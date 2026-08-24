@@ -8,6 +8,7 @@ from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
+from core.circuit_tools.circuit_domain import CircuitError
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.components.label_component import LabelComponent
 from entities.itens.control_pannel import ControlPannel
@@ -77,7 +78,7 @@ class TheveninNortonValidatorSystem(System):
     def _safe_float(value) -> float | None:
         try:
             return float(value)
-        except Exception:
+        except (TypeError, ValueError):
             return None
 
     @staticmethod
@@ -93,7 +94,7 @@ class TheveninNortonValidatorSystem(System):
             base = text[:-3]
             try:
                 return float(base) * 1e6
-            except Exception:
+            except (TypeError, ValueError):
                 return None
 
         if len(text) > 1:
@@ -101,7 +102,7 @@ class TheveninNortonValidatorSystem(System):
             if last == "M":
                 try:
                     return float(text[:-1]) * 1e6
-                except Exception:
+                except (TypeError, ValueError):
                     return None
 
             suffix_map = {
@@ -118,12 +119,12 @@ class TheveninNortonValidatorSystem(System):
             if suffix in suffix_map:
                 try:
                     return float(text[:-1]) * suffix_map[suffix]
-                except Exception:
+                except (TypeError, ValueError):
                     return None
 
         try:
             return float(text)
-        except Exception:
+        except (TypeError, ValueError):
             return None
 
     @staticmethod
@@ -223,7 +224,7 @@ class TheveninNortonValidatorSystem(System):
     def _load_panel_entities(self, panel_id: int):
         try:
             return self.entity_mapper.to_entities(self.circuits.load(self._panel_json_path(panel_id)))
-        except Exception:
+        except (CircuitError, OSError, TypeError, ValueError):
             return []
 
     def _has_component(self, document_path: str, component_name: str) -> bool:
@@ -241,20 +242,14 @@ class TheveninNortonValidatorSystem(System):
     def _entity_label_name(self, entity) -> str:
         if not entity.has(LabelComponent):
             return ""
-        try:
-            label: LabelComponent = entity.get(LabelComponent)
-            return str(label.name).strip()
-        except Exception:
-            return ""
+        label: LabelComponent = entity.get(LabelComponent)
+        return str(label.name).strip()
 
     def _entity_label_value(self, entity) -> str:
         if not entity.has(LabelComponent):
             return ""
-        try:
-            label: LabelComponent = entity.get(LabelComponent)
-            return str(label.value).strip()
-        except Exception:
-            return ""
+        label: LabelComponent = entity.get(LabelComponent)
+        return str(label.value).strip()
 
     def _validate_player_topology(self, panel_id: int) -> tuple[bool, str]:
         entities = self._load_panel_entities(panel_id)
