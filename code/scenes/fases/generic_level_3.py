@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.circuit_file_service import CircuitFileService
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
 from core.localization.story_dialogue_catalog import StoryDialogueCatalog
@@ -21,6 +21,10 @@ from utils.setter_values import SetterValues
 
 
 class GenericLevel3(BaseGenericLevel):
+    def __init__(self, screen, level_path: str):
+        super().__init__(screen, level_path)
+        self.circuit_files = CircuitFileService(CELL_SIZE)
+
     def start(self):
         self.scene_manager.scene_preview = Path(self.level_path).stem
         self.player_dead_by_enemy = False
@@ -45,7 +49,7 @@ class GenericLevel3(BaseGenericLevel):
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
         for i in range(amount_pannels):
             file_name = path_in_circuitos(self.level_path, f"pannel{i + 1}.json")
-            SerializationManager.remove_droppable_entities(file_name)
+            self.circuit_files.remove_editable_elements(file_name)
 
     def set_systems(self):
         self.animation_system = AnimationSystem()

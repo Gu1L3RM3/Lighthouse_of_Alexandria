@@ -2,7 +2,7 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.control_pannel import ControlPannel
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
-from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssotiationValidatorSystem
+from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssociationValidatorSystem
 from core.systems.freeze_system import FreezeSystem
 from core.systems.phantom_ai_system import PhantomAISystem
 from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
@@ -10,7 +10,7 @@ from core.systems.spider_web_system import SpiderWebSystem
 from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
-from core.settings import path_in_circuitos, path_in_ltspice
+from core.settings import path_in_circuitos
 from pathlib import Path
 from scenes.fases.generic_levels import BaseGenericLevel
 
@@ -44,7 +44,6 @@ class GenericLevel4(BaseGenericLevel):
 
     def clear_all_pannels(self):
         json_base = path_in_circuitos(self.level_path)
-        netlist_base = path_in_ltspice(self.level_path)
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
 
         for i in range(amount_pannels):
@@ -54,15 +53,7 @@ class GenericLevel4(BaseGenericLevel):
             if solution_json.exists():
                 try:
                     edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception as e:
-                    pass
-
-            edited_net = netlist_base / f"{panel_name}.net"
-            solution_net = netlist_base / f"{panel_name}_solution.net"
-            if solution_net.exists():
-                try:
-                    edited_net.write_text(solution_net.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception as e:
+                except OSError:
                     pass
 
     def set_systems(self):
@@ -74,7 +65,7 @@ class GenericLevel4(BaseGenericLevel):
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
-        self.circuit_validator_system = ResistorAssotiationValidatorSystem(level_path=self.level_path)
+        self.circuit_validator_system = ResistorAssociationValidatorSystem(level_path=self.level_path)
 
         self.systems.update([
             self.freeze_system,

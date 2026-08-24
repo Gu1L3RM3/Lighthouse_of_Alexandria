@@ -1,23 +1,21 @@
-from pathlib import Path
 from typing import Dict
 import random
 
-from core.circuit_tools.serialization_manager import SerializationManager
-from core.circuit_tools.solve_circuit import CircuitSolver
-from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
+from core.circuit_tools.circuit_domain import ElementKind
 from core.components.label_component import LabelComponent
 from core.ecs import System
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
-from core.settings import COMERCIAL_RESISTORS, CIRCUITOS_DIR, path_in_circuitos, path_in_ltspice
+from core.settings import CELL_SIZE, COMERCIAL_RESISTORS, path_in_circuitos
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from utils.setter_values import SetterValues
 
 
-class ResistorAssotiationValidatorSystem(System):
-    def __init__(self, level_path: str):
+class ResistorAssociationValidatorSystem(System):
+    def __init__(self, level_path: str, circuit_service: CircuitService | None = None):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
@@ -27,32 +25,10 @@ class ResistorAssotiationValidatorSystem(System):
         self._validation_acc = 0.0
         self._panel_rr_index = 0
 
-        self.serialization_manager = SerializationManager()
-        self.serialization_manager.base_path = Path(CIRCUITOS_DIR)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
-
-    def _panel_net_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
-
-    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
-
-    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
-        for suffix in ("", "_solution"):
-            json_path = self._panel_json_path(panel_id, suffix)
-            if not json_path.exists():
-                continue
-            try:
-                LtSpiceGenerate(
-                    json_filepath=str(json_path),
-                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
-                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
-                    entity_manager=entity_manager,
-                ).save_netlist()
-            except Exception:
-                pass
 
     def _set_resistor_item_value(self, item: ResistorItem, value: float):
         formatted = SetterValues.format_eng(float(value), "")
@@ -116,46 +92,23 @@ class ResistorAssotiationValidatorSystem(System):
         )
         return farthest_key, farthest_val
 
-    def _randomize_resistors_in_netlist(self, netlist_path: str) -> Dict[str, str]:
+    def _randomize_resistors(self, document_path: str) -> Dict[str, str]:
         label_map: Dict[str, str] = {}
-
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-        except FileNotFoundError:
-            return label_map
-
-        resistor_line_indices: list[int] = []
-        for i, line in enumerate(lines):
-            stripped = line.strip().lower()
-            if stripped.startswith("r"):
-                resistor_line_indices.append(i)
-
-        if not resistor_line_indices:
-            return label_map
-
-        for idx in resistor_line_indices:
-            parts = lines[idx].split()
-            if len(parts) < 4:
+        document = self.circuits.load(document_path)
+        for element in document.elements:
+            if element.kind is not ElementKind.RESISTOR:
                 continue
-
-            comp_name = parts[0]
             _, new_val = self._random_comercial_value()
             formatted = SetterValues.format_eng(new_val, "")
-
-            parts[3] = formatted
-            lines[idx] = " ".join(parts) + "\n"
-            label_map[comp_name] = formatted
-
-        with open(netlist_path, "w", encoding="utf-8") as f:
-            f.writelines(lines)
-
+            label_map[element.name or ""] = formatted
+            document = document.with_component_value(element.name or "", formatted)
+        self.circuits.save(document_path, document)
         return label_map
 
     def set_solutions(self, event: dict, entity_manager: EntityManager):
         """
         Fase 4:
-        - randomiza resistores dos netlists com valores comerciais;
+        - randomiza resistores dos documentos com valores comerciais;
         - atualiza os JSONs de circuito com os mesmos valores;
         - calcula Req por painel e define solution_value;
         - distribui valores de resistores por area sem sobrescrever
@@ -176,28 +129,19 @@ class ResistorAssotiationValidatorSystem(System):
             area_res_items = resistors_by_area.get(area, [])
             panel_id = control_pannel.pannel_id
 
-            self._sync_netlists_from_json(panel_id, entity_manager)
-
             if not area_res_items:
                 self._log_panel_solution(panel_id, area, None, None, "no_resistors_in_area")
                 continue
 
-            netlist_path = str(self._panel_net_path(panel_id, "_solution"))
-            json_solution_path = path_in_circuitos(self.level_path, f"pannel{panel_id}.json")
+            solution_path = str(self._panel_json_path(panel_id, "_solution"))
+            player_path = str(self._panel_json_path(panel_id))
 
-            label_updates = self._randomize_resistors_in_netlist(netlist_path)
+            label_updates = self._randomize_resistors(solution_path)
             if label_updates:
-                try:
-                    self.serialization_manager.update_resistor_labels_in_file(
-                        json_solution_path,
-                        label_updates,
-                    )
-                except FileNotFoundError:
-                    pass
-                except Exception:
-                    pass
+                for component_name, value in label_updates.items():
+                    self.circuits.save_component_value(player_path, component_name, value)
 
-            solver = CircuitSolver(netlist_path)
+            solver = self.circuits.solve(solution_path)
             if not solver.is_solved:
                 self._log_panel_solution(panel_id, area, None, None, "solver_failed")
                 continue

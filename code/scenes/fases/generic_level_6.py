@@ -4,7 +4,6 @@ from pathlib import Path
 from pygame import Surface
 
 from core.settings import *
-from core.circuit_tools.serialization_manager import SerializationManager
 from core.components.label_component import LabelComponent
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
@@ -23,7 +22,7 @@ from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.old_paper import OldPaper
 from entities.itens.resistor_item import ResistorItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from scenes.fases.generic_levels import BaseGenericLevel
 
 
@@ -88,7 +87,7 @@ class GenericLevel6(BaseGenericLevel):
         return resistors_per_area
 
     def _assign_sources_for_areas(self) -> dict[int, dict[str, list[str]]]:
-        voltage_items: list[VoutageSourceItem] = self.entity_mn.get_entities_by_class(VoutageSourceItem)
+        voltage_items: list[VoltageSourceItem] = self.entity_mn.get_entities_by_class(VoltageSourceItem)
         current_items: list[CurrentSourceItem] = self.entity_mn.get_entities_by_class(CurrentSourceItem)
 
         voltage_values = self._build_random_values(self.VOLTAGE_POOL, len(voltage_items))
@@ -139,22 +138,13 @@ class GenericLevel6(BaseGenericLevel):
         for i in range(amount_pannels):
             panel_name = f"pannel{i + 1}"
             json_base = path_in_circuitos(self.level_path)
-            netlist_base = path_in_ltspice(self.level_path)
 
             edited_json = json_base / f"{panel_name}.json"
             solution_json = json_base / f"{panel_name}_solution.json"
             if solution_json.exists():
                 try:
                     edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception:
-                    pass
-
-            edited_net = netlist_base / f"{panel_name}.net"
-            solution_net = netlist_base / f"{panel_name}_solution.net"
-            if solution_net.exists():
-                try:
-                    edited_net.write_text(solution_net.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception:
+                except OSError:
                     pass
 
     def set_systems(self):

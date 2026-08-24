@@ -43,7 +43,7 @@ class Node(Entity):
 
         
 
-class VoutageSource(Entity):
+class VoltageSource(Entity):
     def __init__(self,x,y,id,value:str="10"):
         super().__init__()
         rm=ResourceManager.get()

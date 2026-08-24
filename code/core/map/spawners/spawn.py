@@ -13,7 +13,7 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.key import Key
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 from entities.itens.anti_reaggro_flask_item import AntiReaggroFlaskItem
@@ -46,7 +46,7 @@ class ItemSpawner(EntitySpawner):
             'key': Key,
             'control_pannel':ControlPannel,
             'resistor':ResistorItem,
-            'voltage_source':VoutageSourceItem,
+            'voltage_source':VoltageSourceItem,
             'current_source':CurrentSourceItem,
             'crystal_invisibility': CrystalInvisibilityItem,
             'anti_reaggro_flask': AntiReaggroFlaskItem,

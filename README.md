@@ -26,7 +26,7 @@ Core themes:
   - voltage source;
   - current source;
   - nodes, wires, and GND.
-- Automatic circuit validation powered by symbolic and numeric analysis.
+- Automatic circuit validation powered by in-memory numerical analysis.
 - Bomb mechanics in specific stages, tied to circuit progression.
 - Ghost enemies with radial proximity damage and audio chase feedback.
 - Fairer fall-ground traps with warning audio and delayed activation.
@@ -63,10 +63,10 @@ In the circuit editor:
 - Runtime dependencies from [`requirements.txt`](requirements.txt):
   - `pygame-ce==2.5.3`
   - `numpy==2.2.5`
-  - `pandas==2.2.3`
   - `PyTMX==3.32`
-  - `sympy==1.13.3`
   - `pathfinding==1.0.18`
+- Development dependencies from [`requirements-dev.txt`](requirements-dev.txt):
+  - `Pillow>=12.0,<13`
 - Optional build dependencies from [`requirements-build.txt`](requirements-build.txt):
   - `pyinstaller==6.16.0`
 
@@ -103,11 +103,12 @@ For the packaged release flow, see [`BUILD_WINDOWS.md`](BUILD_WINDOWS.md) and th
 
 ## Saves and Runtime Data
 
-During development, writable data lives inside `code/`, including circuits, LTspice support files, and local save snapshots.
+During development, writable data lives inside `code/`, including JSON v2 circuits and local save snapshots.
 
 In the Windows executable, writable runtime data may be copied to:
 - `%LOCALAPPDATA%\Alexandria\code\circuitos`
-- `%LOCALAPPDATA%\Alexandria\code\ltspice`
+
+Old LTspice files already present in a user profile are left untouched, but the game no longer reads or updates them.
 
 Release packages for itch.io are distributed as zip archives that include the executable, the `_internal` folder, and execution instructions in both Portuguese and English.
 
@@ -117,8 +118,7 @@ Release packages for itch.io are distributed as zip archives that include the ex
 - `code/game.py`: main loop and scene registration
 - `code/scenes/`: game scenes, menus, stages, endings, and circuit editor
 - `code/core/`: ECS systems, managers, UI, localization, and map tooling
-- `code/circuitos/`: JSON circuit data
-- `code/ltspice/`: LTspice-related support files and netlists
+- `code/circuitos/`: versioned JSON circuit documents
 - `assets/`: images, fonts, maps, and audio
 - `code/tests/`: automated coverage for gameplay, localization, and regression scenarios
 
@@ -126,7 +126,7 @@ Release packages for itch.io are distributed as zip archives that include the ex
 
 - Python + `pygame-ce`
 - Custom ECS architecture
-- Circuit solving with `sympy`, `numpy`, and `pandas`
+- In-memory Modified Nodal Analysis with `numpy`
 - Tiled maps via `PyTMX`
 - Grid navigation with A* from `pathfinding`
 

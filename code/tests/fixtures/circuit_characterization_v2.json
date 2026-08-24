@@ -1,0 +1,4377 @@
+{
+  "schema_version": 1,
+  "circuits": {
+    "bombs/bomb_editor.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 10.0
+        },
+        "components": {
+          "R1": {
+            "voltage": 10.0,
+            "current": 0.01,
+            "power": 0.1
+          },
+          "V1": {
+            "voltage": 10.0,
+            "current": -0.01,
+            "power": -0.1
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "bombs/default_bomb.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 10.0
+        },
+        "components": {
+          "R1": {
+            "voltage": 10.0,
+            "current": 0.01,
+            "power": 0.1
+          },
+          "V1": {
+            "voltage": 10.0,
+            "current": -0.01,
+            "power": -0.1
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "final_fase/fase_8/pannel1.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 4700.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 4.7
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 2.7
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 2.2
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0,
+          "2": 0.014709846069519823,
+          "3": 0.006101275130027844,
+          "4": 0.0019507478306891749
+        },
+        "components": {
+          "R2": {
+            "voltage": 14.98529015393048,
+            "current": 0.003188359607219251,
+            "power": 0.0477784938292523
+          },
+          "R5": {
+            "voltage": 0.0019507478306891749,
+            "current": 0.000415052729933867,
+            "power": 8.09663212540111e-07
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": -0.003188359607219251,
+            "power": -0.04782539410828877
+          },
+          "R4": {
+            "voltage": 0.008608570939491978,
+            "current": 0.003188359607219251,
+            "power": 2.7447219859357703e-05
+          },
+          "R1": {
+            "voltage": 0.0041505272993386695,
+            "current": 0.00041505272993386694,
+            "power": 1.722687686255555e-06
+          },
+          "R3": {
+            "voltage": 0.006101275130027844,
+            "current": 0.0027733068772853833,
+            "power": 1.692070827831649e-05
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 4.613609467455621,
+          "norton_current": 3.251250480954213,
+          "norton_resistance": 4.613609467455621
+        },
+        "R5": {
+          "thevenin_voltage": 0.007013964165019446,
+          "thevenin_resistance": 12.198971285255796,
+          "norton_current": 0.0005749635769285584,
+          "norton_resistance": 12.198971285255796
+        },
+        "R4": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 4701.913609467456,
+          "norton_current": 0.0031901904726188528,
+          "norton_resistance": 4701.913609467456
+        },
+        "R1": {
+          "thevenin_voltage": 0.007013964165019449,
+          "thevenin_resistance": 6.898971285255798,
+          "norton_current": 0.0010166681197832216,
+          "norton_resistance": 6.898971285255798
+        },
+        "R3": {
+          "thevenin_voltage": 0.04674184932378005,
+          "thevenin_resistance": 14.654192987662702,
+          "norton_current": 0.003189657005550002,
+          "norton_resistance": 14.654192987662702
+        }
+      }
+    },
+    "final_fase/fase_8/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 4700.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 4.7
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 2.7
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 2.2
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0,
+          "2": 0.014709846069519823,
+          "3": 0.006101275130027844,
+          "4": 0.0019507478306891749
+        },
+        "components": {
+          "R2": {
+            "voltage": 14.98529015393048,
+            "current": 0.003188359607219251,
+            "power": 0.0477784938292523
+          },
+          "R5": {
+            "voltage": 0.0019507478306891749,
+            "current": 0.000415052729933867,
+            "power": 8.09663212540111e-07
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": -0.003188359607219251,
+            "power": -0.04782539410828877
+          },
+          "R4": {
+            "voltage": 0.008608570939491978,
+            "current": 0.003188359607219251,
+            "power": 2.7447219859357703e-05
+          },
+          "R1": {
+            "voltage": 0.0041505272993386695,
+            "current": 0.00041505272993386694,
+            "power": 1.722687686255555e-06
+          },
+          "R3": {
+            "voltage": 0.006101275130027844,
+            "current": 0.0027733068772853833,
+            "power": 1.692070827831649e-05
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 4.613609467455621,
+          "norton_current": 3.251250480954213,
+          "norton_resistance": 4.613609467455621
+        },
+        "R5": {
+          "thevenin_voltage": 0.007013964165019446,
+          "thevenin_resistance": 12.198971285255796,
+          "norton_current": 0.0005749635769285584,
+          "norton_resistance": 12.198971285255796
+        },
+        "R4": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 4701.913609467456,
+          "norton_current": 0.0031901904726188528,
+          "norton_resistance": 4701.913609467456
+        },
+        "R1": {
+          "thevenin_voltage": 0.007013964165019449,
+          "thevenin_resistance": 6.898971285255798,
+          "norton_current": 0.0010166681197832216,
+          "norton_resistance": 6.898971285255798
+        },
+        "R3": {
+          "thevenin_voltage": 0.04674184932378005,
+          "thevenin_resistance": 14.654192987662702,
+          "norton_current": 0.003189657005550002,
+          "norton_resistance": 14.654192987662702
+        }
+      }
+    },
+    "final_fase/fase_8/pannel2.json": {
+      "branches": [
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 12.0
+        },
+        {
+          "name": "I2",
+          "kind": "current_source",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 12.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 82.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 180000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 4,
+          "negative_node": 1,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 0,
+          "negative_node": 5,
+          "value": 27000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 5,
+          "value": 270.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 8.2
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 98.32921040941346,
+          "2": 218.24917770765046,
+          "3": 1097.3292104094135,
+          "4": 113.32921040941346,
+          "5": 216.08829476004996
+        },
+        "components": {
+          "I1": {
+            "voltage": -1097.3292104094135,
+            "current": 12.0,
+            "power": -13167.950524912962
+          },
+          "I2": {
+            "voltage": -119.919967298237,
+            "current": 12.0,
+            "power": -1439.039607578844
+          },
+          "R1": {
+            "voltage": -119.919967298237,
+            "current": -11.9919967298237,
+            "power": 1438.0798556810232
+          },
+          "R2": {
+            "voltage": 984.0,
+            "current": 12.0,
+            "power": 11808.0
+          },
+          "R3": {
+            "voltage": 113.32921040941346,
+            "current": 0.0006296067244967415,
+            "power": 0.07135283295567282
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": 11.999370393275505,
+            "power": 179.99055589913257
+          },
+          "R4": {
+            "voltage": -216.08829476004996,
+            "current": -0.008003270176298146,
+            "power": 1.7294130049002308
+          },
+          "R5": {
+            "voltage": 2.1608829476004985,
+            "current": 0.008003270176298143,
+            "power": 0.017294130049002293
+          },
+          "R6": {
+            "voltage": 98.32921040941346,
+            "current": 11.991367123099204,
+            "power": 1179.1016609437447
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": -327240.0006833004,
+          "thevenin_resistance": 27278.199626461428,
+          "norton_current": -11.996392913184001,
+          "norton_resistance": 27278.199626461428
+        },
+        "R2": {
+          "error": "SingularCircuitError"
+        },
+        "R3": {
+          "thevenin_voltage": 113.33437163316009,
+          "thevenin_resistance": 8.19753593128165,
+          "norton_current": 13.825419319075891,
+          "norton_resistance": 8.19753593128165
+        },
+        "R4": {
+          "thevenin_voltage": -218.3948342353292,
+          "thevenin_resistance": 288.19962646146115,
+          "norton_current": -0.7577901363606853,
+          "norton_resistance": 288.19962646146115
+        },
+        "R5": {
+          "thevenin_voltage": 218.39483423532926,
+          "thevenin_resistance": 27018.19962646146,
+          "norton_current": 0.008083248967537966,
+          "norton_resistance": 27018.19962646146
+        },
+        "R6": {
+          "thevenin_voltage": 284170.1601698058,
+          "thevenin_resistance": 23689.695098416614,
+          "norton_current": 11.995517839687153,
+          "norton_resistance": 23689.695098416614
+        }
+      }
+    },
+    "final_fase/fase_8/pannel2_solution.json": {
+      "branches": [
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 12.0
+        },
+        {
+          "name": "I2",
+          "kind": "current_source",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 12.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 82.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 180000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 4,
+          "negative_node": 1,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 0,
+          "negative_node": 5,
+          "value": 27000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 5,
+          "value": 270.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 8.2
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 98.32921040941346,
+          "2": 218.24917770765046,
+          "3": 1097.3292104094135,
+          "4": 113.32921040941346,
+          "5": 216.08829476004996
+        },
+        "components": {
+          "I1": {
+            "voltage": -1097.3292104094135,
+            "current": 12.0,
+            "power": -13167.950524912962
+          },
+          "I2": {
+            "voltage": -119.919967298237,
+            "current": 12.0,
+            "power": -1439.039607578844
+          },
+          "R1": {
+            "voltage": -119.919967298237,
+            "current": -11.9919967298237,
+            "power": 1438.0798556810232
+          },
+          "R2": {
+            "voltage": 984.0,
+            "current": 12.0,
+            "power": 11808.0
+          },
+          "R3": {
+            "voltage": 113.32921040941346,
+            "current": 0.0006296067244967415,
+            "power": 0.07135283295567282
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": 11.999370393275505,
+            "power": 179.99055589913257
+          },
+          "R4": {
+            "voltage": -216.08829476004996,
+            "current": -0.008003270176298146,
+            "power": 1.7294130049002308
+          },
+          "R5": {
+            "voltage": 2.1608829476004985,
+            "current": 0.008003270176298143,
+            "power": 0.017294130049002293
+          },
+          "R6": {
+            "voltage": 98.32921040941346,
+            "current": 11.991367123099204,
+            "power": 1179.1016609437447
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": -327240.0006833004,
+          "thevenin_resistance": 27278.199626461428,
+          "norton_current": -11.996392913184001,
+          "norton_resistance": 27278.199626461428
+        },
+        "R2": {
+          "error": "SingularCircuitError"
+        },
+        "R3": {
+          "thevenin_voltage": 113.33437163316009,
+          "thevenin_resistance": 8.19753593128165,
+          "norton_current": 13.825419319075891,
+          "norton_resistance": 8.19753593128165
+        },
+        "R4": {
+          "thevenin_voltage": -218.3948342353292,
+          "thevenin_resistance": 288.19962646146115,
+          "norton_current": -0.7577901363606853,
+          "norton_resistance": 288.19962646146115
+        },
+        "R5": {
+          "thevenin_voltage": 218.39483423532926,
+          "thevenin_resistance": 27018.19962646146,
+          "norton_current": 0.008083248967537966,
+          "norton_resistance": 27018.19962646146
+        },
+        "R6": {
+          "thevenin_voltage": 284170.1601698058,
+          "thevenin_resistance": 23689.695098416614,
+          "norton_current": 11.995517839687153,
+          "norton_resistance": 23689.695098416614
+        }
+      }
+    },
+    "final_fase/fase_8/pannel3.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 9.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 39000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 27.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 1.8
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 10.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 9.0,
+          "2": 2.736910874784977,
+          "3": 0.4178305572791708
+        },
+        "components": {
+          "V1": {
+            "voltage": 9.0,
+            "current": -0.2321863195235891,
+            "power": -2.0896768757123017
+          },
+          "R2": {
+            "voltage": 2.736910874784977,
+            "current": 5.823214627202078e-05,
+            "power": 0.00015937619439396314
+          },
+          "R3": {
+            "voltage": 8.58216944272083,
+            "current": 0.00022005562673643153,
+            "power": 0.0018885546754761834
+          },
+          "R4": {
+            "voltage": 6.263089125215023,
+            "current": 0.2319662638968527,
+            "power": 1.4528253848291364
+          },
+          "R5": {
+            "voltage": 0.4178305572791708,
+            "current": 0.2321280873773171,
+            "power": 0.09699020810901246
+          },
+          "R1": {
+            "voltage": 2.319080317505806,
+            "current": 0.2319080317505806,
+            "power": 0.537813351904283
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 2.737389036406407,
+          "thevenin_resistance": 8.211299978470416,
+          "norton_current": 0.33336853404256245,
+          "norton_resistance": 8.211299978470416
+        },
+        "R3": {
+          "thevenin_voltage": 8.58254715972522,
+          "thevenin_resistance": 1.7164614692782891,
+          "norton_current": 5.000139713787968,
+          "norton_resistance": 1.7164614692782891
+        },
+        "R4": {
+          "thevenin_voltage": 8.999584738811658,
+          "thevenin_resistance": 11.79695515902028,
+          "norton_current": 0.7628735226589655,
+          "norton_resistance": 11.79695515902028
+        },
+        "R5": {
+          "thevenin_voltage": 8.994837651212032,
+          "thevenin_resistance": 36.949458339314184,
+          "norton_current": 0.24343625199077776,
+          "norton_resistance": 36.949458339314184
+        },
+        "R1": {
+          "thevenin_voltage": 8.994417390206337,
+          "thevenin_resistance": 28.78441519386409,
+          "norton_current": 0.3124752519593887,
+          "norton_resistance": 28.78441519386409
+        }
+      }
+    },
+    "final_fase/fase_8/pannel3_solution.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 9.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 39000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 27.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 1.8
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 10.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 9.0,
+          "2": 2.736910874784977,
+          "3": 0.4178305572791708
+        },
+        "components": {
+          "V1": {
+            "voltage": 9.0,
+            "current": -0.2321863195235891,
+            "power": -2.0896768757123017
+          },
+          "R2": {
+            "voltage": 2.736910874784977,
+            "current": 5.823214627202078e-05,
+            "power": 0.00015937619439396314
+          },
+          "R3": {
+            "voltage": 8.58216944272083,
+            "current": 0.00022005562673643153,
+            "power": 0.0018885546754761834
+          },
+          "R4": {
+            "voltage": 6.263089125215023,
+            "current": 0.2319662638968527,
+            "power": 1.4528253848291364
+          },
+          "R5": {
+            "voltage": 0.4178305572791708,
+            "current": 0.2321280873773171,
+            "power": 0.09699020810901246
+          },
+          "R1": {
+            "voltage": 2.319080317505806,
+            "current": 0.2319080317505806,
+            "power": 0.537813351904283
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 2.737389036406407,
+          "thevenin_resistance": 8.211299978470416,
+          "norton_current": 0.33336853404256245,
+          "norton_resistance": 8.211299978470416
+        },
+        "R3": {
+          "thevenin_voltage": 8.58254715972522,
+          "thevenin_resistance": 1.7164614692782891,
+          "norton_current": 5.000139713787968,
+          "norton_resistance": 1.7164614692782891
+        },
+        "R4": {
+          "thevenin_voltage": 8.999584738811658,
+          "thevenin_resistance": 11.79695515902028,
+          "norton_current": 0.7628735226589655,
+          "norton_resistance": 11.79695515902028
+        },
+        "R5": {
+          "thevenin_voltage": 8.994837651212032,
+          "thevenin_resistance": 36.949458339314184,
+          "norton_current": 0.24343625199077776,
+          "norton_resistance": 36.949458339314184
+        },
+        "R1": {
+          "thevenin_voltage": 8.994417390206337,
+          "thevenin_resistance": 28.78441519386409,
+          "norton_current": 0.3124752519593887,
+          "norton_resistance": 28.78441519386409
+        }
+      }
+    },
+    "final_fase/fase_8/pannel4.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2.7
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 56.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 1.8
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 680000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 12.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.953939367864898,
+          "2": 29.989898946441492,
+          "3": 0.00044102144007355024
+        },
+        "components": {
+          "R2": {
+            "voltage": 30.953939367864898,
+            "current": 11.46442198809811,
+            "power": 354.86902310720603
+          },
+          "R3": {
+            "voltage": 29.989898946441492,
+            "current": 0.5355339097578838,
+            "power": 16.060607836031654
+          },
+          "R1": {
+            "voltage": 0.00044102144007355024,
+            "current": 4.4102144007355024e-05,
+            "power": 1.9449991060454805e-08
+          },
+          "R4": {
+            "voltage": 0.9640404214234053,
+            "current": 0.5355780119018918,
+            "power": 0.5163188522990093
+          },
+          "R5": {
+            "voltage": 29.989457925001417,
+            "current": 4.4102144007355024e-05,
+            "power": 0.0013225993921109269
+          },
+          "I1": {
+            "voltage": -30.953939367864898,
+            "current": 12.0,
+            "power": -371.44727241437874
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 693.5446641943557,
+          "thevenin_resistance": 57.795388682863205,
+          "norton_current": 11.999999999999952,
+          "norton_resistance": 57.795388682863205
+        },
+        "R3": {
+          "thevenin_voltage": 32.39978559280722,
+          "thevenin_resistance": 4.499970221223224,
+          "norton_current": 7.200000000000002,
+          "norton_resistance": 4.499970221223224
+        },
+        "R1": {
+          "thevenin_voltage": 29.9900826446281,
+          "thevenin_resistance": 680004.1652892563,
+          "norton_current": 4.410279256432362e-05,
+          "norton_resistance": 680004.1652892563
+        },
+        "R4": {
+          "thevenin_voltage": 32.4,
+          "thevenin_resistance": 58.69538868286314,
+          "norton_current": 0.5520024779980645,
+          "norton_resistance": 58.69538868286314
+        },
+        "R5": {
+          "thevenin_voltage": 29.9900826446281,
+          "thevenin_resistance": 14.165289256198344,
+          "norton_current": 2.1171528588098023,
+          "norton_resistance": 14.165289256198344
+        }
+      }
+    },
+    "final_fase/fase_8/pannel4_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2.7
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 56.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 1.8
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 680000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 12.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.953939367864898,
+          "2": 29.989898946441492,
+          "3": 0.00044102144007355024
+        },
+        "components": {
+          "R2": {
+            "voltage": 30.953939367864898,
+            "current": 11.46442198809811,
+            "power": 354.86902310720603
+          },
+          "R3": {
+            "voltage": 29.989898946441492,
+            "current": 0.5355339097578838,
+            "power": 16.060607836031654
+          },
+          "R1": {
+            "voltage": 0.00044102144007355024,
+            "current": 4.4102144007355024e-05,
+            "power": 1.9449991060454805e-08
+          },
+          "R4": {
+            "voltage": 0.9640404214234053,
+            "current": 0.5355780119018918,
+            "power": 0.5163188522990093
+          },
+          "R5": {
+            "voltage": 29.989457925001417,
+            "current": 4.4102144007355024e-05,
+            "power": 0.0013225993921109269
+          },
+          "I1": {
+            "voltage": -30.953939367864898,
+            "current": 12.0,
+            "power": -371.44727241437874
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 693.5446641943557,
+          "thevenin_resistance": 57.795388682863205,
+          "norton_current": 11.999999999999952,
+          "norton_resistance": 57.795388682863205
+        },
+        "R3": {
+          "thevenin_voltage": 32.39978559280722,
+          "thevenin_resistance": 4.499970221223224,
+          "norton_current": 7.200000000000002,
+          "norton_resistance": 4.499970221223224
+        },
+        "R1": {
+          "thevenin_voltage": 29.9900826446281,
+          "thevenin_resistance": 680004.1652892563,
+          "norton_current": 4.410279256432362e-05,
+          "norton_resistance": 680004.1652892563
+        },
+        "R4": {
+          "thevenin_voltage": 32.4,
+          "thevenin_resistance": 58.69538868286314,
+          "norton_current": 0.5520024779980645,
+          "norton_resistance": 58.69538868286314
+        },
+        "R5": {
+          "thevenin_voltage": 29.9900826446281,
+          "thevenin_resistance": 14.165289256198344,
+          "norton_current": 2.1171528588098023,
+          "norton_resistance": 14.165289256198344
+        }
+      }
+    },
+    "generic_levels_3/fase_3/pannel1.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 10.0
+        },
+        "components": {
+          "V1": {
+            "voltage": 10.0,
+            "current": 0.0,
+            "power": 0.0
+          }
+        }
+      },
+      "analyses": {}
+    },
+    "generic_levels_3/fase_3/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 10.0
+        },
+        "components": {
+          "R1": {
+            "voltage": 10.0,
+            "current": 1.0,
+            "power": 10.0
+          },
+          "V1": {
+            "voltage": 10.0,
+            "current": -1.0,
+            "power": -10.0
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "generic_levels_3/fase_3/pannel2.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0
+        },
+        "components": {
+          "V1": {
+            "voltage": 15.0,
+            "current": 0.0,
+            "power": 0.0
+          }
+        }
+      },
+      "analyses": {}
+    },
+    "generic_levels_3/fase_3/pannel2_solution.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0
+        },
+        "components": {
+          "V1": {
+            "voltage": 15.0,
+            "current": -1.5,
+            "power": -22.5
+          },
+          "R1": {
+            "voltage": 15.0,
+            "current": 1.5,
+            "power": 22.5
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "generic_levels_3/fase_3/pannel3.json": {
+      "branches": [
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 20.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "error": "SingularCircuitError"
+      }
+    },
+    "generic_levels_3/fase_3/pannel3_solution.json": {
+      "branches": [
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 20.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 200.0
+        },
+        "components": {
+          "I1": {
+            "voltage": -200.0,
+            "current": 20.0,
+            "power": -4000.0
+          },
+          "R1": {
+            "voltage": 200.0,
+            "current": 20.0,
+            "power": 4000.0
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel1.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 6.8
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 68000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.995589324990295,
+          "3": 29.992590065983695
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.004410675009705045,
+            "current": 0.0004410675009705045,
+            "power": 1.9454054041236598e-06
+          },
+          "R2": {
+            "voltage": 0.0029992590066001412,
+            "current": 0.00044106750097060903,
+            "power": 1.3228756748047157e-06
+          },
+          "R3": {
+            "voltage": 29.992590065983695,
+            "current": 0.00044106750097034844,
+            "power": 0.013228756748031527
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.0004410675009700604,
+            "power": -0.013232025029101813
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 68006.7999999585,
+          "norton_current": 0.00044113235735276923,
+          "norton_resistance": 68006.7999999585
+        },
+        "R2": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 68010.0,
+          "norton_current": 0.0004411116012351125,
+          "norton_resistance": 68010.0
+        },
+        "R3": {
+          "thevenin_voltage": 29.999999999999996,
+          "thevenin_resistance": 16.8,
+          "norton_current": 1.7857142857142854,
+          "norton_resistance": 16.8
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 6.8
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 68000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.995589324990295,
+          "3": 29.992590065983695
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.004410675009705045,
+            "current": 0.0004410675009705045,
+            "power": 1.9454054041236598e-06
+          },
+          "R2": {
+            "voltage": 0.0029992590066001412,
+            "current": 0.00044106750097060903,
+            "power": 1.3228756748047157e-06
+          },
+          "R3": {
+            "voltage": 29.992590065983695,
+            "current": 0.00044106750097034844,
+            "power": 0.013228756748031527
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.0004410675009700604,
+            "power": -0.013232025029101813
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 68006.7999999585,
+          "norton_current": 0.00044113235735276923,
+          "norton_resistance": 68006.7999999585
+        },
+        "R2": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 68010.0,
+          "norton_current": 0.0004411116012351125,
+          "norton_resistance": 68010.0
+        },
+        "R3": {
+          "thevenin_voltage": 29.999999999999996,
+          "thevenin_resistance": 16.8,
+          "norton_current": 1.7857142857142854,
+          "norton_resistance": 16.8
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel2.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 39000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 560.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0
+        },
+        "components": {
+          "R1": {
+            "voltage": 30.0,
+            "current": 3.0,
+            "power": 90.0
+          },
+          "R2": {
+            "voltage": 30.0,
+            "current": 0.0007692307692307692,
+            "power": 0.023076923076923078
+          },
+          "R3": {
+            "voltage": 30.0,
+            "current": 0.05357142857142857,
+            "power": 1.607142857142857
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -3.0543406593406592,
+            "power": -91.63021978021978
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        },
+        "R2": {
+          "error": "SingularCircuitError"
+        },
+        "R3": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel2_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 39000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 560.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 1,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0
+        },
+        "components": {
+          "R1": {
+            "voltage": 30.0,
+            "current": 3.0,
+            "power": 90.0
+          },
+          "R2": {
+            "voltage": 30.0,
+            "current": 0.0007692307692307692,
+            "power": 0.023076923076923078
+          },
+          "R3": {
+            "voltage": 30.0,
+            "current": 0.05357142857142857,
+            "power": 1.607142857142857
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -3.0543406593406592,
+            "power": -91.63021978021978
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        },
+        "R2": {
+          "error": "SingularCircuitError"
+        },
+        "R3": {
+          "error": "SingularCircuitError"
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel3.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 4700.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 12000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 5,
+          "value": 12.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 5,
+          "value": 180000.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 0,
+          "negative_node": 5,
+          "value": 39.0
+        },
+        {
+          "name": "R7",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 150000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.91211361675419,
+          "3": 0.32109132445335703,
+          "4": 0.286750961249194,
+          "5": 0.2455425254041985
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.08788638324580944,
+            "current": 0.008788638324580943,
+            "power": 0.0007724016360029294
+          },
+          "R2": {
+            "voltage": 29.591022292300835,
+            "current": 0.006295962189851241,
+            "power": 0.18630395751137124
+          },
+          "R3": {
+            "voltage": 29.91211361675419,
+            "current": 0.002492676134729516,
+            "power": 0.07456121175180096
+          },
+          "R4": {
+            "voltage": 0.07554879904915854,
+            "current": 0.0062957332540965446,
+            "power": 0.0004756350864808448
+          },
+          "R5": {
+            "voltage": 0.041208435844995533,
+            "current": 2.2893575469441962e-07,
+            "power": 9.434084359950625e-09
+          },
+          "R6": {
+            "voltage": -0.2455425254041985,
+            "current": -0.006295962189851244,
+            "power": 0.0015459264559454222
+          },
+          "R7": {
+            "voltage": 0.034340363204163005,
+            "current": 2.2893575469442004e-07,
+            "power": 7.86173696662555e-09
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.008788638324580876,
+            "power": -0.26365914973742627
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 3403.4980746782617,
+          "norton_current": 0.008814460693601523,
+          "norton_resistance": 3403.4980746782617
+        },
+        "R2": {
+          "thevenin_voltage": 29.975020815986674,
+          "thevenin_resistance": 60.9912372575597,
+          "norton_current": 0.49146438347209215,
+          "norton_resistance": 60.9912372575597
+        },
+        "R3": {
+          "thevenin_voltage": 29.936988021950192,
+          "thevenin_resistance": 9.97899600731673,
+          "norton_current": 3.0,
+          "norton_resistance": 9.97899600731673
+        },
+        "R4": {
+          "thevenin_voltage": 29.54977345807957,
+          "thevenin_resistance": 4681.619037758936,
+          "norton_current": 0.006311870577197771,
+          "norton_resistance": 4681.619037758936
+        },
+        "R5": {
+          "thevenin_voltage": 0.07555153935386996,
+          "thevenin_resistance": 150011.96975420043,
+          "norton_current": 5.036367396392678e-07,
+          "norton_resistance": 150011.96975420043
+        },
+        "R6": {
+          "thevenin_voltage": -29.975020815986944,
+          "thevenin_resistance": 4721.991237257603,
+          "norton_current": -0.0063479619740665965,
+          "norton_resistance": 4721.991237257603
+        },
+        "R7": {
+          "thevenin_voltage": 0.07555153935386993,
+          "thevenin_resistance": 180011.96975420043,
+          "norton_current": 4.197028645208022e-07,
+          "norton_resistance": 180011.96975420043
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel3_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 4700.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 12000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 5,
+          "value": 12.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 5,
+          "value": 180000.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 0,
+          "negative_node": 5,
+          "value": 39.0
+        },
+        {
+          "name": "R7",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 150000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.91211361675419,
+          "3": 0.32109132445335703,
+          "4": 0.286750961249194,
+          "5": 0.2455425254041985
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.08788638324580944,
+            "current": 0.008788638324580943,
+            "power": 0.0007724016360029294
+          },
+          "R2": {
+            "voltage": 29.591022292300835,
+            "current": 0.006295962189851241,
+            "power": 0.18630395751137124
+          },
+          "R3": {
+            "voltage": 29.91211361675419,
+            "current": 0.002492676134729516,
+            "power": 0.07456121175180096
+          },
+          "R4": {
+            "voltage": 0.07554879904915854,
+            "current": 0.0062957332540965446,
+            "power": 0.0004756350864808448
+          },
+          "R5": {
+            "voltage": 0.041208435844995533,
+            "current": 2.2893575469441962e-07,
+            "power": 9.434084359950625e-09
+          },
+          "R6": {
+            "voltage": -0.2455425254041985,
+            "current": -0.006295962189851244,
+            "power": 0.0015459264559454222
+          },
+          "R7": {
+            "voltage": 0.034340363204163005,
+            "current": 2.2893575469442004e-07,
+            "power": 7.86173696662555e-09
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.008788638324580876,
+            "power": -0.26365914973742627
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 30.0,
+          "thevenin_resistance": 3403.4980746782617,
+          "norton_current": 0.008814460693601523,
+          "norton_resistance": 3403.4980746782617
+        },
+        "R2": {
+          "thevenin_voltage": 29.975020815986674,
+          "thevenin_resistance": 60.9912372575597,
+          "norton_current": 0.49146438347209215,
+          "norton_resistance": 60.9912372575597
+        },
+        "R3": {
+          "thevenin_voltage": 29.936988021950192,
+          "thevenin_resistance": 9.97899600731673,
+          "norton_current": 3.0,
+          "norton_resistance": 9.97899600731673
+        },
+        "R4": {
+          "thevenin_voltage": 29.54977345807957,
+          "thevenin_resistance": 4681.619037758936,
+          "norton_current": 0.006311870577197771,
+          "norton_resistance": 4681.619037758936
+        },
+        "R5": {
+          "thevenin_voltage": 0.07555153935386996,
+          "thevenin_resistance": 150011.96975420043,
+          "norton_current": 5.036367396392678e-07,
+          "norton_resistance": 150011.96975420043
+        },
+        "R6": {
+          "thevenin_voltage": -29.975020815986944,
+          "thevenin_resistance": 4721.991237257603,
+          "norton_current": -0.0063479619740665965,
+          "norton_resistance": 4721.991237257603
+        },
+        "R7": {
+          "thevenin_voltage": 0.07555153935386993,
+          "thevenin_resistance": 180011.96975420043,
+          "norton_current": 4.197028645208022e-07,
+          "norton_resistance": 180011.96975420043
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel4.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 1200.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 100000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 2,
+          "value": 1200.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 180.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.97106363078362,
+          "3": 26.539873605125948
+        },
+        "components": {
+          "R2": {
+            "voltage": 26.539873605125948,
+            "current": 0.022116561337604958,
+            "power": 0.5869707424800509
+          },
+          "R3": {
+            "voltage": 3.4311900256576706,
+            "current": 3.431190025657671e-05,
+            "power": 0.00011773064992172687
+          },
+          "R1": {
+            "voltage": 0.028936369216381763,
+            "current": 0.002893636921638176,
+            "power": 8.373134634267661e-05
+          },
+          "R4": {
+            "voltage": -3.4311900256576706,
+            "current": -0.002859325021381392,
+            "power": 0.009810887493477239
+          },
+          "R5": {
+            "voltage": 3.4601263948740524,
+            "current": 0.019222924415966958,
+            "power": 0.06651374815835615
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.022116561337605062,
+            "power": -0.6634968401281518
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 30.000000000000007,
+          "thevenin_resistance": 156.44956474272416,
+          "norton_current": 0.19175508764970972,
+          "norton_resistance": 156.44956474272416
+        },
+        "R3": {
+          "thevenin_voltage": 3.436207445116125,
+          "thevenin_resistance": 146.2297168310531,
+          "norton_current": 0.02349869451697124,
+          "norton_resistance": 146.2297168310531
+        },
+        "R1": {
+          "thevenin_voltage": 3.913043478260871,
+          "thevenin_resistance": 1342.292490118577,
+          "norton_current": 0.0029151943462897537,
+          "norton_resistance": 1342.292490118577
+        },
+        "R4": {
+          "thevenin_voltage": -3.9065382428390976,
+          "thevenin_resistance": 166.24490522304166,
+          "norton_current": -0.023498694516971272,
+          "norton_resistance": 166.24490522304166
+        },
+        "R5": {
+          "thevenin_voltage": 14.973520531899101,
+          "thevenin_resistance": 598.9408212759638,
+          "norton_current": 0.025000000000000012,
+          "norton_resistance": 598.9408212759638
+        }
+      }
+    },
+    "generic_levels_4/fase_4/pannel4_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 1200.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 100000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 2,
+          "value": 1200.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 180.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 30.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 30.0,
+          "2": 29.97106363078362,
+          "3": 26.539873605125948
+        },
+        "components": {
+          "R2": {
+            "voltage": 26.539873605125948,
+            "current": 0.022116561337604958,
+            "power": 0.5869707424800509
+          },
+          "R3": {
+            "voltage": 3.4311900256576706,
+            "current": 3.431190025657671e-05,
+            "power": 0.00011773064992172687
+          },
+          "R1": {
+            "voltage": 0.028936369216381763,
+            "current": 0.002893636921638176,
+            "power": 8.373134634267661e-05
+          },
+          "R4": {
+            "voltage": -3.4311900256576706,
+            "current": -0.002859325021381392,
+            "power": 0.009810887493477239
+          },
+          "R5": {
+            "voltage": 3.4601263948740524,
+            "current": 0.019222924415966958,
+            "power": 0.06651374815835615
+          },
+          "V1": {
+            "voltage": 30.0,
+            "current": -0.022116561337605062,
+            "power": -0.6634968401281518
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 30.000000000000007,
+          "thevenin_resistance": 156.44956474272416,
+          "norton_current": 0.19175508764970972,
+          "norton_resistance": 156.44956474272416
+        },
+        "R3": {
+          "thevenin_voltage": 3.436207445116125,
+          "thevenin_resistance": 146.2297168310531,
+          "norton_current": 0.02349869451697124,
+          "norton_resistance": 146.2297168310531
+        },
+        "R1": {
+          "thevenin_voltage": 3.913043478260871,
+          "thevenin_resistance": 1342.292490118577,
+          "norton_current": 0.0029151943462897537,
+          "norton_resistance": 1342.292490118577
+        },
+        "R4": {
+          "thevenin_voltage": -3.9065382428390976,
+          "thevenin_resistance": 166.24490522304166,
+          "norton_current": -0.023498694516971272,
+          "norton_resistance": 166.24490522304166
+        },
+        "R5": {
+          "thevenin_voltage": 14.973520531899101,
+          "thevenin_resistance": 598.9408212759638,
+          "norton_current": 0.025000000000000012,
+          "norton_resistance": 598.9408212759638
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel1.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 3000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 2,
+          "value": 0.01
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 13.311148086522119,
+          "2": 13.377703826954729,
+          "3": 3.344425956738682
+        },
+        "components": {
+          "R1": {
+            "voltage": -0.06655574043261048,
+            "current": -0.0066555740432610476,
+            "power": 0.0004429666584533021
+          },
+          "R2": {
+            "voltage": 10.033277870216047,
+            "current": 0.0033444259567386825,
+            "power": 0.033555554940322356
+          },
+          "R4": {
+            "voltage": 13.311148086522119,
+            "current": 0.00665557404326106,
+            "power": 0.08859333169066073
+          },
+          "R5": {
+            "voltage": 3.344425956738682,
+            "current": 0.003344425956738682,
+            "power": 0.011185184980107447
+          },
+          "I1": {
+            "voltage": -13.377703826954729,
+            "current": 0.01,
+            "power": -0.1337770382695473
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": -40.0,
+          "thevenin_resistance": 6000.0,
+          "norton_current": -0.006666666666666667,
+          "norton_resistance": 6000.0
+        },
+        "R2": {
+          "thevenin_voltage": 20.09999999999942,
+          "thevenin_resistance": 3009.999999999942,
+          "norton_current": 0.006677740863787311,
+          "norton_resistance": 3009.999999999942
+        },
+        "R4": {
+          "thevenin_voltage": 39.99999999999921,
+          "thevenin_resistance": 4009.999999999697,
+          "norton_current": 0.009975062344140207,
+          "norton_resistance": 4009.999999999697
+        },
+        "R5": {
+          "thevenin_voltage": 20.099999999999213,
+          "thevenin_resistance": 5009.999999999922,
+          "norton_current": 0.004011976047904097,
+          "norton_resistance": 5009.999999999922
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 2,
+          "value": 3000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 0.01
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 270000.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 13.274377501179535,
+          "2": 3.3628112494100857,
+          "3": 13.341116483731794
+        },
+        "components": {
+          "R1": {
+            "voltage": -0.06673898255225907,
+            "current": -0.006673898255225907,
+            "power": 0.0004454091792110741
+          },
+          "R2": {
+            "voltage": 9.978305234321708,
+            "current": 0.0033261017447739024,
+            "power": 0.03318885844976399
+          },
+          "R4": {
+            "voltage": 13.274377501179535,
+            "current": 0.006637188750589767,
+            "power": 0.08810454902191071
+          },
+          "R5": {
+            "voltage": 3.3628112494100857,
+            "current": 0.0033628112494100857,
+            "power": 0.011308499499159021
+          },
+          "I1": {
+            "voltage": -13.341116483731794,
+            "current": 0.01,
+            "power": -0.13341116483731794
+          },
+          "R3": {
+            "voltage": 9.911566251769448,
+            "current": 3.6709504636183146e-05,
+            "power": 0.00036384868727116696
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": -39.8901098901099,
+          "thevenin_resistance": 5967.0329670329675,
+          "norton_current": -0.006685082872928178,
+          "norton_resistance": 5967.0329670329675
+        },
+        "R2": {
+          "thevenin_voltage": 19.88021978021958,
+          "thevenin_resistance": 2977.0329670329547,
+          "norton_current": 0.006677863497102319,
+          "norton_resistance": 2977.0329670329547
+        },
+        "R4": {
+          "thevenin_voltage": 39.669242884876866,
+          "thevenin_resistance": 3976.8140361156734,
+          "norton_current": 0.009975131480782927,
+          "norton_resistance": 3976.8140361156734
+        },
+        "R5": {
+          "thevenin_voltage": 20.098897476282605,
+          "thevenin_resistance": 4976.814036115868,
+          "norton_current": 0.004038506829957564,
+          "norton_resistance": 4976.814036115868
+        },
+        "R3": {
+          "thevenin_voltage": 9.966722129783498,
+          "thevenin_resistance": 1502.495840266206,
+          "norton_current": 0.006633444075304485,
+          "norton_resistance": 1502.495840266206
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel2.json": {
+      "branches": [
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "R7",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 3300.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 0.01
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 4700.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2200.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 6.853582554517083,
+          "2": 6.884735202492161,
+          "3": 53.88473520249216,
+          "4": 0.0
+        },
+        "components": {
+          "R5": {
+            "voltage": 6.884735202492161,
+            "current": 0.0068847352024921605,
+            "power": 0.047399578808434775
+          },
+          "R7": {
+            "voltage": 0.0,
+            "current": 0.0,
+            "power": 0.0
+          },
+          "I1": {
+            "voltage": -53.88473520249216,
+            "current": 0.01,
+            "power": -0.5388473520249216
+          },
+          "R2": {
+            "voltage": -47.0,
+            "current": -0.01,
+            "power": 0.47000000000000003
+          },
+          "R4": {
+            "voltage": 0.0,
+            "current": 0.0,
+            "power": 0.0
+          },
+          "R1": {
+            "voltage": -0.031152647975077663,
+            "current": -0.0031152647975077664,
+            "power": 9.704874758591105e-05
+          },
+          "R6": {
+            "voltage": 6.853582554517083,
+            "current": 0.003115264797507765,
+            "power": 0.021350724468900413
+          }
+        }
+      },
+      "analyses": {
+        "R5": {
+          "thevenin_voltage": 22.099999999999522,
+          "thevenin_resistance": 2209.9999999999523,
+          "norton_current": 0.01,
+          "norton_resistance": 2209.9999999999523
+        },
+        "R7": {
+          "thevenin_voltage": 0.0,
+          "thevenin_resistance": 10000.0,
+          "norton_current": 0.0,
+          "norton_resistance": 10000.0
+        },
+        "R2": {
+          "error": "SingularCircuitError"
+        },
+        "R4": {
+          "thevenin_voltage": 0.0,
+          "thevenin_resistance": 3300.0,
+          "norton_current": 0.0,
+          "norton_resistance": 3300.0
+        },
+        "R1": {
+          "thevenin_voltage": -10.0,
+          "thevenin_resistance": 3200.0,
+          "norton_current": -0.003125,
+          "norton_resistance": 3200.0
+        },
+        "R6": {
+          "thevenin_voltage": 10.000000000000014,
+          "thevenin_resistance": 1009.9999999999893,
+          "norton_current": 0.009900990099010019,
+          "norton_resistance": 1009.9999999999893
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel2_solution.json": {
+      "branches": [
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 1000.0
+        },
+        {
+          "name": "R7",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 3300.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 0.01
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 4700.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 6800.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R6",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 2200.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 4.336120901974686,
+          "2": 4.355830542438208,
+          "3": 34.09176510975302,
+          "4": 9.113968313527621
+        },
+        "components": {
+          "R5": {
+            "voltage": 4.355830542438208,
+            "current": 0.004355830542438208,
+            "power": 0.018973259714437533
+          },
+          "R7": {
+            "voltage": 9.113968313527621,
+            "current": 0.002761808579856855,
+            "power": 0.025171035884844095
+          },
+          "I1": {
+            "voltage": -34.09176510975302,
+            "current": 0.01,
+            "power": -0.3409176510975302
+          },
+          "R2": {
+            "voltage": -29.73593456731481,
+            "current": -0.0063267945887903855,
+            "power": 0.1881331499131123
+          },
+          "R4": {
+            "voltage": 9.113968313527621,
+            "current": 0.0009113968313527621,
+            "power": 0.008306441841998552
+          },
+          "R3": {
+            "voltage": 24.977796796225398,
+            "current": 0.0036732054112096173,
+            "power": 0.09174857835198938
+          },
+          "R1": {
+            "voltage": -0.01970964046352197,
+            "current": -0.001970964046352197,
+            "power": 3.884699272013026e-05
+          },
+          "R6": {
+            "voltage": 4.336120901974686,
+            "current": 0.00197096404635213,
+            "power": 0.008546338398428076
+          }
+        }
+      },
+      "analyses": {
+        "R5": {
+          "thevenin_voltage": 12.66827340568279,
+          "thevenin_resistance": 1908.3485416289006,
+          "norton_current": 0.006638343640763646,
+          "norton_resistance": 1908.3485416289006
+        },
+        "R7": {
+          "thevenin_voltage": 24.285012285012275,
+          "thevenin_resistance": 5493.155493155493,
+          "norton_current": 0.004420958466453673,
+          "norton_resistance": 5493.155493155493
+        },
+        "R2": {
+          "thevenin_voltage": -92.81203007518798,
+          "thevenin_resistance": 9969.676527768013,
+          "norton_current": -0.009309432439125135,
+          "norton_resistance": 9969.676527768013
+        },
+        "R4": {
+          "thevenin_voltage": 11.480771551550742,
+          "thevenin_resistance": 2596.8964962387868,
+          "norton_current": 0.004420958466453673,
+          "norton_resistance": 2596.8964962387868
+        },
+        "R3": {
+          "thevenin_voltage": 53.88473520249216,
+          "thevenin_resistance": 7869.676527768012,
+          "norton_current": 0.006847134696370409,
+          "norton_resistance": 7869.676527768012
+        },
+        "R1": {
+          "thevenin_voltage": -6.195232120451695,
+          "thevenin_resistance": 3133.249686323714,
+          "norton_current": -0.0019772545250680766,
+          "norton_resistance": 3133.249686323714
+        },
+        "R6": {
+          "thevenin_voltage": 6.1952321204517045,
+          "thevenin_resistance": 943.2496863237047,
+          "norton_current": 0.0065679662662783255,
+          "norton_resistance": 943.2496863237047
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel3.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0,
+          "2": 12.761528130129792,
+          "3": 2.240710341739811,
+          "4": 2.2384718698699406
+        },
+        "components": {
+          "R2": {
+            "voltage": 2.2384718698702084,
+            "current": 0.00022384718698702084,
+            "power": 0.0005010756312200227
+          },
+          "R5": {
+            "voltage": 2.2384718698699406,
+            "current": 0.00022384718698699406,
+            "power": 0.0005010756312199029
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": -0.0002238471869870208,
+            "power": -0.0033577078048053124
+          },
+          "R4": {
+            "voltage": 10.52081778838998,
+            "current": 0.00022384718698702086,
+            "power": 0.002355055466734107
+          },
+          "R1": {
+            "voltage": 0.002238471869870473,
+            "current": 0.00022384718698704732,
+            "power": 5.010756312201413e-07
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 57010.0000000001,
+          "norton_current": 0.0002631117347833709,
+          "norton_resistance": 57010.0000000001
+        },
+        "R5": {
+          "thevenin_voltage": 14.999999999992196,
+          "thevenin_resistance": 57009.999999970336,
+          "norton_current": 0.00026311173478337136,
+          "norton_resistance": 57009.999999970336
+        },
+        "R4": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 20009.999999999716,
+          "norton_current": 0.0007496251874063075,
+          "norton_resistance": 20009.999999999716
+        },
+        "R1": {
+          "thevenin_voltage": 15.000000000000004,
+          "thevenin_resistance": 67000.00000000001,
+          "norton_current": 0.00022388059701492538,
+          "norton_resistance": 67000.00000000001
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel3_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 15.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 25000.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 15.0,
+          "2": 12.661655876250068,
+          "3": 1.6714384946253897,
+          "4": 1.66976872589949
+        },
+        "components": {
+          "R2": {
+            "voltage": 2.3383441237499323,
+            "current": 0.00023383441237499324,
+            "power": 0.0005467853241075839
+          },
+          "R5": {
+            "voltage": 1.66976872589949,
+            "current": 0.000166976872589949,
+            "power": 0.00027881275979920063
+          },
+          "V1": {
+            "voltage": 15.0,
+            "current": -0.00023383441237499316,
+            "power": -0.0035075161856248974
+          },
+          "R4": {
+            "voltage": 10.990217381624678,
+            "current": 0.00023383441237499316,
+            "power": 0.0025698910233056425
+          },
+          "R1": {
+            "voltage": 0.0016697687258997451,
+            "current": 0.0001669768725899745,
+            "power": 2.788127597992858e-07
+          },
+          "R3": {
+            "voltage": 1.6714384946253897,
+            "current": 6.68575397850156e-05,
+            "power": 0.00011174826565262357
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 54147.95772636398,
+          "norton_current": 0.0002770187580444365,
+          "norton_resistance": 54147.95772636398
+        },
+        "R5": {
+          "thevenin_voltage": 4.573170731706183,
+          "thevenin_resistance": 17388.048780483492,
+          "norton_current": 0.0002630065506164874,
+          "norton_resistance": 17388.048780483492
+        },
+        "R4": {
+          "thevenin_voltage": 15.0,
+          "thevenin_resistance": 17147.957726363547,
+          "norton_current": 0.000874739735154511,
+          "norton_resistance": 17147.957726363547
+        },
+        "R1": {
+          "thevenin_voltage": 4.573170731707318,
+          "thevenin_resistance": 27378.048780487803,
+          "norton_current": 0.00016703786191536754,
+          "norton_resistance": 27378.048780487803
+        },
+        "R3": {
+          "thevenin_voltage": 2.240710341739811,
+          "thevenin_resistance": 8514.699298611866,
+          "norton_current": 0.00026315789473682405,
+          "norton_resistance": 8514.699298611866
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel4.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 20.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 626866.66666684,
+          "2": 626666.66666684,
+          "3": 313333.33333342
+        },
+        "components": {
+          "R1": {
+            "voltage": 200.0,
+            "current": 20.0,
+            "power": 4000.0
+          },
+          "R2": {
+            "voltage": 313333.33333342,
+            "current": 6.66666666666851,
+            "power": 2088888.888890044
+          },
+          "R4": {
+            "voltage": 626666.66666684,
+            "current": 13.33333333333702,
+            "power": 8355555.555560176
+          },
+          "R5": {
+            "voltage": 313333.33333342,
+            "current": 6.66666666666851,
+            "power": 2088888.888890044
+          },
+          "I1": {
+            "voltage": -626866.66666684,
+            "current": 20.0,
+            "power": -12537333.3333368
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "error": "SingularCircuitError"
+        },
+        "R2": {
+          "thevenin_voltage": 940000.0000001949,
+          "thevenin_resistance": 94000.00000000974,
+          "norton_current": 10.000000000001037,
+          "norton_resistance": 94000.00000000974
+        },
+        "R4": {
+          "thevenin_voltage": 1880000.0000007797,
+          "thevenin_resistance": 94000.00000003897,
+          "norton_current": 20.000000000000004,
+          "norton_resistance": 94000.00000003897
+        },
+        "R5": {
+          "thevenin_voltage": 940000.0000003899,
+          "thevenin_resistance": 94000.00000001949,
+          "norton_current": 10.000000000002075,
+          "norton_resistance": 94000.00000001949
+        }
+      }
+    },
+    "generic_levels_5/fase_5/pannel4_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 20.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 626866.6241227004,
+          "2": 626666.66666684,
+          "3": 313333.33333342
+        },
+        "components": {
+          "R1": {
+            "voltage": 199.95745586045086,
+            "current": 19.995745586045086,
+            "power": 3998.2984154184155
+          },
+          "R2": {
+            "voltage": 313333.33333342,
+            "current": 6.66666666666851,
+            "power": 2088888.888890044
+          },
+          "R3": {
+            "voltage": 199.95745586045086,
+            "current": 0.004254413954477678,
+            "power": 0.8507017905145564
+          },
+          "R4": {
+            "voltage": 626666.66666684,
+            "current": 13.33333333333702,
+            "power": 8355555.555560176
+          },
+          "R5": {
+            "voltage": 313333.33333342,
+            "current": 6.66666666666851,
+            "power": 2088888.888890044
+          },
+          "I1": {
+            "voltage": -626866.6241227004,
+            "current": 20.0,
+            "power": -12537332.48245401
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 940000.0,
+          "thevenin_resistance": 47000.0,
+          "norton_current": 20.0,
+          "norton_resistance": 47000.0
+        },
+        "R2": {
+          "thevenin_voltage": 940000.0000001949,
+          "thevenin_resistance": 94000.00000000974,
+          "norton_current": 10.000000000001037,
+          "norton_resistance": 94000.00000000974
+        },
+        "R3": {
+          "thevenin_voltage": 200.0,
+          "thevenin_resistance": 10.0,
+          "norton_current": 20.0,
+          "norton_resistance": 10.0
+        },
+        "R4": {
+          "thevenin_voltage": 1880000.0000007797,
+          "thevenin_resistance": 94000.00000003897,
+          "norton_current": 20.000000000000004,
+          "norton_resistance": 94000.00000003897
+        },
+        "R5": {
+          "thevenin_voltage": 940000.0000003899,
+          "thevenin_resistance": 94000.00000001949,
+          "norton_current": 10.000000000002075,
+          "norton_resistance": 94000.00000001949
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel1.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 56000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 4.5
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 25000.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 4.5,
+          "2": 2.212168203553698,
+          "3": 0.29202366010769487,
+          "4": 0.2917319281795154
+        },
+        "components": {
+          "R2": {
+            "voltage": 2.287831796446302,
+            "current": 4.085413922225539e-05,
+            "power": 9.346739872911988e-05
+          },
+          "R5": {
+            "voltage": 0.2917319281795154,
+            "current": 2.9173192817951537e-05,
+            "power": 8.510751791933792e-06
+          },
+          "V1": {
+            "voltage": 4.5,
+            "current": -4.085413922225539e-05,
+            "power": -0.00018384362650014928
+          },
+          "R4": {
+            "voltage": 1.9201445434460032,
+            "current": 4.0854139222255386e-05,
+            "power": 7.844585250479702e-05
+          },
+          "R1": {
+            "voltage": 0.000291731928179495,
+            "current": 2.91731928179495e-05,
+            "power": 8.510751791932603e-09
+          },
+          "R3": {
+            "voltage": 0.29202366010769487,
+            "current": 1.1680946404307795e-05,
+            "power": 3.41111272250778e-06
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 4.5,
+          "thevenin_resistance": 54147.95772636398,
+          "norton_current": 8.310562741333095e-05,
+          "norton_resistance": 54147.95772636398
+        },
+        "R5": {
+          "thevenin_voltage": 0.8789062500002894,
+          "thevenin_resistance": 20127.18750000662,
+          "norton_current": 4.3667613768689756e-05,
+          "norton_resistance": 20127.18750000662
+        },
+        "R4": {
+          "thevenin_voltage": 4.5,
+          "thevenin_resistance": 63147.957726363544,
+          "norton_current": 7.12612119539901e-05,
+          "norton_resistance": 63147.957726363544
+        },
+        "R1": {
+          "thevenin_voltage": 0.87890625,
+          "thevenin_resistance": 30117.187499999996,
+          "norton_current": 2.918287937743191e-05,
+          "norton_resistance": 30117.187499999996
+        },
+        "R3": {
+          "thevenin_voltage": 0.39859304486330915,
+          "thevenin_resistance": 9123.351915759913,
+          "norton_current": 4.368932038835083e-05,
+          "norton_resistance": 9123.351915759913
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 56000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10000.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 4.5
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 25000.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 4.5,
+          "2": 2.212168203553698,
+          "3": 0.29202366010769487,
+          "4": 0.2917319281795154
+        },
+        "components": {
+          "R2": {
+            "voltage": 2.287831796446302,
+            "current": 4.085413922225539e-05,
+            "power": 9.346739872911988e-05
+          },
+          "R5": {
+            "voltage": 0.2917319281795154,
+            "current": 2.9173192817951537e-05,
+            "power": 8.510751791933792e-06
+          },
+          "V1": {
+            "voltage": 4.5,
+            "current": -4.085413922225539e-05,
+            "power": -0.00018384362650014928
+          },
+          "R4": {
+            "voltage": 1.9201445434460032,
+            "current": 4.0854139222255386e-05,
+            "power": 7.844585250479702e-05
+          },
+          "R1": {
+            "voltage": 0.000291731928179495,
+            "current": 2.91731928179495e-05,
+            "power": 8.510751791932603e-09
+          },
+          "R3": {
+            "voltage": 0.29202366010769487,
+            "current": 1.1680946404307795e-05,
+            "power": 3.41111272250778e-06
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 4.5,
+          "thevenin_resistance": 54147.95772636398,
+          "norton_current": 8.310562741333095e-05,
+          "norton_resistance": 54147.95772636398
+        },
+        "R5": {
+          "thevenin_voltage": 0.8789062500002894,
+          "thevenin_resistance": 20127.18750000662,
+          "norton_current": 4.3667613768689756e-05,
+          "norton_resistance": 20127.18750000662
+        },
+        "R4": {
+          "thevenin_voltage": 4.5,
+          "thevenin_resistance": 63147.957726363544,
+          "norton_current": 7.12612119539901e-05,
+          "norton_resistance": 63147.957726363544
+        },
+        "R1": {
+          "thevenin_voltage": 0.87890625,
+          "thevenin_resistance": 30117.187499999996,
+          "norton_current": 2.918287937743191e-05,
+          "norton_resistance": 30117.187499999996
+        },
+        "R3": {
+          "thevenin_voltage": 0.39859304486330915,
+          "thevenin_resistance": 9123.351915759913,
+          "norton_current": 4.368932038835083e-05,
+          "norton_resistance": 9123.351915759913
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel2.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 12000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 10.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 330602.0156718727,
+          "2": 95616.84209011655,
+          "3": 95587.18925362895
+        },
+        "components": {
+          "R1": {
+            "voltage": 29.652836487599416,
+            "current": 2.9652836487599417,
+            "power": 87.92907117603073
+          },
+          "R2": {
+            "voltage": 235014.82641824376,
+            "current": 5.000315455707314,
+            "power": 1175148.268859516
+          },
+          "R3": {
+            "voltage": 234985.17358175616,
+            "current": 4.999684544292684,
+            "power": 1174851.7404946398
+          },
+          "R4": {
+            "voltage": 95616.84209011655,
+            "current": 2.034400895534395,
+            "power": 194522.98917630393
+          },
+          "R5": {
+            "voltage": 95587.18925362895,
+            "current": 7.96559910446908,
+            "power": 761409.2291174232
+          },
+          "I1": {
+            "voltage": -330602.0156718727,
+            "current": 10.0,
+            "power": -3306020.156718727
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 107516.33986928103,
+          "thevenin_resistance": 36248.3660130719,
+          "norton_current": 2.9661016949152534,
+          "norton_resistance": 36248.3660130719
+        },
+        "R2": {
+          "thevenin_voltage": 470079.64751736994,
+          "thevenin_resistance": 47009.99830537197,
+          "norton_current": 9.999567421036316,
+          "norton_resistance": 47009.99830537197
+        },
+        "R3": {
+          "thevenin_voltage": 470020.3355363498,
+          "thevenin_resistance": 47009.99830537197,
+          "norton_current": 9.998305732392234,
+          "norton_resistance": 47009.99830537197
+        },
+        "R4": {
+          "thevenin_voltage": 120049.99468145009,
+          "thevenin_resistance": 12009.998936285403,
+          "norton_current": 9.995837245143054,
+          "norton_resistance": 12009.998936285403
+        },
+        "R5": {
+          "thevenin_voltage": 470049.9946823238,
+          "thevenin_resistance": 47009.998936374075,
+          "norton_current": 9.998936509624588,
+          "norton_resistance": 47009.998936374075
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel2_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 3,
+          "value": 47000.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 12000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 10.0
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 330602.0156718727,
+          "2": 95616.84209011655,
+          "3": 95587.18925362895
+        },
+        "components": {
+          "R1": {
+            "voltage": 29.652836487599416,
+            "current": 2.9652836487599417,
+            "power": 87.92907117603073
+          },
+          "R2": {
+            "voltage": 235014.82641824376,
+            "current": 5.000315455707314,
+            "power": 1175148.268859516
+          },
+          "R3": {
+            "voltage": 234985.17358175616,
+            "current": 4.999684544292684,
+            "power": 1174851.7404946398
+          },
+          "R4": {
+            "voltage": 95616.84209011655,
+            "current": 2.034400895534395,
+            "power": 194522.98917630393
+          },
+          "R5": {
+            "voltage": 95587.18925362895,
+            "current": 7.96559910446908,
+            "power": 761409.2291174232
+          },
+          "I1": {
+            "voltage": -330602.0156718727,
+            "current": 10.0,
+            "power": -3306020.156718727
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 107516.33986928103,
+          "thevenin_resistance": 36248.3660130719,
+          "norton_current": 2.9661016949152534,
+          "norton_resistance": 36248.3660130719
+        },
+        "R2": {
+          "thevenin_voltage": 470079.64751736994,
+          "thevenin_resistance": 47009.99830537197,
+          "norton_current": 9.999567421036316,
+          "norton_resistance": 47009.99830537197
+        },
+        "R3": {
+          "thevenin_voltage": 470020.3355363498,
+          "thevenin_resistance": 47009.99830537197,
+          "norton_current": 9.998305732392234,
+          "norton_resistance": 47009.99830537197
+        },
+        "R4": {
+          "thevenin_voltage": 120049.99468145009,
+          "thevenin_resistance": 12009.998936285403,
+          "norton_current": 9.995837245143054,
+          "norton_resistance": 12009.998936285403
+        },
+        "R5": {
+          "thevenin_voltage": 470049.9946823238,
+          "thevenin_resistance": 47009.998936374075,
+          "norton_current": 9.998936509624588,
+          "norton_resistance": 47009.998936374075
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel3.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 3900.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 5.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 1,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 5,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 25000.0
+        },
+        {
+          "name": "V2",
+          "kind": "voltage_source",
+          "positive_node": 0,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 5,
+          "negative_node": 2,
+          "value": 10000.0
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": -8.152917516911005,
+          "2": -10.0,
+          "3": 5.0,
+          "4": 3.992212606759275,
+          "5": -8.154762754156849
+        },
+        "components": {
+          "R2": {
+            "voltage": 1.0077873932407249,
+            "current": 0.00025840702390787817,
+            "power": 0.0002604193410192142
+          },
+          "V1": {
+            "voltage": 5.0,
+            "current": -0.00025840702390787817,
+            "power": -0.001292035119539391
+          },
+          "R4": {
+            "voltage": 12.145130123670281,
+            "current": 0.00025840702390787833,
+            "power": 0.0031383869302315597
+          },
+          "R1": {
+            "voltage": 0.0018452372458437338,
+            "current": 0.00018452372458437337,
+            "power": 3.404900493448968e-07
+          },
+          "R3": {
+            "voltage": 1.847082483088995,
+            "current": 7.388329932355979e-05,
+            "power": 0.00013646854797336828
+          },
+          "V2": {
+            "voltage": 10.0,
+            "current": -0.0002584070239078748,
+            "power": -0.002584070239078748
+          },
+          "R5": {
+            "voltage": 1.8452372458431512,
+            "current": 0.00018452372458431512,
+            "power": 0.0003404900493446818
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.000000000000508,
+          "thevenin_resistance": 54147.95772636398,
+          "norton_current": 0.00027701875804444587,
+          "norton_resistance": 54147.95772636398
+        },
+        "R4": {
+          "thevenin_voltage": 14.999999999999517,
+          "thevenin_resistance": 11047.95772636355,
+          "norton_current": 0.0013577169981566165,
+          "norton_resistance": 11047.95772636355
+        },
+        "R1": {
+          "thevenin_voltage": 4.940711462450594,
+          "thevenin_resistance": 26765.48089591568,
+          "norton_current": 0.0001845926655180901,
+          "norton_resistance": 26765.48089591568
+        },
+        "R3": {
+          "thevenin_voltage": 2.465112461007945,
+          "thevenin_resistance": 8364.948284353675,
+          "norton_current": 0.00029469548133595117,
+          "norton_resistance": 8364.948284353675
+        },
+        "R5": {
+          "thevenin_voltage": 4.940711462450313,
+          "thevenin_resistance": 16775.480895916604,
+          "norton_current": 0.00029451981097322545,
+          "norton_resistance": 16775.480895916604
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel3_solution.json": {
+      "branches": [
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 3900.0
+        },
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 5.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 1,
+          "value": 47000.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 5,
+          "value": 10.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 25000.0
+        },
+        {
+          "name": "V2",
+          "kind": "voltage_source",
+          "positive_node": 0,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 5,
+          "negative_node": 2,
+          "value": 10000.0
+        }
+      ],
+      "node_count": 5,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": -8.152917516911005,
+          "2": -10.0,
+          "3": 5.0,
+          "4": 3.992212606759275,
+          "5": -8.154762754156849
+        },
+        "components": {
+          "R2": {
+            "voltage": 1.0077873932407249,
+            "current": 0.00025840702390787817,
+            "power": 0.0002604193410192142
+          },
+          "V1": {
+            "voltage": 5.0,
+            "current": -0.00025840702390787817,
+            "power": -0.001292035119539391
+          },
+          "R4": {
+            "voltage": 12.145130123670281,
+            "current": 0.00025840702390787833,
+            "power": 0.0031383869302315597
+          },
+          "R1": {
+            "voltage": 0.0018452372458437338,
+            "current": 0.00018452372458437337,
+            "power": 3.404900493448968e-07
+          },
+          "R3": {
+            "voltage": 1.847082483088995,
+            "current": 7.388329932355979e-05,
+            "power": 0.00013646854797336828
+          },
+          "V2": {
+            "voltage": 10.0,
+            "current": -0.0002584070239078748,
+            "power": -0.002584070239078748
+          },
+          "R5": {
+            "voltage": 1.8452372458431512,
+            "current": 0.00018452372458431512,
+            "power": 0.0003404900493446818
+          }
+        }
+      },
+      "analyses": {
+        "R2": {
+          "thevenin_voltage": 15.000000000000508,
+          "thevenin_resistance": 54147.95772636398,
+          "norton_current": 0.00027701875804444587,
+          "norton_resistance": 54147.95772636398
+        },
+        "R4": {
+          "thevenin_voltage": 14.999999999999517,
+          "thevenin_resistance": 11047.95772636355,
+          "norton_current": 0.0013577169981566165,
+          "norton_resistance": 11047.95772636355
+        },
+        "R1": {
+          "thevenin_voltage": 4.940711462450594,
+          "thevenin_resistance": 26765.48089591568,
+          "norton_current": 0.0001845926655180901,
+          "norton_resistance": 26765.48089591568
+        },
+        "R3": {
+          "thevenin_voltage": 2.465112461007945,
+          "thevenin_resistance": 8364.948284353675,
+          "norton_current": 0.00029469548133595117,
+          "norton_resistance": 8364.948284353675
+        },
+        "R5": {
+          "thevenin_voltage": 4.940711462450313,
+          "thevenin_resistance": 16775.480895916604,
+          "norton_current": 0.00029451981097322545,
+          "norton_resistance": 16775.480895916604
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel4.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 22.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 0.0001
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 2.3515496585855002,
+          "2": 2.350549871306198,
+          "3": 2.349450128692767
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.0009997872793023888,
+            "current": 9.997872793023887e-05,
+            "power": 9.995746038548726e-08
+          },
+          "R2": {
+            "voltage": 0.0010997426134307098,
+            "current": 4.998830061048681e-05,
+            "power": 5.497426435433671e-08
+          },
+          "R3": {
+            "voltage": 0.0009997872793023888,
+            "current": 2.127206977239125e-08,
+            "power": 2.1267544762869632e-11
+          },
+          "R4": {
+            "voltage": 2.350549871306198,
+            "current": 5.001169938949357e-05,
+            "power": 0.00011755499356377836
+          },
+          "R5": {
+            "voltage": 2.349450128692767,
+            "current": 4.9988300610484405e-05,
+            "power": 0.00011744501930243531
+          },
+          "I1": {
+            "voltage": -2.3515496585855002,
+            "current": 0.0001,
+            "power": -0.00023515496585855005
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 4.7,
+          "thevenin_resistance": 47000.0,
+          "norton_current": 0.0001,
+          "norton_resistance": 47000.0
+        },
+        "R2": {
+          "thevenin_voltage": 4.7000000000009745,
+          "thevenin_resistance": 94000.00000000974,
+          "norton_current": 5.0000000000005186e-05,
+          "norton_resistance": 94000.00000000974
+        },
+        "R3": {
+          "thevenin_voltage": 0.0009999999999998899,
+          "thevenin_resistance": 10.0,
+          "norton_current": 9.999999999998899e-05,
+          "norton_resistance": 10.0
+        },
+        "R4": {
+          "thevenin_voltage": 4.702199999999441,
+          "thevenin_resistance": 47021.99999998489,
+          "norton_current": 0.00010000000000002025,
+          "norton_resistance": 47021.99999998489
+        },
+        "R5": {
+          "thevenin_voltage": 4.699999999998489,
+          "thevenin_resistance": 47021.99999998489,
+          "norton_current": 9.995321338947727e-05,
+          "norton_resistance": 47021.99999998489
+        }
+      }
+    },
+    "generic_levels_6/fase_6/pannel4_solution.json": {
+      "branches": [
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 22.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 47000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 0,
+          "value": 47000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 1,
+          "value": 0.0001
+        }
+      ],
+      "node_count": 3,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 2.3515496585855002,
+          "2": 2.350549871306198,
+          "3": 2.349450128692767
+        },
+        "components": {
+          "R1": {
+            "voltage": 0.0009997872793023888,
+            "current": 9.997872793023887e-05,
+            "power": 9.995746038548726e-08
+          },
+          "R2": {
+            "voltage": 0.0010997426134307098,
+            "current": 4.998830061048681e-05,
+            "power": 5.497426435433671e-08
+          },
+          "R3": {
+            "voltage": 0.0009997872793023888,
+            "current": 2.127206977239125e-08,
+            "power": 2.1267544762869632e-11
+          },
+          "R4": {
+            "voltage": 2.350549871306198,
+            "current": 5.001169938949357e-05,
+            "power": 0.00011755499356377836
+          },
+          "R5": {
+            "voltage": 2.349450128692767,
+            "current": 4.9988300610484405e-05,
+            "power": 0.00011744501930243531
+          },
+          "I1": {
+            "voltage": -2.3515496585855002,
+            "current": 0.0001,
+            "power": -0.00023515496585855005
+          }
+        }
+      },
+      "analyses": {
+        "R1": {
+          "thevenin_voltage": 4.7,
+          "thevenin_resistance": 47000.0,
+          "norton_current": 0.0001,
+          "norton_resistance": 47000.0
+        },
+        "R2": {
+          "thevenin_voltage": 4.7000000000009745,
+          "thevenin_resistance": 94000.00000000974,
+          "norton_current": 5.0000000000005186e-05,
+          "norton_resistance": 94000.00000000974
+        },
+        "R3": {
+          "thevenin_voltage": 0.0009999999999998899,
+          "thevenin_resistance": 10.0,
+          "norton_current": 9.999999999998899e-05,
+          "norton_resistance": 10.0
+        },
+        "R4": {
+          "thevenin_voltage": 4.702199999999441,
+          "thevenin_resistance": 47021.99999998489,
+          "norton_current": 0.00010000000000002025,
+          "norton_resistance": 47021.99999998489
+        },
+        "R5": {
+          "thevenin_voltage": 4.699999999998489,
+          "thevenin_resistance": 47021.99999998489,
+          "norton_current": 9.995321338947727e-05,
+          "norton_resistance": 47021.99999998489
+        }
+      }
+    },
+    "generic_levels_7/fase_7/pannel1.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 12.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 680000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 15.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 22000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 2.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 470000.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 12.0,
+          "2": 2.0194310263797495,
+          "3": 49.998236073343854,
+          "4": 19.99929442933754
+        },
+        "components": {
+          "V1": {
+            "voltage": 12.0,
+            "current": -2.1235253135362236e-05,
+            "power": -0.00025482303762434683
+          },
+          "R3": {
+            "voltage": -47.978805046964105,
+            "current": -7.055706624553545e-05,
+            "power": 0.0033852437260802767
+          },
+          "R4": {
+            "voltage": 29.998941644006315,
+            "current": 1.9999294429337544,
+            "power": 59.99576665069976
+          },
+          "R5": {
+            "voltage": 2.0194310263797495,
+            "current": 9.179231938089771e-05,
+            "power": 0.00018536825774114404
+          },
+          "I1": {
+            "voltage": -49.998236073343854,
+            "current": 2.0,
+            "power": -99.99647214668771
+          },
+          "R1": {
+            "voltage": 19.99929442933754,
+            "current": 1.999929442933754,
+            "power": 39.99717776713315
+          },
+          "R2": {
+            "voltage": 9.980568973620251,
+            "current": 2.1235253135362236e-05,
+            "power": 0.0002119399085897685
+          }
+        }
+      },
+      "analyses": {
+        "R3": {
+          "thevenin_voltage": -49.46341463414633,
+          "thevenin_resistance": 21041.260162601626,
+          "norton_current": -0.0023507819518367896,
+          "norton_resistance": 21041.260162601626
+        },
+        "R4": {
+          "thevenin_voltage": 1402033.056910569,
+          "thevenin_resistance": 701026.2601626015,
+          "norton_current": 1.999972235826616,
+          "norton_resistance": 701026.2601626015
+        },
+        "R5": {
+          "thevenin_voltage": 27.530097171800605,
+          "thevenin_resistance": 277917.2191908871,
+          "norton_current": 9.905862347050756e-05,
+          "norton_resistance": 277917.2191908871
+        },
+        "R1": {
+          "thevenin_voltage": 1402033.0569091183,
+          "thevenin_resistance": 701031.2601618763,
+          "norton_current": 1.9999579713255191,
+          "norton_resistance": 701031.2601618763
+        },
+        "R2": {
+          "thevenin_voltage": 10.433104234179694,
+          "thevenin_resistance": 21310.565863039068,
+          "norton_current": 0.0004895742469361086,
+          "norton_resistance": 21310.565863039068
+        }
+      }
+    },
+    "generic_levels_7/fase_7/pannel1_solution.json": {
+      "branches": [
+        {
+          "name": "V1",
+          "kind": "voltage_source",
+          "positive_node": 1,
+          "negative_node": 0,
+          "value": 12.0
+        },
+        {
+          "name": "R3",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 3,
+          "value": 680000.0
+        },
+        {
+          "name": "R4",
+          "kind": "resistor",
+          "positive_node": 3,
+          "negative_node": 4,
+          "value": 15.0
+        },
+        {
+          "name": "R5",
+          "kind": "resistor",
+          "positive_node": 2,
+          "negative_node": 0,
+          "value": 22000.0
+        },
+        {
+          "name": "I1",
+          "kind": "current_source",
+          "positive_node": 0,
+          "negative_node": 3,
+          "value": 2.0
+        },
+        {
+          "name": "R1",
+          "kind": "resistor",
+          "positive_node": 4,
+          "negative_node": 0,
+          "value": 10.0
+        },
+        {
+          "name": "R2",
+          "kind": "resistor",
+          "positive_node": 1,
+          "negative_node": 2,
+          "value": 470000.0
+        }
+      ],
+      "node_count": 4,
+      "has_ground": true,
+      "solution": {
+        "nodes": {
+          "1": 12.0,
+          "2": 2.0194310263797495,
+          "3": 49.998236073343854,
+          "4": 19.99929442933754
+        },
+        "components": {
+          "V1": {
+            "voltage": 12.0,
+            "current": -2.1235253135362236e-05,
+            "power": -0.00025482303762434683
+          },
+          "R3": {
+            "voltage": -47.978805046964105,
+            "current": -7.055706624553545e-05,
+            "power": 0.0033852437260802767
+          },
+          "R4": {
+            "voltage": 29.998941644006315,
+            "current": 1.9999294429337544,
+            "power": 59.99576665069976
+          },
+          "R5": {
+            "voltage": 2.0194310263797495,
+            "current": 9.179231938089771e-05,
+            "power": 0.00018536825774114404
+          },
+          "I1": {
+            "voltage": -49.998236073343854,
+            "current": 2.0,
+            "power": -99.99647214668771
+          },
+          "R1": {
+            "voltage": 19.99929442933754,
+            "current": 1.999929442933754,
+            "power": 39.99717776713315
+          },
+          "R2": {
+            "voltage": 9.980568973620251,
+            "current": 2.1235253135362236e-05,
+            "power": 0.0002119399085897685
+          }
+        }
+      },
+      "analyses": {
+        "R3": {
+          "thevenin_voltage": -49.46341463414633,
+          "thevenin_resistance": 21041.260162601626,
+          "norton_current": -0.0023507819518367896,
+          "norton_resistance": 21041.260162601626
+        },
+        "R4": {
+          "thevenin_voltage": 1402033.056910569,
+          "thevenin_resistance": 701026.2601626015,
+          "norton_current": 1.999972235826616,
+          "norton_resistance": 701026.2601626015
+        },
+        "R5": {
+          "thevenin_voltage": 27.530097171800605,
+          "thevenin_resistance": 277917.2191908871,
+          "norton_current": 9.905862347050756e-05,
+          "norton_resistance": 277917.2191908871
+        },
+        "R1": {
+          "thevenin_voltage": 1402033.0569091183,
+          "thevenin_resistance": 701031.2601618763,
+          "norton_current": 1.9999579713255191,
+          "norton_resistance": 701031.2601618763
+        },
+        "R2": {
+          "thevenin_voltage": 10.433104234179694,
+          "thevenin_resistance": 21310.565863039068,
+          "norton_current": 0.0004895742469361086,
+          "norton_resistance": 21310.565863039068
+        }
+      }
+    }
+  }
+}

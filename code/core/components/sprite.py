@@ -6,9 +6,11 @@ from core.managers.resource_manager import ResourceManager
 
 class Sprite(Component):
     def __init__(self, image: Surface, offset_x: float = 0, offset_y: float = 0, angle:float=0, image_path:str|None=None):
-        self._orig_image = image.convert_alpha()
+        # ResourceManager already returns display-formatted cached surfaces.
+        # Keep the immutable base shared until a transformation is requested.
+        self._orig_image = image
         self.image_path = image_path
-        self.image = self._orig_image.copy()  
+        self.image = self._orig_image
         self.offset_x = offset_x
         self.offset_y = offset_y
         self.rect = self.image.get_rect()
