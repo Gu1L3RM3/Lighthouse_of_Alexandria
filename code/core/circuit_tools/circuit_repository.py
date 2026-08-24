@@ -44,13 +44,16 @@ class CircuitJsonRepository:
             raise CircuitFormatError(f"Invalid circuit JSON: {circuit_path}") from exc
 
         try:
-            if isinstance(payload, list):
-                return self._decode_v1(payload)
-            if isinstance(payload, dict) and payload.get("schema_version") == 2:
-                return self._decode_v2(payload)
+            return self.decode(payload)
         except (KeyError, TypeError, ValueError) as exc:
             raise CircuitFormatError(f"Invalid circuit data: {circuit_path}") from exc
-        raise CircuitFormatError(f"Unsupported circuit schema: {circuit_path}")
+
+    def decode(self, payload: Any) -> CircuitDocument:
+        if isinstance(payload, list):
+            return self._decode_v1(payload)
+        if isinstance(payload, dict) and payload.get("schema_version") == 2:
+            return self._decode_v2(payload)
+        raise CircuitFormatError("Unsupported circuit schema")
 
     def save(self, path: str | Path, document: CircuitDocument) -> None:
         circuit_path = Path(path)
