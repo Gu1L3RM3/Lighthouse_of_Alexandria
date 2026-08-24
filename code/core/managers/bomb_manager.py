@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from core.circuit_tools.solve_circuit import CircuitSolver
+from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.settings import CELL_SIZE
 
 
 def _clamp(value: float, min_v: float, max_v: float) -> float:
@@ -26,14 +27,15 @@ class BombManager:
     Se o circuito estiver invalido, usa configuracao padrao segura.
     """
 
-    def __init__(self, bombs_per_level: int = 4, default_netlist_path: str | Path | None = None):
+    def __init__(self, bombs_per_level: int = 4, default_circuit_path: str | Path | None = None):
         self.max_bombs = max(0, int(bombs_per_level))
         self.remaining_bombs = self.max_bombs
-        self._default_netlist_path = default_netlist_path
+        self._default_circuit_path = default_circuit_path
+        self._circuits = CircuitFileService(CELL_SIZE)
 
         self.set_balance_profile("standard")
 
-        self.default_params = self._build_default_params(self._default_netlist_path)
+        self.default_params = self._build_default_params(self._default_circuit_path)
         self.current_params = self.default_params
 
     def set_balance_profile(self, profile: str):
@@ -62,12 +64,12 @@ class BombManager:
         self._k_damage = float(values["k_damage"])
 
         if hasattr(self, "default_params"):
-            self.default_params = self._build_default_params(self._default_netlist_path)
+            self.default_params = self._build_default_params(self._default_circuit_path)
             if getattr(self.current_params, "used_fallback", False):
                 self.current_params = self.default_params
 
-    def _build_default_params(self, default_netlist_path: str | Path | None) -> BombParams:
-        # Fallback final caso o netlist padrao nao seja carregado.
+    def _build_default_params(self, default_circuit_path: str | Path | None) -> BombParams:
+        # Fallback final caso o circuito padrao nao seja carregado.
         hardcoded = BombParams(
             voltage_r1=4.0,
             current_r1=0.02,
@@ -76,11 +78,11 @@ class BombManager:
             damage=40.0,
             used_fallback=True,
         )
-        if default_netlist_path is None:
+        if default_circuit_path is None:
             return hardcoded
 
+        solver = self._circuits.solve(default_circuit_path)
         try:
-            solver = CircuitSolver(str(default_netlist_path))
             if not solver.is_solved:
                 return hardcoded
             resistor_results = solver.get_resistor_results()

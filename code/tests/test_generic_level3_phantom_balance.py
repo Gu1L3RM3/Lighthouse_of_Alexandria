@@ -54,7 +54,7 @@ class GenericLevel3PhantomBalanceTest(unittest.TestCase):
         self.assertEqual(48.0, phantom.kwargs["chase_speed"])
 
     def test_standard_bomb_damage_kills_level3_phantom(self):
-        bomb_manager = BombManager(bombs_per_level=1, default_netlist_path=None)
+        bomb_manager = BombManager(bombs_per_level=1, default_circuit_path=None)
         phantom_health = Health(max_hp=40.0)
 
         died = phantom_health.take_damage(bomb_manager.default_params.damage)

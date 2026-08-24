@@ -4,10 +4,8 @@ from entities.itens.control_pannel            import ControlPannel
 from core.managers.circuit_manager            import CircuitManager
 from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
-from core.circuit_tools.serialization_manager import SerializationManager
-from core.circuit_tools.solve_circuit         import CircuitSolver
-from core.circuit_tools.lt_spice_generate     import LtSpiceGenerate
-from core.settings                            import path_in_circuitos, path_in_ltspice
+from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.settings import CELL_SIZE, path_in_circuitos
 
 
 class CircuitValidatorSystem(System):
@@ -21,6 +19,7 @@ class CircuitValidatorSystem(System):
         self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
+        self.circuits = CircuitFileService(CELL_SIZE)
 
     def _log(self, message: str):
         _ = message
@@ -37,28 +36,8 @@ class CircuitValidatorSystem(System):
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
 
-    def _panel_net_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
-
-    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
-
-    def _list_resistor_names_in_netlist(self, netlist_path: str) -> list[str]:
-        resistor_names: list[str] = []
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    stripped = line.strip()
-                    if not stripped or stripped.startswith(("*", ".")):
-                        continue
-                    parts = stripped.split()
-                    if not parts:
-                        continue
-                    if parts[0].lower().startswith("r"):
-                        resistor_names.append(parts[0])
-        except Exception:
-            return []
-        return resistor_names
+    def _list_resistor_names(self, document_path: str) -> list[str]:
+        return self.circuits.resistor_names(document_path)
 
     def _get_unique_resistor_name(self, resistor_results: dict) -> str | None:
         names = [name for name in resistor_results.keys()]
@@ -86,22 +65,6 @@ class CircuitValidatorSystem(System):
 
         return float(value)
 
-    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
-        for suffix in ("", "_solution"):
-            json_path = self._panel_json_path(panel_id, suffix)
-            if not json_path.exists():
-                continue
-            try:
-                LtSpiceGenerate(
-                    json_filepath=str(json_path),
-                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
-                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
-                    entity_manager=entity_manager,
-                ).save_netlist()
-            except Exception as ex:
-                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
-
-
     #TODO: Fazer funcionar para qualquer tipo de lista de componentes [resistors,current sources,voltage_sources]
     def set_solutions(self, event: dict, entity_manager: EntityManager):
 
@@ -110,8 +73,6 @@ class CircuitValidatorSystem(System):
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
 
         for control_pannel in control_pannels:
-            self._sync_netlists_from_json(control_pannel.pannel_id, entity_manager)
-
             area = control_pannel.component_for_area
 
             if area not in resistors_per_area or len(resistors_per_area[area]) == 0:
@@ -122,8 +83,8 @@ class CircuitValidatorSystem(System):
             target_component = control_pannel.target_component
             solution_type    = control_pannel.solution_type
 
-            netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
-            resistor_names_in_solution = self._list_resistor_names_in_netlist(netlist_path)
+            document_path = str(self._panel_json_path(control_pannel.pannel_id, "_solution"))
+            resistor_names_in_solution = self._list_resistor_names(document_path)
             if len(resistor_names_in_solution) != 1:
                 self._set_panel_status(
                     int(control_pannel.pannel_id),
@@ -141,8 +102,8 @@ class CircuitValidatorSystem(System):
             resistors_list.remove(resistor_chosen)
 
             try:
-                SerializationManager.update_component_value(
-                    netlist_path,
+                self.circuits.update_component_value(
+                    document_path,
                     target_component,
                     resistor_chosen
                 )
@@ -154,7 +115,7 @@ class CircuitValidatorSystem(System):
                 )
                 continue
 
-            circuit_solver = CircuitSolver(netlist_path)
+            circuit_solver = self.circuits.solve(document_path)
             resistor_results = circuit_solver.get_resistor_results()
             unique_resistor_name = self._get_unique_resistor_name(resistor_results)
             if unique_resistor_name is None:

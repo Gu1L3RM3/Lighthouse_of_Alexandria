@@ -138,3 +138,6 @@ class CircuitDocument:
         if not changed:
             raise CircuitValidationError(f"Component not found: {component_name}")
         return CircuitDocument(tuple(elements))
+
+    def without_editable_elements(self) -> CircuitDocument:
+        return CircuitDocument(tuple(element for element in self.elements if not element.editable))

@@ -10,7 +10,7 @@ from core.systems.spider_web_system import SpiderWebSystem
 from core.ui.widgets.stealth_timer_bar_widget import StealthTimerBarWidget
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
-from core.settings import path_in_circuitos, path_in_ltspice
+from core.settings import path_in_circuitos
 from pathlib import Path
 from scenes.fases.generic_levels import BaseGenericLevel
 
@@ -44,7 +44,6 @@ class GenericLevel4(BaseGenericLevel):
 
     def clear_all_pannels(self):
         json_base = path_in_circuitos(self.level_path)
-        netlist_base = path_in_ltspice(self.level_path)
         amount_pannels = len(self.entity_mn.get_entities_by_class(ControlPannel))
 
         for i in range(amount_pannels):
@@ -54,14 +53,6 @@ class GenericLevel4(BaseGenericLevel):
             if solution_json.exists():
                 try:
                     edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-                except Exception as e:
-                    pass
-
-            edited_net = netlist_base / f"{panel_name}.net"
-            solution_net = netlist_base / f"{panel_name}_solution.net"
-            if solution_net.exists():
-                try:
-                    edited_net.write_text(solution_net.read_text(encoding="utf-8"), encoding="utf-8")
                 except Exception as e:
                     pass
 

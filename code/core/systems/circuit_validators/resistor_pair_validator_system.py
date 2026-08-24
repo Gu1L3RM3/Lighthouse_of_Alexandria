@@ -4,10 +4,8 @@ from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from entities.itens.control_pannel import ControlPannel
-from core.circuit_tools.serialization_manager import SerializationManager
-from core.circuit_tools.solve_circuit import CircuitSolver
-from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
-from core.settings import path_in_circuitos, path_in_ltspice
+from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.settings import CELL_SIZE, path_in_circuitos
 
 
 class ResistorPairValidatorSystem(System):
@@ -22,6 +20,7 @@ class ResistorPairValidatorSystem(System):
         self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
+        self.circuits = CircuitFileService(CELL_SIZE)
 
     def _log(self, message: str):
         _ = message
@@ -38,27 +37,6 @@ class ResistorPairValidatorSystem(System):
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
 
-    def _panel_net_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
-
-    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
-
-    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
-        for suffix in ("", "_solution"):
-            json_path = self._panel_json_path(panel_id, suffix)
-            if not json_path.exists():
-                continue
-            try:
-                LtSpiceGenerate(
-                    json_filepath=str(json_path),
-                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
-                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
-                    entity_manager=entity_manager,
-                ).save_netlist()
-            except Exception as ex:
-                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
-
     def _float_equals_percent(self, a: float, b: float, percent_tol: float) -> bool:
         if a == 0 and b == 0:
             return True
@@ -74,7 +52,7 @@ class ResistorPairValidatorSystem(System):
         - Recebe um dicionario {area_id: [lista de valores de resistores (labels)]}
         - Para cada painel:
             * escolhe um resistor aleatorio da sua area;
-            * atualiza SEMPRE o componente R3 do netlist de solucao com esse valor;
+            * atualiza SEMPRE o componente R3 do documento de solucao com esse valor;
             * resolve o circuito;
             * le corrente ou tensao de R1, R2, ... conforme target_component;
             * guarda essas solucoes no proprio ControlPannel.
@@ -84,7 +62,6 @@ class ResistorPairValidatorSystem(System):
         control_pannels: list[ControlPannel] = entity_manager.get_entities_by_class(ControlPannel)
 
         for control_pannel in control_pannels:
-            self._sync_netlists_from_json(control_pannel.pannel_id, entity_manager)
             area = control_pannel.component_for_area
 
             if area not in resistors_per_area or len(resistors_per_area[area]) == 0:
@@ -93,24 +70,24 @@ class ResistorPairValidatorSystem(System):
             resistors_list = resistors_per_area[area]
             resistor_chosen = choice(resistors_list)
 
-            # Prioriza o netlist jogavel do painel para calcular gabarito.
+            # Prioriza o documento jogavel do painel para calcular gabarito.
             # Se ele nao tiver R3 (alguns paineis antigos), faz fallback para _solution.
-            netlist_path = str(self._panel_net_path(control_pannel.pannel_id))
+            document_path = str(self._panel_json_path(control_pannel.pannel_id))
             try:
-                SerializationManager.update_component_value(
-                    netlist_path,
+                self.circuits.update_component_value(
+                    document_path,
                     "R3",
                     resistor_chosen
                 )
             except Exception:
-                netlist_path = str(self._panel_net_path(control_pannel.pannel_id, "_solution"))
-                SerializationManager.update_component_value(
-                    netlist_path,
+                document_path = str(self._panel_json_path(control_pannel.pannel_id, "_solution"))
+                self.circuits.update_component_value(
+                    document_path,
                     "R3",
                     resistor_chosen
                 )
 
-            solver = CircuitSolver(netlist_path)
+            solver = self.circuits.solve(document_path)
             if not solver.is_solved:
                 continue
 

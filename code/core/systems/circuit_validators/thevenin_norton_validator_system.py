@@ -7,21 +7,20 @@ from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
-from core.circuit_tools.solve_circuit import CircuitSolver
-from core.circuit_tools.serialization_manager import SerializationManager
-from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
+from core.circuit_tools.circuit_file_service import CircuitFileService
 from core.components.label_component import LabelComponent
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.voltage_source_item import VoutageSourceItem
 from core.settings import (
+    CELL_SIZE,
     COMERCIAL_RESISTORS,
     MAP_CURRENT_SOURCE_POOL,
     MAP_VOLTAGE_SOURCE_POOL,
     THEVENIN_NORTON_TARGET_RESISTOR,
     path_in_circuitos,
-    path_in_ltspice,
 )
 from utils.setter_values import SetterValues
 
@@ -42,6 +41,8 @@ class TheveninNortonValidatorSystem(System):
         self.debug_panel_logs = True
         self.runtime_status_logs = False
         self._panel_status_cache: dict[int, str] = {}
+        self.circuits = CircuitFileService(CELL_SIZE)
+        self.entity_mapper = CircuitEntityMapper()
 
         self._resistor_pool = sorted(
             [(str(label), float(value)) for label, value in COMERCIAL_RESISTORS.items()],
@@ -184,22 +185,22 @@ class TheveninNortonValidatorSystem(System):
         sources_per_area: dict[int, dict[str, list[str]]],
         resistors_per_area: dict[int, list[str]],
     ) -> dict:
-        solution_net = str(self._panel_net_path(panel_id, "_solution"))
+        solution_document = str(self._panel_json_path(panel_id, "_solution"))
 
         source_component = "V1" if source_kind == "voltage" else "I1"
         source_label = self._pick_source_label_for_area(sources_per_area, area, source_kind)
-        if self._net_has_component(solution_net, source_component):
-            SerializationManager.update_component_value(solution_net, source_component, source_label)
+        if self._has_component(solution_document, source_component):
+            self.circuits.update_component_value(solution_document, source_component, source_label)
         else:
             self._log(f"panel={panel_id} sem componente {source_component} para randomizar")
 
         applied_resistors: list[tuple[str, str]] = []
-        resistor_names = self._list_resistors(solution_net)
+        resistor_names = self._list_resistors(solution_document)
         for r_name in resistor_names:
             if r_name.upper() == self.TARGET_RESISTOR:
                 continue
             r_label = self._pick_label_from_area(resistors_per_area, area, self._resistor_pool)
-            SerializationManager.update_component_value(solution_net, r_name, r_label)
+            self.circuits.update_component_value(solution_document, r_name, r_label)
             applied_resistors.append((r_name, r_label))
 
         return {
@@ -213,85 +214,20 @@ class TheveninNortonValidatorSystem(System):
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
 
-    def _panel_net_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
-
-    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
-
     def _load_panel_entities(self, panel_id: int):
         try:
-            return SerializationManager.load_entities_from_json(self._panel_json_path(panel_id)) or []
+            return self.entity_mapper.to_entities(self.circuits.load(self._panel_json_path(panel_id)))
         except Exception:
             return []
 
-    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
-        for suffix in ("", "_solution"):
-            json_path = self._panel_json_path(panel_id, suffix)
-            if not json_path.exists():
-                continue
-            try:
-                LtSpiceGenerate(
-                    json_filepath=str(json_path),
-                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
-                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
-                    entity_manager=entity_manager,
-                ).save_netlist()
-            except Exception as ex:
-                self._log(f"panel={panel_id}{suffix} falha ao sincronizar netlist: {ex}")
+    def _has_component(self, document_path: str, component_name: str) -> bool:
+        return self.circuits.has_component(document_path, component_name)
 
-    def _net_has_component(self, netlist_path: str, component_name: str) -> bool:
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0] == component_name:
-                        return True
-        except Exception:
-            return False
-        return False
+    def _load_components(self, document_path: str) -> dict[str, tuple[str, str]]:
+        return self.circuits.component_nodes(document_path)
 
-    def _load_net_components(self, netlist_path: str) -> dict[str, tuple[str, str]]:
-        """
-        Parse netlist components -> (p_node, n_node). Keys are component names.
-        Only minimal parsing: first three tokens are assumed to be name, p, n.
-        """
-        comps: dict[str, tuple[str, str]] = {}
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if len(parts) < 3:
-                        continue
-                    name, p_node, n_node = parts[0], parts[1], parts[2]
-                    comps[name] = (p_node, n_node)
-        except Exception:
-            pass
-        return comps
-
-    def _list_resistors(self, netlist_path: str) -> list[str]:
-        names: list[str] = []
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as file:
-                for raw in file:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if not parts:
-                        continue
-                    comp = parts[0]
-                    if comp.lower().startswith("r"):
-                        names.append(comp)
-        except Exception:
-            pass
-        return names
+    def _list_resistors(self, document_path: str) -> list[str]:
+        return self.circuits.resistor_names(document_path)
 
     # =========================================================
     # TOPOLOGY / PLAYER INPUT
@@ -431,9 +367,9 @@ class TheveninNortonValidatorSystem(System):
     # SOLUTION PREP (target first -> map values later)
     # =========================================================
     def _infer_panel_mode(self, panel_id: int) -> tuple[str | None, str | None]:
-        solution_net = str(self._panel_net_path(panel_id, "_solution"))
-        has_v1 = self._net_has_component(solution_net, "V1")
-        has_i1 = self._net_has_component(solution_net, "I1")
+        solution_document = str(self._panel_json_path(panel_id, "_solution"))
+        has_v1 = self._has_component(solution_document, "V1")
+        has_i1 = self._has_component(solution_document, "I1")
 
         if has_v1 and not has_i1:
             return "thevenin", "voltage"
@@ -457,8 +393,6 @@ class TheveninNortonValidatorSystem(System):
             self._log(f"panel={cp.pannel_id} ignorado: sem area")
             return None
 
-        self._sync_netlists_from_json(cp.pannel_id, entity_manager)
-
         mode, source_kind = self._infer_panel_mode(cp.pannel_id)
         if mode is None or source_kind is None:
             self._log(f"panel={cp.pannel_id} sem modo inferido")
@@ -474,10 +408,10 @@ class TheveninNortonValidatorSystem(System):
         picked_source = random_result.get("source")
         picked_resistors = random_result.get("resistors", [])
 
-        solution_net = str(self._panel_net_path(cp.pannel_id, "_solution"))
-        solver = CircuitSolver(solution_net)
+        solution_document = str(self._panel_json_path(cp.pannel_id, "_solution"))
+        solver = self.circuits.solve(solution_document)
         if not solver.is_solved:
-            self._log(f"panel={cp.pannel_id} solver falhou para {solution_net}")
+            self._log(f"panel={cp.pannel_id} solver falhou para {solution_document}")
             return None
 
         thevenin = solver.get_thevenin(self.TARGET_RESISTOR)
@@ -731,8 +665,8 @@ class TheveninNortonValidatorSystem(System):
             return
 
         # Topologia elétrica esperada (série para Thevenin, paralelo para Norton)
-        net_components = self._load_net_components(str(self._panel_net_path(cp.pannel_id)))
-        topo_expected_ok, topo_expected_reason = self._validate_expected_topology(cp, net_components)
+        document_components = self._load_components(str(self._panel_json_path(cp.pannel_id)))
+        topo_expected_ok, topo_expected_reason = self._validate_expected_topology(cp, document_components)
         if not topo_expected_ok:
             self._set_panel_status(cp.pannel_id, topo_expected_reason)
             return

@@ -67,7 +67,7 @@ class BaseGenericLevel(BaseScene):
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
         self.bomb_manager = BombManager(
             bombs_per_level=GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL,
-            default_netlist_path=path_in_ltspice(GENERIC_LEVEL_BOMB_DEFAULT_NETLIST),
+            default_circuit_path=path_in_circuitos(GENERIC_LEVEL_BOMB_DEFAULT_CIRCUIT),
         )
         self._configure_bomb_balance_profile()
         self.pending_bombs: list[dict] = []
@@ -652,17 +652,9 @@ class BaseGenericLevel(BaseScene):
     def reset_bomb_circuit_to_default(self):
         default_json = path_in_circuitos("bombs", "default_bomb.json")
         editor_json = path_in_circuitos("bombs", "bomb_editor.json")
-        default_net = path_in_ltspice("bombs", "default_bomb.net")
-        editor_net = path_in_ltspice("bombs", "bomb_editor.net")
-        default_asc = path_in_ltspice("bombs", "default_bomb.asc")
-        editor_asc = path_in_ltspice("bombs", "bomb_editor.asc")
         try:
             editor_json.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(default_json, editor_json)
-            editor_net.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(default_net, editor_net)
-            if default_asc.exists():
-                shutil.copyfile(default_asc, editor_asc)
         except Exception:
             pass
         self.circuit_manager.clear_circuit(GENERIC_LEVEL_BOMB_EDITOR_FILE)

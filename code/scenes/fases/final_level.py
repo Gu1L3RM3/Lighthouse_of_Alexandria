@@ -1,9 +1,9 @@
 from pathlib import Path
 import pygame
-import json
 
 from core.components.animation_sprite import AnimateSprite
-from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.circuit_domain import CircuitError
+from core.circuit_tools.circuit_file_service import CircuitFileService
 from core.components.freeze import Freeze
 from core.components.dialogue import Dialogue
 from core.components.label_component import LabelComponent
@@ -32,8 +32,8 @@ from core.settings import (
     FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS,
     FINAL_LEVEL_FINAL_FADE_SECONDS,
     FINAL_LEVEL_STORAGE_TYPE_BY_KIND,
+    CELL_SIZE,
     path_in_circuitos,
-    path_in_ltspice,
 )
 
 
@@ -48,6 +48,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.initial_components_by_area: dict[int, list[dict]] = {}
         self.crystal_respawn_queue: list[dict] = []
         self._panel_timer_font = None
+        self.circuit_files = CircuitFileService(CELL_SIZE)
         self._base_hooks_bound = False
         self._final_hooks_bound = False
         self._won = False
@@ -383,7 +384,6 @@ class FinalLevel(BaseMaxPowerLevel):
         applied_value = self._fixed_target_resistor_label
         panel_name = f"pannel{panel_id}"
         json_base = path_in_circuitos(self.level_path)
-        netlist_base = path_in_ltspice(self.level_path)
 
         json_paths = [
             json_base / f"{panel_name}.json",
@@ -393,53 +393,19 @@ class FinalLevel(BaseMaxPowerLevel):
             if not json_path.exists():
                 continue
             try:
-                data = json.loads(json_path.read_text(encoding="utf-8"))
-            except Exception:
-                continue
-            changed = False
-            for entity in data:
-                if entity.get("entity_type") != "Resistor":
-                    continue
-                for component in entity.get("components", []):
-                    if component.get("type") != "LabelComponent":
-                        continue
-                    if component.get("name") != target_name:
-                        continue
-                    component["value"] = applied_value
-                    changed = True
-            if changed:
-                try:
-                    json_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
-                except Exception:
-                    pass
-
-        for suffix in ("", "_solution"):
-            net_path = netlist_base / f"{panel_name}{suffix}.net"
-            if not net_path.exists():
-                continue
-            try:
-                SerializationManager.update_component_value(str(net_path), target_name, applied_value)
-            except Exception:
+                self.circuit_files.update_component_value(json_path, target_name, applied_value)
+            except (CircuitError, OSError):
                 pass
 
     def _restore_panel_json(self, panel_id: int):
         panel_name = f"pannel{panel_id}"
         json_base = path_in_circuitos(self.level_path)
-        netlist_base = path_in_ltspice(self.level_path)
 
         edited_json = json_base / f"{panel_name}.json"
         solution_json = json_base / f"{panel_name}_solution.json"
         if solution_json.exists():
             try:
                 edited_json.write_text(solution_json.read_text(encoding="utf-8"), encoding="utf-8")
-            except Exception:
-                pass
-
-        edited_net = netlist_base / f"{panel_name}.net"
-        solution_net = netlist_base / f"{panel_name}_solution.net"
-        if solution_net.exists():
-            try:
-                edited_net.write_text(solution_net.read_text(encoding="utf-8"), encoding="utf-8")
             except Exception:
                 pass
 
@@ -588,36 +554,20 @@ class FinalLevel(BaseMaxPowerLevel):
             round(float(data.get("y", 0.0)), 3),
         )
 
-    @staticmethod
-    def _map_entity_type_to_kind(entity_type: str) -> str | None:
-        return {
-            "Resistor": "resistor",
-            "CurrentSource": "current_source",
-            "VoutageSource": "voltage_source",
-        }.get(str(entity_type))
-
     def _extract_dropped_components_from_panel(self, panel_id: int, area_id: int) -> list[dict]:
         panel_json = path_in_circuitos(self.level_path, f"pannel{panel_id}.json")
         if not panel_json.exists():
             return []
         try:
-            entities = json.loads(panel_json.read_text(encoding="utf-8"))
-        except Exception:
+            document = self.circuit_files.load(panel_json)
+        except (CircuitError, OSError):
             return []
 
         dropped_components: list[dict] = []
-        for entity in entities:
-            kind = self._map_entity_type_to_kind(entity.get("entity_type", ""))
-            if not kind:
+        for element in document.elements:
+            if not element.editable or not element.kind.is_electrical or not element.value:
                 continue
-            components = entity.get("components", [])
-            dropped = next((c for c in components if c.get("type") == "Dropped"), None)
-            if not dropped or not bool(dropped.get("can_dropped", False)):
-                continue
-            label = next((c for c in components if c.get("type") == "LabelComponent"), None)
-            if not label or not label.get("value"):
-                continue
-            restored = self._allocate_respawn_slot(area_id, kind, str(label.get("value")))
+            restored = self._allocate_respawn_slot(area_id, element.kind.value, element.value)
             if restored:
                 dropped_components.append(restored)
         return dropped_components

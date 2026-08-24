@@ -1,20 +1,17 @@
 from random import choice
-import json
 import math
 
 from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
-from core.circuit_tools.solve_circuit import CircuitSolver
-from core.circuit_tools.serialization_manager import SerializationManager
-from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
+from core.circuit_tools.circuit_file_service import CircuitFileService
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from core.components.label_component import LabelComponent
 from core.settings import (
+    CELL_SIZE,
     path_in_circuitos,
-    path_in_ltspice,
     COMERCIAL_RESISTORS,
 )
 
@@ -42,6 +39,7 @@ class MaxPowerTransferValidatorSystem(System):
         self.validation_debug = False
         self.validation_debug_panels: set[int] = {3}
         self._exact_rth_answer_panels: set[int] = set()
+        self.circuits = CircuitFileService(CELL_SIZE)
 
         # Keep target resistor in problem circuit fixed (requested behavior).
         self._fixed_target_resistor_label = "10"
@@ -191,82 +189,21 @@ class MaxPowerTransferValidatorSystem(System):
         )
         return expected
 
-    @staticmethod
-    def _net_has_component(netlist_path: str, component_name: str) -> bool:
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0] == component_name:
-                        return True
-        except Exception:
-            return False
-        return False
+    def _has_component(self, document_path: str, component_name: str) -> bool:
+        return self.circuits.has_component(document_path, component_name)
 
-    @staticmethod
-    def _list_resistors(netlist_path: str) -> list[str]:
-        names = []
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if parts and parts[0].startswith("R"):
-                        names.append(parts[0])
-        except Exception:
-            pass
-        return names
+    def _list_resistors(self, document_path: str) -> list[str]:
+        return self.circuits.resistor_names(document_path)
 
-    @staticmethod
-    def _read_component_value_from_netlist(netlist_path: str, component_name: str) -> tuple[str | None, float | None]:
-        try:
-            with open(netlist_path, "r", encoding="utf-8") as f:
-                for raw in f:
-                    line = raw.strip()
-                    if not line or line.startswith("*") or line.startswith("."):
-                        continue
-                    parts = line.split()
-                    if not parts or parts[0] != component_name:
-                        continue
-                    label = parts[-1] if len(parts) >= 4 else None
-                    value = MaxPowerTransferValidatorSystem._label_to_value(label) if label is not None else None
-                    return label, value
-        except Exception:
-            return None, None
-        return None, None
+    def _read_component_value(self, document_path: str, component_name: str) -> tuple[str | None, float | None]:
+        return self.circuits.component_value(document_path, component_name)
 
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
 
-    def _panel_net_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.net")
-
-    def _panel_asc_path(self, panel_id: int, suffix: str = ""):
-        return path_in_ltspice(self.level_path, f"pannel{panel_id}{suffix}.asc")
-
-    def _sync_netlists_from_json(self, panel_id: int, entity_manager: EntityManager):
-        for suffix in ("", "_solution"):
-            json_path = self._panel_json_path(panel_id, suffix)
-            if not json_path.exists():
-                continue
-            try:
-                LtSpiceGenerate(
-                    json_filepath=str(json_path),
-                    net_filepath=str(self._panel_net_path(panel_id, suffix)),
-                    lt_spice_filepath=str(self._panel_asc_path(panel_id, suffix)),
-                    entity_manager=entity_manager,
-                ).save_netlist()
-            except Exception as ex:
-                self._log(f"Painel {panel_id}{suffix}: falha ao sincronizar netlist ({ex})")
-
-    def _pick_source_for_net(self, area_sources: dict, solution_netlist: str) -> tuple[str | None, str | None]:
-        has_v1 = self._net_has_component(solution_netlist, "V1")
-        has_i1 = self._net_has_component(solution_netlist, "I1")
+    def _pick_source(self, area_sources: dict, solution_document: str) -> tuple[str | None, str | None]:
+        has_v1 = self._has_component(solution_document, "V1")
+        has_i1 = self._has_component(solution_document, "I1")
 
         v_list = list(area_sources.get("voltage", []))
         i_list = list(area_sources.get("current", []))
@@ -291,64 +228,22 @@ class MaxPowerTransferValidatorSystem(System):
 
         return _choice(list(COMERCIAL_RESISTORS.keys()))
 
-    @staticmethod
-    def _update_component_label_value_in_json(json_path: str, component_name: str, new_value: str):
-        try:
-            with open(json_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception:
-            return
-
-        changed = False
-        for entity in data:
-            for component in entity.get("components", []):
-                if component.get("type") != "LabelComponent":
-                    continue
-                if component.get("name") == component_name:
-                    component["value"] = str(new_value)
-                    changed = True
-
-        if not changed:
-            return
-
-        try:
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=4, ensure_ascii=False)
-        except Exception:
-            return
-
-    @staticmethod
-    def _update_resistor_label_value_in_json(json_path: str, resistor_name: str, new_value: str):
-        MaxPowerTransferValidatorSystem._update_component_label_value_in_json(
-            json_path=json_path,
-            component_name=resistor_name,
-            new_value=new_value,
-        )
-
-    def _apply_target_resistor_to_panel_artifacts(
+    def _apply_target_resistor_to_documents(
         self,
         target_resistor: str,
         applied_value: str,
-        panel_netlist: str,
-        solution_netlist: str,
-        panel_json: str,
-        panel_solution_json: str,
+        panel_document: str,
+        solution_document: str,
     ):
-        for net_path in (solution_netlist, panel_netlist):
-            if not self._net_has_component(net_path, target_resistor):
+        for document_path in (solution_document, panel_document):
+            if not self._has_component(document_path, target_resistor):
                 continue
-            try:
-                SerializationManager.update_component_value(net_path, target_resistor, applied_value)
-            except Exception:
-                pass
-
-        self._update_resistor_label_value_in_json(panel_json, target_resistor, applied_value)
-        self._update_resistor_label_value_in_json(panel_solution_json, target_resistor, applied_value)
+            self.circuits.update_component_value(document_path, target_resistor, applied_value)
 
     def _compute_expected_from_thevenin(
         self,
         cp: ControlPannel,
-        solution_netlist: str,
+        solution_document: str,
         answer_label: str,
         answer_ohm: float,
     ) -> dict | None:
@@ -356,7 +251,7 @@ class MaxPowerTransferValidatorSystem(System):
         if not target_name:
             return None
 
-        solver = CircuitSolver(solution_netlist)
+        solver = self.circuits.solve(solution_document)
         if not solver.is_solved:
             return None
 
@@ -421,58 +316,42 @@ class MaxPowerTransferValidatorSystem(System):
             if panel_ids_filter is not None and int(cp.pannel_id) not in panel_ids_filter:
                 continue
 
-            self._sync_netlists_from_json(cp.pannel_id, entity_manager)
-
             area = getattr(cp, "component_for_area", None)
-            solution_netlist = str(path_in_ltspice(self.level_path, f"pannel{cp.pannel_id}_solution.net"))
-            panel_netlist = str(path_in_ltspice(self.level_path, f"pannel{cp.pannel_id}.net"))
-            panel_json = str(path_in_circuitos(self.level_path, f"pannel{cp.pannel_id}.json"))
-            panel_solution_json = str(path_in_circuitos(self.level_path, f"pannel{cp.pannel_id}_solution.json"))
+            solution_document = str(self._panel_json_path(cp.pannel_id, "_solution"))
+            panel_document = str(self._panel_json_path(cp.pannel_id))
 
             area_sources = sources_per_area.get(area)
             if isinstance(area_sources, dict):
-                source_name, source_value = self._pick_source_for_net(area_sources, solution_netlist)
+                source_name, source_value = self._pick_source(area_sources, solution_document)
                 if source_name and source_value is not None:
-                    for net_path in (solution_netlist, panel_netlist):
-                        try:
-                            SerializationManager.update_component_value(net_path, source_name, source_value)
-                        except Exception:
-                            pass
-                    self._update_component_label_value_in_json(panel_json, source_name, source_value)
-                    self._update_component_label_value_in_json(panel_solution_json, source_name, source_value)
-                    self._trace(cp, f"fonte escolhida: {source_name}={source_value} (sincronizada em net+json)")
+                    for document_path in (solution_document, panel_document):
+                        self.circuits.update_component_value(document_path, source_name, source_value)
+                    self._trace(cp, f"fonte escolhida: {source_name}={source_value}")
 
             target_resistor = cp.target_component or "R1"
             self._trace(cp, f"set_solutions: alvo={target_resistor} area={cp.component_for_area}")
 
             # Randomize all non-target resistors in both problem and solution circuits.
-            for r_name in self._list_resistors(solution_netlist):
+            for r_name in self._list_resistors(solution_document):
                 if r_name == target_resistor:
                     continue
                 rand_label = self._random_resistor_label()
-                for net_path in (solution_netlist, panel_netlist):
-                    if self._net_has_component(net_path, r_name):
-                        try:
-                            SerializationManager.update_component_value(net_path, r_name, rand_label)
-                        except Exception:
-                            pass
-                self._update_resistor_label_value_in_json(panel_json, r_name, rand_label)
-                self._update_resistor_label_value_in_json(panel_solution_json, r_name, rand_label)
+                for document_path in (solution_document, panel_document):
+                    if self._has_component(document_path, r_name):
+                        self.circuits.update_component_value(document_path, r_name, rand_label)
 
             # Keep target resistor fixed in the problem setup.
-            self._apply_target_resistor_to_panel_artifacts(
+            self._apply_target_resistor_to_documents(
                 target_resistor=target_resistor,
                 applied_value=self._fixed_target_resistor_label,
-                panel_netlist=panel_netlist,
-                solution_netlist=solution_netlist,
-                panel_json=panel_json,
-                panel_solution_json=panel_solution_json,
+                panel_document=panel_document,
+                solution_document=solution_document,
             )
 
             # Compute Rth from Thevenin and define answer as nearest commercial resistor.
             tmp_expected = self._compute_expected_from_thevenin(
                 cp=cp,
-                solution_netlist=solution_netlist,
+                solution_document=solution_document,
                 answer_label=self._fixed_target_resistor_label,
                 answer_ohm=self._label_to_value(self._fixed_target_resistor_label) or 10.0,
             )
@@ -492,13 +371,13 @@ class MaxPowerTransferValidatorSystem(System):
                     f"resposta especial: usando Rth exato sem aproximacao comercial -> {answer_label} Ohm",
                 )
             else:
-                _, target_problem_value = self._read_component_value_from_netlist(panel_netlist, target_resistor)
+                _, target_problem_value = self._read_component_value(panel_document, target_resistor)
                 answer_label, answer_ohm = self._nearest_commercial_resistor(rth, forbidden_value=target_problem_value)
             self._trace(
                 cp,
                 "thevenin: "
                 f"Rth={self._fmt_ohm(rth)} Vth={tmp_expected.get('vth', 0.0):.6g}V "
-                f"| R1_problema={self._fmt_ohm(self._read_component_value_from_netlist(panel_netlist, target_resistor)[1])} "
+                f"| R1_problema={self._fmt_ohm(self._read_component_value(panel_document, target_resistor)[1])} "
                 f"| resposta_escolhida={answer_label} ({self._fmt_ohm(answer_ohm)})",
             )
             if answer_label is None or answer_ohm is None:
@@ -509,7 +388,7 @@ class MaxPowerTransferValidatorSystem(System):
 
             expected = self._compute_expected_from_thevenin(
                 cp=cp,
-                solution_netlist=solution_netlist,
+                solution_document=solution_document,
                 answer_label=answer_label,
                 answer_ohm=float(answer_ohm),
             )
@@ -669,11 +548,11 @@ class MaxPowerTransferValidatorSystem(System):
                     f"RL={expected['rl']:.3g} Ohm -> {'OK' if all_ok else 'FAIL'}"
                 )
                 if not all_ok:
-                    live_net = str(self._panel_net_path(panel_id))
-                    r1_label_now, r1_value_now = self._read_component_value_from_netlist(live_net, str(target))
+                    live_document = str(self._panel_json_path(panel_id))
+                    r1_label_now, r1_value_now = self._read_component_value(live_document, str(target))
                     self._trace(
                         cp,
-                        f"R1 no netlist atual: label={r1_label_now} valor={self._fmt_ohm(r1_value_now)} arquivo={live_net}",
+                        f"R1 no circuito atual: label={r1_label_now} valor={self._fmt_ohm(r1_value_now)} arquivo={live_document}",
                     )
                     for name, measured, exp, ok in check_details:
                         err = self._percent_error(float(measured), float(exp))
