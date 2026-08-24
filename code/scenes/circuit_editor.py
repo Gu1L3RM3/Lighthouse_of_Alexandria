@@ -8,9 +8,11 @@ from core.ui.widgets.menu_edit_circuit import MenuEditCircuit
 from core.ui.widgets.alert_dialog import AlertDialog
 from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.node_manager import NodeManager
-from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.circuit_domain import CircuitError
+from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
+from core.circuit_tools.circuit_repository import CircuitJsonRepository
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
-from core.settings import CELL_SIZE
+from core.settings import CELL_SIZE, path_in_circuitos
 from core.managers.scene_manager import SceneManager
 from core.managers.input_manager import InputManager
 from core.ui.prompt_ui import draw_prompt_hint_row
@@ -92,8 +94,10 @@ class CircuitEditor(BaseScene):
             self.inputs[pygame.K_d] = lambda: self.input_system.set_brush("not_drop")
 
     def set_entities(self):
-        initial_entities = SerializationManager.load_entities_from_json(f"{self.file}.json")
-        if not initial_entities:
+        try:
+            document = CircuitJsonRepository().load(path_in_circuitos(f"{self.file}.json"))
+            initial_entities = CircuitEntityMapper().to_entities(document)
+        except CircuitError:
             return
         for entity in initial_entities:
             self.entity_mn.add_entity(entity)

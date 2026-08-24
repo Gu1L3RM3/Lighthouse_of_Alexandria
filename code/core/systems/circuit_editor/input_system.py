@@ -3,7 +3,6 @@ import traceback
 from pygame import Rect
 from pathlib import Path
 from typing import Tuple,Dict
-from core.circuit_tools.serialization_manager import SerializationManager
 from core.ecs import System, Entity
 from core.managers.entity_manager import EntityManager
 from entities.circuit_editor.eletric_components import *
@@ -16,10 +15,13 @@ from core.components.sprite import Sprite
 from core.components.label_component import LabelComponent
 from core.managers.node_manager import NodeManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
-from core.circuit_tools.lt_spice_generate import LtSpiceGenerate
-from core.circuit_tools.solve_circuit import CircuitSolver
+from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
+from core.circuit_tools.circuit_repository import CircuitJsonRepository
+from core.circuit_tools.circuit_result_adapter import CircuitResultAdapter
+from core.circuit_tools.circuit_topology import CircuitGraphBuilder
+from core.circuit_tools.numeric_solver import DcMnaSolver
 from core.managers.circuit_manager import CircuitManager
-from core.settings import CIRCUITOS_DIR, LTSPICE_DIR
+from core.settings import CELL_SIZE, CIRCUITOS_DIR
 from typing import Type
 
 
@@ -29,14 +31,17 @@ class InputSystem(System):
                  grid_rects: list[Rect],
                  node_mn:NodeManager,
                  file:str,
-             
+              
                  storage_manager:StorageCircuitManager,
                  debug_mode:bool,
+                 circuit_repository=None,
+                 circuit_mapper=None,
+                 graph_builder=None,
+                 circuit_solver=None,
                  ):
 
         super().__init__()
         CIRCUITOS_DIR.mkdir(parents=True, exist_ok=True)
-        LTSPICE_DIR.mkdir(parents=True, exist_ok=True)
 
         normalized_file = file.replace("\\", "/")
         file_path = Path(normalized_file)
@@ -46,11 +51,11 @@ class InputSystem(System):
         self.full_file = file  # ex: "generic_levels_3/fase_3/pannel1"
         self.json_file = str(CIRCUITOS_DIR / level / f"{self.file}.json")
 
-        filename_only = self.file
-                 
-
-        self.net_file      = str(LTSPICE_DIR / level / f"{filename_only}.net")
-        self.lt_spice_file = str(LTSPICE_DIR / level / f"{filename_only}.asc")
+        self.circuit_repository = circuit_repository or CircuitJsonRepository()
+        self.circuit_mapper = circuit_mapper or CircuitEntityMapper()
+        self.graph_builder = graph_builder or CircuitGraphBuilder(CELL_SIZE)
+        self.circuit_solver = circuit_solver or DcMnaSolver()
+        self.result_adapter = CircuitResultAdapter()
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
@@ -350,15 +355,20 @@ class InputSystem(System):
         resistors = self.entity_manager.get_entities_by_class(Resistor)
         for resistor in resistors:
             label:LabelComponent = resistor.get(LabelComponent)
-            label.voltage = str(self.resistor_results[label.name]['voltage']['label'])
-            label.current = str(self.resistor_results[label.name]['current']['label'])
+            result = self.resistor_results.get(label.name)
+            if result is None:
+                continue
+            label.voltage = str(result['voltage']['label'])
+            label.current = str(result['current']['label'])
 
 
-    def solve_circuit(self):
+    def solve_circuit(self, document=None):
         try:
-            circuit_solver= CircuitSolver(self.net_file)
-            self.resistor_results = circuit_solver.get_resistor_results()
-            self.total_values = circuit_solver.get_total_values()
+            document = document or self.circuit_mapper.from_entities(self.entity_manager.get_entities())
+            graph = self.graph_builder.build(document)
+            solution = self.circuit_solver.solve(graph)
+            self.resistor_results = self.result_adapter.resistor_results(graph, solution)
+            self.total_values = self.result_adapter.total_values(graph, solution)
             CircuitManager.get().add_circuit_values(self.full_file,self.resistor_results)
             CircuitManager.get().add_total_values(self.full_file,self.total_values)
             self.set_voltage_current_resistors()
@@ -366,7 +376,7 @@ class InputSystem(System):
             return True
         except Exception as e:
             self._log_solve_error_debug(
-                f"arquivo='{self.full_file}' net='{self.net_file}' detalhe='{e}'"
+                f"arquivo='{self.full_file}' detalhe='{e}'"
             )
             CircuitManager.get().clear_circuit(self.full_file)
             return False
@@ -376,24 +386,23 @@ class InputSystem(System):
 
     def save_circuit(self):
         self.exit_current_tool()
-        self.entity_manager.remove_entities_by_class(EmptyBox)
-        entities_to_save = self.entity_manager.get_entities()
-        
-        SerializationManager.save_entities_to_json(entities_to_save,self.json_file)
-        LtSpiceGenerate(self.json_file,self.net_file,self.lt_spice_file,self.entity_manager).run()
+        document = self.circuit_mapper.from_entities(self.entity_manager.get_entities())
+        self.circuit_repository.save(self.json_file, document)
         self.storage_manager.save_eletric_storage()
         self.storage_manager.sync_baseline()
-        self.solve_circuit()
+        self.solve_circuit(document)
         self.set_empty_boxes_for_debug()
         
 
     def load_circuit(self):
         self.exit_current_tool()
+        document = self.circuit_repository.load(self.json_file)
+        loaded_entities = self.circuit_mapper.to_entities(document)
+
         self.entity_manager.clear_all_entities()
         self.node_manager.clear_all_nodes()
         self.storage_manager.reload_storage()
         self.storage_manager.sync_baseline()
-        loaded_entities = SerializationManager.load_entities_from_json(self.json_file)
         for entity in loaded_entities:
             self.entity_manager.add_entity(entity)
             self.node_manager.add_node(entity)
@@ -405,6 +414,8 @@ class InputSystem(System):
             if dropped.can_dropped :
                 continue
             self.add_empty_box(entity)
+
+        self.circuit_repository.save(self.json_file, document)
 
         
     
