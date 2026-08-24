@@ -76,6 +76,22 @@ class CircuitRepositoryTests(unittest.TestCase):
         self.assertEqual(document.elements[0].rotation, 90)
         self.assertFalse(document.elements[0].editable)
 
+    def test_migrates_known_legacy_duplicate_r2_to_r6(self):
+        def resistor(name: str, x: int) -> dict:
+            return {
+                "entity_type": "Resistor",
+                "components": [
+                    {"type": "Position", "x": x, "y": 0},
+                    {"type": "Sprite", "angle": 0},
+                    {"type": "Dropped", "can_dropped": False},
+                    {"type": "LabelComponent", "name": name, "value": "1k"},
+                ],
+            }
+
+        document = CircuitJsonRepository().decode([resistor("R2", 0), resistor("R2", 128)])
+
+        self.assertEqual([element.name for element in document.elements], ["R2", "R6"])
+
     def test_v2_round_trip_omits_rendering_state(self):
         document = CircuitDocument(
             elements=(

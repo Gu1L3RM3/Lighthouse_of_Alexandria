@@ -111,6 +111,14 @@ class CircuitJsonRepository:
 
     def _decode_v1(self, payload: list[dict[str, Any]]) -> CircuitDocument:
         elements: list[CircuitElement] = []
+        legacy_names = [
+            component.get("name")
+            for entity in payload
+            for component in entity.get("components", [])
+            if component.get("type") == "LabelComponent"
+        ]
+        repair_duplicate_r2 = legacy_names.count("R2") == 2 and "R6" not in legacy_names
+        found_r2 = False
         for entity in payload:
             kind = _LEGACY_KIND_MAP[entity["entity_type"]]
             components = {item["type"]: item for item in entity.get("components", [])}
@@ -118,6 +126,11 @@ class CircuitJsonRepository:
             sprite = components.get("Sprite", {})
             dropped = components.get("Dropped", {})
             label = components.get("LabelComponent", {})
+            component_name = label.get("name") if kind.is_electrical else None
+            if repair_duplicate_r2 and component_name == "R2":
+                if found_r2:
+                    component_name = "R6"
+                found_r2 = True
             elements.append(
                 CircuitElement(
                     kind=kind,
@@ -125,7 +138,7 @@ class CircuitJsonRepository:
                     y=position["y"],
                     rotation=sprite.get("angle", 0),
                     editable=bool(dropped.get("can_dropped", True)),
-                    name=label.get("name") if kind.is_electrical else None,
+                    name=component_name,
                     value=label.get("value") if kind.is_electrical else None,
                 )
             )
