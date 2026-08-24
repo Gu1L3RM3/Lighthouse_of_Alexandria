@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Protocol
 
 from core.circuit_tools.circuit_domain import CircuitDocument, CircuitError, ElementKind
 from core.circuit_tools.circuit_repository import CircuitJsonRepository
@@ -65,6 +66,17 @@ class SolvedCircuit:
         }
 
 
+class CircuitService(Protocol):
+    def load(self, path: str | Path) -> CircuitDocument: ...
+    def save(self, path: str | Path, document: CircuitDocument) -> None: ...
+    def save_component_value(self, path: str | Path, component_name: str, value: str) -> None: ...
+    def remove_editable_elements(self, path: str | Path) -> None: ...
+    def has_component(self, path: str | Path, component_name: str) -> bool: ...
+    def resistor_names(self, path: str | Path) -> list[str]: ...
+    def component_value(self, path: str | Path, component_name: str) -> tuple[str | None, float | None]: ...
+    def component_nodes(self, path: str | Path) -> dict[str, tuple[str, str]]: ...
+    def solve(self, path: str | Path) -> SolvedCircuit: ...
+
 class CircuitFileService:
     """Application boundary for persisted circuit documents."""
 
@@ -79,7 +91,7 @@ class CircuitFileService:
     def save(self, path: str | Path, document: CircuitDocument) -> None:
         self.repository.save(path, document)
 
-    def update_component_value(self, path: str | Path, component_name: str, value: str) -> None:
+    def save_component_value(self, path: str | Path, component_name: str, value: str) -> None:
         document = self.load(path).with_component_value(component_name, str(value))
         self.save(path, document)
 

@@ -5,7 +5,7 @@ from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from core.components.label_component import LabelComponent
@@ -26,7 +26,12 @@ class MaxPowerTransferValidatorSystem(System):
     - Validation compares player circuit against expected values computed with RL=answer.
     """
 
-    def __init__(self, level_path: str, tolerance_percent: float = 5.0):
+    def __init__(
+        self,
+        level_path: str,
+        tolerance_percent: float = 5.0,
+        circuit_service: CircuitService | None = None,
+    ):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
@@ -39,7 +44,7 @@ class MaxPowerTransferValidatorSystem(System):
         self.validation_debug = False
         self.validation_debug_panels: set[int] = {3}
         self._exact_rth_answer_panels: set[int] = set()
-        self.circuits = CircuitFileService(CELL_SIZE)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
         # Keep target resistor in problem circuit fixed (requested behavior).
         self._fixed_target_resistor_label = "10"
@@ -238,7 +243,7 @@ class MaxPowerTransferValidatorSystem(System):
         for document_path in (solution_document, panel_document):
             if not self._has_component(document_path, target_resistor):
                 continue
-            self.circuits.update_component_value(document_path, target_resistor, applied_value)
+            self.circuits.save_component_value(document_path, target_resistor, applied_value)
 
     def _compute_expected_from_thevenin(
         self,
@@ -325,7 +330,7 @@ class MaxPowerTransferValidatorSystem(System):
                 source_name, source_value = self._pick_source(area_sources, solution_document)
                 if source_name and source_value is not None:
                     for document_path in (solution_document, panel_document):
-                        self.circuits.update_component_value(document_path, source_name, source_value)
+                        self.circuits.save_component_value(document_path, source_name, source_value)
                     self._trace(cp, f"fonte escolhida: {source_name}={source_value}")
 
             target_resistor = cp.target_component or "R1"
@@ -338,7 +343,7 @@ class MaxPowerTransferValidatorSystem(System):
                 rand_label = self._random_resistor_label()
                 for document_path in (solution_document, panel_document):
                     if self._has_component(document_path, r_name):
-                        self.circuits.update_component_value(document_path, r_name, rand_label)
+                        self.circuits.save_component_value(document_path, r_name, rand_label)
 
             # Keep target resistor fixed in the problem setup.
             self._apply_target_resistor_to_documents(

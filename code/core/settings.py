@@ -14,7 +14,6 @@ PROJECT_ROOT = CODE_DIR.parent
 IS_FROZEN = bool(getattr(sys, "frozen", False))
 BUNDLE_ROOT = Path(getattr(sys, "_MEIPASS", PROJECT_ROOT))
 DEFAULT_CIRCUITOS_DIR = BUNDLE_ROOT / "code" / "circuitos"
-DEFAULT_LTSPICE_DIR = BUNDLE_ROOT / "code" / "ltspice"
 
 
 def _copy_missing_tree(source_dir: Path, target_dir: Path) -> None:
@@ -31,25 +30,22 @@ def _copy_missing_tree(source_dir: Path, target_dir: Path) -> None:
         shutil.copy2(src, dst)
 
 
-def _resolve_runtime_data_dirs() -> tuple[Path, Path]:
+def _resolve_runtime_circuit_dir() -> Path:
     if not IS_FROZEN:
-        return CODE_DIR / "circuitos", CODE_DIR / "ltspice"
+        return CODE_DIR / "circuitos"
 
     base_local = os.getenv("LOCALAPPDATA")
     runtime_root = Path(base_local) if base_local else (Path.home() / "AppData" / "Local")
     runtime_root = runtime_root / "Alexandria"
     circuitos_runtime = runtime_root / "code" / "circuitos"
-    ltspice_runtime = runtime_root / "code" / "ltspice"
     circuitos_runtime.mkdir(parents=True, exist_ok=True)
-    ltspice_runtime.mkdir(parents=True, exist_ok=True)
 
     # Copia apenas arquivos que ainda nao existem no perfil do usuario.
     _copy_missing_tree(DEFAULT_CIRCUITOS_DIR, circuitos_runtime)
-    _copy_missing_tree(DEFAULT_LTSPICE_DIR, ltspice_runtime)
-    return circuitos_runtime, ltspice_runtime
+    return circuitos_runtime
 
 
-CIRCUITOS_DIR, LTSPICE_DIR = _resolve_runtime_data_dirs()
+CIRCUITOS_DIR = _resolve_runtime_circuit_dir()
 ASSETS_DIR = str(BUNDLE_ROOT / "assets")
 SAVE_DIR = CIRCUITOS_DIR.parent / "save"
 SAVE_FILE = SAVE_DIR / "savegame.json"
@@ -60,10 +56,6 @@ SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 def path_in_circuitos(*parts: str) -> Path:
     return CIRCUITOS_DIR.joinpath(*parts)
-
-
-def path_in_ltspice(*parts: str) -> Path:
-    return LTSPICE_DIR.joinpath(*parts)
 
 
 def path_in_save(*parts: str) -> Path:
@@ -226,7 +218,7 @@ FINAL_LEVEL_FINAL_FADE_SECONDS = 0.8
 FINAL_LEVEL_STORAGE_TYPE_BY_KIND = {
     "resistor": "Resistor",
     "current_source": "CurrentSource",
-    "voltage_source": "VoutageSource",
+    "voltage_source": "VoltageSource",
 }
 
 # Sistemas

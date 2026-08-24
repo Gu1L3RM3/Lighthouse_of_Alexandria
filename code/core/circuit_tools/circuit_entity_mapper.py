@@ -15,14 +15,14 @@ from entities.circuit_editor.eletric_components import (
     Ground,
     Node,
     Resistor,
-    VoutageSource,
+    VoltageSource,
     Wire,
 )
 
 
 _ENTITY_TO_KIND = {
     Resistor: ElementKind.RESISTOR,
-    VoutageSource: ElementKind.VOLTAGE_SOURCE,
+    VoltageSource: ElementKind.VOLTAGE_SOURCE,
     CurrentSource: ElementKind.CURRENT_SOURCE,
     Wire: ElementKind.WIRE,
     Node: ElementKind.NODE,
@@ -61,7 +61,7 @@ class CircuitEntityMapper:
         if element.kind is ElementKind.RESISTOR:
             entity = Resistor(element.x, element.y, self._numeric_id(element.name), element.value or "")
         elif element.kind is ElementKind.VOLTAGE_SOURCE:
-            entity = VoutageSource(element.x, element.y, self._numeric_id(element.name), element.value or "")
+            entity = VoltageSource(element.x, element.y, self._numeric_id(element.name), element.value or "")
         elif element.kind is ElementKind.CURRENT_SOURCE:
             entity = CurrentSource(element.x, element.y, self._numeric_id(element.name), element.value or "")
         elif element.kind is ElementKind.WIRE:

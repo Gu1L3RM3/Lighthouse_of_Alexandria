@@ -8,7 +8,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 from core.circuit_tools.circuit_domain import CircuitDocument, CircuitElement, ElementKind
-from core.circuit_tools.circuit_topology import CircuitGraphBuilder
+from core.circuit_tools.circuit_topology import CircuitGraphBuilder, CircuitTopologyIndex
 
 
 class CircuitTopologyTests(unittest.TestCase):
@@ -47,6 +47,29 @@ class CircuitTopologyTests(unittest.TestCase):
         self.assertEqual(graph.branches[0].positive_node, graph.branches[1].positive_node)
         self.assertEqual(graph.branches[0].negative_node, 0)
         self.assertEqual(graph.branches[1].negative_node, 0)
+
+    def test_incremental_index_tracks_only_affected_positions_and_revisions(self):
+        resistor = CircuitElement(ElementKind.RESISTOR, 0, 0, name="R1", value="1k")
+        index = CircuitTopologyIndex(64, CircuitDocument((resistor,)))
+
+        resistor_id = index.element_ids[0]
+        index.replace(
+            resistor_id,
+            CircuitElement(ElementKind.RESISTOR, 0, 0, name="R1", value="2k"),
+        )
+        self.assertEqual(index.topology_revision, 0)
+        self.assertEqual(index.value_revision, 1)
+        self.assertEqual(index.last_affected_positions, frozenset())
+
+        index.replace(
+            resistor_id,
+            CircuitElement(ElementKind.RESISTOR, 64, 0, name="R1", value="2k"),
+        )
+        self.assertEqual(index.topology_revision, 1)
+        self.assertEqual(
+            index.last_affected_positions,
+            frozenset({(0, 32), (128, 32), (64, 32), (192, 32)}),
+        )
 
 
 if __name__ == "__main__":

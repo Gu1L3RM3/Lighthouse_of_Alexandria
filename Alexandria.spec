@@ -83,15 +83,6 @@ datas.extend(
         allowed_exts={".json"},
     )
 )
-datas.extend(
-    collect_filtered_tree(
-        PROJECT_ROOT / "code" / "ltspice",
-        target_root=Path("code") / "ltspice",
-        allowed_exts={".asc", ".net"},
-    )
-)
-
-
 a = Analysis(
     ["main.py"],
     pathex=[

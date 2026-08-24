@@ -20,7 +20,7 @@ from entities.itens.control_pannel import ControlPannel
 from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.resistor_item import ResistorItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.components.velocity import Velocity
@@ -393,7 +393,7 @@ class FinalLevel(BaseMaxPowerLevel):
             if not json_path.exists():
                 continue
             try:
-                self.circuit_files.update_component_value(json_path, target_name, applied_value)
+                self.circuit_files.save_component_value(json_path, target_name, applied_value)
             except (CircuitError, OSError):
                 pass
 
@@ -453,7 +453,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.storage_circuit.save_eletric_storage()
 
     def _remove_area_items_from_map(self, area_id: int):
-        for cls in (ResistorItem, CurrentSourceItem, VoutageSourceItem):
+        for cls in (ResistorItem, CurrentSourceItem, VoltageSourceItem):
             for entity in list(self.entity_mn.get_entities_by_class(cls)):
                 if int(getattr(entity, "area_id", -1)) != int(area_id):
                     continue
@@ -478,7 +478,7 @@ class FinalLevel(BaseMaxPowerLevel):
         }
         sources_payload: dict[int, dict[str, list[str]]] = {}
 
-        for voltage_item in self.entity_mn.get_entities_by_class(VoutageSourceItem):
+        for voltage_item in self.entity_mn.get_entities_by_class(VoltageSourceItem):
             if int(voltage_item.area_id) != int(area_id):
                 continue
             sources_payload.setdefault(int(area_id), {}).setdefault("voltage", []).append(str(voltage_item.value))
@@ -597,7 +597,7 @@ class FinalLevel(BaseMaxPowerLevel):
         class_by_kind = {
             "resistor": ResistorItem,
             "current_source": CurrentSourceItem,
-            "voltage_source": VoutageSourceItem,
+            "voltage_source": VoltageSourceItem,
         }
         cls = class_by_kind.get(kind)
         if cls is None:
@@ -618,7 +618,7 @@ class FinalLevel(BaseMaxPowerLevel):
         item_class = {
             "resistor": ResistorItem,
             "current_source": CurrentSourceItem,
-            "voltage_source": VoutageSourceItem,
+            "voltage_source": VoltageSourceItem,
         }.get(kind)
         if item_class is None:
             return

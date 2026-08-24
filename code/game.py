@@ -9,7 +9,7 @@ from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
 from core.managers.language_service import LanguageService
-from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.inventory_repository import InventoryRepository
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -140,7 +140,7 @@ class Game:
 
         preserve_storage_on_boot = bool(self.boot_circuit_editor_file and self.boot_circuit_editor_debug)
         if not preserve_storage_on_boot:
-            SerializationManager.clear_eletric_storage()
+            InventoryRepository().clear()
     
         self.register_fases()
         if self.boot_circuit_editor_file:

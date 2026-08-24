@@ -1,7 +1,7 @@
 from typing import Dict
 import random
 
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.circuit_tools.circuit_domain import ElementKind
 from core.components.label_component import LabelComponent
 from core.ecs import System
@@ -14,8 +14,8 @@ from entities.itens.resistor_item import ResistorItem
 from utils.setter_values import SetterValues
 
 
-class ResistorAssotiationValidatorSystem(System):
-    def __init__(self, level_path: str):
+class ResistorAssociationValidatorSystem(System):
+    def __init__(self, level_path: str, circuit_service: CircuitService | None = None):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
@@ -25,7 +25,7 @@ class ResistorAssotiationValidatorSystem(System):
         self._validation_acc = 0.0
         self._panel_rr_index = 0
 
-        self.circuits = CircuitFileService(CELL_SIZE)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def _panel_json_path(self, panel_id: int, suffix: str = ""):
         return path_in_circuitos(self.level_path, f"pannel{panel_id}{suffix}.json")
@@ -139,7 +139,7 @@ class ResistorAssotiationValidatorSystem(System):
             label_updates = self._randomize_resistors(solution_path)
             if label_updates:
                 for component_name, value in label_updates.items():
-                    self.circuits.update_component_value(player_path, component_name, value)
+                    self.circuits.save_component_value(player_path, component_name, value)
 
             solver = self.circuits.solve(solution_path)
             if not solver.is_solved:

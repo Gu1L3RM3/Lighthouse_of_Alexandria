@@ -17,7 +17,7 @@ from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.old_paper import OldPaper
 from entities.itens.resistor_item import ResistorItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from scenes.fases.generic_levels import BaseGenericLevel
 
 
@@ -92,7 +92,7 @@ class BaseMaxPowerLevel(BaseGenericLevel):
         return resistors_per_area
 
     def _assign_sources_for_areas(self) -> dict[int, dict[str, list[str]]]:
-        voltage_items: list[VoutageSourceItem] = self.entity_mn.get_entities_by_class(VoutageSourceItem)
+        voltage_items: list[VoltageSourceItem] = self.entity_mn.get_entities_by_class(VoltageSourceItem)
         current_items: list[CurrentSourceItem] = self.entity_mn.get_entities_by_class(CurrentSourceItem)
 
         voltage_values = self._build_random_values(self.VOLTAGE_POOL, len(voltage_items))

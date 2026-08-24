@@ -100,6 +100,13 @@ class CircuitGraphBuilder:
 
     def build(self, document: CircuitDocument) -> CircuitGraph:
         terminals = tuple(self.terminals_for(element) for element in document.elements)
+        return self._build(document, terminals)
+
+    def _build(
+        self,
+        document: CircuitDocument,
+        terminals: tuple[dict[str, Point], ...],
+    ) -> CircuitGraph:
         references = tuple(
             (index, name)
             for index, element_terminals in enumerate(terminals)
@@ -166,3 +173,89 @@ class CircuitGraphBuilder:
                 )
             )
         return CircuitGraph(tuple(branches), len(non_ground_roots), bool(ground_roots))
+
+
+class CircuitTopologyIndex:
+    """Incremental spatial index with independent topology/value revisions."""
+
+    def __init__(self, cell_size: int, document: CircuitDocument | None = None):
+        self.builder = CircuitGraphBuilder(cell_size)
+        self._next_id = 1
+        self._order: list[int] = []
+        self._elements: dict[int, CircuitElement] = {}
+        self._terminals: dict[int, dict[str, Point]] = {}
+        self.by_position: dict[Point, set[TerminalRef]] = {}
+        self.topology_revision = 0
+        self.value_revision = 0
+        self.last_affected_positions: frozenset[Point] = frozenset()
+        for element in (document or CircuitDocument()).elements:
+            self._insert(element)
+
+    def _insert(self, element: CircuitElement) -> int:
+        element_id = self._next_id
+        self._next_id += 1
+        terminals = self.builder.terminals_for(element)
+        self._order.append(element_id)
+        self._elements[element_id] = element
+        self._terminals[element_id] = terminals
+        for terminal_name, point in terminals.items():
+            self.by_position.setdefault(point, set()).add((element_id, terminal_name))
+        return element_id
+
+    def add(self, element: CircuitElement) -> int:
+        element_id = self._insert(element)
+        self.topology_revision += 1
+        self.last_affected_positions = frozenset(self._terminals[element_id].values())
+        return element_id
+
+    @property
+    def element_ids(self) -> tuple[int, ...]:
+        return tuple(self._order)
+
+    def remove(self, element_id: int) -> CircuitElement:
+        element = self._elements.pop(element_id)
+        terminals = self._terminals.pop(element_id)
+        self._order.remove(element_id)
+        for terminal_name, point in terminals.items():
+            refs = self.by_position[point]
+            refs.discard((element_id, terminal_name))
+            if not refs:
+                del self.by_position[point]
+        self.topology_revision += 1
+        self.last_affected_positions = frozenset(terminals.values())
+        return element
+
+    def replace(self, element_id: int, element: CircuitElement) -> None:
+        previous = self._elements[element_id]
+        previous_terminals = self._terminals[element_id]
+        previous_geometry = (previous.kind, previous.x, previous.y, previous.rotation)
+        next_geometry = (element.kind, element.x, element.y, element.rotation)
+        if previous_geometry == next_geometry:
+            self._elements[element_id] = element
+            if previous != element:
+                self.value_revision += 1
+            self.last_affected_positions = frozenset()
+            return
+
+        for terminal_name, point in previous_terminals.items():
+            refs = self.by_position[point]
+            refs.discard((element_id, terminal_name))
+            if not refs:
+                del self.by_position[point]
+        next_terminals = self.builder.terminals_for(element)
+        self._elements[element_id] = element
+        self._terminals[element_id] = next_terminals
+        for terminal_name, point in next_terminals.items():
+            self.by_position.setdefault(point, set()).add((element_id, terminal_name))
+        self.topology_revision += 1
+        self.last_affected_positions = frozenset(
+            (*previous_terminals.values(), *next_terminals.values())
+        )
+
+    def document(self) -> CircuitDocument:
+        return CircuitDocument(tuple(self._elements[element_id] for element_id in self._order))
+
+    def build(self) -> CircuitGraph:
+        document = self.document()
+        terminals = tuple(self._terminals[element_id] for element_id in self._order)
+        return self.builder._build(document, terminals)

@@ -2,7 +2,7 @@ from entities.itens.old_paper import OldPaper
 from entities.itens.control_pannel import ControlPannel
 from core.systems.animation_system import AnimationSystem
 from core.systems.area_trigger_system import AreaTriggerSystem
-from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssotiationValidatorSystem
+from core.systems.circuit_validators.resistor_association_validator_system import ResistorAssociationValidatorSystem
 from core.systems.freeze_system import FreezeSystem
 from core.systems.phantom_ai_system import PhantomAISystem
 from core.systems.enemy_touch_game_over_system import EnemyTouchGameOverSystem
@@ -65,7 +65,7 @@ class GenericLevel4(BaseGenericLevel):
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
-        self.circuit_validator_system = ResistorAssotiationValidatorSystem(level_path=self.level_path)
+        self.circuit_validator_system = ResistorAssociationValidatorSystem(level_path=self.level_path)
 
         self.systems.update([
             self.freeze_system,

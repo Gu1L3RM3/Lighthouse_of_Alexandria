@@ -101,7 +101,7 @@ class CircuitEditor(BaseScene):
             return
         for entity in initial_entities:
             self.entity_mn.add_entity(entity)
-            self.node_manager.add_node(entity)
+        self.node_manager.rebuild(initial_entities)
 
     def on_close(self):
         self.ui_manager.remove(self.eletric_list)

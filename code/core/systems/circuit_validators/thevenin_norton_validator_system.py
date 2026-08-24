@@ -8,12 +8,12 @@ from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.components.label_component import LabelComponent
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.resistor_item import ResistorItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from core.settings import (
     CELL_SIZE,
     COMERCIAL_RESISTORS,
@@ -28,7 +28,13 @@ from utils.setter_values import SetterValues
 class TheveninNortonValidatorSystem(System):
     TARGET_RESISTOR = THEVENIN_NORTON_TARGET_RESISTOR
 
-    def __init__(self, level_path: str, tolerance_percent: float = 2.0):
+    def __init__(
+        self,
+        level_path: str,
+        tolerance_percent: float = 2.0,
+        circuit_service: CircuitService | None = None,
+        entity_mapper: CircuitEntityMapper | None = None,
+    ):
         super().__init__()
         self.level_path = level_path
         self.tolerance_percent = tolerance_percent
@@ -41,8 +47,8 @@ class TheveninNortonValidatorSystem(System):
         self.debug_panel_logs = True
         self.runtime_status_logs = False
         self._panel_status_cache: dict[int, str] = {}
-        self.circuits = CircuitFileService(CELL_SIZE)
-        self.entity_mapper = CircuitEntityMapper()
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
+        self.entity_mapper = entity_mapper or CircuitEntityMapper()
 
         self._resistor_pool = sorted(
             [(str(label), float(value)) for label, value in COMERCIAL_RESISTORS.items()],
@@ -190,7 +196,7 @@ class TheveninNortonValidatorSystem(System):
         source_component = "V1" if source_kind == "voltage" else "I1"
         source_label = self._pick_source_label_for_area(sources_per_area, area, source_kind)
         if self._has_component(solution_document, source_component):
-            self.circuits.update_component_value(solution_document, source_component, source_label)
+            self.circuits.save_component_value(solution_document, source_component, source_label)
         else:
             self._log(f"panel={panel_id} sem componente {source_component} para randomizar")
 
@@ -200,7 +206,7 @@ class TheveninNortonValidatorSystem(System):
             if r_name.upper() == self.TARGET_RESISTOR:
                 continue
             r_label = self._pick_label_from_area(resistors_per_area, area, self._resistor_pool)
-            self.circuits.update_component_value(solution_document, r_name, r_label)
+            self.circuits.save_component_value(solution_document, r_name, r_label)
             applied_resistors.append((r_name, r_label))
 
         return {
@@ -259,7 +265,7 @@ class TheveninNortonValidatorSystem(System):
             class_name = entity.__class__.__name__
             if class_name == "Resistor":
                 resistor_labels.append(self._entity_label_name(entity))
-            elif class_name in ("VoutageSource", "CurrentSource"):
+            elif class_name in ("VoltageSource", "CurrentSource"):
                 source_count += 1
 
         if len(resistor_labels) != 2:
@@ -337,7 +343,7 @@ class TheveninNortonValidatorSystem(System):
 
             if class_name == "Resistor":
                 resistors.append({"name": label_name, "value": label_num_value})
-            elif class_name == "VoutageSource":
+            elif class_name == "VoltageSource":
                 sources.append({"kind": "voltage", "name": label_name, "value": label_num_value})
             elif class_name == "CurrentSource":
                 sources.append({"kind": "current", "name": label_name, "value": label_num_value})
@@ -511,11 +517,11 @@ class TheveninNortonValidatorSystem(System):
                 req_by_area[area]["resistor"].append(str(resistor_label))
 
         resistor_items: list[ResistorItem] = entity_manager.get_entities_by_class(ResistorItem)
-        voltage_items: list[VoutageSourceItem] = entity_manager.get_entities_by_class(VoutageSourceItem)
+        voltage_items: list[VoltageSourceItem] = entity_manager.get_entities_by_class(VoltageSourceItem)
         current_items: list[CurrentSourceItem] = entity_manager.get_entities_by_class(CurrentSourceItem)
 
         resistors_by_area: dict[int, list[ResistorItem]] = defaultdict(list)
-        voltages_by_area: dict[int, list[VoutageSourceItem]] = defaultdict(list)
+        voltages_by_area: dict[int, list[VoltageSourceItem]] = defaultdict(list)
         currents_by_area: dict[int, list[CurrentSourceItem]] = defaultdict(list)
 
         for item in resistor_items:

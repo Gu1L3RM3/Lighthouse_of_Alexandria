@@ -16,7 +16,7 @@ from entities.dialogue_area import DialogueArea
 from entities.animated_tiles.iron_gate import IronGate
 from entities.enemies.phantom_enemy import PhantomEnemy
 from entities.itens.current_source_item import CurrentSourceItem
-from entities.itens.voltage_source_item import VoutageSourceItem
+from entities.itens.voltage_source_item import VoltageSourceItem
 from entities.itens.resistor_item import ResistorItem
 from entities.itens.old_paper import OldPaper
 from entities.animated_tiles.door import Door
@@ -38,6 +38,11 @@ from core.managers.audio_manager import AudioManager
 from core.managers.language_service import LanguageService
 from core.managers.bomb_manager import BombManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
+from core.circuit_tools.legacy_circuit_aliases import (
+    LEGACY_VOLTAGE_SOURCE_EVENT,
+    VOLTAGE_SOURCE_ENTITY,
+    looks_like_voltage_source,
+)
 from core.managers.circuit_manager import CircuitManager
 from core.localization.letter_asset_resolver import LetterAssetResolver
 from core.ui.dialogue_interaction_hud_controller import DialogueInteractionHUDController
@@ -374,7 +379,7 @@ class BaseGenericLevel(BaseScene):
         normalized = component_type.lower()
         if "current" in normalized:
             kind = "current_source"
-        elif "voutage" in normalized or "voltage" in normalized:
+        elif looks_like_voltage_source(normalized):
             kind = "voltage_source"
         else:
             kind = "resistor"
@@ -598,8 +603,8 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("kill_entity",self.kill_entity_event)
         self.event_manager.subscribe("resistor_collected",self.update_storage_circuit)
         self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, "CurrentSource"))
-        self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
-        self.event_manager.subscribe("voutage_source_collected", lambda e: self.update_storage_circuit_generic(e, "VoutageSource"))
+        self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
+        self.event_manager.subscribe(LEGACY_VOLTAGE_SOURCE_EVENT, lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
         self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
         if not self.environment_system.uses_custom_crystal_respawn():
             self.event_manager.subscribe("crystal_invisibility_collected", self.environment_system.on_crystal_invisibility_collected)
@@ -742,7 +747,7 @@ class BaseGenericLevel(BaseScene):
         total = 0
         total += len(self.entity_mn.get_entities_by_class(ResistorItem))
         total += len(self.entity_mn.get_entities_by_class(CurrentSourceItem))
-        total += len(self.entity_mn.get_entities_by_class(VoutageSourceItem))
+        total += len(self.entity_mn.get_entities_by_class(VoltageSourceItem))
         return max(1, total)
 
     def _total_component_areas(self) -> int:

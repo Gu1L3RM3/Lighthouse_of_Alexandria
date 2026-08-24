@@ -1,11 +1,12 @@
 from copy import deepcopy
 
-from core.circuit_tools.serialization_manager import SerializationManager
+from core.circuit_tools.inventory_repository import InventoryRepository
 
 
 class StorageCircuitManager:
-    def __init__(self):
-        self.storage_circuit = SerializationManager.load_eletric_storage()
+    def __init__(self, repository: InventoryRepository | None = None):
+        self.repository = repository or InventoryRepository()
+        self.storage_circuit = self.repository.load()
         self.old_storage_circuit = deepcopy(self.storage_circuit)
         self.revision = 0  # contador de atualizacoes
 
@@ -13,7 +14,7 @@ class StorageCircuitManager:
         self.old_storage_circuit = deepcopy(self.storage_circuit)
 
     def reload_storage(self):
-        self.storage_circuit = SerializationManager.load_eletric_storage()
+        self.storage_circuit = self.repository.load()
 
     def add_component(self, type: str, value: str):
         self.storage_circuit.setdefault(type, {})
@@ -43,4 +44,4 @@ class StorageCircuitManager:
         self.revision += 1
 
     def save_eletric_storage(self):
-        SerializationManager.save_eletric_storage(self.storage_circuit)
+        self.repository.save(self.storage_circuit)

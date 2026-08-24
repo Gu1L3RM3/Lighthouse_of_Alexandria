@@ -34,7 +34,7 @@ def _pixel_voltage_icon() -> pygame.Surface:
 
     return surf
 
-class VoutageSourceItem(Item):
+class VoltageSourceItem(Item):
     def __init__(self, x, y, active,props):
         super().__init__(x, y, active,props)
         self.value = props['valor']

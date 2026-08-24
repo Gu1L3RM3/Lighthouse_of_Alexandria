@@ -1,6 +1,6 @@
 import pygame
 
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.components.animation_sprite import AnimateSprite
 from core.components.freeze import Freeze
 from core.components.health import Health
@@ -20,9 +20,9 @@ from core.settings import (
 
 
 class GenericLevelBombSystem(System):
-    def __init__(self, scene):
+    def __init__(self, scene, circuit_service: CircuitService | None = None):
         self.scene = scene
-        self.circuits = CircuitFileService(CELL_SIZE)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def update(self, entity_manager, dt: float):
         _ = entity_manager

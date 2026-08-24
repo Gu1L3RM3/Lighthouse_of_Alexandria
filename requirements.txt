@@ -1,6 +1,4 @@
 ﻿numpy==2.2.5
-pandas==2.2.3
 pygame-ce==2.5.3
 PyTMX==3.32
-sympy==1.13.3
 pathfinding==1.0.18

@@ -5,8 +5,15 @@ from pathlib import Path
 from typing import Tuple,Dict
 from core.ecs import System, Entity
 from core.managers.entity_manager import EntityManager
-from entities.circuit_editor.eletric_components import *
-from entities.circuit_editor.edit_components import *
+from entities.circuit_editor.eletric_components import (
+    CurrentSource,
+    Ground,
+    Node,
+    Resistor,
+    VoltageSource,
+    Wire,
+)
+from entities.circuit_editor.edit_components import Delete, NotDrop, Rotate, Select
 from entities.generic.empty_box import EmptyBox
 from core.components.position import Position
 from core.components.dropped import Dropped
@@ -96,7 +103,7 @@ class InputSystem(System):
             "wire": Wire,
             "gnd": Ground,
             "CurrentSource": CurrentSource,
-            "VoutageSource": VoutageSource,
+            "VoltageSource": VoltageSource,
             "node":Node,
             "select": Select,
             "rotate": Rotate,
@@ -119,7 +126,7 @@ class InputSystem(System):
         self.brush = entity
         self.show_mouse = False
     def set_label(self, obj: Type[Entity], x, y, value: str) -> Entity:
-        if obj not in {Resistor, CurrentSource, VoutageSource}:
+        if obj not in {Resistor, CurrentSource, VoltageSource}:
             return obj(x, y)
 
         entities = self.entity_manager.get_entities_by_class(obj)
@@ -405,7 +412,6 @@ class InputSystem(System):
         self.storage_manager.sync_baseline()
         for entity in loaded_entities:
             self.entity_manager.add_entity(entity)
-            self.node_manager.add_node(entity)
 
             if not self.debug_mode:
                 continue
@@ -414,6 +420,8 @@ class InputSystem(System):
             if dropped.can_dropped :
                 continue
             self.add_empty_box(entity)
+
+        self.node_manager.rebuild(loaded_entities)
 
         self.circuit_repository.save(self.json_file, document)
 

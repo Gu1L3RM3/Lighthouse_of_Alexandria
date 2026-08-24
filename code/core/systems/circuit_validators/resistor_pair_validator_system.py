@@ -4,12 +4,17 @@ from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
 from entities.itens.control_pannel import ControlPannel
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.settings import CELL_SIZE, path_in_circuitos
 
 
 class ResistorPairValidatorSystem(System):
-    def __init__(self, level_path: str, tolerance_percent: float = 2.0):
+    def __init__(
+        self,
+        level_path: str,
+        tolerance_percent: float = 2.0,
+        circuit_service: CircuitService | None = None,
+    ):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
@@ -20,7 +25,7 @@ class ResistorPairValidatorSystem(System):
         self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
-        self.circuits = CircuitFileService(CELL_SIZE)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def _log(self, message: str):
         _ = message
@@ -74,14 +79,14 @@ class ResistorPairValidatorSystem(System):
             # Se ele nao tiver R3 (alguns paineis antigos), faz fallback para _solution.
             document_path = str(self._panel_json_path(control_pannel.pannel_id))
             try:
-                self.circuits.update_component_value(
+                self.circuits.save_component_value(
                     document_path,
                     "R3",
                     resistor_chosen
                 )
             except Exception:
                 document_path = str(self._panel_json_path(control_pannel.pannel_id, "_solution"))
-                self.circuits.update_component_value(
+                self.circuits.save_component_value(
                     document_path,
                     "R3",
                     resistor_chosen

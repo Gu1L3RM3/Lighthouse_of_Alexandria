@@ -12,11 +12,12 @@ from core.circuit_tools.circuit_domain import (
     CircuitValidationError,
     ElementKind,
 )
+from core.circuit_tools.legacy_circuit_aliases import LEGACY_VOLTAGE_SOURCE_ENTITY
 
 
 _LEGACY_KIND_MAP = {
     "Resistor": ElementKind.RESISTOR,
-    "VoutageSource": ElementKind.VOLTAGE_SOURCE,
+    LEGACY_VOLTAGE_SOURCE_ENTITY: ElementKind.VOLTAGE_SOURCE,
     "VoltageSource": ElementKind.VOLTAGE_SOURCE,
     "CurrentSource": ElementKind.CURRENT_SOURCE,
     "Wire": ElementKind.WIRE,

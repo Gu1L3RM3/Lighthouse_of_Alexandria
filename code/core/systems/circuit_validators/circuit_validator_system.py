@@ -4,12 +4,12 @@ from entities.itens.control_pannel            import ControlPannel
 from core.managers.circuit_manager            import CircuitManager
 from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.settings import CELL_SIZE, path_in_circuitos
 
 
 class CircuitValidatorSystem(System):
-    def __init__(self,level_path):
+    def __init__(self, level_path, circuit_service: CircuitService | None = None):
         super().__init__()
         self.level_path =  level_path
         self.circuit_manager = CircuitManager.get()
@@ -19,7 +19,7 @@ class CircuitValidatorSystem(System):
         self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
-        self.circuits = CircuitFileService(CELL_SIZE)
+        self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def _log(self, message: str):
         _ = message
@@ -102,7 +102,7 @@ class CircuitValidatorSystem(System):
             resistors_list.remove(resistor_chosen)
 
             try:
-                self.circuits.update_component_value(
+                self.circuits.save_component_value(
                     document_path,
                     target_component,
                     resistor_chosen

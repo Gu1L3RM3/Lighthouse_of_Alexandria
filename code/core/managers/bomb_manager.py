@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from core.circuit_tools.circuit_file_service import CircuitFileService
+from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.settings import CELL_SIZE
 
 
@@ -27,11 +27,16 @@ class BombManager:
     Se o circuito estiver invalido, usa configuracao padrao segura.
     """
 
-    def __init__(self, bombs_per_level: int = 4, default_circuit_path: str | Path | None = None):
+    def __init__(
+        self,
+        bombs_per_level: int = 4,
+        default_circuit_path: str | Path | None = None,
+        circuit_service: CircuitService | None = None,
+    ):
         self.max_bombs = max(0, int(bombs_per_level))
         self.remaining_bombs = self.max_bombs
         self._default_circuit_path = default_circuit_path
-        self._circuits = CircuitFileService(CELL_SIZE)
+        self._circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
         self.set_balance_profile("standard")
 
