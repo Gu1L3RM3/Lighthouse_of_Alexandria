@@ -14,6 +14,7 @@
 .hypothesis/
 .pyre/
 .pytype/
+*.pyd
 
 # Coverage
 .coverage
@@ -51,6 +52,10 @@ dist/
 release/
 *.zip
 *.spec.bak
+*.tmp
+*.temp
+*.swp
+*.swo
 obf_src/
 obf_test/
 .pyarmor/
@@ -79,6 +84,8 @@ pyarmor.bug.log
 
 # Artefatos locais de documentacao/inspecao
 docs/generated/
+test-results/
+.cache/
 
 # Configuracao local sensivel
 .env
