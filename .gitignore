@@ -90,3 +90,6 @@ test-results/
 # Configuracao local sensivel
 .env
 .env.*
+
+# Instrucoes locais do agente (nao versionar)
+AGENTS.md
