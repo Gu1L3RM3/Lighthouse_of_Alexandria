@@ -12,6 +12,11 @@ from core.managers.resource_manager import ResourceManager
 from core.managers.scene_manager import SceneManager
 from core.managers.language_service import LanguageService
 from core.localization.scene_copy_catalog import SceneCopyCatalog
+from core.circuit_tools.legacy_circuit_aliases import (
+    CURRENT_SOURCE_ENTITY,
+    RESISTOR_ENTITY,
+    VOLTAGE_SOURCE_ENTITY,
+)
 
 
 class ConfirmActionDialog(AlertDialog):
@@ -123,24 +128,27 @@ class MenuEditCircuit(Widget):
 
         self.resistor_list = EletricList(
             data,
-            self.language_service.get_ui_label("editor_resistor"),
+            RESISTOR_ENTITY,
             storage_manager=storage,
+            display_name=self.language_service.get_ui_label("editor_resistor"),
             action=self.on_eletric_list_click,
             on_close=self.on_close,
         )
 
         self.v_source_list = EletricList(
             data,
-            self.language_service.get_ui_label("editor_v_source"),
+            VOLTAGE_SOURCE_ENTITY,
             storage_manager=storage,
+            display_name=self.language_service.get_ui_label("editor_v_source"),
             action=self.on_eletric_list_click,
             on_close=self.on_close,
         )
 
         self.c_source_list = EletricList(
             data,
-            self.language_service.get_ui_label("editor_i_source"),
+            CURRENT_SOURCE_ENTITY,
             storage_manager=storage,
+            display_name=self.language_service.get_ui_label("editor_i_source"),
             action=self.on_eletric_list_click,
             on_close=self.on_close,
         )

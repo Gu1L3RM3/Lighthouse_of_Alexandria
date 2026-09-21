@@ -215,12 +215,6 @@ MAX_POWER_LEVEL_CURRENT_POOL = ["0.001", "0.002", "0.005", "0.01", "0.05", "0.10
 
 FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS = 90.0
 FINAL_LEVEL_FINAL_FADE_SECONDS = 0.8
-FINAL_LEVEL_STORAGE_TYPE_BY_KIND = {
-    "resistor": "Resistor",
-    "current_source": "CurrentSource",
-    "voltage_source": "VoltageSource",
-}
-
 # Sistemas
 DAY_NIGHT_KEY_FRAMES = [
     (0, NIGHT_COLOR),

@@ -26,6 +26,12 @@ from core.circuit_tools.circuit_domain import CircuitError
 from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
 from core.circuit_tools.circuit_repository import CircuitJsonRepository
 from core.circuit_tools.circuit_result_adapter import CircuitResultAdapter
+from core.circuit_tools.legacy_circuit_aliases import (
+    CURRENT_SOURCE_ENTITY,
+    RESISTOR_ENTITY,
+    VOLTAGE_SOURCE_ENTITY,
+    normalize_inventory_component_type,
+)
 from core.circuit_tools.circuit_topology import CircuitGraphBuilder
 from core.circuit_tools.numeric_solver import DcMnaSolver
 from core.managers.circuit_manager import CircuitManager
@@ -99,12 +105,17 @@ class InputSystem(System):
             self.exit_current_tool(set_mouse=False)
         self.active_tool=brush_type
 
+        try:
+            brush_type = normalize_inventory_component_type(brush_type)
+        except ValueError:
+            pass
+
         brush_map = {
-            "Resistor": Resistor,
+            RESISTOR_ENTITY: Resistor,
             "wire": Wire,
             "gnd": Ground,
-            "CurrentSource": CurrentSource,
-            "VoltageSource": VoltageSource,
+            CURRENT_SOURCE_ENTITY: CurrentSource,
+            VOLTAGE_SOURCE_ENTITY: VoltageSource,
             "node":Node,
             "select": Select,
             "rotate": Rotate,

@@ -29,6 +29,27 @@ class InventoryRepositoryTests(unittest.TestCase):
             self.assertEqual(repository.load(), {"Resistor": {"1k": 2}})
             self.assertEqual(list(path.parent.glob("*.tmp")), [])
 
+    def test_save_normalizes_all_component_type_aliases(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "inventory.json"
+            repository = InventoryRepository(path)
+            repository.save(
+                {
+                    "resistor": {"1k": 1},
+                    "current_source": {"2": 1},
+                    "VoutageSource": {"5": 1},
+                }
+            )
+
+            self.assertEqual(
+                repository.load(),
+                {
+                    "Resistor": {"1k": 1},
+                    "CurrentSource": {"2": 1},
+                    "VoltageSource": {"5": 1},
+                },
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

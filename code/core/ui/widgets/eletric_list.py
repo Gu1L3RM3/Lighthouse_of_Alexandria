@@ -30,6 +30,7 @@ class EletricList(Widget):
         data: dict,
         list_type: str,
         storage_manager,
+        display_name: str | None = None,
         button_size: tuple[int, int] = (220, 50),
         spacing: int = 10,
         action: Optional[Callable] = None,
@@ -39,6 +40,7 @@ class EletricList(Widget):
         self.data = data
         self.storage_manager = storage_manager
         self.list_type = list_type
+        self.display_name = display_name or list_type
         self.button_size = (int(button_size[0]), int(button_size[1]))
         self.spacing = int(spacing)
         self.action = action
@@ -103,7 +105,7 @@ class EletricList(Widget):
             self.alert_dialog = AlertDialog(
                 dialog_size=dialog_size,
                 on_close=self.on_close,
-                title=f"{self.list_type} List",
+                title=f"{self.display_name} List",
                 parent=self,
                 make_freeze=False,
             )
@@ -151,7 +153,7 @@ class EletricList(Widget):
                 pos_center=(x_center, y + h // 2),
                 click_type=ClickType.AFTER_RELEASED,
                 action=make_action,
-                text=f"{self.list_type}: {val} (x{qtd})",
+                text=f"{self.display_name}: {val} (x{qtd})",
                 color_text=(0, 0, 0),
                 font_size=10,
             )

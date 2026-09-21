@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from core.circuit_tools.inventory_repository import InventoryRepository
+from core.circuit_tools.legacy_circuit_aliases import normalize_inventory_component_type
 
 
 class StorageCircuitManager:
@@ -17,6 +18,7 @@ class StorageCircuitManager:
         self.storage_circuit = self.repository.load()
 
     def add_component(self, type: str, value: str):
+        type = normalize_inventory_component_type(type)
         self.storage_circuit.setdefault(type, {})
         self.storage_circuit[type].setdefault(value, 0)
         self.storage_circuit[type][value] += 1
@@ -27,6 +29,7 @@ class StorageCircuitManager:
         self.revision += 1
 
     def remove_component(self, type: str, value: str):
+        type = normalize_inventory_component_type(type)
         if type not in self.storage_circuit:
             return False
         if value not in self.storage_circuit[type]:

@@ -39,7 +39,9 @@ from core.managers.language_service import LanguageService
 from core.managers.bomb_manager import BombManager
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.circuit_tools.legacy_circuit_aliases import (
+    CURRENT_SOURCE_ENTITY,
     LEGACY_VOLTAGE_SOURCE_EVENT,
+    RESISTOR_ENTITY,
     VOLTAGE_SOURCE_ENTITY,
     looks_like_voltage_source,
 )
@@ -366,7 +368,7 @@ class BaseGenericLevel(BaseScene):
         value = event['value']
         self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
         self.storage_circuit.reload_storage()
-        self.storage_circuit.add_component(type='Resistor',value=value)
+        self.storage_circuit.add_component(type=RESISTOR_ENTITY, value=value)
         self.storage_circuit.save_eletric_storage()
         self._register_collected_component(event, "resistor")
 
@@ -602,7 +604,7 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe('set_cache_colliders',lambda event:self.physics_system.cache_static_colliders(self.entity_mn))
         self.event_manager.subscribe("kill_entity",self.kill_entity_event)
         self.event_manager.subscribe("resistor_collected",self.update_storage_circuit)
-        self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, "CurrentSource"))
+        self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, CURRENT_SOURCE_ENTITY))
         self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
         self.event_manager.subscribe(LEGACY_VOLTAGE_SOURCE_EVENT, lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
         self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))

@@ -31,16 +31,16 @@ from core.managers.language_service import LanguageService
 from core.settings import (
     FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS,
     FINAL_LEVEL_FINAL_FADE_SECONDS,
-    FINAL_LEVEL_STORAGE_TYPE_BY_KIND,
     CELL_SIZE,
     path_in_circuitos,
 )
+from core.circuit_tools.legacy_circuit_aliases import INVENTORY_COMPONENT_TYPE_BY_KIND
 
 
 class FinalLevel(BaseMaxPowerLevel):
     DEFAULT_PANEL_HOLD_SECONDS = FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS
     FINAL_FADE_SECONDS = FINAL_LEVEL_FINAL_FADE_SECONDS
-    STORAGE_TYPE_BY_KIND = dict(FINAL_LEVEL_STORAGE_TYPE_BY_KIND)
+    STORAGE_TYPE_BY_KIND = dict(INVENTORY_COMPONENT_TYPE_BY_KIND)
 
     def __init__(self, screen, level_path, tolerance_percent: float = 2.0):
         self.panel_timers: dict[int, float] = {}
