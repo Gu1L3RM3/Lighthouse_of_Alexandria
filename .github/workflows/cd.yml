@@ -1,0 +1,152 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cd-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  ITCH_TARGET: gu1l3rm3/lighthouse-of-alexandria
+  PYTHON_VERSION: "3.11"
+  BUILD_NAME: Farol de Alexandria
+
+jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml
+
+  version:
+    name: version
+    needs: tests
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.new_tag }}
+      version: ${{ steps.tag.outputs.new_version }}
+      changelog: ${{ steps.tag.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Deriva a proxima versao dos Conventional Commits desde a ultima tag
+      # (feat -> minor, fix/outros -> patch, BREAKING CHANGE -> major) e cria a tag.
+      - name: Bump version and push tag
+        id: tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: main
+          default_bump: patch
+
+  build:
+    name: build (${{ matrix.channel }})
+    needs: version
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-latest
+            channel: windows
+          - os: ubuntu-22.04
+            channel: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-build.txt
+
+      - name: Install build dependencies
+        run: pip install -r requirements-build.txt
+
+      - name: Build with PyInstaller
+        run: pyinstaller --noconfirm Alexandria.spec
+
+      - name: Write version file
+        shell: bash
+        run: echo "${{ needs.version.outputs.version }}" > "dist/${BUILD_NAME}/VERSION"
+
+      # Empacota antes do upload para preservar permissoes de execucao no Linux.
+      - name: Package (Windows)
+        if: matrix.channel == 'windows'
+        shell: pwsh
+        run: Compress-Archive -Path "dist/$env:BUILD_NAME/*" -DestinationPath "alexandria-${{ matrix.channel }}.zip"
+
+      - name: Package (Linux)
+        if: matrix.channel == 'linux'
+        run: tar -czf "alexandria-${{ matrix.channel }}.tar.gz" -C "dist/${BUILD_NAME}" .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.channel }}
+          path: alexandria-${{ matrix.channel }}.*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-itch:
+    name: publish itch.io
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    env:
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          merge-multiple: true
+
+      - name: Install butler
+        run: |
+          curl -fsSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          echo "$PWD/butler" >> "$GITHUB_PATH"
+
+      - name: Extract builds
+        run: |
+          mkdir -p windows linux
+          unzip -q alexandria-windows.zip -d windows
+          tar -xzf alexandria-linux.tar.gz -C linux
+
+      - name: Push to itch.io
+        run: |
+          butler -V
+          for channel in windows linux; do
+            butler push "$channel" "${ITCH_TARGET}:${channel}" --userversion "${{ needs.version.outputs.version }}"
+          done
+
+  release:
+    name: github release
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-*
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
+          body: ${{ needs.version.outputs.changelog }}
+          files: |
+            alexandria-windows.zip
+            alexandria-linux.tar.gz

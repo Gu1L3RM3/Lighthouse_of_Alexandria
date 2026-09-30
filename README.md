@@ -139,6 +139,15 @@ The project is currently playable end-to-end, with:
 - Windows build and packaging flow;
 - automated tests covering localization, fall-ground fairness, and phantom behavior.
 
+## CI/CD
+
+GitHub Actions workflows live in `.github/workflows/`:
+
+- `ci.yml` runs the unit test suite on every pull request and branch push.
+- `cd.yml` runs on every push to `main`: it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows` and `linux` channels) and attaches them to a GitHub Release.
+
+Required repository secret: `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys).
+
 ## Roadmap
 
 - Continue balancing enemy pressure and bomb-based stages.

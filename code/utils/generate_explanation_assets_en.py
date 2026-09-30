@@ -27,8 +27,18 @@ CARD_DARK_2 = (14, 27, 39)
 ACCENT = (237, 222, 165)
 
 
+FALLBACK_FONTS = ("DejaVuSans-Bold.ttf", "DejaVuSans.ttf")
+
+
 def font(size: int, bold: bool = False):
-    return ImageFont.truetype(FONT_BOLD if bold else FONT_REGULAR, size=size)
+    try:
+        return ImageFont.truetype(FONT_BOLD if bold else FONT_REGULAR, size=size)
+    except OSError:
+        # Arial so existe no Windows; em Linux/CI usa DejaVu ou a fonte padrao do Pillow.
+        try:
+            return ImageFont.truetype(FALLBACK_FONTS[0] if bold else FALLBACK_FONTS[1], size=size)
+        except OSError:
+            return ImageFont.load_default(size=size)
 
 
 def new_light_slide(title: str) -> tuple[Image.Image, ImageDraw.ImageDraw]:

@@ -34,8 +34,12 @@ def _resolve_runtime_circuit_dir() -> Path:
     if not IS_FROZEN:
         return CODE_DIR / "circuitos"
 
-    base_local = os.getenv("LOCALAPPDATA")
-    runtime_root = Path(base_local) if base_local else (Path.home() / "AppData" / "Local")
+    if sys.platform == "win32":
+        base_local = os.getenv("LOCALAPPDATA")
+        runtime_root = Path(base_local) if base_local else (Path.home() / "AppData" / "Local")
+    else:
+        base_data = os.getenv("XDG_DATA_HOME")
+        runtime_root = Path(base_data) if base_data else (Path.home() / ".local" / "share")
     runtime_root = runtime_root / "Alexandria"
     circuitos_runtime = runtime_root / "code" / "circuitos"
     circuitos_runtime.mkdir(parents=True, exist_ok=True)
