@@ -9,6 +9,9 @@ FPS = 60
 IS_WEB = sys.platform == "emscripten"
 # Fixed logical size for browser/Android: scaled by the page instead of using the native fullscreen size.
 WEB_RESOLUTION = (1280, 720)
+AUDIO_FREQUENCY = 44100
+# The browser runs Python on its main thread, so a slow frame drains a short buffer and the audio crackles.
+AUDIO_BUFFER_SAMPLES = 4096 if IS_WEB else 512
 
 TILE_SIZE=16
 

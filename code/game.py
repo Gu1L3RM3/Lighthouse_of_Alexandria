@@ -3,7 +3,7 @@ import pygame
 import time
 import os
 from functools import partial
-from core.settings               import FPS, ASSETS_DIR, IS_WEB, WEB_RESOLUTION
+from core.settings               import FPS, ASSETS_DIR, IS_WEB, WEB_RESOLUTION, AUDIO_FREQUENCY, AUDIO_BUFFER_SAMPLES
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
@@ -107,6 +107,8 @@ class FrameProfiler:
 
 class Game:
     def __init__(self, storage_sync=None):
+        # pygame.init() opens the mixer, so its settings must be given beforehand.
+        pygame.mixer.pre_init(AUDIO_FREQUENCY, -16, 2, AUDIO_BUFFER_SAMPLES)
         pygame.init()
         self.storage_sync = storage_sync
         self._storage_sync_elapsed = 0.0
