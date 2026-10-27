@@ -307,7 +307,6 @@ class Level2(BaseScene):
         self.screen.fill(BLACK)
         self.map_renderer.draw()
         self.render_system.draw(scale=self.scale) 
-        #self.light_system.update(self.entity_mn,0)
         self.ui_manager.draw(self.screen)
         self._draw_gameplay_prompt_bar()
 

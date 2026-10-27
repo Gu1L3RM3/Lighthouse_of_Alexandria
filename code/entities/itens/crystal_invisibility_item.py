@@ -6,7 +6,6 @@ from core.components.animation_sprite import AnimateSprite
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.components.always_on_top import AlwaysOnTop
-from core.components.light_component import LightComponent
 from core.managers.event_manager import EventManager
 from core.managers.resource_manager import ResourceManager
 from entities.itens.item import Item
@@ -29,7 +28,6 @@ class CrystalInvisibilityItem(Item):
             AreaTrigger(self.area_trigger, active=active, on_entered=self.on_collect),
             Sprite(self.animations["idle"][0]),
             AlwaysOnTop(),
-            LightComponent(radius=15),
             self.animate_sprite,
         )
         self.animate_sprite.play("idle")

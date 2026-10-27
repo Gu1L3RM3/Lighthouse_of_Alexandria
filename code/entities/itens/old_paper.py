@@ -5,7 +5,6 @@ from core.components.area_trigger import AreaTrigger
 from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
 from core.components.position import Position
-from core.components.light_component import LightComponent
 from core.managers.resource_manager import ResourceManager
 from core.components.always_on_top import AlwaysOnTop
 from core.managers.event_manager import EventManager
@@ -26,7 +25,6 @@ class OldPaper(Item):
             AreaTrigger(self.area_trigger,active=active,on_entered=self.on_player_enter, on_exit=self.on_player_exit),
             AlwaysOnTop(),
             Sprite(surf),
-            LightComponent(),
             self.animate_sprite
             )
         self.player_inside = False

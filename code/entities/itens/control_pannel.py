@@ -5,7 +5,6 @@ from core.components.position import Position
 from core.components.collider import Collider
 from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
-from core.components.light_component import LightComponent
 from core.components.panel_status import PanelStatus
 from core.managers.resource_manager import ResourceManager
 from core.managers.event_manager import EventManager
@@ -57,7 +56,6 @@ class ControlPannel(Item):
             AlwaysOnTop(),
             self.animate,
             Sprite(self.animations['idle'][0]),
-            LightComponent(),
             self.panel_status,
         )
         self.animate.play('idle')

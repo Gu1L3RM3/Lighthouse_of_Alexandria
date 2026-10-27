@@ -11,7 +11,6 @@ from core.components.render_layer import RenderLayer
 from core.components.depth_anchor import DepthAnchor
 from core.settings import *
 from core.ecs import Entity
-from core.components.light_component import LightComponent
 from pygame import Vector2, Event
 from core.managers.resource_manager import ResourceManager
 from core.managers.audio_manager import AudioManager
@@ -44,7 +43,6 @@ class Player(Entity):
         self.add(pos, vel, spr, col,
                  anim,
                  Freeze(),
-                 LightComponent(radius=20),
                  Team("player"),
                  RenderLayer(RenderLayer.ACTOR),
                  DepthAnchor(offset_y=16),

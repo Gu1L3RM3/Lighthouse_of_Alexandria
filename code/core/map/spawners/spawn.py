@@ -17,7 +17,6 @@ from entities.itens.voltage_source_item import VoltageSourceItem
 from entities.itens.current_source_item import CurrentSourceItem
 from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 from entities.itens.anti_reaggro_flask_item import AntiReaggroFlaskItem
-from entities.itens.light_charge_item import LightChargeItem
 from entities.animate_circuit.circuit_components import *
 from entities.npcs.npc_factory import NPCFactory
 from core.components.npc_routine import NPCRoutine
@@ -50,7 +49,6 @@ class ItemSpawner(EntitySpawner):
             'current_source':CurrentSourceItem,
             'crystal_invisibility': CrystalInvisibilityItem,
             'anti_reaggro_flask': AntiReaggroFlaskItem,
-            'light_charge': LightChargeItem,
         }
      
 

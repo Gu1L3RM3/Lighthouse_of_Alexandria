@@ -1,10 +1,6 @@
 from pathlib import Path
 
 from core.ecs import System
-from core.settings import (
-    GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS,
-    GENERIC_LEVEL_TEMPORARY_LIGHT_FADE_OUT_SECONDS,
-)
 from entities.itens.crystal_invisibility_item import CrystalInvisibilityItem
 
 
@@ -15,53 +11,6 @@ class GenericLevelEnvironmentSystem(System):
     def update(self, entity_manager, dt: float):
         _ = entity_manager
         self.update_crystal_respawn_queue(dt)
-        self.update_temporary_light(dt)
-
-    def activate_temporary_light(self, duration: float):
-        if not hasattr(self.scene, "light_system"):
-            return
-        if self.scene._temporary_light_timer <= 0:
-            self.scene._temporary_light_restore_enabled = self.scene.light_system.enabled
-        self.scene.light_system.turn_on()
-        self.scene._temporary_light_timer = max(0.0, float(duration))
-
-    def activate_permanent_light(self):
-        if not hasattr(self.scene, "light_system"):
-            return
-        self.scene.light_system.turn_on()
-        if self.scene._temporary_light_timer > 0:
-            self.scene._temporary_light_restore_enabled = self.scene.light_system.enabled
-
-    def toggle_permanent_light(self):
-        if not hasattr(self.scene, "light_system"):
-            return
-
-        if self.scene.light_system.enabled:
-            self.scene.light_system.turn_on()
-        else:
-            self.scene.light_system.turn_off()
-
-        if self.scene._temporary_light_timer > 0:
-            self.scene._temporary_light_restore_enabled = self.scene.light_system.enabled
-
-    def update_temporary_light(self, dt: float):
-        if self.scene._temporary_light_timer <= 0:
-            return
-        self.scene._temporary_light_timer = max(0.0, self.scene._temporary_light_timer - dt)
-        if self.scene._temporary_light_timer > 0:
-            return
-        if hasattr(self.scene, "light_system") and self.scene._temporary_light_restore_enabled is not None:
-            self.scene.light_system.set_enabled(
-                self.scene._temporary_light_restore_enabled,
-                transition_seconds=GENERIC_LEVEL_TEMPORARY_LIGHT_FADE_OUT_SECONDS,
-            )
-        self.scene._temporary_light_restore_enabled = None
-
-    def get_temporary_light_ratio(self) -> float:
-        duration = float(GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS)
-        if duration <= 0:
-            return 0.0
-        return max(0.0, min(1.0, self.scene._temporary_light_timer / duration))
 
     def uses_custom_crystal_respawn(self) -> bool:
         level_name = Path(self.scene.level_path).stem.lower()

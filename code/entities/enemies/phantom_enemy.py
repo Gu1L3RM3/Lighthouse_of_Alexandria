@@ -2,7 +2,6 @@ import pygame
 
 from core.components.collider import Collider
 from core.components.phantom_ai import PhantomAI
-from core.components.light_component import LightComponent
 from core.managers.resource_manager import ResourceManager
 from entities.enemies.base_enemy import EnemyBase
 
@@ -38,7 +37,6 @@ class PhantomEnemy(EnemyBase):
                 patrol_speed=speed,
                 route=route,
             ),
-            LightComponent()
         )
 
     def _load_animations(self) -> dict[str, list[pygame.Surface]]:

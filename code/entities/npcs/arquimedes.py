@@ -1,7 +1,6 @@
 from core.components.animation_sprite import AnimateSprite
 from core.components.collider import Collider
 from core.components.dialogue import Dialogue
-from core.components.light_component import LightComponent
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.ecs import Entity
@@ -32,6 +31,5 @@ class Arquimedes(Entity):
                 ).get_npc_dialogue("arquimedes"),
                 size_dialogue=(48, 48),
             ),
-            LightComponent(),
         )
         self.anim.play("idle")

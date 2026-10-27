@@ -8,7 +8,6 @@ from core.components.position import Position
 from core.components.collider import Collider
 from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
-from core.components.light_component import LightComponent
 from core.components.health import Health
 from entities.player import Player
 
@@ -66,7 +65,6 @@ class Door(Entity):
             Sprite(
                 self.animations['idle'][0]
             ),
-            LightComponent(),
 
 
         ),
