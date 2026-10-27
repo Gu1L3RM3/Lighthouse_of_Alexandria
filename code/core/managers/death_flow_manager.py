@@ -77,9 +77,9 @@ class DeathFlowManager:
             return
 
         return_scene_name = context["return_scene_name"]
-        if return_scene_name not in self.scene_manager.scenes:
+        if not self.scene_manager.has_scene(return_scene_name):
             self.scene_manager.start_fade(self.game_over_return_scene, duration)
             return
 
-        new_scene = self.scene_factory.recreate(self.scene_manager.scenes[return_scene_name])
+        new_scene = self.scene_factory.recreate(self.scene_manager.get_scene(return_scene_name))
         self.scene_manager.replace_scene_and_fade(return_scene_name, new_scene, duration)

@@ -4,7 +4,6 @@ from core.components.area_trigger import AreaTrigger
 from core.components.position import Position
 from core.components.sprite import Sprite
 from core.components.always_on_top import AlwaysOnTop
-from core.components.light_component import LightComponent
 from core.managers.event_manager import EventManager
 from core.managers.resource_manager import ResourceManager
 from entities.itens.item import Item
@@ -25,7 +24,6 @@ class AntiReaggroFlaskItem(Item):
             AreaTrigger(self.area_trigger, active=active, on_entered=self.on_collect),
             Sprite(self.sprite),
             AlwaysOnTop(),
-            LightComponent(radius=12),
         )
 
     def on_collect(self, entity):

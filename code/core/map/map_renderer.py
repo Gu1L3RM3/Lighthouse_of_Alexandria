@@ -11,6 +11,11 @@ class MapRenderer:
         self.map_surface = self._scale_surface(self.tilemap.ground_surface, scale)
         self.object_surface = self._scale_surface(self.tilemap.object_surface, scale)
         self.foreground_surface = self._scale_surface(self.tilemap.foreground_surface, scale)
+        # The renderer owns the drawn layers from here on; keeping the unscaled
+        # copies on the tilemap would hold a second full-map image per layer in RAM.
+        self.tilemap.ground_surface = None
+        self.tilemap.object_surface = None
+        self.tilemap.foreground_surface = None
 
     def _scale_surface(self, surface: pygame.Surface | None, scale: float) -> pygame.Surface | None:
         if surface is None:

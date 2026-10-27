@@ -128,8 +128,6 @@ class BaseGenericLevel(BaseScene):
         self.interaction_system = GenericLevelInteractionSystem(self)
         # Mantem o recurso de debug no codigo, mas desativado por padrao.
         self.debug_interaction_areas = False
-        self._temporary_light_timer = 0.0
-        self._temporary_light_restore_enabled = None
         self._scene_change_target_name: str | None = None
         self._preserve_runtime_state_on_next_start = False
         self._preserve_component_overload_on_next_start = False
@@ -521,9 +519,6 @@ class BaseGenericLevel(BaseScene):
         self.ghost_renderer.draw_rebirth_effects(self)
         if self.debug_interaction_areas:
             self._draw_debug_areas()
-        if hasattr(self, 'light_system'):
-            # Usa o dt real para permitir transicoes de luz (fade in/out) fluirem.
-            self.light_system.update(self.entity_mn, self._last_frame_dt)
         self.ui_manager.draw(self.screen)
         self._draw_gameplay_prompt_bar()
 
@@ -596,8 +591,6 @@ class BaseGenericLevel(BaseScene):
         else:
             self.bomb_manager.reset_bombs(GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL)
         self.bomb_system.sync_bomb_runtime()
-        self._temporary_light_timer = 0.0
-        self._temporary_light_restore_enabled = None
         self.event_manager.subscribe('fall_player',self.fall_player)
         self.event_manager.subscribe('request_freeze',self.freeze_system.request_freeze)
         self.event_manager.subscribe('release_freeze',self.freeze_system.release_freeze)
@@ -676,29 +669,6 @@ class BaseGenericLevel(BaseScene):
         if target_scene_name in {"main_menu", "help"}:
             return
         self.reset_bomb_circuit_to_default()
-
-    def _on_temporary_light_collected(self, event):
-        _ = event
-        if not hasattr(self, "light_system"):
-            return
-        self._activate_temporary_light(GENERIC_LEVEL_TEMPORARY_LIGHT_DURATION_SECONDS)
-
-    def _activate_temporary_light(self, duration: float):
-        self.environment_system.activate_temporary_light(duration)
-
-    def _activate_permanent_light(self, event):
-        _ = event
-        self.environment_system.activate_permanent_light()
-
-    def _toggle_permanent_light(self, event):
-        _ = event
-        self.environment_system.toggle_permanent_light()
-
-    def _update_temporary_light(self, dt: float):
-        self.environment_system.update_temporary_light(dt)
-
-    def get_temporary_light_ratio(self) -> float:
-        return self.environment_system.get_temporary_light_ratio()
 
     def _uses_custom_crystal_respawn(self) -> bool:
         return self.environment_system.uses_custom_crystal_respawn()

@@ -6,7 +6,6 @@ from core.components.sprite import Sprite
 from core.components.position import Position
 from core.components.always_on_top import AlwaysOnTop
 from core.components.label_component import LabelComponent
-from core.components.light_component import LightComponent
 from core.managers.event_manager import EventManager
 from entities.player import Player
 from core.settings import FONT
@@ -56,7 +55,6 @@ class VoltageSourceItem(Item):
                 use_outline=True,
             ),
             AlwaysOnTop(),
-            LightComponent(radius=30)
         )
     def on_active(self):
         area_trigger:AreaTrigger =  self.get(AreaTrigger)

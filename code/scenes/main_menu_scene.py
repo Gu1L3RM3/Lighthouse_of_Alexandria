@@ -262,7 +262,7 @@ class MainMenuScene(BaseScene):
         max_lives = int(lives.get("max", self.life_manager.max_lives))
         self.life_manager.set_state(current_lives=current_lives, max_lives=max_lives)
 
-        if scene_name and scene_name in self.scene_manager.scenes:
+        if scene_name and self.scene_manager.has_scene(scene_name):
             self.scene_manager.start_fade(scene_name, 0.45)
 
     def start_new_game(self):

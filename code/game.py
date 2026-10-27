@@ -1,6 +1,7 @@
 import pygame
 import time
 import os
+from functools import partial
 from core.settings               import FPS, ASSETS_DIR
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
@@ -151,7 +152,7 @@ class Game:
             )
             self.scene_manager.active_scene_name = "circuit_editor_boot"
         elif self.profile_start_scene:
-            if self.profile_start_scene in self.scene_manager.scenes:
+            if self.scene_manager.has_scene(self.profile_start_scene):
                 self.scene_manager.change(self.profile_start_scene)
             else:
                 print(f"[ALEX_PROFILE] warning: scene '{self.profile_start_scene}' not found")
@@ -189,21 +190,21 @@ class Game:
             "generic_levels_7": GenericLevel7,
             "final_fase": FinalLevel,
         }
-        self.scene_manager.register('main_menu', MainMenuScene(self.screen))
-        self.scene_manager.register('credits', CreditsScene(self.screen))
-        self.scene_manager.register('help', HelpScene(self.screen))
-        self.scene_manager.register('ending_lighthouse', LighthouseRekindleScene(self.screen))
-        self.scene_manager.register('ending_thanks_credits', EndingThanksCreditsScene(self.screen))
-        self.scene_manager.register('home_scene',HomeScene(self.screen))
-        self.scene_manager.register('home_after', HomeAfterScene(self.screen))
-        self.scene_manager.register('death_transition', DeathTransitionScene(self.screen))
-        self.scene_manager.register('level_1',Level1(self.screen))
-        self.scene_manager.register('level_2',Level2(self.screen))
-        self.scene_manager.register('exp_fase_3', ExplanationLevel3(self.screen))
-        self.scene_manager.register('exp_fase_4', ExplanationLevel4(self.screen))
-        self.scene_manager.register('exp_fase_5', ExplanationLevel5(self.screen))
-        self.scene_manager.register('exp_fase_6', ExplanationLevel6(self.screen))
-        self.scene_manager.register('exp_fase_7', ExplanationLevel7(self.screen))
+        self.scene_manager.register_lazy('main_menu', partial(MainMenuScene, self.screen))
+        self.scene_manager.register_lazy('credits', partial(CreditsScene, self.screen))
+        self.scene_manager.register_lazy('help', partial(HelpScene, self.screen))
+        self.scene_manager.register_lazy('ending_lighthouse', partial(LighthouseRekindleScene, self.screen))
+        self.scene_manager.register_lazy('ending_thanks_credits', partial(EndingThanksCreditsScene, self.screen))
+        self.scene_manager.register_lazy('home_scene', partial(HomeScene, self.screen))
+        self.scene_manager.register_lazy('home_after', partial(HomeAfterScene, self.screen))
+        self.scene_manager.register_lazy('death_transition', partial(DeathTransitionScene, self.screen))
+        self.scene_manager.register_lazy('level_1', partial(Level1, self.screen))
+        self.scene_manager.register_lazy('level_2', partial(Level2, self.screen))
+        self.scene_manager.register_lazy('exp_fase_3', partial(ExplanationLevel3, self.screen))
+        self.scene_manager.register_lazy('exp_fase_4', partial(ExplanationLevel4, self.screen))
+        self.scene_manager.register_lazy('exp_fase_5', partial(ExplanationLevel5, self.screen))
+        self.scene_manager.register_lazy('exp_fase_6', partial(ExplanationLevel6, self.screen))
+        self.scene_manager.register_lazy('exp_fase_7', partial(ExplanationLevel7, self.screen))
         
         for folder, level_class in folder_class_map.items():
             folder_path = (base_path / folder)
@@ -213,9 +214,9 @@ class Game:
                     level_name = file_path.stem
                     level_route = str(Path(folder) / level_name)  
 
-                    self.scene_manager.register(
+                    self.scene_manager.register_lazy(
                         level_name,
-                        level_class(self.screen, level_path=level_route)
+                        partial(level_class, self.screen, level_path=level_route),
                     )
     def run(self):
         while True:

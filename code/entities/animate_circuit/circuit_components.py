@@ -8,7 +8,6 @@ from core.components.area_trigger import AreaTrigger
 from core.components.velocity import Velocity
 from core.components.tags import EletronTag
 from core.components.always_on_top import AlwaysOnTop
-from core.components.light_component import LightComponent
 from core.components.electron_flow import ElectronFlow
 from core.components.dynamic_collision import DynamicCollision
 class Eletron(Entity):
@@ -23,7 +22,6 @@ class Eletron(Entity):
             Collider(16,16),
             EletronTag(),
             Velocity(),
-            LightComponent(),
             ElectronFlow(),
             DynamicCollision(enabled=False),
             )

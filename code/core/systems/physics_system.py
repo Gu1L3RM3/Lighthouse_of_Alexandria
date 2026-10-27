@@ -88,12 +88,13 @@ class PhysicsSystem(System):
 
         rect = col.get_rect(pos.x, pos.y)
 
-        for wall in self.static_colliders:
-            if rect.colliderect(wall):
-                rect, vel = self._resolve_collision(rect, wall, dx, dy, vel, col)
-                pos.x = rect.x - col.offset_x
-                pos.y = rect.y - col.offset_y
-                return
+        wall_index = rect.collidelist(self.static_colliders)
+        if wall_index != -1:
+            wall = self.static_colliders[wall_index]
+            rect, vel = self._resolve_collision(rect, wall, dx, dy, vel, col)
+            pos.x = rect.x - col.offset_x
+            pos.y = rect.y - col.offset_y
+            return
 
         for other in moving_entities:
             if other is entity or not other.has(Collider):

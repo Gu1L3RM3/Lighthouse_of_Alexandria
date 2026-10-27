@@ -31,6 +31,8 @@ class AlertDialog(Widget):
         self.input_manager = InputManager.get()
         self.prompt_chip_font = pygame.font.Font(None, 18)
         self.prompt_text_font = pygame.font.Font(None, 18)
+        self.title_font = pygame.font.SysFont(None, 28)
+        self._overlay: Surface | None = None
         self._closed = False
 
         self.set_dialog_rect(self._dialog_size)
@@ -115,21 +117,24 @@ class AlertDialog(Widget):
         
         pygame.draw.rect(surface, (255, 255, 255), self.dialog_rect, border_radius=12)
         pygame.draw.rect(surface, (0, 0, 0), self.dialog_rect, 2, border_radius=12)
-        font = pygame.font.SysFont(None, 28)
-        title_surf = font.render(f"{self.title}", True, (0, 0, 0))
+        title_surf = self.title_font.render(f"{self.title}", True, (0, 0, 0))
         surface.blit(title_surf, (self.dialog_rect.centerx - title_surf.get_width() // 2,
                                   self.dialog_rect.top + 15))
 
     def draw(self, surface: Surface):
-        overlay = Surface(surface.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 150))
-        surface.blit(overlay, (0, 0))
+        surface.blit(self._get_overlay(surface.get_size()), (0, 0))
 
         self.draw_surface(surface)
 
 
         self.close_button.draw(surface)
         self._draw_close_hint(surface)
+
+    def _get_overlay(self, size: tuple[int, int]) -> Surface:
+        if self._overlay is None or self._overlay.get_size() != size:
+            self._overlay = Surface(size, pygame.SRCALPHA)
+            self._overlay.fill((0, 0, 0, 150))
+        return self._overlay
 
     def _draw_close_hint(self, surface: Surface):
         language = LanguageService.get()
