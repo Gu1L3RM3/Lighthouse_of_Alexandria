@@ -10,7 +10,13 @@ pip install -r requirements-dev.txt        # runtime + dev dependencies
 python main.py                             # launch the game
 python -m unittest discover -s code/tests  # full test suite (run before every commit)
 pyinstaller --noconfirm Alexandria.spec    # release build
+pygbag --build .                           # web build (build/web), config in pygbag.ini
 ```
+
+- Web build (pygbag): `sys.platform == "emscripten"` → fixed 1280×720 `SCALED`
+  window; desktop stays native fullscreen. Saves are mirrored to localStorage
+  by `core/web_storage_sync.py`. Runtime deps for the web go in the PEP 723
+  block at the top of `main.py`.
 
 - Entry point: `main.py`; game loop and scene registration: `code/game.py`.
 - `code/scenes/` scenes, `code/entities/` game objects, `code/core/` shared ECS,

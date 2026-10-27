@@ -6,6 +6,10 @@ from pygame.locals import *
 
 FPS = 60
 
+IS_WEB = sys.platform == "emscripten"
+# Fixed logical size for browser/Android: scaled by the page instead of using the native fullscreen size.
+WEB_RESOLUTION = (1280, 720)
+
 TILE_SIZE=16
 
 BASE_DIR = Path(__file__).resolve().parent
