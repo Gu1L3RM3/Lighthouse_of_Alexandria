@@ -245,18 +245,17 @@ class InputSystem(System):
         label :LabelComponent=target.get(LabelComponent)
         self.storage_manager.add_component(target.__class__.__name__,label.value)    
     def clear_all(self):
-  
+        # A ferramenta ativa pode conter um componente ainda preso ao cursor.
+        # Ele não foi retirado do inventário e não deve ser devolvido ao storage.
+        self.exit_current_tool()
+
         for entity in self.entity_manager.get_entities_with(Dropped,
                                                             filter=lambda e: self.can_change_all(e)):
             self.entity_manager.remove_entity(entity)
             if entity.has(LabelComponent):
                 label:LabelComponent = entity.get(LabelComponent)
                 self.storage_manager.add_component(entity.__class__.__name__,label.value)
-            
-    
-
-        
-        self.storage_manager.set_completly_storage()
+        self.node_manager.clear_all_nodes()
     def rotate_brush(self):
         if not self.brush or not self.brush.has(Connectable):
             return

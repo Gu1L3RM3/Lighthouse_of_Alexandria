@@ -100,6 +100,12 @@ class MenuEditCircuit(Widget):
         self.rm = ResourceManager.get()
         self.color_background = (0, 0, 0)
         self.screen_width, self.screen_height = self.screen_size
+        self.button_scale = self._button_scale_for_screen()
+        self.wide_button_size = (round(61 * self.button_scale), round(41 * self.button_scale))
+        self.short_button_size = (round(64 * self.button_scale), round(64 * self.button_scale))
+        self.top_font_size = max(6, min(15, round(7.5 * self.button_scale)))
+        self.side_font_size = max(6, min(14, round(7 * self.button_scale)))
+        self.side_action_font_size = max(6, min(10, round(5 * self.button_scale)))
         self.buttons: list[Button] = []
         self.buttons_by_name: dict[str, Button] = {}
         self.top_button_names: list[str] = []
@@ -117,6 +123,15 @@ class MenuEditCircuit(Widget):
         self.set_menu_top()
         self.set_menu_right()
         self._refresh_focus_visuals()
+
+    def _button_scale_for_screen(self) -> float:
+        """Keep all editor controls visible on smaller fullscreen displays."""
+        horizontal_scale = (self.screen_width - 96) / 494
+        vertical_scale = (self.screen_height - 24) / (6 * 64)
+        return max(0.55, min(2.0, horizontal_scale, vertical_scale))
+
+    def _button_surface(self, image_path: str, size: tuple[int, int]) -> Surface:
+        return pygame.transform.scale(self.rm.load_image(image_path), size)
 
     def _register_button(self, name: str, button: Button):
         self.buttons_by_name[name] = button
@@ -197,11 +212,20 @@ class MenuEditCircuit(Widget):
 
         self.rect_top = self.surface_top.get_rect(topleft=(0, 0))
 
-        surf1 = pygame.transform.scale2x(self.rm.load_image("buttons/wide.png"))
-        surf2 = pygame.transform.scale2x(self.rm.load_image("buttons/wide_pressed.png"))
-        init_pos_x = self.cell_size * 2
-        pos_y = self.cell_size + (self.cell_size / 2) - 15
-        font_size = 15
+        surf1 = self._button_surface("buttons/wide.png", self.wide_button_size)
+        surf2 = self._button_surface("buttons/wide_pressed.png", self.wide_button_size)
+        close_surf = self._button_surface("buttons/short.png", self.short_button_size)
+        close_pressed_surf = self._button_surface("buttons/short_pressed.png", self.short_button_size)
+
+        # O editor foi concebido para um grupo compacto de ferramentas. Não
+        # distribuir os botões por toda a largura evita grandes vazios em telas
+        # grandes e conserva a memória muscular do layout original.
+        gap = max(6, round(35 * self.button_scale))
+        first_center = round(self.cell_size * self.button_scale)
+        centers = [first_center + index * (self.wide_button_size[0] + gap) for index in range(6)]
+        centers.append(centers[-1] + (self.wide_button_size[0] + self.short_button_size[0]) // 2 + 4)
+        pos_y = self.rect_top.centery
+        font_size = self.top_font_size
 
         self._register_button(
             "node",
@@ -210,7 +234,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.input_system.set_brush("node"),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x, pos_y),
+                pos_center=(centers[0], pos_y),
                 text=self.language_service.get_ui_label("editor_node"),
                 font_size=font_size,
             ),
@@ -224,7 +248,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.to_eletric_list_click(self.v_source_list),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 3, pos_y),
+                pos_center=(centers[1], pos_y),
                 text=self.language_service.get_ui_label("editor_v_source"),
                 font_size=font_size,
             ),
@@ -238,7 +262,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.to_eletric_list_click(self.resistor_list),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 6, pos_y),
+                pos_center=(centers[2], pos_y),
                 text=self.language_service.get_ui_label("editor_resistor"),
                 font_size=font_size,
             ),
@@ -252,7 +276,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.to_eletric_list_click(self.c_source_list),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 9, pos_y),
+                pos_center=(centers[3], pos_y),
                 text=self.language_service.get_ui_label("editor_i_source"),
                 font_size=font_size,
             ),
@@ -266,7 +290,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.input_system.set_brush("gnd"),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 12, pos_y),
+                pos_center=(centers[4], pos_y),
                 text=self.language_service.get_ui_label("editor_gnd"),
                 font_size=font_size,
             ),
@@ -280,7 +304,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.input_system.set_brush("wire"),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 15, pos_y),
+                pos_center=(centers[5], pos_y),
                 text=self.language_service.get_ui_label("editor_wire"),
                 font_size=font_size,
             ),
@@ -288,16 +312,14 @@ class MenuEditCircuit(Widget):
         self.top_button_names.append("wire")
         self.component_button_names.append("wire")
 
-        surf1 = pygame.transform.scale2x(self.rm.load_image("buttons/short.png"))
-        surf2 = pygame.transform.scale2x(self.rm.load_image("buttons/short_pressed.png"))
         self._register_button(
             "close",
             Button(
                 click_type=ClickType.AFTER_PRESSED,
                 action=self._request_exit,
-                init_surface=surf1.copy(),
-                surface_pressed=surf2.copy(),
-                pos_center=(init_pos_x + self.cell_size * 17, pos_y - 5),
+                init_surface=close_surf.copy(),
+                surface_pressed=close_pressed_surf.copy(),
+                pos_center=(centers[6], pos_y),
                 text=self.language_service.get_ui_label("editor_close"),
                 font_size=font_size,
             ),
@@ -313,19 +335,19 @@ class MenuEditCircuit(Widget):
         SceneManager.get().back_with_fade()
 
     def set_menu_right(self):
-        self.surface_right = Surface((self.cell_size * 2, self.screen_height))
-
+        side_margin = max(10, round(12 * self.button_scale))
+        sidebar_left = self.screen_width - side_margin - self.short_button_size[0]
+        self.surface_right = Surface((self.screen_width - sidebar_left, self.screen_height))
         self.surface_right.fill(self.color_background)
-        pos_x_menu_right = self.screen_width - self.cell_size - 22
-        self.rect_right = self.surface_right.get_rect(topleft=(pos_x_menu_right, 0))
+        self.rect_right = self.surface_right.get_rect(topleft=(sidebar_left, 0))
 
-        surf1 = pygame.transform.scale2x(self.rm.load_image("buttons/short.png"))
-        surf2 = pygame.transform.scale2x(self.rm.load_image("buttons/short_pressed.png"))
+        surf1 = self._button_surface("buttons/short.png", self.short_button_size)
+        surf2 = self._button_surface("buttons/short_pressed.png", self.short_button_size)
 
-        font_size = 15
-
-        pos_x = pos_x_menu_right + 40
-        start_y = self.cell_size
+        font_size = self.side_font_size
+        pos_x = self.screen_width - side_margin - self.short_button_size[0] // 2
+        vertical_gap = max(4, round(2 * self.button_scale))
+        start_y = self.short_button_size[1] // 2 + 4
 
         self._register_button(
             "rotate",
@@ -348,7 +370,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.input_system.set_brush("delete"),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(pos_x, start_y + self.cell_size * 2),
+                pos_center=(pos_x, start_y + (self.short_button_size[1] + vertical_gap)),
                 text="D",
                 font_size=font_size,
             ),
@@ -362,7 +384,7 @@ class MenuEditCircuit(Widget):
                 action=lambda: self.input_system.set_brush("select"),
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(pos_x, start_y + self.cell_size * 4),
+                pos_center=(pos_x, start_y + 2 * (self.short_button_size[1] + vertical_gap)),
                 text="S",
                 font_size=font_size,
             ),
@@ -376,9 +398,9 @@ class MenuEditCircuit(Widget):
                 action=self.input_system.save_circuit,
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(pos_x, start_y + self.cell_size * 6),
-                text=self.language_service.get_ui_label("editor_solve"),
-                font_size=font_size,
+                pos_center=(pos_x, start_y + 3 * (self.short_button_size[1] + vertical_gap)),
+                text="Solve",
+                font_size=self.side_action_font_size,
             ),
         )
         self.right_button_names.append("save")
@@ -390,9 +412,9 @@ class MenuEditCircuit(Widget):
                 action=self.input_system.load_circuit,
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(pos_x, start_y + self.cell_size * 8),
-                text=self.language_service.get_ui_label("editor_load"),
-                font_size=font_size,
+                pos_center=(pos_x, start_y + 4 * (self.short_button_size[1] + vertical_gap)),
+                text="Load",
+                font_size=self.side_action_font_size,
             ),
         )
         self.right_button_names.append("load")
@@ -404,9 +426,9 @@ class MenuEditCircuit(Widget):
                 action=self._request_clear,
                 init_surface=surf1.copy(),
                 surface_pressed=surf2.copy(),
-                pos_center=(pos_x, start_y + self.cell_size * 10),
-                text=self.language_service.get_ui_label("editor_clear"),
-                font_size=font_size - 2,
+                pos_center=(pos_x, start_y + 5 * (self.short_button_size[1] + vertical_gap)),
+                text="Clear",
+                font_size=self.side_action_font_size,
             ),
         )
         self.right_button_names.append("clear")

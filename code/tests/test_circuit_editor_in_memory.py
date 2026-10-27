@@ -9,15 +9,20 @@ if str(ROOT) not in sys.path:
 
 from core.circuit_tools.circuit_domain import CircuitDocument
 from core.circuit_tools.circuit_repository import CircuitFormatError
+from core.components.dropped import Dropped
+from core.components.label_component import LabelComponent
+from core.ecs import Entity
 from core.systems.circuit_editor.input_system import InputSystem
+from entities.circuit_editor.eletric_components import Resistor
 
 
 class _EntityManager:
     def __init__(self):
         self.cleared = False
+        self.entities = []
 
     def get_entities(self):
-        return []
+        return list(self.entities)
 
     def get_entities_by_class(self, _entity_class):
         return []
@@ -25,8 +30,26 @@ class _EntityManager:
     def clear_all_entities(self):
         self.cleared = True
 
+    def get_entities_with(self, component_type, filter=None):
+        entities = [entity for entity in self.entities if entity.has(component_type)]
+        return [entity for entity in entities if filter is None or filter(entity)]
+
+    def remove_entity(self, entity):
+        self.entities.remove(entity)
+
 
 class _Storage:
+    def __init__(self):
+        self.components = {}
+        self.restore_calls = 0
+
+    def add_component(self, component_type, value):
+        key = (component_type, value)
+        self.components[key] = self.components.get(key, 0) + 1
+
+    def set_completly_storage(self):
+        self.restore_calls += 1
+
     def save_eletric_storage(self):
         pass
 
@@ -118,6 +141,20 @@ class CircuitEditorInMemoryTests(unittest.TestCase):
         with self.assertRaises(CircuitFormatError):
             system.load_circuit()
         self.assertFalse(system.entity_manager.cleared)
+
+    def test_clear_all_returns_editable_components_to_storage(self):
+        system = make_system(_Repository())
+        resistor = Resistor.__new__(Resistor)
+        Entity.__init__(resistor)
+        resistor.components[Dropped] = Dropped()
+        resistor.components[LabelComponent] = type("Label", (), {"value": "1k"})()
+        system.entity_manager.entities = [resistor]
+
+        system.clear_all()
+
+        self.assertEqual(system.storage_manager.components, {("Resistor", "1k"): 1})
+        self.assertEqual(system.storage_manager.restore_calls, 0)
+        self.assertEqual(system.entity_manager.entities, [])
 
 
 if __name__ == "__main__":
