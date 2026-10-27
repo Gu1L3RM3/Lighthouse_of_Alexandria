@@ -9,6 +9,7 @@ a Python/Pygame educational adventure game about electric circuits.
 pip install -r requirements-dev.txt        # runtime + dev dependencies
 python main.py                             # launch the game
 python -m unittest discover -s code/tests  # full test suite (run before every commit)
+python tools/level_studio.py               # Level Studio: teacher web tool to edit/add levels (docs/level_studio.md)
 pyinstaller --noconfirm Alexandria.spec    # release build
 pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --build .    # own site: upload build/web
 pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --archive .  # itch.io: upload build/web.zip
@@ -38,6 +39,10 @@ pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png
   bar and the sidebar (whole-pixel cells, never enlarged), so on 1280x720 it is
   drawn at 57 px. Pointer positions go through `board.to_world`, drawing
   through `board.to_screen_rect`; keep world and screen coordinates apart.
+- Level Studio (`tools/`, not shipped: excluded in `pygbag.ini`, never imported by the game): stdlib
+  HTTP server on 127.0.0.1 editing TMX maps (`studio/tmx_io.py`, byte-identical round trip), circuits
+  and `level.json`. The level sequence is the doors' `next_scene`; extra levels live in a stage folder
+  and reuse its scene class/validator (`studio/campaign.py`). Per-level tuning: `core/level_config.py`.
 - Prompt bars: with the on-screen pad visible, `draw_prompt_hint_row` names the
   pad's buttons and draws the row doubled in the strip between its controls
   (`InputManager.touch_prompt_area`), wrapping to two rows when needed.
