@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estúdio do Farol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@600;800&display=swap">
+<link rel="stylesheet" href="/static/studio.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="brand" id="go-trail" type="button" title="Voltar para a trilha">Estúdio do Farol</button>
+  <div class="crumb" id="crumb"></div>
+  <p class="status" id="status" role="status" aria-live="polite"></p>
+  <div class="actions" id="level-actions" hidden>
+    <button type="button" id="save" class="primary">Salvar</button>
+    <button type="button" id="play">Testar no jogo</button>
+    <button type="button" id="fullscreen" aria-pressed="false" title="Usar a tela inteira (Esc sai)">Tela cheia</button>
+  </div>
+  <button type="button" id="help-open" class="help-button" title="Como usar o estúdio (?)" aria-haspopup="dialog">Ajuda</button>
+</header>
+
+<main id="trail-view" class="trail-view">
+  <section class="trail-intro">
+    <h1>Trilha do jogo</h1>
+    <p>Cada etapa ensina um conceito. Uma fase extra entra depois de outra fase da mesma etapa e usa o mesmo tipo de desafio.
+       As portas dos mapas são religadas sozinhas.</p>
+  </section>
+  <ul class="issues" id="trail-issues"></ul>
+  <ol class="stages" id="stages"></ol>
+</main>
+
+<main id="level-view" class="level-view" hidden>
+  <nav class="rail" aria-label="Partes da fase">
+    <button type="button" class="tab" data-tab="map" aria-pressed="true">Mapa</button>
+    <button type="button" class="tab" data-tab="circuit" aria-pressed="false">Circuitos</button>
+    <button type="button" class="tab" data-tab="params" aria-pressed="false">Parâmetros</button>
+  </nav>
+
+  <section class="workspace">
+    <div class="toolbar" id="map-toolbar">
+      <div class="tool-group" role="group" aria-label="Ferramentas do mapa">
+        <button type="button" class="tool" data-tool="select" title="Selecionar e arrastar objetos (V)">Mover</button>
+        <button type="button" class="tool" data-tool="brush" title="Pincel (B)">Pincel</button>
+        <button type="button" class="tool" data-tool="erase" title="Borracha (E)">Borracha</button>
+        <button type="button" class="tool" data-tool="rect" title="Retângulo (U)">Retângulo</button>
+        <button type="button" class="tool" data-tool="fill" title="Balde (F)">Balde</button>
+        <button type="button" class="tool" data-tool="pick" title="Conta-gotas (I)">Conta-gotas</button>
+      </div>
+      <label class="field-inline">Camada
+        <select id="layer-select"></select>
+      </label>
+      <label class="field-inline">Novo objeto
+        <select id="object-kind"></select>
+      </label>
+      <button type="button" id="add-object">Colocar</button>
+      <div class="tool-group" role="group" aria-label="Histórico e zoom">
+        <button type="button" id="undo" title="Desfazer (Ctrl+Z)">Desfazer</button>
+        <button type="button" id="redo" title="Refazer (Ctrl+Y)">Refazer</button>
+        <button type="button" id="zoom-out" title="Diminuir zoom (-)">−</button>
+        <button type="button" id="zoom-in" title="Aumentar zoom (+)">+</button>
+      </div>
+    </div>
+
+    <div class="toolbar" id="circuit-toolbar" hidden>
+      <label class="field-inline">Painel
+        <select id="panel-select"></select>
+      </label>
+      <div class="segmented" role="group" aria-label="Qual circuito">
+        <button type="button" class="variant" data-variant="" aria-pressed="true">Problema</button>
+        <button type="button" class="variant" data-variant="_solution" aria-pressed="false">Gabarito</button>
+      </div>
+      <div class="tool-group" role="group" aria-label="Peças">
+        <button type="button" class="part" data-part="select" title="Selecionar e arrastar (S)">Mover</button>
+        <button type="button" class="part" data-part="resistor" title="Resistor">Resistor</button>
+        <button type="button" class="part" data-part="voltage_source" title="Fonte de tensão">Fonte V</button>
+        <button type="button" class="part" data-part="current_source" title="Fonte de corrente">Fonte I</button>
+        <button type="button" class="part" data-part="wire" title="Fio (W)">Fio</button>
+        <button type="button" class="part" data-part="node" title="Nó (N)">Nó</button>
+        <button type="button" class="part" data-part="ground" title="Terra (G)">Terra</button>
+      </div>
+      <button type="button" id="rotate" title="Girar (R)">Girar</button>
+      <button type="button" id="copy-problem" title="Começar o gabarito a partir do problema">Copiar do problema</button>
+    </div>
+
+    <div class="stage-area" id="stage-area">
+      <canvas id="map-canvas" aria-label="Mapa da fase"></canvas>
+      <canvas id="circuit-canvas" aria-label="Circuito do painel" hidden></canvas>
+      <form id="params-form" class="params" hidden>
+        <h2>Parâmetros da fase</h2>
+        <p class="hint">Valem só para esta fase. Deixe como está para usar o padrão do jogo.</p>
+        <label>Nome para o professor
+          <input name="title" type="text" maxlength="60" placeholder="Ex.: Ponte de resistores">
+        </label>
+        <label>Tolerância da resposta (%)
+          <input name="tolerance_percent" type="number" min="0" max="50" step="0.5">
+          <small>Quanto a medida do aluno pode errar e ainda contar como certa.</small>
+        </label>
+        <label>Bombas por fase
+          <input name="bomb_count" type="number" min="0" max="30" step="1">
+        </label>
+        <label>Tempo para o fantasma voltar (segundos)
+          <input name="ghost_respawn_seconds" type="number" min="0" max="120" step="0.5">
+        </label>
+      </form>
+    </div>
+  </section>
+
+  <aside class="inspector" id="inspector" aria-label="Propriedades">
+    <div id="palette-wrap">
+      <h2>Paleta</h2>
+      <select id="tileset-select" aria-label="Conjunto de tiles"></select>
+      <div class="palette-scroll"><canvas id="palette"></canvas></div>
+      <p class="hint" id="palette-hint">Clique num tile para pintar com ele.</p>
+    </div>
+    <div id="props"></div>
+    <div id="results"></div>
+  </aside>
+
+  <section class="checklist" aria-label="Checklist da fase">
+    <h2>Checklist</h2>
+    <ul id="lamps" class="lamps"></ul>
+    <div id="check-detail" class="check-detail"></div>
+  </section>
+</main>
+
+<dialog id="insert-dialog">
+  <form method="dialog" id="insert-form">
+    <h2>Nova fase na etapa <span id="insert-stage"></span></h2>
+    <p>Ela entra logo depois de <strong id="insert-after"></strong>, com o mesmo tipo de desafio.</p>
+    <label>Nome da cena
+      <input name="name" required pattern="[a-z][a-z0-9_]{0,40}">
+      <small>Letras minúsculas, números e _. Esse nome também aparece no save do aluno.</small>
+    </label>
+    <label>Começar a partir de
+      <select name="template"></select>
+    </label>
+    <div class="dialog-actions">
+      <button value="cancel" formnovalidate type="submit">Cancelar</button>
+      <button value="ok" class="primary" type="submit">Criar fase</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="help-dialog" class="help" aria-labelledby="help-title">
+  <div class="help-head">
+    <h2 id="help-title">Como usar o estúdio</h2>
+    <button type="button" id="help-close" aria-label="Fechar ajuda">Fechar</button>
+  </div>
+  <nav class="help-nav" aria-label="Assuntos da ajuda">
+    <button type="button" data-help="start">Primeira fase</button>
+    <button type="button" data-help="trail">Trilha</button>
+    <button type="button" data-help="map">Mapa</button>
+    <button type="button" data-help="circuit">Circuitos</button>
+    <button type="button" data-help="params">Parâmetros</button>
+    <button type="button" data-help="keys">Atalhos</button>
+  </nav>
+
+  <section class="help-page" data-page="start">
+    <h3>Criar uma fase extra do começo ao fim</h3>
+    <ol class="steps">
+      <li><strong>Escolha a etapa.</strong> Na Trilha, cada coluna é um conceito (Ohm, associação, Thévenin…). Clique em <em>Inserir fase depois</em> na fase atrás da qual a nova deve vir.</li>
+      <li><strong>Dê um nome e um ponto de partida.</strong> Uma cópia de uma fase da etapa já vem com mapa, painéis e circuitos prontos para ajustar.</li>
+      <li><strong>Ajuste o mapa.</strong> Na aba Mapa, mova os painéis e os resistores para coletar e pinte paredes e chão.</li>
+      <li><strong>Monte os circuitos.</strong> Na aba Circuitos, desenhe o Problema que o aluno vê e o Gabarito com a resposta certa.</li>
+      <li><strong>Confira a checklist.</strong> Quando todas as lâmpadas de baixo estiverem acesas, a fase está pronta.</li>
+      <li><strong>Salve e teste.</strong> <em>Salvar</em> grava tudo; <em>Testar no jogo</em> abre o jogo direto na fase.</li>
+    </ol>
+  </section>
+
+  <section class="help-page" data-page="trail">
+    <h3>Trilha</h3>
+    <p>Mostra as fases na ordem em que o aluno joga. Uma fase extra sempre entra numa etapa e usa o mesmo tipo de desafio dela, então a sequência de conteúdo continua fazendo sentido.</p>
+    <dl>
+      <dt>Inserir fase depois</dt><dd>Cria a fase logo depois dessa. As portas são religadas sozinhas: a anterior leva à nova, e a nova leva para onde a anterior levava.</dd>
+      <dt>Mover para depois de…</dt><dd>Troca a posição de uma fase extra dentro da etapa.</dd>
+      <dt>Remover</dt><dd>Apaga a fase extra e reconecta a trilha. As fases originais não podem ser removidas.</dd>
+    </dl>
+    <p class="note">O nome da fase fica gravado no save do aluno. Evite remover fases que uma turma já está jogando.</p>
+  </section>
+
+  <section class="help-page" data-page="map">
+    <h3>Mapa</h3>
+    <dl>
+      <dt>Pintar</dt><dd>Escolha a <em>Camada</em> e um tile na <em>Paleta</em>. Use Pincel, Borracha, Retângulo ou Balde. As camadas <code>obj</code> são paredes: o aluno não passa por elas.</dd>
+      <dt>Mover objetos</dt><dd>Com <em>Mover</em>, clique num objeto e arraste. As propriedades dele aparecem à direita.</dd>
+      <dt>Criar objetos</dt><dd>Escolha em <em>Novo objeto</em>, clique em <em>Colocar</em> e depois no mapa.</dd>
+      <dt>Painel</dt><dd><code>type_solution</code> é o que o aluno precisa medir. <code>target_component</code> é a peça medida no gabarito. <code>component_for_area</code> diz de qual área vêm os resistores que o aluno coleta: use o mesmo número no <code>area</code> desses resistores.</dd>
+      <dt>Vista</dt><dd>Roda do mouse aproxima e afasta. Arraste com Alt ou com o botão direito para andar pelo mapa.</dd>
+    </dl>
+  </section>
+
+  <section class="help-page" data-page="circuit">
+    <h3>Circuitos</h3>
+    <p>Cada painel tem dois circuitos. O <strong>Problema</strong> é o que o aluno encontra. O <strong>Gabarito</strong> é o circuito montado do jeito certo; o jogo calcula a resposta esperada a partir dele.</p>
+    <dl>
+      <dt>Colocar peças</dt><dd>Escolha Resistor, Fonte V, Fonte I, Fio, Nó ou Terra e clique no quadro. <em>Girar</em> (R) vira a peça.</dd>
+      <dt>Editar</dt><dd>Com <em>Mover</em>, clique numa peça para mudar nome e valor (220, 1k, 4.7k…) ou arrastá-la.</dd>
+      <dt>Peças tracejadas</dt><dd>O aluno pode mover essas. Desmarque a opção no painel da direita para fixar a peça.</dd>
+      <dt>Medidas</dt><dd>Tensão, corrente e potência de cada resistor aparecem ao lado enquanto você edita. Se o circuito não fecha, o aviso diz o que falta, como o terra.</dd>
+      <dt>Copiar do problema</dt><dd>Começa o gabarito a partir do problema: só falta acrescentar a peça que o aluno deve colocar.</dd>
+    </dl>
+  </section>
+
+  <section class="help-page" data-page="params">
+    <h3>Parâmetros</h3>
+    <dl>
+      <dt>Tolerância</dt><dd>Quanto a medida do aluno pode errar e ainda contar como certa. O padrão é 2%.</dd>
+      <dt>Bombas por fase</dt><dd>Quantas bombas o aluno tem para enfrentar fantasmas. O padrão é 8.</dd>
+      <dt>Tempo para o fantasma voltar</dt><dd>Segundos até um fantasma derrotado reaparecer. O padrão é 10.</dd>
+    </dl>
+    <p>Esses valores valem só para a fase aberta.</p>
+  </section>
+
+  <section class="help-page" data-page="keys">
+    <h3>Atalhos de teclado</h3>
+    <table class="keys">
+      <tbody>
+        <tr><th scope="row"><kbd>Ctrl</kbd> + <kbd>S</kbd></th><td>Salvar a fase</td></tr>
+        <tr><th scope="row"><kbd>?</kbd></th><td>Abrir esta ajuda</td></tr>
+        <tr><th scope="row"><kbd>V</kbd> <kbd>B</kbd> <kbd>E</kbd> <kbd>U</kbd> <kbd>F</kbd> <kbd>I</kbd></th><td>Mapa: mover, pincel, borracha, retângulo, balde, conta-gotas</td></tr>
+        <tr><th scope="row"><kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd></th><td>Mapa: desfazer e refazer</td></tr>
+        <tr><th scope="row"><kbd>+</kbd> <kbd>−</kbd></th><td>Mapa: zoom</td></tr>
+        <tr><th scope="row"><kbd>S</kbd> <kbd>W</kbd> <kbd>N</kbd> <kbd>G</kbd></th><td>Circuito: mover, fio, nó, terra</td></tr>
+        <tr><th scope="row"><kbd>R</kbd></th><td>Circuito: girar</td></tr>
+        <tr><th scope="row"><kbd>Delete</kbd></th><td>Apagar o que está selecionado</td></tr>
+        <tr><th scope="row"><kbd>Esc</kbd></th><td>Cancelar a ação atual</td></tr>
+      </tbody>
+    </table>
+  </section>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

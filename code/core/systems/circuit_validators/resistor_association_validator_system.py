@@ -8,19 +8,24 @@ from core.ecs import System
 from core.managers.circuit_manager import CircuitManager
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
-from core.settings import CELL_SIZE, COMERCIAL_RESISTORS, path_in_circuitos
+from core.settings import CELL_SIZE, COMERCIAL_RESISTORS, GENERIC_LEVEL_TOLERANCE_PERCENT, path_in_circuitos
 from entities.itens.control_pannel import ControlPannel
 from entities.itens.resistor_item import ResistorItem
 from utils.setter_values import SetterValues
 
 
 class ResistorAssociationValidatorSystem(System):
-    def __init__(self, level_path: str, circuit_service: CircuitService | None = None):
+    def __init__(
+        self,
+        level_path: str,
+        tolerance_percent: float = GENERIC_LEVEL_TOLERANCE_PERCENT,
+        circuit_service: CircuitService | None = None,
+    ):
         super().__init__()
         self.level_path = level_path
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
-        self.tolerance_percent = 2.0
+        self.tolerance_percent = tolerance_percent
         self._validation_interval = 0.12
         self._validation_acc = 0.0
         self._panel_rr_index = 0

@@ -6,13 +6,19 @@ from core.managers.entity_manager             import EntityManager
 from core.managers.event_manager              import EventManager
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.circuit_tools.circuit_domain import CircuitError
-from core.settings import CELL_SIZE, path_in_circuitos
+from core.settings import CELL_SIZE, GENERIC_LEVEL_TOLERANCE_PERCENT, path_in_circuitos
 
 
 class CircuitValidatorSystem(System):
-    def __init__(self, level_path, circuit_service: CircuitService | None = None):
+    def __init__(
+        self,
+        level_path,
+        tolerance_percent: float = GENERIC_LEVEL_TOLERANCE_PERCENT,
+        circuit_service: CircuitService | None = None,
+    ):
         super().__init__()
         self.level_path =  level_path
+        self.tolerance_percent = tolerance_percent
         self.circuit_manager = CircuitManager.get()
         self.event_manager   = EventManager.get()
         self._validation_interval = 0.12
@@ -233,7 +239,7 @@ class CircuitValidatorSystem(System):
             )
             return
 
-        tolerance_percent = 2
+        tolerance_percent = self.tolerance_percent
         is_correct_answer = self._float_equals_percent(answer, solution_value, tolerance_percent)
 
         if is_correct_answer:

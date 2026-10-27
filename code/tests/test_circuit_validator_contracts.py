@@ -21,6 +21,18 @@ class CircuitValidatorContractTests(unittest.TestCase):
         for validator in validators:
             self.assertIs(validator.circuits, service)
 
+    def test_all_validators_accept_a_tolerance_percent(self):
+        validators = (
+            CircuitValidatorSystem("phase", tolerance_percent=7.5),
+            ResistorPairValidatorSystem("phase", tolerance_percent=7.5),
+            ResistorAssociationValidatorSystem("phase", tolerance_percent=7.5),
+            TheveninNortonValidatorSystem("phase", tolerance_percent=7.5),
+            MaxPowerTransferValidatorSystem("phase", tolerance_percent=7.5),
+        )
+
+        for validator in validators:
+            self.assertEqual(validator.tolerance_percent, 7.5)
+
 
 if __name__ == "__main__":
     unittest.main()

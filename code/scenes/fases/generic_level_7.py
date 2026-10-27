@@ -24,7 +24,7 @@ from scenes.fases.max_power_level_base import BaseMaxPowerLevel
 
 
 class GenericLevel7(BaseMaxPowerLevel):
-    def __init__(self, screen, level_path, tolerance_percent: float = 2.0):
+    def __init__(self, screen, level_path):
         self.debug_story_test_mode = False
         self.father_npc: FatherNPC | None = None
         self.father_dialogue_done = False
@@ -38,7 +38,7 @@ class GenericLevel7(BaseMaxPowerLevel):
         self.player_thought_dialogue: Entity | None = None
         self.player_thought_done = False
         self.player_frozen_by_story = False
-        super().__init__(screen, level_path, tolerance_percent)
+        super().__init__(screen, level_path)
 
     def set_systems(self):
         self.animation_system = AnimationSystem()

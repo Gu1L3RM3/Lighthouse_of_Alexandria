@@ -98,9 +98,38 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  build-web:
+    name: build (html5)
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install web build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg pngquant
+          pip install pygbag==0.9.3
+
+      - name: Build web archive
+        run: |
+          python -m pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --build --archive .
+          mv build/web.zip alexandria-html5.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-html5
+          path: alexandria-html5.zip
+          if-no-files-found: error
+          retention-days: 7
+
   publish-itch:
     name: publish itch.io
-    needs: [version, build]
+    needs: [version, build, build-web]
     runs-on: ubuntu-latest
     env:
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
@@ -119,20 +148,21 @@ jobs:
 
       - name: Extract builds
         run: |
-          mkdir -p windows linux
+          mkdir -p windows linux html5
           unzip -q alexandria-windows.zip -d windows
           tar -xzf alexandria-linux.tar.gz -C linux
+          unzip -q alexandria-html5.zip -d html5
 
       - name: Push to itch.io
         run: |
           butler -V
-          for channel in windows linux; do
+          for channel in windows linux html5; do
             butler push "$channel" "${ITCH_TARGET}:${channel}" --userversion "${{ needs.version.outputs.version }}"
           done
 
   release:
     name: github release
-    needs: [version, build]
+    needs: [version, build, build-web]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -150,3 +180,4 @@ jobs:
           files: |
             alexandria-windows.zip
             alexandria-linux.tar.gz
+            alexandria-html5.zip

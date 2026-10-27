@@ -6,8 +6,9 @@ from core.settings import GENERIC_LEVEL_GHOST_REBIRTH_ANIM_SECONDS, GENERIC_LEVE
 
 
 class GenericLevelGhostSystem(System):
-    def __init__(self, scene):
+    def __init__(self, scene, respawn_seconds: float = GENERIC_LEVEL_GHOST_RESPAWN_SECONDS):
         self.scene = scene
+        self.respawn_seconds = respawn_seconds
 
     def update(self, entity_manager, dt: float):
         _ = entity_manager
@@ -148,7 +149,7 @@ class GenericLevelGhostSystem(System):
         self.scene.ghost_respawn_queue.append(
             {
                 "spawn_key": spawn_key,
-                "remaining": float(GENERIC_LEVEL_GHOST_RESPAWN_SECONDS),
+                "remaining": float(self.respawn_seconds),
                 "respawn_x": None,
                 "respawn_y": None,
             }

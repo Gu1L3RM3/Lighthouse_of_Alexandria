@@ -31,6 +31,7 @@ Core themes:
 - Ghost enemies with radial proximity damage and audio chase feedback.
 - Fairer fall-ground traps with warning audio and delayed activation.
 - English and Portuguese support across UI, dialogue, letters, and explanation content.
+- Level Studio: a browser tool for teachers to edit stages and add new ones without code.
 
 ## Educational Content
 
@@ -91,6 +92,33 @@ pip install -r requirements-build.txt
 python main.py
 ```
 
+## Level Studio (for teachers)
+
+![Level Studio trail of stages](docs/media/level_studio/trilha.png)
+
+Level Studio is a local web tool (in Portuguese) for teachers and other non-programmers. With it you can:
+- tune the existing stages;
+- add extra stages;
+- draw the circuit challenges.
+
+It runs on Python's standard library, so it needs nothing beyond the game's own dependencies.
+
+```bash
+python tools/level_studio.py          # opens http://127.0.0.1:8765/
+python tools/level_studio.py --port 8800 --no-browser
+```
+
+What it does:
+- **Trail**: shows the stages in the order students play them (Ohm's law, resistor networks, resistor pairs, Thévenin/Norton, maximum power transfer, final stage). An extra stage is inserted into a knowledge stage and reuses that stage's validator, so the learning sequence holds. The map doors are rewired automatically.
+- **Map**: paint tiles and walls, place and drag panels, collectible parts, doors, and the player start, and edit their properties.
+- **Circuits**: draw each panel's *problem* and *answer key* on the 20x10 board and see voltage, current, and power live from the game's own solver.
+- **Parameters**: set answer tolerance, bomb count, and ghost respawn per stage. They are saved to that stage's `level.json`.
+- **Checklist**: lights up each panel once it is ready, using the same rules as the validators. **Test in game** launches the game straight into the stage.
+
+The studio only listens on `127.0.0.1` and writes straight into `assets/maps/fases` and `code/circuitos`, so every change shows up in `git diff`. It is not part of the game builds.
+
+An in-app **Ajuda** button (or the `?` key) explains each screen. The full teacher guide is in [`docs/level_studio.md`](docs/level_studio.md).
+
 ## Windows Build
 
 Example manual build with PyInstaller:
@@ -118,7 +146,8 @@ Release packages for itch.io are distributed as zip archives that include the ex
 - `code/game.py`: main loop and scene registration
 - `code/scenes/`: game scenes, menus, stages, endings, and circuit editor
 - `code/core/`: ECS systems, managers, UI, localization, and map tooling
-- `code/circuitos/`: versioned JSON circuit documents
+- `code/circuitos/`: versioned JSON circuit documents and optional per-stage `level.json` tuning
+- `tools/level_studio.py`, `tools/studio/`: Level Studio, the teacher authoring tool (not shipped)
 - `assets/`: images, fonts, maps, and audio
 - `code/tests/`: automated coverage for gameplay, localization, and regression scenarios
 
@@ -144,9 +173,11 @@ The project is currently playable end-to-end, with:
 GitHub Actions workflows live in `.github/workflows/`:
 
 - `ci.yml` runs the unit test suite on every pull request and branch push.
-- `cd.yml` runs on every push to `main`: it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows` and `linux` channels) and attaches them to a GitHub Release.
+- `cd.yml` runs on every push to `main` (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`.
 
 Required repository secret: `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys).
+
+After the first web upload, open the itch.io project's **Edit game** page, set **Kind of project** to **HTML**, and mark the `html5` upload as **This file will be played in the browser**. This is a one-time setting: butler uploads do not enable browser playback automatically ([butler documentation](https://itch.io/docs/butler/pushing.html#html--playable-in-browser-games)).
 
 ## Roadmap
 
