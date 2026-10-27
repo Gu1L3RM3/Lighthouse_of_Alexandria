@@ -173,9 +173,11 @@ The project is currently playable end-to-end, with:
 GitHub Actions workflows live in `.github/workflows/`:
 
 - `ci.yml` runs the unit test suite on every pull request and branch push.
-- `cd.yml` runs on every push to `main`: it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows` and `linux` channels) and attaches them to a GitHub Release.
+- `cd.yml` runs on every push to `main` (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`.
 
 Required repository secret: `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys).
+
+After the first web upload, open the itch.io project's **Edit game** page, set **Kind of project** to **HTML**, and mark the `html5` upload as **This file will be played in the browser**. This is a one-time setting: butler uploads do not enable browser playback automatically ([butler documentation](https://itch.io/docs/butler/pushing.html#html--playable-in-browser-games)).
 
 ## Roadmap
 
