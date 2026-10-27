@@ -30,8 +30,7 @@ class GenericLevel6(BaseGenericLevel):
     VOLTAGE_POOL = list(MAP_VOLTAGE_SOURCE_POOL)
     CURRENT_POOL = list(MAP_CURRENT_SOURCE_POOL)
 
-    def __init__(self, screen: Surface, level_path: str, tolerance_percent: float = 2.0):
-        self.tolerance_percent = tolerance_percent
+    def __init__(self, screen: Surface, level_path: str):
         self.can_reset_pannels = True
         self.player_dead_by_enemy = False
         self.debug_panel_logs = True

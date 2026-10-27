@@ -25,8 +25,7 @@ class BaseMaxPowerLevel(BaseGenericLevel):
     VOLTAGE_POOL = list(MAX_POWER_LEVEL_VOLTAGE_POOL)
     CURRENT_POOL = list(MAX_POWER_LEVEL_CURRENT_POOL)
 
-    def __init__(self, screen: Surface, level_path: str, tolerance_percent: float = 2.0):
-        self.tolerance_percent = tolerance_percent
+    def __init__(self, screen: Surface, level_path: str):
         self.can_reset_pannels = True
         super().__init__(screen, level_path)
 

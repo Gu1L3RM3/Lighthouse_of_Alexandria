@@ -37,6 +37,7 @@ from core.managers.death_flow_manager import DeathFlowManager
 from core.managers.audio_manager import AudioManager
 from core.managers.language_service import LanguageService
 from core.managers.bomb_manager import BombManager
+from core.level_config import LevelConfig
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.circuit_tools.legacy_circuit_aliases import (
     CURRENT_SOURCE_ENTITY,
@@ -66,6 +67,8 @@ class BaseGenericLevel(BaseScene):
     def __init__(self, screen: Surface, level_path: str):
         self.loader = TileMapLoader()
         self.level_path = level_path
+        self.level_config = LevelConfig.for_level(level_path)
+        self.tolerance_percent = self.level_config.tolerance_percent
         self.tile_map = self.loader.load(f"fases/{self.level_path}.tmx")
         self.scale = 2
 
@@ -73,7 +76,7 @@ class BaseGenericLevel(BaseScene):
         self.camera.scale = self.scale
         self.map_renderer = MapRenderer(self.tile_map, self.camera, self.screen, self.scale)
         self.bomb_manager = BombManager(
-            bombs_per_level=GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL,
+            bombs_per_level=self.level_config.bomb_count,
             default_circuit_path=path_in_circuitos(GENERIC_LEVEL_BOMB_DEFAULT_CIRCUIT),
         )
         self._configure_bomb_balance_profile()
@@ -97,7 +100,7 @@ class BaseGenericLevel(BaseScene):
         )
         # Sistemas de suporte precisam existir antes de set_map(),
         # porque o fluxo do mapa já prepara templates de fantasmas.
-        self.ghost_system = GenericLevelGhostSystem(self)
+        self.ghost_system = GenericLevelGhostSystem(self, respawn_seconds=self.level_config.ghost_respawn_seconds)
         self.bomb_system = GenericLevelBombSystem(self)
         self.environment_system = GenericLevelEnvironmentSystem(self)
         self.bomb_renderer = GenericLevelBombRenderer()
@@ -589,7 +592,7 @@ class BaseGenericLevel(BaseScene):
             self._saved_bomb_counts = None
             self._restore_bombs_after_editor = False
         else:
-            self.bomb_manager.reset_bombs(GENERIC_LEVEL_BOMB_COUNT_PER_LEVEL)
+            self.bomb_manager.reset_bombs(self.level_config.bomb_count)
         self.bomb_system.sync_bomb_runtime()
         self.event_manager.subscribe('fall_player',self.fall_player)
         self.event_manager.subscribe('request_freeze',self.freeze_system.request_freeze)

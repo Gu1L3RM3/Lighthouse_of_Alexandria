@@ -42,7 +42,7 @@ class FinalLevel(BaseMaxPowerLevel):
     FINAL_FADE_SECONDS = FINAL_LEVEL_FINAL_FADE_SECONDS
     STORAGE_TYPE_BY_KIND = dict(INVENTORY_COMPONENT_TYPE_BY_KIND)
 
-    def __init__(self, screen, level_path, tolerance_percent: float = 2.0):
+    def __init__(self, screen, level_path):
         self.panel_timers: dict[int, float] = {}
         self.collected_components_by_area: dict[int, list[dict]] = {}
         self.initial_components_by_area: dict[int, list[dict]] = {}
@@ -55,7 +55,7 @@ class FinalLevel(BaseMaxPowerLevel):
         self.player_dead_by_enemy = False
         self._fixed_target_resistor_label = "10"
         self._post_reset_player_lock_frames = 0
-        super().__init__(screen, level_path, tolerance_percent)
+        super().__init__(screen, level_path)
         self._panel_timer_font = pygame.font.SysFont("consolas", 12, bold=True)
 
     def start(self):

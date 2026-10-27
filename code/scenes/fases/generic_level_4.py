@@ -65,7 +65,7 @@ class GenericLevel4(BaseGenericLevel):
         self.enemy_touch_game_over_system = EnemyTouchGameOverSystem()
         self.stealth_timer_widget = StealthTimerBarWidget(self.screen.get_size(), self.phantom_ai_system)
         self.ui_manager.add(self.stealth_timer_widget)
-        self.circuit_validator_system = ResistorAssociationValidatorSystem(level_path=self.level_path)
+        self.circuit_validator_system = ResistorAssociationValidatorSystem(level_path=self.level_path, tolerance_percent=self.tolerance_percent)
 
         self.systems.update([
             self.freeze_system,
