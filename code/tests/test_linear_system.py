@@ -41,19 +41,5 @@ class LinearSystemTests(unittest.TestCase):
         self.assertEqual(rhs, [5.0, 1.0])
 
 
-class NoNumpyDependencyTests(unittest.TestCase):
-    def test_game_code_does_not_import_numpy(self):
-        offenders = [
-            str(path.relative_to(ROOT))
-            for path in ROOT.rglob("*.py")
-            if "tests" not in path.parts
-            and any(
-                line.strip().startswith(("import numpy", "from numpy"))
-                for line in path.read_text(encoding="utf-8").splitlines()
-            )
-        ]
-        self.assertEqual(offenders, [])
-
-
 if __name__ == "__main__":
     unittest.main()

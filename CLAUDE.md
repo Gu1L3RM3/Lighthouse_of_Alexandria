@@ -80,7 +80,8 @@ The release is a PyInstaller bundle, so every dependency ships to players.
 
 - **No numpy.** It added ~40 MB to the build for one small linear solve.
   Use `core.circuit_tools.linear_system.solve_linear_system` and plain lists.
-  `test_linear_system.NoNumpyDependencyTests` guards this.
+  `test_no_numpy_runtime.py` guards this: it imports the game and its scenes,
+  runs pathfinding and the circuit solver with `import numpy` blocked.
   (`pathfinding` only uses numpy when installed; lists work fine.)
 - New runtime dependencies need a size check: build and compare
   `du -sh "dist/Farol de Alexandria"`.
