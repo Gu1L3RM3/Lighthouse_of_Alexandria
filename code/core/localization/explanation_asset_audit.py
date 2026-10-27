@@ -94,24 +94,3 @@ def audit_explanation_assets(
 
     return issues
 
-
-def build_explanation_asset_manifest_lines(
-    explanation_content: dict[str, dict[str, dict[str, list[str]]]],
-    images_root: str | Path,
-    language: str,
-) -> list[str]:
-    lines = [
-        f"# Explanation Image Checklist ({language})",
-        "",
-        "Expected localized assets for explanatory phases.",
-        "",
-    ]
-    current_phase = None
-    for item in build_explanation_asset_expectations(explanation_content, images_root, language):
-        if item.phase != current_phase:
-            current_phase = item.phase
-            lines.append(f"## {current_phase}")
-        status = "OK" if item.localized_exists else "MISSING"
-        lines.append(f"- [{status}] {item.expected_path}")
-    lines.append("")
-    return lines
