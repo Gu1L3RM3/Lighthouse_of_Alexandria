@@ -6,6 +6,13 @@ from pygame.locals import *
 
 FPS = 60
 
+IS_WEB = sys.platform == "emscripten"
+# Fixed logical size for browser/Android: scaled by the page instead of using the native fullscreen size.
+WEB_RESOLUTION = (1280, 720)
+AUDIO_FREQUENCY = 44100
+# The browser runs Python on its main thread, so a slow frame drains a short buffer and the audio crackles.
+AUDIO_BUFFER_SAMPLES = 4096 if IS_WEB else 512
+
 TILE_SIZE=16
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -160,6 +167,8 @@ ELETRIC_LIST_DIALOG_SIDE_PADDING = 30
 ELETRIC_LIST_DIALOG_TOP_PADDING = 52
 ELETRIC_LIST_DIALOG_BOTTOM_PADDING = 24
 ELETRIC_LIST_SCROLL_STEP = 36
+# A finger has to travel this far (px) before a touch on the list scrolls instead of picking an item.
+ELETRIC_LIST_DRAG_SCROLL_THRESHOLD = 12
 
 # Gameplay de fases
 GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN = 10.0

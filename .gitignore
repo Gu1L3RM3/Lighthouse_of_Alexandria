@@ -93,3 +93,6 @@ test-results/
 
 # Instrucoes locais do agente (nao versionar)
 AGENTS.md
+
+# Arquivos otimizados gerados pelo build web (pygbag)
+*-pygbag.*

@@ -67,6 +67,8 @@ class LanguageService:
             "editor_load": "Load",
             "editor_clear": "Clear",
             "editor_close": "X",
+            "editor_rotate_brush": "Rotate",
+            "editor_cancel_tool": "Cancel",
             "panel_label": "PANEL",
         },
         "pt-BR": {
@@ -94,6 +96,8 @@ class LanguageService:
             "editor_load": "Carregar",
             "editor_clear": "Limpar",
             "editor_close": "X",
+            "editor_rotate_brush": "Girar",
+            "editor_cancel_tool": "Cancelar",
             "panel_label": "PAINEL",
         },
     }
@@ -123,6 +127,8 @@ class LanguageService:
             "edit": "edit",
             "menu_grid": "menu/grid",
             "click_menu": "click menu",
+            "editor_touch_pick": "Pick a part from the top bar",
+            "editor_touch_place": "Drag to aim, lift to place",
         },
         "pt-BR": {
             "navigate": "navegar",
@@ -149,6 +155,8 @@ class LanguageService:
             "edit": "editar",
             "menu_grid": "menu/grid",
             "click_menu": "clicar menu",
+            "editor_touch_pick": "Escolha uma peça na barra de cima",
+            "editor_touch_place": "Arraste para mirar e solte para colocar",
         },
     }
 

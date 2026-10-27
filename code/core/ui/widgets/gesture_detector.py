@@ -3,6 +3,7 @@ from pygame import Surface, Rect
 from core.ui.widgets.widget import Widget
 from enum import Enum
 from typing import Callable
+from core.touch_points import TouchPoints
 
 class ClickType(Enum):
     AFTER_RELEASED = 0
@@ -15,8 +16,13 @@ class GestureDetector(Widget):
                  function: Callable,
                  click_type: ClickType = ClickType.AFTER_RELEASED,
                  show_debug_surf: bool = False,
-                 offset: tuple[int,int] = (0,0)):
+                 offset: tuple[int,int] = (0,0),
+                 touch_points: TouchPoints | None = None,
+                 accepts_touch: bool = True):
         self.click_type = click_type
+        # The circuit grid opts out: the editor places parts when the finger lifts, not here.
+        self.accepts_touch = accepts_touch
+        self.touch_points = touch_points or TouchPoints.get()
         self.function = function
         self.show_debug_surf = show_debug_surf
         self.rect = Rect((0+offset[0], 0+offset[1]), size)
@@ -28,12 +34,16 @@ class GestureDetector(Widget):
         self.debug_surf.fill((0, 255, 0, 100))
 
     def update(self, dt):
-        mouse_pos = pygame.mouse.get_pos()
-        mouse_buttons = pygame.mouse.get_pressed()
-        left_button_pressed = mouse_buttons[0]
-
-        self.is_hovered = self.rect.collidepoint(mouse_pos)
-        self.is_pressed = self.is_hovered and left_button_pressed
+        touched = self.accepts_touch and any(self.rect.collidepoint(pos) for pos in self.touch_points.pressed_positions())
+        lifted = self.accepts_touch and any(self.rect.collidepoint(pos) for pos in self.touch_points.released_positions())
+        if self.touch_points.touched_recently():
+            # the mouse state here is the browser's emulated click for the same tap
+            self.is_hovered = touched or lifted
+            self.is_pressed = touched
+        else:
+            mouse_hovered = self.rect.collidepoint(pygame.mouse.get_pos())
+            self.is_hovered = mouse_hovered or touched or lifted
+            self.is_pressed = touched or (mouse_hovered and pygame.mouse.get_pressed()[0])
 
         self._pressed()
         self._release()

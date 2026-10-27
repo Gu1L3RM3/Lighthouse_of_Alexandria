@@ -7,6 +7,7 @@ except Exception:
     sdl2_controller = None
 
 from core.managers.language_service import LanguageService
+from core.touch_points import TouchPoints
 from core.settings import (
     KEY_DIALOG,
     KEY_NEXT_SCENE,
@@ -46,6 +47,12 @@ class InputManager:
         self._xinput_state = None
         self._xinput_connected = False
         self._virtual_mouse_target: tuple[int, int] | None = None
+        # Set by Game; None means no on-screen pad (tests, or before the window exists).
+        self.touch_gamepad = None
+        self.touch_points = TouchPoints.get()
+        self._touch_actions: set[str] = set()
+        # Key-ups from switching the touch pad off between frames, delivered with the next events.
+        self._pending_events: list[pygame.event.Event] = []
 
         self._button_to_actions_joystick = {
             0: ("confirm", "interact"),
@@ -151,10 +158,20 @@ class InputManager:
 
     def process_events(self, events: list[pygame.event.Event]) -> list[pygame.event.Event]:
         self.begin_frame()
+        self.touch_points.begin_frame()
         self._refresh_connected_joysticks()
-        augmented_events: list[pygame.event.Event] = []
+        augmented_events: list[pygame.event.Event] = self._pending_events
+        self._pending_events = []
 
         for event in events:
+            if not self._finger_on_touch_gamepad(event):
+                self.touch_points.handle_event(event)
+                if event.type == pygame.FINGERDOWN:
+                    self.last_input_source = "touch"
+                    self.mouse_visible = False
+            if self.touch_gamepad is not None and self.touch_gamepad.handle_event(event):
+                augmented_events.extend(self._sync_touch_gamepad())
+                continue
             augmented_events.append(event)
 
             if event.type == pygame.KEYDOWN:
@@ -174,6 +191,8 @@ class InputManager:
                     continue
                 # Quando estamos em fluxo de controle, ignora movimento de mouse
                 # para evitar "flicker" de fonte por eventos sinteticos/ruido.
+                if self._is_emulated_from_touch():
+                    continue
                 if self.last_input_source == "controller" and not self.mouse_visible:
                     continue
                 else:
@@ -182,6 +201,8 @@ class InputManager:
                 continue
 
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEWHEEL):
+                if self._is_emulated_from_touch():
+                    continue
                 self.last_input_source = "mouse"
                 self.mouse_visible = True
                 continue
@@ -251,7 +272,47 @@ class InputManager:
         return direction
 
     def has_controller(self) -> bool:
-        return bool(self.joysticks or self.controllers or self._xinput_connected)
+        return bool(self.joysticks or self.controllers or self._xinput_connected or self._touch_gamepad_active())
+
+    def get_pointer_position(self) -> tuple[int, int]:
+        """The finger on touch screens, the mouse everywhere else."""
+        if self.last_input_source == "touch" and self.touch_points.last_position() is not None:
+            return self.touch_points.last_position()
+        return pygame.mouse.get_pos()
+
+    def set_touch_gamepad_enabled(self, enabled: bool) -> None:
+        if self.touch_gamepad is None or self.touch_gamepad.enabled == enabled:
+            return
+        self.touch_gamepad.set_enabled(enabled)
+        self._pending_events.extend(self._sync_touch_gamepad(mark_source=False))
+
+    def _is_emulated_from_touch(self) -> bool:
+        # browsers and SDL repeat each tap as mouse events; those must not flip the input source
+        return self.last_input_source == "touch" and self.touch_points.touched_recently()
+
+    def _finger_on_touch_gamepad(self, event: pygame.event.Event) -> bool:
+        if self.touch_gamepad is None or not self.touch_gamepad.enabled or event.type != pygame.FINGERDOWN:
+            return False
+        return self.touch_gamepad.control_at_finger(event) is not None
+
+    def _touch_gamepad_active(self) -> bool:
+        return self.touch_gamepad is not None and self.touch_gamepad.active and self.touch_gamepad.enabled
+
+    def _sync_touch_gamepad(self, mark_source: bool = True) -> list[pygame.event.Event]:
+        dx, dy = self.touch_gamepad.direction
+        actions = self.touch_gamepad.pressed_actions
+        if Vector2(dx, dy) == self.dpad_vector and actions == self._touch_actions:
+            return []
+        if mark_source:
+            self.last_input_source = "controller"
+            self.mouse_visible = False
+        synthetic_events: list[pygame.event.Event] = []
+        if Vector2(dx, dy) != self.dpad_vector:
+            synthetic_events.extend(self._handle_hat_motion((dx, -dy)))
+        synthetic_events.extend(self._set_actions_state(actions - self._touch_actions, is_pressed=True))
+        synthetic_events.extend(self._set_actions_state(self._touch_actions - actions, is_pressed=False))
+        self._touch_actions = set(actions)
+        return synthetic_events
 
     def apply_mouse_visibility(self):
         pygame.mouse.set_visible(self.mouse_visible)
@@ -267,22 +328,33 @@ class InputManager:
         return key in self.just_pressed_keys
 
     def get_prompt_button(self, action: str) -> str:
-        if self.last_input_source == "controller":
-            labels = self._controller_action_labels_by_layout.get(
-                self.controller_layout,
-                self._controller_action_labels_by_layout["xbox"],
-            )
-        else:
-            labels = self._keyboard_action_labels
-        label = labels.get(action, action.upper())
-        if action == "open_editor" and self.last_input_source != "controller":
+        if self._shows_controller_prompts():
+            return self.get_controller_button(action)
+        if action == "open_editor":
             return LanguageService.get().get_ui_label("core_button")
-        return label
+        return self._keyboard_action_labels.get(action, action.upper())
+
+    def _shows_controller_prompts(self) -> bool:
+        # the on-screen pad is the touch player's controller, so prompts name its buttons
+        return self.last_input_source == "controller" or (self.last_input_source == "touch" and self._touch_gamepad_active())
+
+    def touch_prompt_area(self):
+        """Free strip between the on-screen pad controls for prompts, or None when the pad is not shown."""
+        if not self._touch_gamepad_active():
+            return None
+        return self.touch_gamepad.prompt_area()
+
+    def get_controller_button(self, action: str) -> str:
+        labels = self._controller_action_labels_by_layout.get(
+            self.controller_layout,
+            self._controller_action_labels_by_layout["xbox"],
+        )
+        return labels.get(action, action.upper())
 
     def get_prompt_items(self, context: str) -> list[tuple[str, str]]:
         language = LanguageService.get()
         if context == "menu":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [
                     ("D-PAD", language.get_prompt_text("navigate")),
                     (self.get_prompt_button("confirm"), language.get_prompt_text("confirm")),
@@ -290,11 +362,11 @@ class InputManager:
                 ]
             return [("W/S", language.get_prompt_text("navigate")), ("ENTER", language.get_prompt_text("confirm")), ("ESC", language.get_prompt_text("back"))]
         if context == "help":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [("D-PAD", language.get_prompt_text("scroll")), (self.get_prompt_button("back"), language.get_prompt_text("back"))]
             return [("W/S", language.get_prompt_text("scroll")), ("PGUP", language.get_prompt_text("up")), ("PGDN", language.get_prompt_text("down")), ("ESC", language.get_prompt_text("back"))]
         if context == "generic_level":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [
                     (self.get_prompt_button("bomb"), language.get_prompt_text("bomb")),
                     (self.get_prompt_button("open_editor"), language.get_prompt_text("editor")),
@@ -303,18 +375,18 @@ class InputManager:
                 ]
             return [("B", language.get_prompt_text("bomb")), (self.get_prompt_button("open_editor"), language.get_prompt_text("editor")), ("F1", language.get_prompt_text("help")), ("ESC", language.get_prompt_text("menu"))]
         if context == "basic_level":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [(self.get_prompt_button("help"), language.get_prompt_text("help")), (self.get_prompt_button("pause"), language.get_prompt_text("menu"))]
             return [("F1", language.get_prompt_text("help")), ("ESC", language.get_prompt_text("menu"))]
         if context == "home":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [
                     (self.get_prompt_button("pause"), language.get_prompt_text("menu")),
                     (self.get_prompt_button("help"), language.get_prompt_text("help")),
                 ]
             return [("ESC", language.get_prompt_text("menu")), ("F1", language.get_prompt_text("help"))]
         if context == "circuit_editor":
-            if self.last_input_source == "controller":
+            if self._shows_controller_prompts():
                 return [
                     (self.get_prompt_button("help"), language.get_prompt_text("menu_grid")),
                     ("D-PAD/L", language.get_prompt_text("move")),
@@ -399,7 +471,9 @@ class InputManager:
         return self._button_to_actions_joystick.get(button, ())
 
     def _handle_button_change(self, button: int, is_pressed: bool, source: str = "joystick") -> list[pygame.event.Event]:
-        actions = self._button_actions_for_source(source, button)
+        return self._set_actions_state(self._button_actions_for_source(source, button), is_pressed)
+
+    def _set_actions_state(self, actions, is_pressed: bool) -> list[pygame.event.Event]:
         synthetic_events: list[pygame.event.Event] = []
 
         for action in actions:
@@ -508,7 +582,8 @@ class InputManager:
         self._poll_xinput_state()
         if not self.joysticks and not self.controllers and not self._xinput_connected:
             self.axis_vector.xy = 0, 0
-            self.dpad_vector.xy = 0, 0
+            if not self._touch_gamepad_active():
+                self.dpad_vector.xy = 0, 0
             return synthetic_events
 
         controller = self._get_primary_controller()

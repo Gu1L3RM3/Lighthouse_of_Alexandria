@@ -1,8 +1,9 @@
+import asyncio
 import pygame
 import time
 import os
 from functools import partial
-from core.settings               import FPS, ASSETS_DIR
+from core.settings               import FPS, ASSETS_DIR, IS_WEB, WEB_RESOLUTION, AUDIO_FREQUENCY, AUDIO_BUFFER_SAMPLES
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
@@ -10,6 +11,9 @@ from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
 from core.managers.language_service import LanguageService
+from core.managers.resource_manager import ResourceManager
+from core.touch_gamepad import TouchGamepad
+from core.touch_points import TouchPoints
 from core.circuit_tools.inventory_repository import InventoryRepository
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
@@ -34,6 +38,9 @@ from scenes.fases.final_level import FinalLevel
 from scenes.circuit_editor       import CircuitEditor
 from scenes.death_transition_scene import DeathTransitionScene
 from pathlib import Path
+
+
+STORAGE_SYNC_INTERVAL_SECONDS = 1.0
 
 
 class FrameProfiler:
@@ -102,16 +109,23 @@ class FrameProfiler:
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, storage_sync=None):
+        # pygame.init() opens the mixer, so its settings must be given beforehand.
+        pygame.mixer.pre_init(AUDIO_FREQUENCY, -16, 2, AUDIO_BUFFER_SAMPLES)
         pygame.init()
-        info = pygame.display.Info()
-        self.screen_width = info.current_w
-        self.screen_height = info.current_h
-
-        self.screen = pygame.display.set_mode(
-            (self.screen_width, self.screen_height),
-            pygame.FULLSCREEN
-        )
+        self.storage_sync = storage_sync
+        self._storage_sync_elapsed = 0.0
+        if IS_WEB:
+            self.screen_width, self.screen_height = WEB_RESOLUTION
+            self.screen = pygame.display.set_mode(WEB_RESOLUTION, pygame.SCALED)
+        else:
+            info = pygame.display.Info()
+            self.screen_width = info.current_w
+            self.screen_height = info.current_h
+            self.screen = pygame.display.set_mode(
+                (self.screen_width, self.screen_height),
+                pygame.FULLSCREEN
+            )
         self._set_window_icon()
         self.clock = pygame.time.Clock()
 
@@ -124,6 +138,10 @@ class Game:
         pygame.display.set_caption(self.language_service.get_system_label("window_title"))
         self.input_manager = InputManager.get()
         self.input_manager.initialize()
+        self.touch_gamepad = TouchGamepad(self.screen.get_size())
+        self.input_manager.touch_gamepad = self.touch_gamepad
+        TouchPoints.get().screen_size = self.screen.get_size()
+        self.touch_gamepad_font = ResourceManager.get().load_font("PressStart2P-Regular.ttf", 12)
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
         self._last_scene_name = None
@@ -218,7 +236,7 @@ class Game:
                         level_name,
                         partial(level_class, self.screen, level_path=level_route),
                     )
-    def run(self):
+    async def run(self):
         while True:
             dt = self.clock.tick(FPS) / 1000.0
             # Evita "tunneling" de colisao apos frames com travada (ex.: reset pesado de painel).
@@ -227,6 +245,9 @@ class Game:
             self.profiler.start_frame()
             
             events = pygame.event.get()
+            self.input_manager.set_touch_gamepad_enabled(
+                getattr(self.scene_manager.active_scene, "shows_touch_gamepad", True)
+            )
             events = self.input_manager.process_events(events)
             self.profiler.mark("events")
             filtered_events = []
@@ -259,11 +280,16 @@ class Game:
 
             self.scene_manager.update_transition()
             self.scene_manager.draw_transition(self.screen)
+            if self.touch_gamepad.active and self.touch_gamepad.enabled:
+                self.touch_gamepad.draw(self.screen, self.touch_gamepad_font, self.input_manager.get_controller_button)
             self.profiler.mark("transition")
 
             pygame.display.flip()
             self.profiler.mark("flip")
             self.profiler.end_frame()
+            self._persist_storage_periodically(dt)
+            # Yields to the browser event loop under pygbag; a no-op cost on desktop.
+            await asyncio.sleep(0)
 
             if self.profile_auto_seconds > 0:
                 self._profile_elapsed += dt
@@ -280,7 +306,18 @@ class Game:
                     )
                     self._shutdown()
 
+    def _persist_storage_periodically(self, dt: float):
+        if self.storage_sync is None:
+            return
+        self._storage_sync_elapsed += dt
+        if self._storage_sync_elapsed < STORAGE_SYNC_INTERVAL_SECONDS:
+            return
+        self._storage_sync_elapsed = 0.0
+        self.storage_sync.persist_changes()
+
     def _shutdown(self):
         self.scene_manager.active_scene.end()
+        if self.storage_sync is not None:
+            self.storage_sync.persist_changes()
         pygame.quit()
         raise SystemExit

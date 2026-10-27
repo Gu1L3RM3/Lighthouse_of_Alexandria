@@ -2,6 +2,10 @@ import pygame
 
 _ROW_CACHE: dict[tuple, pygame.Surface] = {}
 _ROW_CACHE_LIMIT = 256
+# On touch screens the 8 px pixel font is ~4 px on a phone; doubling it (nearest-neighbour) keeps it crisp.
+TOUCH_PROMPT_SCALE = 2
+TOUCH_PROMPT_ROW_GAP = 8
+_ASK_INPUT_MANAGER = object()
 
 
 def get_prompt_style(label: str) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]:
@@ -52,7 +56,55 @@ def draw_prompt_hint_row(
     anchor: tuple[int, int],
     align: str = "center",
     gap: int = 14,
+    touch_area=_ASK_INPUT_MANAGER,
 ):
+    """Draws button chips with their meaning. With an on-screen pad, the row moves into the free strip
+    between its controls (`touch_area`), doubled in size; by default that strip comes from InputManager."""
+    if touch_area is _ASK_INPUT_MANAGER:
+        from core.managers.input_manager import InputManager
+
+        touch_area = InputManager.get().touch_prompt_area()
+    if touch_area is not None:
+        _draw_touch_rows(surface, chip_font, text_font, items, gap, touch_area)
+        return
+
+    row_surface = _render_row(chip_font, text_font, items, gap)
+    total_width = row_surface.get_width()
+    max_height = row_surface.get_height()
+    if align == "center":
+        x = anchor[0] - total_width // 2
+    elif align == "right":
+        x = anchor[0] - total_width
+    else:
+        x = anchor[0]
+    y = anchor[1] - max_height // 2
+    surface.blit(row_surface, (x, y))
+
+
+def _draw_touch_rows(surface, chip_font, text_font, items, gap, area: pygame.Rect):
+    rows = [list(items)]
+    if _render_row(chip_font, text_font, items, gap).get_width() * TOUCH_PROMPT_SCALE > area.width and len(items) > 1:
+        half = (len(items) + 1) // 2
+        rows = [list(items[:half]), list(items[half:])]
+
+    bottom = area.bottom
+    for row_items in reversed(rows):
+        row = _scaled_row(chip_font, text_font, row_items, gap)
+        surface.blit(row, row.get_rect(midbottom=(area.centerx, bottom)))
+        bottom -= row.get_height() + TOUCH_PROMPT_ROW_GAP
+
+
+def _scaled_row(chip_font, text_font, items, gap) -> pygame.Surface:
+    key = ("touch", id(chip_font), id(text_font), tuple(items), int(gap))
+    scaled = _ROW_CACHE.get(key)
+    if scaled is None:
+        row = _render_row(chip_font, text_font, items, gap)
+        scaled = pygame.transform.scale(row, (row.get_width() * TOUCH_PROMPT_SCALE, row.get_height() * TOUCH_PROMPT_SCALE))
+        _ROW_CACHE[key] = scaled
+    return scaled
+
+
+def _render_row(chip_font, text_font, items, gap) -> pygame.Surface:
     normalized_items = tuple((str(button_label), str(description)) for button_label, description in items)
     cache_key = (
         id(chip_font),
@@ -95,14 +147,4 @@ def draw_prompt_hint_row(
         if len(_ROW_CACHE) >= _ROW_CACHE_LIMIT:
             _ROW_CACHE.clear()
         _ROW_CACHE[cache_key] = row_surface
-
-    total_width = row_surface.get_width()
-    max_height = row_surface.get_height()
-    if align == "center":
-        x = anchor[0] - total_width // 2
-    elif align == "right":
-        x = anchor[0] - total_width
-    else:
-        x = anchor[0]
-    y = anchor[1] - max_height // 2
-    surface.blit(row_surface, (x, y))
+    return row_surface

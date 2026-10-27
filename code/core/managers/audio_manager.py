@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pygame
 
-from core.settings import ASSETS_DIR
+from core.settings import ASSETS_DIR, AUDIO_BUFFER_SAMPLES, AUDIO_FREQUENCY
 from core.managers.resource_manager import ResourceManager
 
 
@@ -61,7 +61,7 @@ class AudioManager:
     def _init_mixer(self):
         try:
             if not pygame.mixer.get_init():
-                pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+                pygame.mixer.init(frequency=AUDIO_FREQUENCY, size=-16, channels=2, buffer=AUDIO_BUFFER_SAMPLES)
             self.enabled = True
             pygame.mixer.set_num_channels(16)
         except pygame.error:

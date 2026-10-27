@@ -7,6 +7,7 @@ from core.managers.event_manager import EventManager
 from core.managers.input_manager import InputManager
 from core.managers.language_service import LanguageService
 from core.ui.prompt_ui import draw_prompt_hint_row
+from core.touch_points import TouchPoints
 from typing import Callable, Optional
 
 
@@ -17,7 +18,8 @@ class AlertDialog(Widget):
                 dialog_size:tuple[int,int] = (200,300),
                 surface:Surface|None = None,
                 parent:Widget|None=None,
-                make_freeze:bool= True
+                make_freeze:bool= True,
+                touch_points: TouchPoints | None = None,
                 ):
         super().__init__()
         self.title    = title
@@ -34,6 +36,8 @@ class AlertDialog(Widget):
         self.title_font = pygame.font.SysFont(None, 28)
         self._overlay: Surface | None = None
         self._closed = False
+        self.touch_points = touch_points or TouchPoints.get()
+        self._last_update_frame: int | None = None
 
         self.set_dialog_rect(self._dialog_size)
         if self.make_freeze:
@@ -109,7 +113,20 @@ class AlertDialog(Widget):
         self.on_close(self)
 
     def update(self, dt):
+        self._close_on_touch_outside()
         self.close_button.update(dt)
+
+    def _close_on_touch_outside(self):
+        # Touch screens send no mouse click here, so a tap outside is read from the fingers.
+        frame = self.touch_points.frame
+        just_shown = self._last_update_frame != frame - 1
+        self._last_update_frame = frame
+        if just_shown:
+            # the tap that opened (or reopened) the dialog is still in this frame; the dialog is open again
+            self._closed = False
+            return
+        if any(not self.dialog_rect.collidepoint(pos) for pos in self.touch_points.started_positions()):
+            self._close()
     def draw_surface(self,surface:Surface):
         if self.surface:
             surface.blit(self.surface,self.dialog_rect)
@@ -137,6 +154,9 @@ class AlertDialog(Widget):
         return self._overlay
 
     def _draw_close_hint(self, surface: Surface):
+        if self.input_manager.last_input_source == "touch":
+            # ESC/ENTER chips mean nothing without a keyboard; the X button closes the dialog
+            return
         language = LanguageService.get()
         if self.input_manager.last_input_source == "controller":
             items = [

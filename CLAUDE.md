@@ -10,7 +10,37 @@ pip install -r requirements-dev.txt        # runtime + dev dependencies
 python main.py                             # launch the game
 python -m unittest discover -s code/tests  # full test suite (run before every commit)
 pyinstaller --noconfirm Alexandria.spec    # release build
+pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --build .    # own site: upload build/web
+pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --archive .  # itch.io: upload build/web.zip
 ```
+
+- Web build (pygbag): `sys.platform == "emscripten"` → fixed 1280×720 `SCALED`
+  window; desktop stays native fullscreen. Saves are mirrored to localStorage
+  by `core/web_storage_sync.py`. Runtime deps for the web go in the PEP 723
+  block at the top of `main.py`. The boot screen (lighthouse that lights up
+  while loading, "click to start" audio gate) lives in `web/alexandria.tmpl`,
+  a copy of pygbag 0.9.3's `default.tmpl`; keep its element ids, pygbag's
+  loader looks them up. It also shows a "turn your phone" notice in portrait.
+- Touch: `core/touch_gamepad.py` draws an on-screen gamepad after the first
+  touch and feeds `InputManager` like a physical controller, so new actions
+  only need a controller mapping to work on phones too. UI buttons read
+  fingers themselves through `core/touch_points.py` (polled by
+  `GestureDetector`, so quick taps and buttons nested in composite widgets work).
+  The circuit editor sets `shows_touch_gamepad = False`: on touch the held part
+  follows the finger and is placed on lift (`core/ui/touch_grid.py`), with
+  Rotate/Cancel buttons (`brush_touch_actions.py`). SDL under pygbag sends no
+  mouse events for taps, so touch handling must read `TouchPoints`, not
+  `MOUSEBUTTONDOWN`. Test web touch with Playwright + CDP `Input.dispatchTouchEvent`;
+  to open the editor directly, set `ALEX_BOOT_EDITOR_FILE` (and
+  `ALEX_BOOT_EDITOR_DEBUG=1` to keep the inventory) at the top of a scratch copy's `main.py`.
+- Circuit editor board: circuits are authored on a 20 x 10 board of 64 px cells
+  (x up to 1216, y up to 768). `core/ui/board_view.py` fits it between the top
+  bar and the sidebar (whole-pixel cells, never enlarged), so on 1280x720 it is
+  drawn at 57 px. Pointer positions go through `board.to_world`, drawing
+  through `board.to_screen_rect`; keep world and screen coordinates apart.
+- Prompt bars: with the on-screen pad visible, `draw_prompt_hint_row` names the
+  pad's buttons and draws the row doubled in the strip between its controls
+  (`InputManager.touch_prompt_area`), wrapping to two rows when needed.
 
 - Entry point: `main.py`; game loop and scene registration: `code/game.py`.
 - `code/scenes/` scenes, `code/entities/` game objects, `code/core/` shared ECS,

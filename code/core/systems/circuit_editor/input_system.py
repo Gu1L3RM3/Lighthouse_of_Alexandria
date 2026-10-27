@@ -16,6 +16,7 @@ from entities.circuit_editor.eletric_components import (
 from entities.circuit_editor.edit_components import Delete, NotDrop, Rotate, Select
 from entities.generic.empty_box import EmptyBox
 from core.components.position import Position
+from core.components.connectable import Connectable
 from core.components.dropped import Dropped
 from core.components.always_on_top import AlwaysOnTop
 from core.components.sprite import Sprite
@@ -35,6 +36,7 @@ from core.circuit_tools.legacy_circuit_aliases import (
 from core.circuit_tools.circuit_topology import CircuitGraphBuilder
 from core.circuit_tools.numeric_solver import DcMnaSolver
 from core.managers.circuit_manager import CircuitManager
+from core.managers.input_manager import InputManager
 from core.settings import CELL_SIZE, CIRCUITOS_DIR
 from typing import Type
 
@@ -52,6 +54,7 @@ class InputSystem(System):
                  circuit_mapper=None,
                  graph_builder=None,
                  circuit_solver=None,
+                 pointer_position=None,
                  ):
 
         super().__init__()
@@ -70,6 +73,8 @@ class InputSystem(System):
         self.graph_builder = graph_builder or CircuitGraphBuilder(CELL_SIZE)
         self.circuit_solver = circuit_solver or DcMnaSolver()
         self.result_adapter = CircuitResultAdapter()
+        # Where the player points: the finger on touch screens, otherwise the mouse.
+        self.pointer_position = pointer_position or InputManager.get().get_pointer_position
         self.show_mouse = True
         self.select_mode = False
         self.brush: Entity | None = None
@@ -127,7 +132,7 @@ class InputSystem(System):
         if not cls:
             raise Exception(f"Invalid brush type: {brush_type}")
 
-        x, y = pygame.mouse.get_pos()
+        x, y = self.pointer_position()
         entity: Entity = self.set_label(cls,x,y,value)
         
         entity.add(AlwaysOnTop())
@@ -245,18 +250,17 @@ class InputSystem(System):
         label :LabelComponent=target.get(LabelComponent)
         self.storage_manager.add_component(target.__class__.__name__,label.value)    
     def clear_all(self):
-  
+        # A ferramenta ativa pode conter um componente ainda preso ao cursor.
+        # Ele não foi retirado do inventário e não deve ser devolvido ao storage.
+        self.exit_current_tool()
+
         for entity in self.entity_manager.get_entities_with(Dropped,
                                                             filter=lambda e: self.can_change_all(e)):
             self.entity_manager.remove_entity(entity)
             if entity.has(LabelComponent):
                 label:LabelComponent = entity.get(LabelComponent)
                 self.storage_manager.add_component(entity.__class__.__name__,label.value)
-            
-    
-
-        
-        self.storage_manager.set_completly_storage()
+        self.node_manager.clear_all_nodes()
     def rotate_brush(self):
         if not self.brush or not self.brush.has(Connectable):
             return
@@ -288,6 +292,8 @@ class InputSystem(System):
 
 
     def handle_canvas_actions(self):
+        # a tap has no hover beforehand, so aim at the touched cell before acting on it
+        self.update_brush_position()
         self.drop_entity()
         self.delete_entity()
         self.rotate_entity()
@@ -308,17 +314,21 @@ class InputSystem(System):
 
         label.name = f"{prefix}{number}"
 
-    def drop_entity(self):
+    def can_drop_brush(self) -> bool:
+        """True when the held part would land on free cells (the editor previews this on touch)."""
         if not self.brush or not self.brush.has(Dropped):
+            return False
+        others = [e for e in self.entity_manager.get_entities() if e is not self.brush]
+        rects = [e.get(Sprite).rect for e in others if e.has(Sprite)]
+        sprite: Sprite = self.brush.get(Sprite)
+        return sprite.rect.collidelist(rects) == -1
+
+    def drop_entity(self):
+        if not self.can_drop_brush():
             return
 
         entities = self.entity_manager.get_entities()
         entities.remove(self.brush)
-
-        rects = [e.get(Sprite).rect for e in entities if e.has(Sprite)]
-        sprite: Sprite = self.brush.get(Sprite)
-        if sprite.rect.collidelist(rects) != -1:
-            return
 
         new_entity = self.brush.copy()
         new_entity.remove(AlwaysOnTop)
@@ -364,11 +374,15 @@ class InputSystem(System):
             return
 
         pos: Position = self.brush.get(Position)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        pointer = self.pointer_position()
 
         for rect in self.grid_rects:
-            if rect.collidepoint((mouse_x, mouse_y)):
+            if rect.collidepoint(pointer):
                 pos.xy = rect.topleft
+                # drop_entity tests overlap with the sprite rect, which otherwise only follows at draw time
+                if self.brush.has(Sprite):
+                    sprite: Sprite = self.brush.get(Sprite)
+                    sprite.rect.topleft = (pos.x + sprite.offset_x, pos.y + sprite.offset_y)
                 return
     def set_voltage_current_resistors(self,):
         resistors = self.entity_manager.get_entities_by_class(Resistor)
