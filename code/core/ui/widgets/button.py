@@ -72,7 +72,7 @@ class Button(Widget):
     def activate(self, press_feedback_seconds: float = 0.14, trigger_action: bool = True):
         self._pressed_feedback_timer = max(self._pressed_feedback_timer, max(0.0, press_feedback_seconds))
         self._suppress_next_press_sound = True
-        self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+        self.audio.play_ui("sfx/ui_click.ogg", volume=0.9)
         if trigger_action and self.action:
             self.action()
 
@@ -83,12 +83,12 @@ class Button(Widget):
         gesture_pressed = self.gesture_detector._hold_state if self.click_type == ClickType.HOLD else self.gesture_detector.is_pressed
         pressed = gesture_pressed or self._pressed_feedback_timer > 0
         if self.gesture_detector.is_hovered and not self._was_hovered_last_frame:
-            self.audio.play_ui("sfx/ui_hover.wav", volume=0.75)
+            self.audio.play_ui("sfx/ui_hover.ogg", volume=0.75)
         if pressed and not self._was_pressed_last_frame:
             if self._suppress_next_press_sound:
                 self._suppress_next_press_sound = False
             else:
-                self.audio.play_ui("sfx/ui_click.wav", volume=0.9)
+                self.audio.play_ui("sfx/ui_click.ogg", volume=0.9)
         if not pressed:
             self._suppress_next_press_sound = False
         self._was_hovered_last_frame = self.gesture_detector.is_hovered

@@ -221,5 +221,5 @@ class GenericLevelGhostSystem(System):
                 respawn_x=effect.get("x"),
                 respawn_y=effect.get("y"),
             )
-            self.scene.audio_manager.play_sfx("sfx/light_on.wav", volume=0.82)
+            self.scene.audio_manager.play_sfx("sfx/light_on.ogg", volume=0.82)
         self.scene.ghost_rebirth_effects = still_animating

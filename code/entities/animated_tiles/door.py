@@ -60,7 +60,7 @@ class Door(Entity):
         _ = event
         if self.is_open:
             return
-        AudioManager.get().play_sfx("sfx/door_open.wav", volume=0.92)
+        AudioManager.get().play_sfx("sfx/door_open.ogg", volume=0.92)
         animate_sprite:AnimateSprite= self.get(AnimateSprite)
         self.add(
             Sprite(

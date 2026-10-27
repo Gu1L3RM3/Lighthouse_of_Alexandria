@@ -75,7 +75,7 @@ class Dialogue(Component):
             font_size,
             font_color,
             speed=30,
-            sound_name="sfx/dialogue_type.wav",
+            sound_name="sfx/dialogue_type.ogg",
         )
 
     def start(self, screen_size, font_name="PressStart2P-Regular.ttf", font_size=16, font_color=(255,255,255)):

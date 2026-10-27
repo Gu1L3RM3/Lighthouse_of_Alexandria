@@ -105,7 +105,7 @@ class LighthouseRekindleScene(BaseScene):
         if t <= 0:
             return
         if not self._ignite_sfx_played:
-            AudioManager.get().play_sfx("sfx/lighthouse_ignite.wav", volume=0.95)
+            AudioManager.get().play_sfx("sfx/lighthouse_ignite.ogg", volume=0.95)
             self._ignite_sfx_played = True
         progress = min(1.0, t / self.light_rise_duration)
         eased = progress * progress * (3.0 - 2.0 * progress)

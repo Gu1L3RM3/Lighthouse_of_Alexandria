@@ -40,7 +40,7 @@ class DeathTransitionScene(BaseScene):
         self.lives_after = int(context.get("lives_after", 0))
         self.is_game_over = bool(context.get("is_game_over", False))
         if self.is_game_over:
-            self.audio_manager.play_sfx("sfx/game_over.wav", volume=1.0)
+            self.audio_manager.play_sfx("sfx/game_over.ogg", volume=1.0)
         self._spawn_particles(42)
 
     def process_input(self, events: list[Event]) -> None:

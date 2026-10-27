@@ -30,7 +30,7 @@ class GenericLevelBombSystem(System):
 
     def place_bomb(self):
         if not self.scene.bomb_manager.consume_bomb():
-            self.scene.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+            self.scene.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
             return
 
         self.sync_bomb_runtime()
@@ -49,7 +49,7 @@ class GenericLevelBombSystem(System):
                 "damage": float(params.damage),
             }
         )
-        self.scene.audio_manager.play_sfx("sfx/lighthouse_ignite.wav", volume=0.58)
+        self.scene.audio_manager.play_sfx("sfx/lighthouse_ignite.ogg", volume=0.58)
 
     def sync_bomb_runtime(self):
         bomb_results = self.scene.circuit_manager.get_circuit_values(GENERIC_LEVEL_BOMB_EDITOR_FILE)
