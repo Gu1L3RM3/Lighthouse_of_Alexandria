@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 
-import numpy as np
-
 from core.circuit_tools.circuit_domain import CircuitError, ElementKind
 from core.circuit_tools.circuit_topology import CircuitBranch, CircuitGraph
+from core.circuit_tools.linear_system import SingularMatrixError, solve_linear_system
 
 
 class CircuitSolveError(CircuitError):
@@ -63,8 +62,8 @@ class DcMnaSolver:
         size = graph.node_count + len(voltage_sources)
         if size == 0:
             raise SingularCircuitError("Circuit has no solvable branches")
-        matrix = np.zeros((size, size), dtype=float)
-        rhs = np.zeros(size, dtype=float)
+        matrix = [[0.0] * size for _ in range(size)]
+        rhs = [0.0] * size
         voltage_index = {branch.name.casefold(): index for index, branch in enumerate(voltage_sources)}
 
         for branch in graph.branches:
@@ -73,12 +72,12 @@ class DcMnaSolver:
             if branch.kind is ElementKind.RESISTOR:
                 conductance = 1.0 / branch.value
                 if p:
-                    matrix[p - 1, p - 1] += conductance
+                    matrix[p - 1][p - 1] += conductance
                 if n:
-                    matrix[n - 1, n - 1] += conductance
+                    matrix[n - 1][n - 1] += conductance
                 if p and n:
-                    matrix[p - 1, n - 1] -= conductance
-                    matrix[n - 1, p - 1] -= conductance
+                    matrix[p - 1][n - 1] -= conductance
+                    matrix[n - 1][p - 1] -= conductance
             elif branch.kind is ElementKind.CURRENT_SOURCE:
                 if p:
                     rhs[p - 1] -= branch.value
@@ -87,16 +86,16 @@ class DcMnaSolver:
             elif branch.kind is ElementKind.VOLTAGE_SOURCE:
                 source_index = graph.node_count + voltage_index[branch.name.casefold()]
                 if p:
-                    matrix[p - 1, source_index] += 1.0
-                    matrix[source_index, p - 1] += 1.0
+                    matrix[p - 1][source_index] += 1.0
+                    matrix[source_index][p - 1] += 1.0
                 if n:
-                    matrix[n - 1, source_index] -= 1.0
-                    matrix[source_index, n - 1] -= 1.0
+                    matrix[n - 1][source_index] -= 1.0
+                    matrix[source_index][n - 1] -= 1.0
                 rhs[source_index] = branch.value
 
         try:
-            values = np.linalg.solve(matrix, rhs)
-        except np.linalg.LinAlgError as exc:
+            values = solve_linear_system(matrix, rhs)
+        except SingularMatrixError as exc:
             raise SingularCircuitError("Circuit does not have a unique DC solution") from exc
 
         node_voltages = {node: float(values[node - 1]) for node in range(1, graph.node_count + 1)}

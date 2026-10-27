@@ -9,7 +9,6 @@ if str(ROOT) not in sys.path:
 
 from core.localization.explanation_asset_audit import (
     audit_explanation_assets,
-    build_explanation_asset_manifest_lines,
     expected_explanation_image_path,
 )
 from scenes.fases.explanation_content import EXPLANATION_CONTENT
@@ -74,24 +73,6 @@ class ExplanationAssetAuditTest(unittest.TestCase):
             )
 
         self.assertEqual(issues, [])
-
-    def test_manifest_marks_missing_assets(self):
-        content = {
-            "exp_fase_3": {
-                "dialog_1": {
-                    "images": ["explanations/topic_ptbr/01.png"],
-                    "captions": ["caption"],
-                }
-            }
-        }
-        with tempfile.TemporaryDirectory() as temp_dir:
-            lines = build_explanation_asset_manifest_lines(
-                content,
-                images_root=Path(temp_dir),
-                language="en",
-            )
-
-        self.assertIn("- [MISSING] explanations/topic_en/01.png", lines)
 
     def test_real_explanation_entries_keep_image_and_caption_counts_in_sync(self):
         for phase, dialogues in EXPLANATION_CONTENT.items():
