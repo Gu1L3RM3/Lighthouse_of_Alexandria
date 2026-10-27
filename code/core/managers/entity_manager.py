@@ -102,23 +102,12 @@ class EntityManager:
         *comp_types: Type[Component],
         filter: Optional[Callable[[Entity], bool]] = None
     ) -> List[Entity]:
-        
-
-        index: Dict[Type[Component], set[Entity]] = {}
+        result = list(self._entities.values())
         for ct in comp_types:
-            index[ct] = {e for e in self._entities.values() if e.has(ct)}
-            if not index[ct]:
-                return []  
-
-        sorted_sets = sorted(index.values(), key=len)
-        result_set = sorted_sets[0].copy()
-        for s in sorted_sets[1:]:
-            result_set.intersection_update(s)
-
+            result = [e for e in result if ct in e.components]
         if filter:
-            result_set = {e for e in result_set if filter(e)}
-
-        return list(result_set)
+            result = [e for e in result if filter(e)]
+        return result
     def clear_all_entities(self,excepts:Optional[List[Entity]]=None):
         if not excepts:
             self._entities.clear()

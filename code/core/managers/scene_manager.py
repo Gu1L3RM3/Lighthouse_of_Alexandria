@@ -1,5 +1,5 @@
 import pygame
-from typing import Dict
+from typing import Callable, Dict
 from scenes.base_scene import BaseScene
 from core.managers.event_manager import EventManager
 from core.managers.life_manager import LifeManager
@@ -14,6 +14,7 @@ class SceneManager:
 
     def __init__(self):
         self.scenes: Dict[str, BaseScene] = {}
+        self._scene_factories: Dict[str, Callable[[], BaseScene]] = {}
         self._scenes_needing_reset: set[str] = set()
         self.active_scene: BaseScene = None
         self.active_scene_name: str | None = None
@@ -45,21 +46,37 @@ class SceneManager:
             self.active_scene_name = name
             self.active_scene.start()
 
+    def register_lazy(self, name: str, factory: Callable[[], BaseScene]):
+        # Levels load and scale their whole map on construction; building them only
+        # when first visited keeps unvisited levels out of RAM.
+        self._scene_factories[name] = factory
+        if not self.active_scene:
+            self.register(name, factory())
+
+    def has_scene(self, name: str) -> bool:
+        return name in self.scenes or name in self._scene_factories
+
+    def get_scene(self, name: str) -> BaseScene:
+        if name not in self.scenes:
+            if name not in self._scene_factories:
+                raise KeyError(f"Scene '{name}' not registered.")
+            self.scenes[name] = self._scene_factories[name]()
+        return self.scenes[name]
+
     def _recreate_scene_instance(self, name: str) -> BaseScene:
-        scene = self.scenes.get(name)
-        if scene is None:
-            raise KeyError(f"Scene '{name}' not registered.")
-        recreated = SceneFactory.get().recreate(scene)
+        factory = self._scene_factories.get(name)
+        if factory is not None:
+            recreated = factory()
+        else:
+            recreated = SceneFactory.get().recreate(self.get_scene(name))
         self.scenes[name] = recreated
         self._scenes_needing_reset.discard(name)
         return recreated
 
     def _resolve_scene_for_activation(self, name: str) -> BaseScene:
-        if name not in self.scenes:
-            raise KeyError(f"Scene '{name}' not registered.")
         if name in self._scenes_needing_reset:
             return self._recreate_scene_instance(name)
-        return self.scenes[name]
+        return self.get_scene(name)
 
     def start_new_journey(self, start_scene_name: str = "home_scene", duration: float = 0.6):
         save_manager = SaveGameManager.get()
@@ -68,17 +85,22 @@ class SceneManager:
 
         # Marca apenas cenas de gameplay para reset; menu/help/creditos permanecem.
         for scene_name in list(self.scenes.keys()):
-            if save_manager.should_persist_scene(scene_name):
+            if not save_manager.should_persist_scene(scene_name):
+                continue
+            if scene_name in self._scene_factories and self.scenes[scene_name] is not self.active_scene:
+                # Dropping a built lazy scene frees its map; its factory rebuilds it fresh on the next visit.
+                del self.scenes[scene_name]
+            else:
                 self._scenes_needing_reset.add(scene_name)
 
         # A cena inicial da nova jornada precisa estar limpa imediatamente.
-        if start_scene_name in self.scenes:
+        if self.has_scene(start_scene_name):
             self._recreate_scene_instance(start_scene_name)
 
         self.start_fade(start_scene_name, duration)
 
     def change(self, name: str):
-        if name not in self.scenes:
+        if not self.has_scene(name):
             raise KeyError(f"Scene '{name}' not registered.")
         if self.active_scene:
             self.active_scene.end()
@@ -91,7 +113,7 @@ class SceneManager:
     def can_resume_scene(self) -> bool:
         return (
             self.resume_scene_name is not None
-            and self.resume_scene_name in self.scenes
+            and self.has_scene(self.resume_scene_name)
             and self.resume_scene_name != self.menu_scene_name
         )
 
@@ -106,7 +128,7 @@ class SceneManager:
     def can_resume_help_scene(self) -> bool:
         return (
             self.help_resume_scene_name is not None
-            and self.help_resume_scene_name in self.scenes
+            and self.has_scene(self.help_resume_scene_name)
             and self.help_resume_scene_name != self.help_scene_name
         )
 
@@ -134,7 +156,7 @@ class SceneManager:
         self.start_fade(self.scene_preview, duration)
 
     def start_fade(self, name: str, duration: float = 0.5):
-        if name not in self.scenes:
+        if not self.has_scene(name):
             raise KeyError(f"Scene '{name}' not registered.")
         if not self.active_scene:
             self.change(name)
@@ -143,7 +165,7 @@ class SceneManager:
         self._begin_transition(target_scene, name, duration)
 
     def replace_scene_and_fade(self, scene_name: str, new_scene: BaseScene, duration: float = 0.5):
-        if scene_name not in self.scenes:
+        if not self.has_scene(scene_name):
             raise KeyError(f"Scene '{scene_name}' not registered.")
         self.scenes[scene_name] = new_scene
         self._scenes_needing_reset.discard(scene_name)
