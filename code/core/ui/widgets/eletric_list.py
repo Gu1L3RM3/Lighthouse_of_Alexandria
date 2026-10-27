@@ -7,6 +7,7 @@ from core.ui.widgets.gesture_detector import ClickType
 from core.ui.widgets.button import Button
 from core.managers.resource_manager import ResourceManager
 from core.ui.widgets.alert_dialog import AlertDialog
+from core.touch_points import TouchPoints
 from core.settings import (
     ELETRIC_LIST_DIALOG_MAX_SCREEN_RATIO,
     ELETRIC_LIST_DIALOG_MIN_HEIGHT,
@@ -14,7 +15,12 @@ from core.settings import (
     ELETRIC_LIST_DIALOG_TOP_PADDING,
     ELETRIC_LIST_DIALOG_BOTTOM_PADDING,
     ELETRIC_LIST_SCROLL_STEP,
+    ELETRIC_LIST_DRAG_SCROLL_THRESHOLD,
 )
+
+SCROLL_THUMB_COLOR = (220, 220, 220)
+# Cream, the editor's "you are acting here" colour: shows a drag is scrolling, not picking.
+SCROLL_THUMB_DRAG_COLOR = (245, 230, 170)
 
 
 class EletricList(Widget):
@@ -35,6 +41,7 @@ class EletricList(Widget):
         spacing: int = 10,
         action: Optional[Callable] = None,
         on_close: Optional[Callable] = None,
+        touch_points: TouchPoints | None = None,
     ):
         super().__init__()
         self.data = data
@@ -53,6 +60,10 @@ class EletricList(Widget):
         self.content_height = 0
         self._last_revision = self.storage_manager.revision
         self.controller_focus_index = 0
+        self.touch_points = touch_points or TouchPoints.get()
+        self._drag_last_y: int | None = None
+        self._drag_travel = 0
+        self._dragging = False
 
         self.set_alert_dialog()
         self._create_buttons()
@@ -248,9 +259,38 @@ class EletricList(Widget):
             self.update_data()
 
         self._update_visible_buttons()
-        for btn in self.visible_buttons:
-            btn.update(dt)
+        if not self._track_touch_drag():
+            for btn in self.visible_buttons:
+                btn.update(dt)
         self.alert_dialog.update(dt)
+
+    def _track_touch_drag(self) -> bool:
+        """Scrolls with a finger dragged over the list; True while the items must ignore that finger."""
+        fingers = self.touch_points.pressed_positions()
+        if not fingers:
+            was_dragging = self._dragging
+            self._drag_last_y = None
+            self._drag_travel = 0
+            self._dragging = False
+            if was_dragging:
+                # fresh buttons never saw the press, so the item under the lifted finger is not picked
+                self._create_buttons(preserve_focus=True)
+            return was_dragging
+
+        x, y = fingers[0]
+        if self._drag_last_y is None:
+            if self.content_view_rect.collidepoint((x, y)):
+                self._drag_last_y = y
+            return False
+
+        dy = y - self._drag_last_y
+        self._drag_last_y = y
+        self._drag_travel += abs(dy)
+        if self._drag_travel >= ELETRIC_LIST_DRAG_SCROLL_THRESHOLD:
+            self._dragging = True
+        if self._dragging and dy:
+            self._scroll_by(-dy)
+        return self._dragging
 
     def activate_hovered(self, mouse_pos: tuple[int, int]) -> bool:
         for btn in self.visible_buttons:
@@ -277,7 +317,8 @@ class EletricList(Widget):
         thumb_travel = max(1, track.height - thumb_height)
         thumb_y = track.top + int((self.scroll_offset / max_scroll) * thumb_travel)
         thumb = Rect(track.left, thumb_y, track.width, thumb_height)
-        pygame.draw.rect(surface, (220, 220, 220), thumb, border_radius=3)
+        thumb_color = SCROLL_THUMB_DRAG_COLOR if self._dragging else SCROLL_THUMB_COLOR
+        pygame.draw.rect(surface, thumb_color, thumb, border_radius=3)
 
     def draw(self, surface: Surface):
         self.alert_dialog.draw(surface)

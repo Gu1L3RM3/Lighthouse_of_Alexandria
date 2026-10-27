@@ -11,6 +11,9 @@ from core.managers.audio_manager import AudioManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.input_manager import InputManager
 from core.managers.language_service import LanguageService
+from core.managers.resource_manager import ResourceManager
+from core.touch_gamepad import TouchGamepad
+from core.touch_points import TouchPoints
 from core.circuit_tools.inventory_repository import InventoryRepository
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
@@ -135,6 +138,10 @@ class Game:
         pygame.display.set_caption(self.language_service.get_system_label("window_title"))
         self.input_manager = InputManager.get()
         self.input_manager.initialize()
+        self.touch_gamepad = TouchGamepad(self.screen.get_size())
+        self.input_manager.touch_gamepad = self.touch_gamepad
+        TouchPoints.get().screen_size = self.screen.get_size()
+        self.touch_gamepad_font = ResourceManager.get().load_font("PressStart2P-Regular.ttf", 12)
         self.life_manager.set_max_lives(10)
         self.life_manager.reset_lives()
         self._last_scene_name = None
@@ -238,6 +245,9 @@ class Game:
             self.profiler.start_frame()
             
             events = pygame.event.get()
+            self.input_manager.set_touch_gamepad_enabled(
+                getattr(self.scene_manager.active_scene, "shows_touch_gamepad", True)
+            )
             events = self.input_manager.process_events(events)
             self.profiler.mark("events")
             filtered_events = []
@@ -270,6 +280,8 @@ class Game:
 
             self.scene_manager.update_transition()
             self.scene_manager.draw_transition(self.screen)
+            if self.touch_gamepad.active and self.touch_gamepad.enabled:
+                self.touch_gamepad.draw(self.screen, self.touch_gamepad_font, self.input_manager.get_controller_button)
             self.profiler.mark("transition")
 
             pygame.display.flip()

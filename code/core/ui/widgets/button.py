@@ -34,6 +34,8 @@ class Button(Widget):
         self.draw_gesture_detector = draw_gesture_detector
         self.gesture_detector = gesture_detector
         self.set_gesture_detector()
+        # otherwise the first update tests the press at (0, 0) and a tap on a fresh button is lost
+        self.gesture_detector.rect.center = self._rect.center
         self.text_widget = text_widget
         self.text = text
         self.font_size = font_size
@@ -82,7 +84,9 @@ class Button(Widget):
             self._pressed_feedback_timer = max(0.0, self._pressed_feedback_timer - dt)
         gesture_pressed = self.gesture_detector._hold_state if self.click_type == ClickType.HOLD else self.gesture_detector.is_pressed
         pressed = gesture_pressed or self._pressed_feedback_timer > 0
-        if self.gesture_detector.is_hovered and not self._was_hovered_last_frame:
+        # a finger has no hover: the click sound alone is the feedback
+        touch_input = self.gesture_detector.touch_points.touched_recently()
+        if self.gesture_detector.is_hovered and not self._was_hovered_last_frame and not touch_input:
             self.audio.play_ui("sfx/ui_hover.ogg", volume=0.75)
         if pressed and not self._was_pressed_last_frame:
             if self._suppress_next_press_sound:

@@ -6,6 +6,9 @@ from scenes.base_scene import BaseScene
 from core.ui.widgets.gesture_detector import ClickType, GestureDetector
 from core.ui.widgets.menu_edit_circuit import MenuEditCircuit
 from core.ui.widgets.alert_dialog import AlertDialog
+from core.ui.widgets.brush_touch_actions import BrushTouchActions
+from core.ui.touch_grid import aim_position, grid_lift_positions
+from core.ui.board_view import BoardView
 from core.systems.circuit_editor.input_system import InputSystem
 from core.managers.node_manager import NodeManager
 from core.circuit_tools.circuit_domain import CircuitError
@@ -15,11 +18,32 @@ from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
 from core.settings import CELL_SIZE, path_in_circuitos
 from core.managers.scene_manager import SceneManager
 from core.managers.input_manager import InputManager
+from core.managers.language_service import LanguageService
 from core.ui.prompt_ui import draw_prompt_hint_row
 from core.components.sprite import Sprite
+from core.components.dropped import Dropped
+
+# Touch preview of the held part: lighthouse-flame amber where it fits, red where it is blocked.
+# (The controller focus keeps its cream; on the white grid a finger-sized preview needs more contrast.)
+TOUCH_AIM_OK = (235, 180, 92)
+TOUCH_AIM_OK_FILL = (235, 180, 92, 64)
+TOUCH_AIM_BLOCKED = (200, 50, 50)
+TOUCH_AIM_BLOCKED_FILL = (200, 50, 50, 64)
+TOUCH_AIM_OUTLINE_WIDTH = 3
+TOUCH_HINT_FONT_SIZE = 14
+TOUCH_HINT_TEXT = (245, 230, 170)
+TOUCH_HINT_BACKGROUND = (15, 20, 42, 235)
+TOUCH_HINT_PADDING = 8
+TOUCH_UI_MARGIN = 12
+# Circuits are authored on a 20 x 10 board (x up to 1216, y up to 768); smaller screens draw it scaled.
+BOARD_COLS = 20
+BOARD_MIN_ROWS = 10
+BOARD_TOP_CELLS = 2
 
 
 class CircuitEditor(BaseScene):
+    shows_touch_gamepad = False
+
     def __init__(
         self,
         screen: Surface,
@@ -52,12 +76,12 @@ class CircuitEditor(BaseScene):
         self.prompt_text_font = None
         self.file = file
         self.input_manager = InputManager.get()
+        self._touch_aim: tuple[int, int] | None = None
 
         self.node_manager = NodeManager()
         self.storage_circuit_manager = StorageCircuitManager()
 
         self.set_gesture_canvas()
-        self.set_rects_grid()
         self.set_entities()
         self.input_system = InputSystem(
             self.entity_mn,
@@ -66,10 +90,13 @@ class CircuitEditor(BaseScene):
             self.file,
             self.storage_circuit_manager,
             self.debug_mode,
+            pointer_position=self._pointer_position,
         )
         self.set_canvas()
         self.prompt_chip_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
         self.prompt_text_font = self.resources.load_font("PressStart2P-Regular.ttf", 8)
+        self.touch_hint_font = self.resources.load_font("PressStart2P-Regular.ttf", TOUCH_HINT_FONT_SIZE)
+        self._touch_hint_cache: dict[str, Surface] = {}
 
         self.menu_widget = MenuEditCircuit(
             self.input_system,
@@ -78,6 +105,17 @@ class CircuitEditor(BaseScene):
             self.ui_manager,
         )
         self.ui_manager.add(self.menu_widget)
+        self.brush_touch_actions = BrushTouchActions(
+            self.input_system,
+            self.menu_widget._button_surface("buttons/wide.png", self.menu_widget.wide_button_size),
+            self.menu_widget._button_surface("buttons/wide_pressed.png", self.menu_widget.wide_button_size),
+            bottom_left=(TOUCH_UI_MARGIN, self.height_screen - TOUCH_UI_MARGIN),
+            input_source=lambda: self.input_manager.last_input_source,
+            popup_open=self._has_popup_open,
+            font_size=self.menu_widget.top_font_size,
+        )
+        self.ui_manager.add(self.brush_touch_actions)
+        self._fit_board_to_free_area()
 
         self.systems.update([self.input_system, self.render_system])
 
@@ -115,33 +153,38 @@ class CircuitEditor(BaseScene):
             offset=(0, self.cell_size * 2),
             show_debug_surf=False,
             click_type=ClickType.AFTER_PRESSED,
+            # touch acts when the finger lifts (see _act_on_touch_lifts), so the player can aim first
+            accepts_touch=False,
         )
-
-    def set_rects_grid(self):
-        left = self.gesture_canvas.rect.left
-        top = self.gesture_canvas.rect.top
-        cols = self.gesture_canvas.rect.width // self.cell_size
-        rows = self.gesture_canvas.rect.height // self.cell_size
-        self.grid_cols = cols
-        self.grid_rows = rows
-
-        self.rects_grid = [
-            Rect(left + x * self.cell_size, top + y * self.cell_size, self.cell_size, self.cell_size)
-            for x in range(cols)
-            for y in range(rows)
-        ]
-        self.grid_focus_col = max(0, cols // 2)
-        self.grid_focus_row = max(0, rows // 2)
 
     def set_canvas(self):
         self.gesture_canvas.function = self.input_system.handle_canvas_actions
         self.ui_manager.add(self.gesture_canvas)
 
+    def _fit_board_to_free_area(self):
+        """Scale the board into the space between the top bar and the sidebar, so no cell hides under them."""
+        top = self.cell_size * BOARD_TOP_CELLS
+        free_area = Rect(0, top, self.menu_widget.rect_right.left, self.height_screen - top)
+        self.board = BoardView((0, top), self.cell_size, BOARD_COLS, BOARD_MIN_ROWS, free_area)
+
+        self.gesture_canvas.rect = Rect(self.board.screen_rect)
+        # InputSystem keeps a reference to this list, so refill it instead of replacing it
+        self.rects_grid[:] = self.board.world_cells()
+        self.grid_cols = self.board.cols
+        self.grid_rows = self.board.rows
+        self.grid_focus_col = self.grid_cols // 2
+        self.grid_focus_row = self.grid_rows // 2
+
+        offset_x, offset_y = self.board.camera_offset
+        self.camera.viewport.topleft = (-round(offset_x), -round(offset_y))
+
         self.canvas = pygame.Surface((self.width_screen, self.height_screen), pygame.SRCALPHA)
-        for x in range(0, self.width_screen, self.cell_size):
-            pygame.draw.line(self.canvas, "gray", (x, 0), (x, self.height_screen))
-        for y in range(0, self.height_screen, self.cell_size):
-            pygame.draw.line(self.canvas, "gray", (0, y), (self.width_screen, y))
+        board_rect = self.board.screen_rect
+        step = self.board.cell_on_screen
+        for x in range(board_rect.left, board_rect.right + 1, step):
+            pygame.draw.line(self.canvas, "gray", (x, board_rect.top), (x, board_rect.bottom))
+        for y in range(board_rect.top, board_rect.bottom + 1, step):
+            pygame.draw.line(self.canvas, "gray", (board_rect.left, y), (board_rect.right, y))
 
     def process_input(self, events):
         self._refresh_input_lock(events)
@@ -174,8 +217,37 @@ class CircuitEditor(BaseScene):
             self.menu_widget.set_controller_navigation(False)
             self._update_mouse_visibility_for_pointer()
 
+        # read before the UI runs: the lift that picks a list item or taps a menu must not also hit the grid
+        touch_lift_allowed = self._is_touch() and not self._has_popup_open()
+        blocked_rects = self._touch_blocked_rects()
+
         self.ui_manager.update(dt)
         self.update_systems(dt)
+        if touch_lift_allowed:
+            self._act_on_touch_lifts(blocked_rects)
+
+    def _pointer_position(self) -> tuple[float, float]:
+        """Where the player points, in board coordinates (the board may be drawn scaled)."""
+        return self.board.to_world(self._pointer_on_screen())
+
+    def _pointer_on_screen(self) -> tuple[int, int]:
+        if not self._is_touch():
+            return self.input_manager.get_pointer_position()
+        # taps on Rotate/Cancel or the menus must not drag the held part under them
+        last_touch = self.input_manager.touch_points.last_position()
+        self._touch_aim = aim_position(last_touch, self._touch_blocked_rects(), self._touch_aim or last_touch)
+        return self._touch_aim or (0, 0)
+
+    def _is_touch(self) -> bool:
+        return self.input_manager.last_input_source == "touch"
+
+    def _touch_blocked_rects(self) -> list[Rect]:
+        return [self.menu_widget.rect_top, self.menu_widget.rect_right, *self.brush_touch_actions.rects()]
+
+    def _act_on_touch_lifts(self, blocked_rects: list[Rect]):
+        released = self.input_manager.touch_points.released_positions()
+        for _ in grid_lift_positions(released, self.gesture_canvas.rect, blocked_rects):
+            self.input_system.handle_canvas_actions()
 
     def _update_mouse_visibility_for_pointer(self):
         if self._has_popup_open():
@@ -192,10 +264,11 @@ class CircuitEditor(BaseScene):
     def render(self):
         self.screen.fill("white")
         self.screen.blit(self.canvas, (0, 0))
-        self.render_system.draw()
+        self.render_system.draw(scale=self.board.scale)
         self.ui_manager.draw(self.screen)
         if self._using_controller() and not self._has_popup_open():
             self._draw_grid_focus()
+        self._draw_touch_aim()
         self._draw_editor_prompt_bar()
 
     def _exit_editor(self):
@@ -332,8 +405,9 @@ class CircuitEditor(BaseScene):
         )
 
     def _grid_anchor_rect(self) -> Rect:
-        left = self.gesture_canvas.rect.left + (self.grid_focus_col * self.cell_size)
-        top = self.gesture_canvas.rect.top + (self.grid_focus_row * self.cell_size)
+        """The controller-focused cell, in board coordinates."""
+        left = self.board.origin[0] + (self.grid_focus_col * self.cell_size)
+        top = self.board.origin[1] + (self.grid_focus_row * self.cell_size)
         return Rect(left, top, self.cell_size, self.cell_size)
 
     def _grid_focus_rect(self) -> Rect:
@@ -342,7 +416,7 @@ class CircuitEditor(BaseScene):
         return Rect(anchor.left, anchor.top, w_cells * self.cell_size, h_cells * self.cell_size)
 
     def _sync_mouse_with_grid_focus(self):
-        anchor = self._grid_anchor_rect()
+        anchor = self.board.to_screen_rect(self._grid_anchor_rect())
         self.input_manager.set_virtual_mouse_position(anchor.center)
 
     def _move_grid_focus(self, dx: int, dy: int):
@@ -401,14 +475,50 @@ class CircuitEditor(BaseScene):
             self.input_system.handle_canvas_actions()
 
     def _draw_grid_focus(self):
-        focus_rect = self._grid_focus_rect()
-        overlay = pygame.Surface(focus_rect.size, pygame.SRCALPHA)
-        overlay.fill(self.grid_focus_fill)
-        self.screen.blit(overlay, focus_rect.topleft)
-        pygame.draw.rect(self.screen, self.grid_focus_highlight, focus_rect.inflate(-2, -2), 2)
+        focus = self.board.to_screen_rect(self._grid_focus_rect())
+        self._draw_area_highlight(focus, self.grid_focus_highlight, self.grid_focus_fill)
+
+    def _draw_area_highlight(self, rect: Rect, outline, fill, width: int = 2):
+        overlay = pygame.Surface(rect.size, pygame.SRCALPHA)
+        overlay.fill(fill)
+        self.screen.blit(overlay, rect.topleft)
+        pygame.draw.rect(self.screen, outline, rect.inflate(-width, -width), width)
+
+    def _draw_touch_aim(self):
+        """While a finger aims on the grid, light the area the held part will take."""
+        brush = self.input_system.brush
+        if brush is None or not brush.has(Sprite) or not self._is_touch() or self._has_popup_open():
+            return
+        blocked = self._touch_blocked_rects()
+        aiming = grid_lift_positions(self.input_manager.touch_points.pressed_positions(), self.gesture_canvas.rect, blocked)
+        if not aiming:
+            return
+        area = self.board.to_screen_rect(brush.get(Sprite).rect)
+        if brush.has(Dropped) and not self.input_system.can_drop_brush():
+            self._draw_area_highlight(area, TOUCH_AIM_BLOCKED, TOUCH_AIM_BLOCKED_FILL, TOUCH_AIM_OUTLINE_WIDTH)
+            return
+        self._draw_area_highlight(area, TOUCH_AIM_OK, TOUCH_AIM_OK_FILL, TOUCH_AIM_OUTLINE_WIDTH)
+
+    def _draw_touch_hint(self):
+        key = "editor_touch_place" if self.input_system.brush is not None else "editor_touch_pick"
+        text = LanguageService.get().get_prompt_text(key)
+        hint = self._touch_hint_cache.get(text)
+        if hint is None:
+            label = self.touch_hint_font.render(text, True, TOUCH_HINT_TEXT)
+            hint = pygame.Surface(label.get_rect().inflate(TOUCH_HINT_PADDING * 2, TOUCH_HINT_PADDING * 2).size, pygame.SRCALPHA)
+            pygame.draw.rect(hint, TOUCH_HINT_BACKGROUND, hint.get_rect(), border_radius=6)
+            hint.blit(label, (TOUCH_HINT_PADDING, TOUCH_HINT_PADDING))
+            self._touch_hint_cache[text] = hint
+        buttons_top = self.height_screen - TOUCH_UI_MARGIN - self.menu_widget.wide_button_size[1]
+        self.screen.blit(hint, hint.get_rect(bottomleft=(TOUCH_UI_MARGIN, buttons_top - TOUCH_UI_MARGIN)))
 
     def _draw_editor_prompt_bar(self):
         if not self.should_draw_bottom_prompt_bar():
+            return
+        if self._is_touch():
+            # key chips mean nothing without a keyboard: say the next step instead
+            if not self._has_popup_open():
+                self._draw_touch_hint()
             return
         if self._using_controller():
             items = self.input_manager.get_prompt_items("circuit_editor_grid")

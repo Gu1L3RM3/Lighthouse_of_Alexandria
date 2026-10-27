@@ -167,6 +167,8 @@ ELETRIC_LIST_DIALOG_SIDE_PADDING = 30
 ELETRIC_LIST_DIALOG_TOP_PADDING = 52
 ELETRIC_LIST_DIALOG_BOTTOM_PADDING = 24
 ELETRIC_LIST_SCROLL_STEP = 36
+# A finger has to travel this far (px) before a touch on the list scrolls instead of picking an item.
+ELETRIC_LIST_DRAG_SCROLL_THRESHOLD = 12
 
 # Gameplay de fases
 GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN = 10.0

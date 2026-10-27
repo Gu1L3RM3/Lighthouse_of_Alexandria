@@ -84,6 +84,17 @@ class LanguageServiceTest(unittest.TestCase):
         self.assertEqual(self.service.get_ui_label("editor_solve"), "Resolver")
         self.assertEqual(self.service.get_ui_label("editor_wire"), "Fio")
 
+    def test_editor_touch_labels_follow_current_language(self):
+        self.assertEqual(self.service.get_ui_label("editor_rotate_brush"), "Rotate")
+        self.assertEqual(self.service.get_ui_label("editor_cancel_tool"), "Cancel")
+        self.assertEqual(self.service.get_prompt_text("editor_touch_pick"), "Pick a part from the top bar")
+        self.assertEqual(self.service.get_prompt_text("editor_touch_place"), "Drag to aim, lift to place")
+        self.service.set_language("pt-BR")
+        self.assertEqual(self.service.get_ui_label("editor_rotate_brush"), "Girar")
+        self.assertEqual(self.service.get_ui_label("editor_cancel_tool"), "Cancelar")
+        self.assertEqual(self.service.get_prompt_text("editor_touch_pick"), "Escolha uma peça na barra de cima")
+        self.assertEqual(self.service.get_prompt_text("editor_touch_place"), "Arraste para mirar e solte para colocar")
+
     def test_window_title_follows_current_language(self):
         self.assertEqual(self.service.get_system_label("window_title"), "Lighthouse of Alexandria")
         self.service.set_language("pt-BR")

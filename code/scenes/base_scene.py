@@ -33,6 +33,9 @@ class OrderedSystems:
 
 
 class BaseScene(ABC):
+    # Scenes that are played by tapping anywhere (the circuit editor) hide the on-screen gamepad.
+    shows_touch_gamepad = True
+
     def __init__(self,screen:Surface,world_width:int,world_height:int):
         self.screen=screen
 

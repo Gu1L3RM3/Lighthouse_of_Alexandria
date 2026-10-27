@@ -1,0 +1,583 @@
+<html lang="en-us"><script src="{{cookiecutter.cdn}}pythons.js" type=module id="site" data-python="python{{cookiecutter.PYBUILD}}" data-LINES=42 data-COLUMNS=132 data-os="vtx,snd,gui" async defer>#<!--
+
+print("""
+Loading {{cookiecutter.title}} from {{cookiecutter.archive}}.apk
+    Pygbag Version : {{cookiecutter.version}}
+    Template Version : 0.9.3 (alexandria)
+    Python  : {{cookiecutter.PYBUILD}}
+    CDN URL : {{cookiecutter.cdn}}
+    Screen  : {{cookiecutter.width}}x{{cookiecutter.height}}
+""")
+
+import sys
+import asyncio
+import platform
+import json
+from pathlib import Path
+
+# do not rename
+async def custom_site():
+    import embed
+    # letterbox colour around the 16:9 canvas: the menu's night sky, not pygbag's grey
+    platform.document.body.style.background = "#0f142a"
+    platform.window.boot_state("unpack")
+
+    platform.window.transfer.hidden = true
+    platform.window.canvas.style.visibility = "visible"
+
+    bundle = "{{cookiecutter.archive}}"
+
+    appdir = Path(f"/data/data/{bundle}")
+    appdir.mkdir()
+
+    # itch.io serves the zip (.apk), any other host serves the tar.gz
+    if platform.window.location.host.find('.itch.zone')>0:
+        import zipfile
+        async with platform.fopen("{{cookiecutter.archive}}.apk", "rb") as archive:
+            with zipfile.ZipFile(archive) as zip_ref:
+                zip_ref.extractall(appdir.as_posix())
+    else:
+        import tarfile
+        async with platform.fopen("{{cookiecutter.archive}}.tar.gz", "rb") as archive:
+            tar = tarfile.open(fileobj=archive, mode="r:gz")
+            tar.extractall(path=appdir.as_posix(), filter='tar')
+            tar.close()
+
+    platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
+
+    while embed.counter()<0:
+        await asyncio.sleep(.1)
+
+    main = appdir / "assets" / "main.py"
+
+    # browsers only unlock audio after a click/touch, so wait for one before starting
+    if not platform.window.MM.UME:
+        __import__(__name__).__file__ = main
+        platform.window.boot_state("ready")
+        while not platform.window.MM.UME:
+            await asyncio.sleep(.1)
+
+    await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
+
+    __import__(__name__).__file__ = main
+
+    def ui_callback(pkg):
+        platform.window.boot_state("installing", pkg)
+
+    await shell.source(main, callback=ui_callback)
+
+    # if you don't reach that step
+    # your main.py has an infinite sync loop somewhere !
+
+    platform.window.boot_state("done")
+    platform.window.config.gui_divider = 1
+    platform.window.window_resize()
+    print("alexandria.tmpl: done")
+
+    shell.interactive()
+
+asyncio.run( custom_site() )
+
+
+
+
+
+
+
+
+
+
+
+
+# BEGIN BLOCK
+#
+# now this is the html part you can (and should) customize
+# It is not mandatory : pygame-script when it reads the first line (also called
+# shebang ) of above code create absolute minimal widget set
+# required for running with default rules
+#
+# do not alter that comment block it is separating python code from html code
+# =============================================================================
+# --></script><head><!--
+//=============================================================================
+//
+//
+//
+//
+//
+//
+//
+
+--><script type="application/javascript">
+// END BLOCK
+
+
+
+// this dict is available under PyConfig.config from __main__
+
+config = {
+    xtermjs : "{{cookiecutter.xtermjs}}" ,
+    _sdl2 : "canvas",
+    user_canvas : 0,
+    user_canvas_managed : 0,
+    gui_divider : 2,
+    ume_block : {{cookiecutter.ume_block}},
+    can_close : {{cookiecutter.can_close}},
+    archive : "{{cookiecutter.archive}}",
+    gui_debug : 2,
+    cdn : "{{cookiecutter.cdn}}",
+    autorun : {{cookiecutter.autorun}},
+    PYBUILD : "{{cookiecutter.PYBUILD}}",
+    fb_ar   :  1.77,
+    fb_width : "{{cookiecutter.width}}",
+    fb_height : "{{cookiecutter.height}}"
+}
+
+const BOOT_TEXT = {
+    title: "Lighthouse of Alexandria",
+    tagline: "Story, puzzles and electricity",
+    download: "Downloading the game",
+    unpack: "Preparing the lighthouse",
+    ready: "Click or tap to light the lighthouse",
+    installing: "Installing ",
+}
+
+// lamp_level: 0 = dark lamp, 1 = fully lit; the download fills it, later states keep it lit
+const BOOT_LAMP_LEVEL = { unpack: 0.85, ready: 1, installing: 1 }
+
+const LAMP_TOP = 26
+const LAMP_HEIGHT = 12
+
+function set_lamp_level(level) {
+    level = Math.max(0, Math.min(1, level))
+    // whole pixels only, so the lamp fills like pixel art instead of a smooth bar
+    const lit = Math.round(LAMP_HEIGHT * level)
+    const lamp = document.getElementById("lamp-lit")
+    lamp.setAttribute("y", LAMP_TOP + LAMP_HEIGHT - lit)
+    lamp.setAttribute("height", lit)
+    document.getElementById("lamp-glow").style.opacity = (level * 0.55).toFixed(2)
+}
+
+function boot_state(state, detail) {
+    document.body.dataset.boot = state
+    if (state === "done") {
+        infobox.style.display = "none"
+        boot.hidden = true
+        return
+    }
+    if (state in BOOT_LAMP_LEVEL) set_lamp_level(BOOT_LAMP_LEVEL[state])
+    infobox.innerText = BOOT_TEXT[state] + (detail ? detail : "")
+}
+
+// pygbag updates #progress during the wasm download; mirror it into the lamp and the label
+function boot_track_download() {
+    if (document.body.dataset.boot !== "download") return
+    const ratio = progress.max ? progress.value / progress.max : 0
+    set_lamp_level(ratio)
+    infobox.innerText = BOOT_TEXT.download + (ratio > 0 ? " " + Math.round(ratio * 100) + "%" : "")
+    requestAnimationFrame(boot_track_download)
+}
+
+// pythons.js may call this; the layout is pure CSS now, so it only has to make the box visible
+function show_infobox() {
+    infobox.style.display = "block"
+}
+
+</script>
+
+    <title>{{cookiecutter.title}}</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta name="theme-color" content="#0f142a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* palette taken from main_menu_scene.py so the boot screen hands off to the menu seamlessly */
+        :root {
+            --sky-1: #0f142a;
+            --sky-2: #171f3a;
+            --sky-3: #212b4a;
+            --sky-4: #2a385a;
+            --sea: #183151;
+            --stone: #b0a688;
+            --stone-dark: #918568;
+            --stone-light: #cdc29c;
+            --flame: #ebb45c;
+            --glow: #ffe08a;
+            --cream: #f5e6aa;
+            --muted: #a7916a;
+            --pixel-font: "Press Start 2P", ui-monospace, monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--sky-1);
+            font-family: var(--pixel-font);
+            color: var(--cream);
+        }
+
+        /* pygbag still writes into these; the lamp shows the progress instead */
+        #transfer {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+        }
+
+        #boot {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2.5vh;
+            padding: 0 16px;
+            /* hard stops = the menu's banded pixel sky; the sea starts at 62% like the menu */
+            background: linear-gradient(
+                var(--sky-1) 0 15.5%, var(--sky-2) 15.5% 31%,
+                var(--sky-3) 31% 46.5%, var(--sky-4) 46.5% 62%,
+                var(--sea) 62% 100%);
+        }
+
+        #boot[hidden] { display: none; }
+
+        #boot svg {
+            height: min(44vh, 360px);
+            overflow: visible;
+            shape-rendering: crispEdges;
+        }
+
+        .beam {
+            fill: var(--glow);
+            opacity: 0;
+        }
+
+        [data-boot="ready"] .beam { animation: beam-sweep 2.4s steps(6) infinite; }
+        [data-boot="ready"] .beam-right { animation-delay: -1.2s; }
+
+        @keyframes beam-sweep {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.22; }
+        }
+
+        #boot h1 {
+            margin: 0;
+            font-size: clamp(14px, 3.4vw, 34px);
+            font-weight: 400;
+            line-height: 1.4;
+            letter-spacing: 0.04em;
+            color: #f0d084;
+            text-align: center;
+            text-shadow: 0.12em 0.12em 0 var(--sky-1);
+        }
+
+        #boot p {
+            margin: 0;
+            font-size: clamp(8px, 1.3vw, 14px);
+            line-height: 1.6;
+            color: #ccb47e;
+            text-align: center;
+        }
+
+        #infobox {
+            position: fixed;
+            left: 50%;
+            bottom: 12vh;
+            transform: translateX(-50%);
+            z-index: 999999;
+            max-width: calc(100vw - 32px);
+            box-sizing: border-box;
+            padding: 12px 18px;
+            font-family: var(--pixel-font);
+            font-size: clamp(8px, 1.2vw, 12px);
+            line-height: 1.6;
+            text-align: center;
+            color: var(--muted);
+            background: transparent;
+        }
+
+        /* the one state that needs the player: make it read as a button on the sea */
+        [data-boot="ready"] #infobox {
+            color: var(--sky-1);
+            background: var(--glow);
+            box-shadow: 0 0 0 4px var(--flame), 6px 6px 0 4px var(--sky-1);
+            cursor: pointer;
+        }
+
+        /* the game is a fixed 16:9 canvas: on a phone held upright it would be a thin strip */
+        #rotate {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            padding: 0 16px;
+            background: var(--sky-1);
+            color: var(--cream);
+            text-align: center;
+        }
+
+        @media (orientation: portrait) and (pointer: coarse) {
+            #rotate { display: flex; }
+        }
+
+        #rotate svg {
+            width: 96px;
+            shape-rendering: crispEdges;
+            animation: turn-phone 2.4s steps(1) infinite;
+        }
+
+        /* hold upright, then snap sideways: a stepped turn reads as pixel art, not a smooth spin */
+        @keyframes turn-phone {
+            0%, 45% { transform: rotate(0deg); }
+            50%, 95% { transform: rotate(-90deg); }
+        }
+
+        #rotate p {
+            margin: 0;
+            max-width: 22ch;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #rotate svg { animation: none; transform: rotate(-90deg); }
+            [data-boot="ready"] .beam { animation: none; opacity: 0.18; }
+        }
+
+        div.emscripten { text-align: center; }
+        div.emscripten_border { border: 1px solid black; }
+
+        /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+        canvas.emscripten {
+            border: 0px none;
+            background-color: transparent;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            padding: 0;
+            margin: 0 auto;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            image-rendering: pixelated;
+        }
+
+        .bottomright {
+            position: absolute;
+            top: 40%;
+            right: 0px;
+        }
+
+        .trinfo {
+           position: relative;
+           right: 0px;
+           border: 1px solid black;
+        }
+
+        .framed {
+           position: relative;
+           top: 150px;
+           right: 10px;
+           border: 1px solid black;
+        }
+    </style>
+
+    <script src="{{cookiecutter.cdn}}/browserfs.min.js"></script>
+
+</head>
+
+<body data-boot="download">
+
+    <div id="transfer" align=center>
+        <div class="emscripten" id="status">Downloading...</div>
+        <div class="emscripten">
+            <progress value="0" max="100" id="progress"></progress>
+        </div>
+    </div>
+
+    <div id="boot">
+        <!-- same rectangles as the lighthouse drawn in main_menu_scene.py (320x180 space) -->
+        <svg viewBox="128 8 66 128" role="img" aria-labelledby="boot-title">
+            <polygon class="beam beam-left" points="158,28 158,36 40,52 40,12"/>
+            <polygon class="beam beam-right" points="164,28 164,36 282,52 282,12"/>
+            <g id="lamp-glow" fill="#ffdc78" opacity="0">
+                <rect x="145" y="14" width="32" height="26"/>
+                <rect x="141" y="18" width="40" height="18"/>
+            </g>
+            <rect x="140" y="50" width="42" height="74" fill="#b0a688"/>
+            <rect x="140" y="50" width="8" height="74" fill="#cdc29c"/>
+            <rect x="174" y="50" width="8" height="74" fill="#918568"/>
+            <rect x="157" y="66" width="8" height="12" fill="#0f142a"/>
+            <rect x="157" y="94" width="8" height="12" fill="#0f142a"/>
+            <rect x="134" y="124" width="54" height="10" fill="#918568"/>
+            <rect x="146" y="38" width="30" height="14" fill="#cdc29c"/>
+            <rect x="154" y="26" width="14" height="12" fill="#3a3326"/>
+            <rect id="lamp-lit" x="154" y="38" width="14" height="0" fill="#ebb45c"/>
+            <rect x="151" y="20" width="20" height="7" fill="#ffe08a"/>
+        </svg>
+        <h1 id="boot-title"></h1>
+        <p id="boot-tagline"></p>
+    </div>
+
+    <canvas class="emscripten" id="canvas"
+width="1px"
+height="1px"
+    oncontextmenu="event.preventDefault()" tabindex=1>
+    </canvas>
+
+    <canvas class="emscripten" id="canvas3d"
+width="{{cookiecutter.width}}px"
+height="{{cookiecutter.height}}px"
+    oncontextmenu="event.preventDefault()" tabindex=1 hidden>
+    </canvas>
+
+    <div id="infobox" role="status" aria-live="polite"></div>
+
+    <div id="rotate">
+        <svg viewBox="0 0 24 40" aria-hidden="true">
+            <rect x="0" y="0" width="24" height="40" fill="#f5e6aa"/>
+            <rect x="3" y="4" width="18" height="28" fill="#183151"/>
+            <rect x="6" y="20" width="12" height="9" fill="#2a385a"/>
+            <rect x="10" y="9" width="4" height="11" fill="#b0a688"/>
+            <rect x="10" y="7" width="4" height="2" fill="#ebb45c"/>
+            <rect x="10" y="35" width="4" height="2" fill="#0f142a"/>
+        </svg>
+        <p>Turn your phone sideways to play</p>
+    </div>
+
+    <div id=html></div>
+
+    <div id=crt  class=bottomright >
+
+        <div id="system" hidden>
+            <div class="button-container">
+                <button id="aiostop" disabled>AIO ⏏︎</button>
+                <button id="aiopaused_true" disabled>AIO ■</button>
+                <button id="aiopaused_false" disabled>AIO ▶</button>
+                <button id="pygame_mixer_music_pause" disabled>Music ■</button>
+            </div>
+
+            <div class="button-container">
+                <div id=load_min>min</div>
+                <div id=load_avg>avg</div>
+                <div id=load_max>max</div>
+              <button id="load_rst" disabled>RESET</button>
+            </div>
+
+            <div id="level">(battery level unknown)</div>
+            <div id="stateBattery">(charging state unknown)</div>
+
+        </div>
+
+        <div id=box class="emscripten_border" hidden=true>
+
+            <div id="info" class="trinfo"></div>
+
+            <iframe id="iframe" class="framed" name="iframe"
+width="470px" height="90%"
+allowtransparency="true"
+style="z-index: 10;"
+frameborder="1"
+                allowfullscreen="true"
+                webkitallowfullscreen="true"
+                msallowfullscreen="true"
+                mozallowfullscreen="true"
+                sandbox="allow-same-origin allow-top-navigation allow-scripts allow-pointer-lock"
+                allow="autoplay; fullscreen *; geolocation; microphone; camera; midi; monetization; xr-spatial-tracking; gamepad; gyroscope; accelerometer; xr; cross-origin-isolated"
+                src="{{cookiecutter.cdn}}empty.html"
+                scrolling="yes">
+            </iframe>
+        </div>
+
+    </div>
+
+
+    <div id="dlg" hidden>
+        <input type="file" id="dlg_multifile" multiple accept="image/*">
+        <label for="dlg_multifile">Select files</label>
+    </div>
+
+    <div id="pyconsole">
+        <div id="terminal" tabIndex=1 align="left"></div>
+    </div>
+
+    <script type="application/javascript">
+
+    document.getElementById("boot-title").innerText = BOOT_TEXT.title
+    document.getElementById("boot-tagline").innerText = BOOT_TEXT.tagline
+    boot_track_download()
+
+    globalThis.__canvas_resized = (self, ecw, ech) => {
+        console.warn("TODO: panda3d canvas monitor", self, ecw, ech)
+    }
+
+    async function custom_onload(debug_hidden) {
+        // this is called before anything python is loaded
+        console.log(__FILE__, "custom_onload")
+
+        pyconsole.hidden = debug_hidden
+        system.hidden = debug_hidden
+        transfer.hidden = debug_hidden
+        info.hidden = debug_hidden
+        box.hidden =  debug_hidden
+
+        show_infobox()
+    }
+
+    function custom_prerun(){
+        console.log(__FILE__, "custom_prerun")
+    }
+
+    function custom_postrun(){
+        console.log(__FILE__, "custom_postrun")
+    }
+
+    function debug() {
+        // allow to gain access to dev tools from js console
+        python.config.debug = true
+        custom_onload(false)
+        Module.PyRun_SimpleString("shell.uptime()")
+        window_resize()
+    }
+
+    function info_inline(data){
+        document.getElementById("info").innerHTML = data
+    }
+
+    function info_online(url) {
+        fetch(url)
+            .then((response) => response.text())
+            .then((html) => {
+                info_inline(html);
+        })
+        .catch((error) => {
+            console.warn(error);
+        });
+    }
+
+    function frame_online(url) {
+        window.frames["iframe"].location = url;
+    }
+
+    </script>
+
+</body>
+</html>
