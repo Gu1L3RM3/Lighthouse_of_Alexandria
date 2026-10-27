@@ -103,6 +103,7 @@ a = Analysis(
         "jupyter",
         "matplotlib",
         "PIL",
+        "numpy",
     ],
     noarchive=False,
     optimize=0,

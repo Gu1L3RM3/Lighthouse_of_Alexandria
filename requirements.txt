@@ -1,4 +1,3 @@
-﻿numpy==2.2.5
 pygame-ce==2.5.3
 PyTMX==3.32
 pathfinding==1.0.18

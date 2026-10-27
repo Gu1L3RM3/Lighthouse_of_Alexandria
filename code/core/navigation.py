@@ -1,4 +1,3 @@
-import numpy as np
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 from pathfinding.core.diagonal_movement import DiagonalMovement
@@ -19,7 +18,7 @@ class NavGrid:
         self.map_width=self.tmx_data.width
         self.map_height=self.tmx_data.height
 
-        self.walkable=np.zeros((self.map_height,self.map_width),dtype=bool)
+        self.walkable=[[False]*self.map_width for _ in range(self.map_height)]
         self._set_walkable()
     def _set_walkable(self):
         layer=self.tmx_data.get_layer_by_name(self.layer_name)
@@ -33,7 +32,7 @@ class PathFinder:
         
     def _in_bounds(self, tile: tuple[int, int]) -> bool:
         x, y = tile
-        return 0 <= x < self.walkable.shape[1] and 0 <= y < self.walkable.shape[0]
+        return 0 <= y < len(self.walkable) and 0 <= x < len(self.walkable[0])
 
     def find_path(
         self,
@@ -46,7 +45,7 @@ class PathFinder:
 
         grid = self.grid
         if blocked_tiles:
-            matrix = self.walkable.copy()
+            matrix = [row.copy() for row in self.walkable]
             for bx, by in blocked_tiles:
                 if (bx, by) == start_tile or (bx, by) == goal_tile:
                     continue
