@@ -48,7 +48,7 @@ class GenericLevelInteractionSystem(System):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
                 if target_panel:
-                    self.scene.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
+                    self.scene.audio_manager.play_sfx("sfx/interact_confirm.ogg", volume=0.9)
                     target_panel.open_circuit_editor()
                 elif target_door:
                     target_door.try_enter(player)

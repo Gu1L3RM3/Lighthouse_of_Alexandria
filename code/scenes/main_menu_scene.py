@@ -274,7 +274,7 @@ class MainMenuScene(BaseScene):
         self.scene_manager.start_fade("credits", 0.45)
 
     def exit_game(self):
-        self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+        self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
         pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def start(self):
@@ -286,16 +286,16 @@ class MainMenuScene(BaseScene):
         if not self.menu_buttons:
             return
         self.selected_button_index = (self.selected_button_index + delta) % len(self.menu_buttons)
-        self.audio_manager.play_ui("sfx/ui_hover.wav", volume=0.75)
+        self.audio_manager.play_ui("sfx/ui_hover.ogg", volume=0.75)
 
     def _activate_selected_button(self):
         button = self.menu_buttons[self.selected_button_index]
         if button is self.resume_button:
             can_resume = self.scene_manager.can_resume_scene() or self.save_manager.has_save()
             if not can_resume:
-                self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.75)
+                self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.75)
                 return
-        self.audio_manager.play_ui("sfx/ui_click.wav", volume=0.9)
+        self.audio_manager.play_ui("sfx/ui_click.ogg", volume=0.9)
         if button.action:
             button.action()
 
@@ -309,7 +309,7 @@ class MainMenuScene(BaseScene):
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     self._activate_selected_button()
                 elif event.key == pygame.K_ESCAPE:
-                    self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+                    self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
                     self.resume_current_scene()
             self.ui_manager.handle_event(event)
 

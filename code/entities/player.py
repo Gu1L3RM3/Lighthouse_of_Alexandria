@@ -111,7 +111,7 @@ class Player(Entity):
         if now - self._step_timer < self._step_interval:
             return
         self._step_timer = now
-        self.audio_manager.play_sfx("sfx/footstep_1.wav", volume=0.42)
+        self.audio_manager.play_sfx("sfx/footstep_1.ogg", volume=0.42)
 
     def _get_dir_name(self, direction: Vector2) -> str:
         if direction.y != 0:

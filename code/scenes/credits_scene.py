@@ -139,12 +139,12 @@ class CreditsScene(BaseScene):
 
     def process_input(self, events: list[Event]) -> None:
         if self.input_manager.is_action_just_pressed("back"):
-            self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+            self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
             self.go_back()
             return
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+                self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
                 self.go_back()
                 return
             self.ui_manager.handle_event(event)

@@ -333,11 +333,11 @@ class BaseGenericLevel(BaseScene):
             
     def after_close_old_paper(self,event):
         self.event_manager.post({'type':'release_freeze'})
-        self.audio_manager.play_sfx("sfx/paper_close.wav", volume=0.85)
+        self.audio_manager.play_sfx("sfx/paper_close.ogg", volume=0.85)
         
     def open_old_paper(self,event):
         self.event_manager.post({'type':'request_freeze','type_request':'open paper'})
-        self.audio_manager.play_sfx("sfx/paper_open.wav", volume=0.9)
+        self.audio_manager.play_sfx("sfx/paper_open.ogg", volume=0.9)
         def close_old_paper(widget):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
@@ -355,7 +355,7 @@ class BaseGenericLevel(BaseScene):
         
     def fall_player(self, event):
         self.can_set_resistors = True
-        self.audio_manager.play_sfx("sfx/player_fall.wav", volume=0.95)
+        self.audio_manager.play_sfx("sfx/player_fall.ogg", volume=0.95)
         # Freeze immediately so next process_input cannot override the fall animation.
         if self.player and self.player.has(Freeze):
             self.player.get(Freeze).active = True
@@ -366,7 +366,7 @@ class BaseGenericLevel(BaseScene):
 
     def update_storage_circuit(self,event):
         value = event['value']
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
+        self.audio_manager.play_sfx("sfx/electric_pickup.ogg", volume=0.84)
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=RESISTOR_ENTITY, value=value)
         self.storage_circuit.save_eletric_storage()
@@ -374,7 +374,7 @@ class BaseGenericLevel(BaseScene):
 
     def update_storage_circuit_generic(self, event, component_type):
         value = event["value"]
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
+        self.audio_manager.play_sfx("sfx/electric_pickup.ogg", volume=0.84)
         self.storage_circuit.reload_storage()
         self.storage_circuit.add_component(type=component_type, value=value)
         self.storage_circuit.save_eletric_storage()
@@ -408,7 +408,7 @@ class BaseGenericLevel(BaseScene):
         self.entity_mn.remove_entity_by_id(entity_id)
 
     def open_bomb_editor(self):
-        self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.9)
+        self.audio_manager.play_sfx("sfx/interact_confirm.ogg", volume=0.9)
         # Ao voltar do editor, manter filas de runtime (ex.: respawn de fantasma).
         self._preserve_runtime_state_on_next_start = True
         # Preserva contagem de nucleos ao abrir/fechar o editor durante a mesma fase.
@@ -607,10 +607,10 @@ class BaseGenericLevel(BaseScene):
         self.event_manager.subscribe("current_source_collected", lambda e: self.update_storage_circuit_generic(e, CURRENT_SOURCE_ENTITY))
         self.event_manager.subscribe("voltage_source_collected", lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
         self.event_manager.subscribe(LEGACY_VOLTAGE_SOURCE_EVENT, lambda e: self.update_storage_circuit_generic(e, VOLTAGE_SOURCE_ENTITY))
-        self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.wav", volume=0.88))
+        self.event_manager.subscribe("crystal_invisibility_collected", lambda e: self.audio_manager.play_sfx("sfx/crystal_pickup.ogg", volume=0.88))
         if not self.environment_system.uses_custom_crystal_respawn():
             self.event_manager.subscribe("crystal_invisibility_collected", self.environment_system.on_crystal_invisibility_collected)
-        self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.wav", volume=0.9))
+        self.event_manager.subscribe("panel_solved", lambda e: self.audio_manager.play_sfx("sfx/panel_solved.ogg", volume=0.9))
         self.event_manager.subscribe("panel_solved", self._on_panel_solved_overload)
         self.event_manager.subscribe("panel_bomb_reward", self._on_panel_bomb_reward)
         self.event_manager.subscribe("open_old_paper",self.open_old_paper)
@@ -638,7 +638,7 @@ class BaseGenericLevel(BaseScene):
             return
         self.bomb_manager.max_bombs += amount
         self.bomb_manager.remaining_bombs += amount
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
+        self.audio_manager.play_sfx("sfx/electric_pickup.ogg", volume=0.84)
 
     def _should_skip_progress_reset_on_end(self) -> bool:
         target = (self._scene_change_target_name or "").strip().lower()

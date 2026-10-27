@@ -16,33 +16,33 @@ class AudioManager:
         self._current_music: str | None = None
         self._warned_music_files: set[str] = set()
         self._scene_music_map = {
-            "main_menu": "music/main_menu.wav",
+            "main_menu": "music/main_menu.ogg",
             # Casa e narrativa introspectiva.
             "home_scene": "music/home.ogg",
             "home_after": "music/home_after.ogg",
             # Fases iniciais e desafios.
-            "level_1": "music/level_1_2.flac",
-            "level_2": "music/level_1_2.flac",
-            "fase_3": "music/other_fases.wav",
-            "fase_4": "music/other_fases.wav",
-            "fase_5": "music/other_fases.wav",
-            "fase_6": "music/other_fases.wav",
+            "level_1": "music/level_1_2.ogg",
+            "level_2": "music/level_1_2.ogg",
+            "fase_3": "music/other_fases.ogg",
+            "fase_4": "music/other_fases.ogg",
+            "fase_5": "music/other_fases.ogg",
+            "fase_6": "music/other_fases.ogg",
             "fase_7": "music/fase_7.ogg",
             # Fases de explicacao (calmas, foco didatico).
-            "exp_fase_3": "music/fase_explicativa.mp3",
-            "exp_fase_4": "music/fase_explicativa.mp3",
-            "exp_fase_5": "music/fase_explicativa.mp3",
-            "exp_fase_6": "music/fase_explicativa.mp3",
-            "exp_fase_7": "music/fase_explicativa.mp3",
+            "exp_fase_3": "music/fase_explicativa.ogg",
+            "exp_fase_4": "music/fase_explicativa.ogg",
+            "exp_fase_5": "music/fase_explicativa.ogg",
+            "exp_fase_6": "music/fase_explicativa.ogg",
+            "exp_fase_7": "music/fase_explicativa.ogg",
             # Climax/final.
-            "fase_8": "music/final_theme_loop.wav",
-            "final_level": "music/final_theme_loop.wav",
+            "fase_8": "music/final_theme_loop.ogg",
+            "final_level": "music/final_theme_loop.ogg",
             "ending_lighthouse": "music/ending_lighthouse.ogg",
             "ending_thanks_credits": "music/ending_thanks_credits.ogg",
             "credits": "music/ending_thanks_credits.ogg",
             "death_transition": None,
         }
-        self._default_music = "music/other_fases.wav"
+        self._default_music = "music/other_fases.ogg"
         self._validate_music_files()
 
         self.vol_music = 0.45
@@ -147,7 +147,7 @@ class AudioManager:
     def on_scene_changed(self, scene_name: str):
         # Stinger de morte sem trocar trilha permanentemente.
         if scene_name == "death_transition":
-            self.play_sfx("sfx/death_stinger.wav", volume=0.9)
+            self.play_sfx("sfx/death_stinger.ogg", volume=0.9)
             return
 
         if scene_name in self._scene_music_map:
@@ -156,6 +156,6 @@ class AudioManager:
 
         if scene_name.startswith("generic_levels_") or scene_name.startswith("generic_level_"):
             # Fallback para nomes antigos/auxiliares.
-            self.play_music("music/other_fases.wav")
+            self.play_music("music/other_fases.ogg")
             return
         self.play_music(self._default_music)

@@ -141,7 +141,7 @@ class HomeScene(BaseScene):
             dialogue.active_status = (area.name == next_name)
     def after_close_old_paper(self,event):
         self.event_manager.post({'type':'release_freeze'})
-        self.audio_manager.play_sfx("sfx/paper_close.wav", volume=0.85)
+        self.audio_manager.play_sfx("sfx/paper_close.ogg", volume=0.85)
         self.scene_manager.start_fade('level_1')
     def set_old_paper(self,event):
         dialogue :DialogueArea= event['entity']
@@ -159,7 +159,7 @@ class HomeScene(BaseScene):
 
     def open_old_paper(self,event):
         self.event_manager.post({'type':'request_freeze','type_request':'teste'})
-        self.audio_manager.play_sfx("sfx/paper_open.wav", volume=0.9)
+        self.audio_manager.play_sfx("sfx/paper_open.ogg", volume=0.9)
         def close_old_paper(widget):
             self.ui_manager.remove(widget)
             self.event_manager.post({'type':'close_old_paper'})
@@ -208,7 +208,7 @@ class HomeScene(BaseScene):
             return
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == KEY_DIALOG:
-                self.audio_manager.play_sfx("sfx/interact_confirm.wav", volume=0.85)
+                self.audio_manager.play_sfx("sfx/interact_confirm.ogg", volume=0.85)
                 self.event_manager.post({"type": "open_old_paper"})
                 self.interaction_key_widget.set_visible(False)
                 break

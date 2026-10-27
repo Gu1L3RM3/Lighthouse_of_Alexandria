@@ -118,7 +118,7 @@ class PhantomFairnessTest(unittest.TestCase):
         system.update(entity_manager, 0.016)
 
         self.assertEqual(1, len(audio.calls))
-        self.assertEqual("sfx/phantom_chase_start.wav", audio.calls[0][0])
+        self.assertEqual("sfx/phantom_chase_start.ogg", audio.calls[0][0])
 
     def test_overload_does_not_increase_chase_speed(self):
         overloaded_player = _DummyPlayer(160, 160, external_speed_multiplier=0.35)

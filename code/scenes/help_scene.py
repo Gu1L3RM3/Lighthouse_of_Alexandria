@@ -80,7 +80,7 @@ class HelpScene(BaseScene):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.audio_manager.play_ui("sfx/ui_back.wav", volume=0.9)
+                    self.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
                     self.go_back()
                     return
                 if event.key in (pygame.K_w, pygame.K_UP):

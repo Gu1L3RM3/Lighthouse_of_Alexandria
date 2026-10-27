@@ -283,7 +283,7 @@ class FinalLevel(BaseMaxPowerLevel):
         reward_amount = 2
         self.bomb_manager.max_bombs += reward_amount
         self.bomb_manager.remaining_bombs += reward_amount
-        self.audio_manager.play_sfx("sfx/electric_pickup.wav", volume=0.84)
+        self.audio_manager.play_sfx("sfx/electric_pickup.ogg", volume=0.84)
 
     def _update_crystal_respawns(self, dt: float):
         still_waiting: list[dict] = []
