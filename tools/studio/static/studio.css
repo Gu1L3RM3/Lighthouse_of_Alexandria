@@ -1,0 +1,410 @@
+/* Cyanotype drafting table: the map and circuits are drawn in pale line on blueprint blue.
+   Lamp amber is reserved for what passed the checklist and for the main action. */
+:root {
+  --paper: #1E3B5C;
+  --ink: #10243B;
+  --line: #D9E4F0;
+  --line-soft: #9FB4CB;
+  --grid: #34587F;
+  --lamp: #F4B63F;
+  --lamp-ink: #2A1C00;
+  --fault: #E0645A;
+  --focus: #F4B63F;
+  --font-ui: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Big Shoulders Display", "Arial Narrow", "Segoe UI", sans-serif;
+  --step--1: 0.833rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.728rem;
+  --step-3: 2.488rem;
+  --radius-control: 4px;
+  --radius-panel: 2px;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --paper: #EEF3F8;
+    --ink: #FFFFFF;
+    --line: #12304F;
+    --line-soft: #4C6884;
+    --grid: #C5D4E3;
+    --lamp: #B87400;
+    --lamp-ink: #FFFFFF;
+    --fault: #B3362C;
+    --focus: #B87400;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="light"] {
+  --paper: #EEF3F8;
+  --ink: #FFFFFF;
+  --line: #12304F;
+  --line-soft: #4C6884;
+  --grid: #C5D4E3;
+  --lamp: #B87400;
+  --lamp-ink: #FFFFFF;
+  --fault: #B3362C;
+  --focus: #B87400;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html, body { height: 100%; }
+
+/* dvh follows the visible area when browser bars or fullscreen change it. */
+body { height: 100dvh; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--line);
+  font: var(--step-0) / 1.5 var(--font-ui);
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2 { font-family: var(--font-display); font-weight: 800; line-height: 1.05; margin: 0 0 0.4em; }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-1); letter-spacing: 0.01em; }
+
+button, select, input {
+  font: inherit;
+  color: var(--line);
+  background: var(--ink);
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-control);
+  padding: 0.35rem 0.7rem;
+}
+
+button { cursor: pointer; }
+button:hover { border-color: var(--line-soft); }
+button[aria-pressed="true"] { border-color: var(--line); box-shadow: inset 0 -3px 0 var(--line); }
+button.primary { background: var(--lamp); color: var(--lamp-ink); border-color: var(--lamp); font-weight: 700; }
+button.danger { color: var(--fault); border-color: var(--fault); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.hint, small { color: var(--line-soft); font-size: var(--step--1); }
+
+/* top bar ------------------------------------------------------------ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--grid);
+  background: var(--ink);
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 800;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--line);
+}
+
+.crumb { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; color: var(--line-soft); }
+.status { margin: 0 0 0 auto; color: var(--line-soft); min-height: 1.5em; }
+.status.error { color: var(--fault); }
+.actions { display: flex; gap: 0.5rem; }
+
+/* trail ---------------------------------------------------------------- */
+
+.trail-view { padding: 1.5rem 1rem 3rem; overflow: auto; flex: 1; }
+.trail-intro { max-width: 70ch; }
+.trail-intro p { color: var(--line-soft); }
+
+.issues { list-style: none; padding: 0; margin: 0 0 1rem; color: var(--fault); }
+
+.stages {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  counter-reset: none;
+}
+
+.stage {
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-panel);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+.stage-number {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--line-soft);
+}
+
+.stage h2 { margin-top: 0.25rem; }
+.stage .lead-in { color: var(--line-soft); font-size: var(--step--1); margin: 0 0 0.75rem; }
+
+.level-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+
+.level-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px dashed var(--grid);
+  border-radius: var(--radius-control);
+}
+
+.level-card.original { border-style: solid; }
+.level-card .open { text-align: left; background: none; border: none; padding: 0; font-weight: 700; }
+.level-card .open:hover { text-decoration: underline; }
+.level-card .tag { font-size: var(--step--1); color: var(--line-soft); }
+.level-card .row-actions { grid-column: 1 / -1; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.level-card .row-actions button { font-size: var(--step--1); padding: 0.2rem 0.5rem; }
+
+.door-arrow { color: var(--line-soft); font-size: var(--step--1); padding-left: 0.6rem; }
+
+/* level editor -------------------------------------------------------- */
+
+.level-view {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) 19rem;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas: "rail work inspector" "check check check";
+}
+
+.rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border-right: 1px solid var(--grid);
+}
+
+.rail .tab { text-align: left; }
+
+.workspace { grid-area: work; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--grid);
+}
+
+.tool-group, .segmented { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+.field-inline { display: flex; gap: 0.4rem; align-items: center; font-size: var(--step--1); color: var(--line-soft); }
+
+.stage-area {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  overflow: hidden;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+.stage-area canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+
+.params {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 1.5rem;
+  background: var(--paper);
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.params > * { max-width: 34rem; }
+
+.params label, .inspector label, dialog label { display: grid; gap: 0.25rem; }
+
+.inspector {
+  grid-area: inspector;
+  border-left: 1px solid var(--grid);
+  padding: 0.75rem;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-content: start;
+}
+
+.palette-scroll { max-height: 18rem; overflow: auto; border: 1px solid var(--grid); margin-top: 0.4rem; }
+#palette { display: block; image-rendering: pixelated; cursor: crosshair; }
+
+#props { display: grid; gap: 0.6rem; }
+.prop-row { display: grid; gap: 0.2rem; }
+.prop-row .name { font-size: var(--step--1); color: var(--line-soft); }
+.prop-row.bool { grid-template-columns: auto 1fr; align-items: center; }
+.coords { font-size: var(--step--1); color: var(--line-soft); }
+
+.results table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.results th, .results td { text-align: left; padding: 0.2rem 0.3rem; border-bottom: 1px solid var(--grid); }
+.results th { font-weight: 400; color: var(--line-soft); }
+.results .error { color: var(--fault); }
+
+/* checklist: the one place lamp light appears on its own */
+.checklist {
+  grid-area: check;
+  border-top: 1px solid var(--grid);
+  padding: 0.6rem 1rem;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.5rem 1rem;
+  align-items: start;
+  background: var(--ink);
+  max-height: 11rem;
+  overflow: auto;
+}
+
+.checklist h2 { margin: 0.2rem 0 0; }
+.lamps { list-style: none; margin: 0; padding: 0; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.lamp {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.4rem;
+}
+
+.lamp::before {
+  content: "";
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 2px solid var(--line-soft);
+  flex: none;
+}
+
+.lamp.lit::before {
+  background: var(--lamp);
+  border-color: var(--lamp);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lamp) 25%, transparent), 0 0 14px var(--lamp);
+}
+
+.lamp.fault::before { border-color: var(--fault); }
+.lamp.lit { animation: lamp-on 600ms ease-out; }
+
+@keyframes lamp-on {
+  from { filter: brightness(2.2); }
+  to { filter: none; }
+}
+
+.check-detail { font-size: var(--step--1); }
+.check-detail ul { margin: 0; padding-left: 1.1rem; }
+.check-detail .fault { color: var(--fault); }
+
+dialog {
+  background: var(--ink);
+  color: var(--line);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-panel);
+  max-width: 30rem;
+  width: calc(100% - 2rem);
+}
+
+dialog::backdrop { background: rgb(0 0 0 / 0.55); }
+dialog form { display: grid; gap: 1rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+/* Parameters have nothing to inspect, so the work area takes the inspector's column. */
+/* help: a sheet docked to the right edge, so the work stays visible beside it */
+.help-button { flex: none; }
+
+.help {
+  margin: 0 0 0 auto;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: min(34rem, 100%);
+  max-width: 100%;
+  padding: 1.25rem 1.5rem 2rem;
+  border-width: 0 0 0 1px;
+  overflow: auto;
+}
+
+.help-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.help-head h2 { font-size: var(--step-2); }
+
+.help-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.5rem 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--grid);
+}
+
+.help-nav button { font-size: var(--step--1); }
+.help h3 { font-family: var(--font-display); font-size: var(--step-1); font-weight: 800; margin: 0 0 0.75rem; }
+.help p, .help dd, .help li { max-width: 62ch; }
+.help dl { margin: 0; }
+.help dt { font-weight: 700; margin-top: 0.9rem; }
+.help dt:first-child { margin-top: 0; }
+.help dd { margin: 0.15rem 0 0; color: var(--line-soft); }
+.help code { font-size: 0.92em; color: var(--line); }
+.help .note { color: var(--line-soft); border-left: 3px solid var(--lamp); padding-left: 0.75rem; }
+
+.steps { padding-left: 1.4rem; margin: 0; display: grid; gap: 0.85rem; }
+.steps li::marker { font-family: var(--font-display); font-weight: 800; color: var(--lamp); }
+
+.keys { border-collapse: collapse; width: 100%; }
+.keys th, .keys td { text-align: left; padding: 0.45rem 0.4rem; border-bottom: 1px solid var(--grid); vertical-align: top; }
+.keys th { font-weight: 400; white-space: nowrap; }
+
+kbd {
+  font: inherit;
+  font-size: var(--step--1);
+  border: 1px solid var(--line-soft);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 0.35rem;
+}
+
+@media (min-width: 961px) {
+  .level-view.no-inspector {
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    grid-template-areas: "rail work" "check check";
+  }
+}
+
+.level-view.no-inspector .inspector { display: none; }
+
+@media (max-width: 960px) {
+  .level-view {
+    overflow: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 70vh auto auto;
+    grid-template-areas: "rail" "work" "inspector" "check";
+  }
+  .rail { flex-direction: row; border-right: none; border-bottom: 1px solid var(--grid); }
+  .inspector { border-left: none; border-top: 1px solid var(--grid); }
+  .checklist { grid-template-columns: 1fr; max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lamp.lit { animation: none; }
+}
