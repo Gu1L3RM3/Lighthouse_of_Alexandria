@@ -4,6 +4,8 @@
 
 You play as **Kevin**, moving through enemy-filled stages, locked passages, and interactive electrical panels while trying to prevent a catastrophic shift in Alexandria's timeline.
 
+[Play in your browser](https://gu1l3rm3.github.io/Lighthouse_of_Alexandria/) · [Download for Windows or Linux](https://github.com/Gu1L3RM3/Lighthouse_of_Alexandria/releases/latest)
+
 ## Gallery
 
 ![Animated game gallery](docs/media/images_game/gallery.gif)
@@ -173,7 +175,7 @@ The project is currently playable end-to-end, with:
 GitHub Actions workflows live in `.github/workflows/`:
 
 - `ci.yml` runs the unit test suite on every pull request and branch push.
-- `cd.yml` runs on every push to `main` (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`.
+- `cd.yml` runs on every push to `main` (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels), deploys the web game to [GitHub Pages](https://gu1l3rm3.github.io/Lighthouse_of_Alexandria/) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`. GitHub Pages must use GitHub Actions as its publishing source; it receives the complete `build/web` directory, including the `.tar.gz` bundle used outside itch.io.
 
 Required repository secret: `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys).
 

@@ -9,6 +9,7 @@ except Exception:
 from core.managers.language_service import LanguageService
 from core.touch_points import TouchPoints
 from core.settings import (
+    IS_WEB,
     KEY_DIALOG,
     KEY_NEXT_SCENE,
     KEY_PLACE_BOMB,
@@ -65,6 +66,15 @@ class InputManager:
             6: ("help",),
             7: ("pause",),
         }
+        if IS_WEB:
+            # SDL's browser joystick backend exposes the standard Gamepad API indices.
+            self._button_to_actions_joystick.update({
+                6: (),  # L2
+                7: (),  # R2
+                8: ("help",),
+                9: ("pause",),
+                10: ("menu_confirm",),
+            })
         self._button_to_actions_sdl2 = {
             0: ("confirm", "interact"),
             1: ("back",),
@@ -213,6 +223,23 @@ class InputManager:
 
             if event.type == pygame.JOYDEVICEREMOVED:
                 self._disconnect_joystick(event.instance_id)
+                continue
+
+            if event.type in (pygame.CONTROLLERBUTTONDOWN, pygame.CONTROLLERBUTTONUP):
+                controller = self._get_primary_controller()
+                if self._xinput_connected or controller is None:
+                    continue
+                if event.instance_id != controller.id:
+                    continue
+                self.last_input_source = "controller"
+                self.mouse_visible = False
+                is_pressed = event.type == pygame.CONTROLLERBUTTONDOWN
+                # Preserve taps released before polling, using SDL's normalized button numbers.
+                if self._prev_button_states.get(event.button, False) != is_pressed:
+                    augmented_events.extend(
+                        self._handle_button_change(event.button, is_pressed, source="sdl2")
+                    )
+                    self._prev_button_states[event.button] = is_pressed
                 continue
 
             if event.type == pygame.JOYBUTTONDOWN:
@@ -648,7 +675,15 @@ class InputManager:
                 int(bool(controller.get_button(11))) - int(bool(controller.get_button(12))),
             )
         elif self.joysticks:
-            hat_value = joystick.get_hat(0) if joystick.get_numhats() > 0 else (0, 0)
+            if joystick.get_numhats() > 0:
+                hat_value = joystick.get_hat(0)
+            elif IS_WEB and joystick.get_numbuttons() >= 16:
+                hat_value = (
+                    int(bool(joystick.get_button(15))) - int(bool(joystick.get_button(14))),
+                    int(bool(joystick.get_button(12))) - int(bool(joystick.get_button(13))),
+                )
+            else:
+                hat_value = (0, 0)
         else:
             hat_value = (0, 0)
         if hat_value != self._prev_hat_value:

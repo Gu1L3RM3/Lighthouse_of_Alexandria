@@ -190,6 +190,7 @@ function show_infobox() {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
     <meta name="theme-color" content="#0f142a">
+    <meta name="description" content="Play Lighthouse of Alexandria: a pixel-art adventure with story, exploration and electrical circuit puzzles. Available in English and Portuguese.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes"/>
 
@@ -400,7 +401,9 @@ function show_infobox() {
         }
     </style>
 
-    <script src="{{cookiecutter.cdn}}/browserfs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browserfs@1.4.3/dist/browserfs.min.js"
+        integrity="sha384-L07lTedW5DiD4A4BIBVv5x29NyDiU/Kt9CglteSqOggJlnvE9QPH3fTv4j+yqGoI"
+        crossorigin="anonymous"></script>
 
 </head>
 
@@ -440,13 +443,13 @@ function show_infobox() {
     <canvas class="emscripten" id="canvas"
 width="1px"
 height="1px"
-    oncontextmenu="event.preventDefault()" tabindex=1>
+    oncontextmenu="event.preventDefault()" tabindex="0" aria-label="Lighthouse of Alexandria game">
     </canvas>
 
     <canvas class="emscripten" id="canvas3d"
 width="{{cookiecutter.width}}px"
 height="{{cookiecutter.height}}px"
-    oncontextmenu="event.preventDefault()" tabindex=1 hidden>
+    oncontextmenu="event.preventDefault()" tabindex="0" aria-label="Lighthouse of Alexandria 3D canvas" hidden>
     </canvas>
 
     <div id="infobox" role="status" aria-live="polite"></div>
