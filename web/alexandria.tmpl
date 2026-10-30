@@ -188,7 +188,7 @@ function show_infobox() {
     <title>{{cookiecutter.title}}</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0f142a">
     <meta name="description" content="Play Lighthouse of Alexandria: a pixel-art adventure with story, exploration and electrical circuit puzzles. Available in English and Portuguese.">
     <meta name="mobile-web-app-capable" content="yes">
@@ -215,6 +215,14 @@ function show_infobox() {
             --cream: #f5e6aa;
             --muted: #a7916a;
             --pixel-font: "Press Start 2P", ui-monospace, monospace;
+            --view-width: 100vw;
+            --view-height: 100vh;
+            --game-width: calc(var(--view-width) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+            --game-height: calc(var(--view-height) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        }
+
+        @supports (height: 100dvh) {
+            :root { --view-width: 100dvw; --view-height: 100dvh; }
         }
 
         body {
@@ -356,6 +364,48 @@ function show_infobox() {
             line-height: 1.8;
         }
 
+        #screen-controls { display: none; }
+        #screen-controls[hidden], #fullscreen-status[hidden] { display: none; }
+
+        @media (pointer: coarse) {
+            #screen-controls {
+                display: flex;
+                position: fixed;
+                top: max(8px, env(safe-area-inset-top, 0px));
+                right: max(8px, env(safe-area-inset-right, 0px));
+                z-index: 1000001;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 12px;
+                max-width: min(28rem, calc(100vw - 32px));
+                font-size: 10px;
+                line-height: 1.6;
+            }
+            #fullscreen-button {
+                min-height: 44px;
+                padding: 12px 16px;
+                border: 2px solid var(--flame);
+                background: var(--glow);
+                color: var(--sky-1);
+                font: inherit;
+                cursor: pointer;
+            }
+            #fullscreen-button:focus-visible { outline: 3px solid var(--cream); outline-offset: 4px; }
+            #fullscreen-status { margin: 0; padding: 12px; background: var(--sky-1); }
+        }
+
+        @media (orientation: portrait) and (pointer: coarse) {
+            #screen-controls {
+                top: auto;
+                bottom: max(24px, 8dvh);
+                left: 16px;
+                right: 16px;
+                align-items: center;
+                max-width: none;
+                text-align: center;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             #rotate svg { animation: none; transform: rotate(-90deg); }
             [data-boot="ready"] .beam { animation: none; opacity: 0.18; }
@@ -368,17 +418,16 @@ function show_infobox() {
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
-            width: 100%;
-            height: 100%;
+            /* Override pygbag's inline pixel sizes when browser chrome or fullscreen changes. */
+            width: min(var(--game-width), calc(var(--game-height) * 16 / 9)) !important;
+            height: min(var(--game-height), calc(var(--game-width) * 9 / 16)) !important;
             z-index: 5;
             padding: 0;
-            margin: 0 auto;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            margin: auto;
+            position: fixed !important;
+            inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px) !important;
             image-rendering: pixelated;
+            touch-action: none;
         }
 
         .bottomright {
@@ -463,7 +512,12 @@ height="{{cookiecutter.height}}px"
             <rect x="10" y="7" width="4" height="2" fill="#ebb45c"/>
             <rect x="10" y="35" width="4" height="2" fill="#0f142a"/>
         </svg>
-        <p>Turn your phone sideways to play</p>
+        <p id="rotate-message">Turn your phone sideways to play</p>
+    </div>
+
+    <div id="screen-controls">
+        <button id="fullscreen-button" type="button">Fullscreen</button>
+        <p id="fullscreen-status" role="status" hidden></p>
     </div>
 
     <div id=html></div>
@@ -521,6 +575,70 @@ frameborder="1"
     <div id="pyconsole">
         <div id="terminal" tabIndex=1 align="left"></div>
     </div>
+
+    <script id="mobile-display">
+    const displayCopy = navigator.language.toLowerCase().startsWith("pt") ? {
+        fullscreen: "Tela cheia",
+        rotate: "Gire o celular para jogar",
+        unavailable: "Este navegador não oferece tela cheia. Gire o celular e use Adicionar à tela inicial no menu do navegador.",
+        denied: "Não foi possível abrir a tela cheia. Tente novamente pelo botão.",
+    } : {
+        fullscreen: "Fullscreen",
+        rotate: "Turn your phone sideways to play",
+        unavailable: "This browser does not offer fullscreen. Turn your phone sideways and use Add to Home Screen in the browser menu.",
+        denied: "Could not open fullscreen. Try the button again.",
+    };
+    const screenControls = document.getElementById("screen-controls");
+    const fullscreenButton = document.getElementById("fullscreen-button");
+    const fullscreenStatus = document.getElementById("fullscreen-status");
+    fullscreenButton.textContent = displayCopy.fullscreen;
+    document.getElementById("rotate-message").textContent = displayCopy.rotate;
+
+    function updateFullscreenControls() {
+        const active = document.fullscreenElement || document.webkitFullscreenElement;
+        screenControls.hidden = Boolean(active || navigator.standalone || matchMedia("(display-mode: standalone)").matches);
+        if (active) {
+            fullscreenStatus.hidden = true;
+            document.getElementById("canvas").focus();
+        }
+    }
+
+    fullscreenButton.addEventListener("click", async () => {
+        fullscreenStatus.hidden = true;
+        const root = document.documentElement;
+        const request = root.requestFullscreen || root.webkitRequestFullscreen;
+        if (!request) {
+            fullscreenStatus.textContent = displayCopy.unavailable;
+            fullscreenStatus.hidden = false;
+            return;
+        }
+        fullscreenButton.disabled = true;
+        try {
+            await request.call(root, {navigationUI: "hide"});
+            try {
+                await screen.orientation?.lock("landscape");
+            } catch (_) {
+                // Some browsers allow fullscreen but require the player to rotate the phone.
+            }
+        } catch (_) {
+            fullscreenStatus.textContent = displayCopy.denied;
+            fullscreenStatus.hidden = false;
+        } finally {
+            fullscreenButton.disabled = false;
+        }
+    });
+    fullscreenButton.addEventListener("keydown", event => {
+        // SDL prevents the button's default keyboard click while the game is running.
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            fullscreenButton.click();
+        }
+    });
+    document.addEventListener("fullscreenchange", updateFullscreenControls);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenControls);
+    updateFullscreenControls();
+    </script>
 
     <script type="application/javascript">
 

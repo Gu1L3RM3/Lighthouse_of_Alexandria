@@ -51,6 +51,8 @@ The explanation stages currently cover:
 - `B`: place bomb when available
 - `L`: toggle stage light
 
+On Android Chrome, tap **Fullscreen** (or **Tela cheia**) to hide the browser bars. The game requests landscape orientation when supported; otherwise, turn the phone sideways. The canvas fits the available screen without cropping or stretching. Use Android's Back action to leave fullscreen.
+
 In the circuit editor:
 - `N`: node
 - `W`: wire
