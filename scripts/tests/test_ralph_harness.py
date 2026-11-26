@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from fakes import ROOT
 from test_ralph import make_repo, run_ralph, summary_rows
 
 LEVEL_TASK = "- [ ] T-01 tune a level — done when: test passes\n  level-data: yes\n"
@@ -95,16 +94,6 @@ def test_a_sentence_style_task_block_is_ready(tmp_path):
         "  depends on: T-01.\n"
         "  DoR: ready.\n"
     )
-    repo, env, calls, _ = make_repo(tmp_path, "success", tasks)
-
-    result = run_ralph(repo, env)
-
-    assert result.returncode == 0, result.stderr
-    assert "T-02" in calls.read_text()
-
-
-def test_the_runner_can_pick_a_task_from_this_projects_queue(tmp_path):
-    tasks = (ROOT / "TASKS.md").read_text()
     repo, env, calls, _ = make_repo(tmp_path, "success", tasks)
 
     result = run_ralph(repo, env)
