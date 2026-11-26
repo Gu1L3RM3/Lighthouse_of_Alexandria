@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Skill",
+      "Agent(Explore)",
+      "Agent(alexandria-scout)",
+      "Agent(alexandria-reviewer)",
+      "Bash(scripts/verify.sh*)",
+      "Bash(./scripts/verify.sh*)",
+      "Bash(.venv/bin/python -m unittest*)",
+      "Bash(python -m unittest*)",
+      "Bash(python3 -m unittest*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git switch*)",
+      "Bash(git branch*)",
+      "Bash(git rev-parse*)",
+      "Bash(git push -u origin*)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr view*)",
+      "Bash(ls*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(gh pr merge*)",
+      "Bash(gh release*)",
+      "Bash(gh workflow*)",
+      "Bash(git tag*)"
+    ]
+  }
+}
