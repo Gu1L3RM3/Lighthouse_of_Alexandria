@@ -20,6 +20,7 @@
       "Bash(git log*)",
       "Bash(git show*)",
       "Bash(git grep*)",
+      "Bash(git ls-files*)",
       "Bash(git add*)",
       "Bash(git commit*)",
       "Bash(git switch*)",

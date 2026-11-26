@@ -171,3 +171,33 @@ def test_the_test_level_requires_a_file_name(repo):
 
     assert result.returncode == 2
     assert calls == ""
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("site/index.html", 0),
+        (".github/workflows/site.yml", 0),
+        # The game, its web build and Level Studio are not website development.
+        ("web/alexandria.tmpl", 1),
+        ("code/core/touch_gamepad.py", 1),
+        ("tools/level_studio.py", 1),
+        (".github/workflows/cd.yml", 1),
+        ("docs/agents/web-site.md", 1),
+    ],
+)
+def test_security_is_needed_only_for_website_changes(repo, path, expected):
+    commit(repo, path)
+
+    result, calls = verify(repo, "security-needed")
+
+    assert result.returncode == expected, result.stdout
+    assert calls == ""
+
+
+def test_an_uncommitted_website_page_also_needs_security(repo):
+    write(repo / "site/new.html", "<p>draft</p>\n")
+
+    result, _ = verify(repo, "security-needed")
+
+    assert result.returncode == 0

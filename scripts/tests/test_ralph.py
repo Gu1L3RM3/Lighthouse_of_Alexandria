@@ -34,6 +34,8 @@ def make_repo(
     write_executable(
         repo / "scripts" / "verify.sh",
         """#!/usr/bin/env bash
+# A question, not a check: it does not count as a verification run.
+if [ "$1" = security-needed ]; then [ -n "${FAKE_SECURITY_NEEDED:-}" ]; exit; fi
 count=0
 [ ! -f "$VERIFY_COUNT_FILE" ] || count=$(cat "$VERIFY_COUNT_FILE")
 count=$((count + 1))
@@ -54,6 +56,18 @@ if [ "${1:-}" = "--help" ]; then
   exit 0
 fi
 printf '%s\n' "$*" >> "$CLAUDE_CALLS_FILE"
+if printf '%s' "$*" | grep -q 'web-security/SKILL.md'; then
+  case "${FAKE_SECURITY:-pass}" in
+    pass) verdict="$(printf 'No findings.\\nSECURITY: PASS')" ;;
+    blocked) verdict="$(printf 'site/index.html: XSS\\nSECURITY: BLOCKED')" ;;
+    missing) verdict='Looks fine to me.' ;;
+    buried) verdict="$(printf 'SECURITY: PASS\\nBut one page could not be reviewed.')" ;;
+    edit) echo patched > patched.txt; verdict='SECURITY: PASS' ;;
+    crash) exit 1 ;;
+  esac
+  jq -cn --arg result "$verdict" '{result: $result, total_cost_usd: 0.07, num_turns: 6}'
+  exit 0
+fi
 echo "unattended=${HARNESS_UNATTENDED:-} strict=${HARNESS_STRICT:-} level=${HARNESS_LEVEL_DATA:-}" >> "$CLAUDE_ENV_FILE"
 task="$(printf '%s' "$*" | grep -oE 'T-[0-9]+' | head -n1)"
 [ -n "$task" ] || { echo '{"result":"shipped","total_cost_usd":0.03}'; exit 0; }  # /ship

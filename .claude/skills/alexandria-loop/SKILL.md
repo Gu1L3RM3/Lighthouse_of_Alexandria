@@ -30,7 +30,7 @@ independent surfaces need mapping.
 - **Isolated:** implement directly, or one `alexandria-implementer`. No review agent.
 - **Behavioral:** implement (TDD), then `alexandria-reviewer` once the focused tests pass.
 - **High risk:** one owner for the shared contract; tests on both sides of it; `playtester`;
-  finish with `/code-review`. Security surfaces (Studio server, website, CD) also `/security-review`.
+  finish with `/code-review`.
 - **Feature:** `/spec`, then one `/task` per task in `TASKS.md`.
 
 Web UI work (website, `web/alexandria.tmpl`, Level Studio screens): load the `frontend-design`
@@ -38,6 +38,12 @@ skill before designing, and read `docs/agents/web-site.md` for the site.
 
 Run independent tasks in parallel only in separate worktrees, at most two implementers plus one
 scout, reviewer or playtester. Web builds run one at a time.
+
+## Security session (website only)
+
+When `scripts/verify.sh security-needed` exits 0, after `verify.sh full` and before shipping:
+dispatch `web-security-reviewer` (clean context) and run `/security-review`. `SECURITY: BLOCKED`
+means fix the findings as new work and run the session again. Game changes skip this section.
 
 ## Verify and report
 

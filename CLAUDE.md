@@ -39,6 +39,8 @@ pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png
 - **A merge into `main` is a public release** (tag, GitHub Release, itch.io, Pages), except when
   only documentation or harness files change (`paths-ignore` in `cd.yml`). Merge only when
   the owner asks.
+- Website work (`site/`) also needs the security session (`web-security` skill) before it ships.
+  Game changes do not.
 - Done = `scripts/verify.sh full` passing, shown. Visible changes also need opened screenshots
   (`playtest` skill).
 

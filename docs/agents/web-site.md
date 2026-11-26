@@ -34,6 +34,7 @@ hard edges. Sources: `web/alexandria.tmpl`, `main_menu_scene.py`, `docs/media/`,
 - Keyboard reaches every control with visible focus; text contrast at least 4.5:1; images have
   `alt`; `prefers-reduced-motion` honoured.
 - Light: no video or large GIF on first load; images compressed and sized.
-- No secrets, trackers or third-party scripts without a decision; `/security-review` before
-  publishing.
+- No secrets, trackers or third-party scripts without a decision.
+- The security session (`web-security` skill) ends in `SECURITY: PASS`. It runs only for website
+  work; its checklist covers what GitHub Pages leaves to the page itself (CSP, referrer policy).
 - A repeatable check is added to `scripts/verify.sh` and CI with the first page.
