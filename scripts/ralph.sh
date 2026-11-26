@@ -210,6 +210,7 @@ select_ready_task() {
       gsub(/[^[:alnum:]_.-]/, " ", value)
       amount = split(value, words, /[[:space:]]+/)
       for (i = 1; i <= amount; i++) if (words[i] ~ /^T-[[:alnum:]_.-]+$/) {
+        sub(/\.+$/, "", words[i])  # "depends on: T-01." ends a sentence
         dependencies[current] = dependencies[current] " " words[i]
       }
       next
@@ -217,7 +218,7 @@ select_ready_task() {
     /^[[:space:]]+DoR:[[:space:]]*/ && current != "" {
       value = $0
       sub(/^[[:space:]]+DoR:[[:space:]]*/, "", value)
-      sub(/[[:space:]]+$/, "", value)
+      sub(/[[:space:].]+$/, "", value)  # "DoR: ready." is ready
       dor[current] = tolower(value)
       next
     }
