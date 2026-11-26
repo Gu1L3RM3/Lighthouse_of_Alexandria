@@ -78,6 +78,13 @@ class LazySceneRegistrationTests(unittest.TestCase):
         self.assertEqual(len(old_level.built), 2)
         self.assertIs(self.manager.active_scene, old_level.built[1])
 
+    def test_scene_names_lists_built_and_lazy_scenes_without_building_them(self):
+        factory = CountingFactory()
+        self.manager.register_lazy("fase_3", factory)
+
+        self.assertEqual(self.manager.scene_names(), ["fase_3", "main_menu"])
+        self.assertEqual(factory.built, [])
+
     def test_unknown_scene_is_not_registered(self):
         self.assertFalse(self.manager.has_scene("fase_99"))
         with self.assertRaises(KeyError):

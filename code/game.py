@@ -156,6 +156,8 @@ class Game:
         except ValueError:
             self.profile_auto_seconds = 0.0
         self._profile_elapsed = 0.0
+        # Saved at the auto-stop, so automated checks can look at what was drawn.
+        self.screenshot_path = os.getenv("ALEX_SCREENSHOT_PATH", "").strip()
 
         preserve_storage_on_boot = bool(self.boot_circuit_editor_file and self.boot_circuit_editor_debug)
         if not preserve_storage_on_boot:
@@ -299,6 +301,8 @@ class Game:
                         f"auto-stop scene={self.scene_manager.active_scene_name} "
                         f"seconds={self.profile_auto_seconds:.1f}"
                     )
+                    if self.screenshot_path:
+                        pygame.image.save(self.screen, self.screenshot_path)
                     self.save_manager.autosave_scene(
                         self.scene_manager.active_scene_name,
                         current_lives=self.life_manager.current_lives,

@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    # Changes limited to documentation or the agent harness do not publish a release.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".claude/**"
+      - "scripts/**"
+      - ".mcp.json"
+      - "ruff.toml"
+      - "requirements-e2e.txt"
   workflow_dispatch:
 
 concurrency:

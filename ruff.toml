@@ -1,0 +1,6 @@
+# Only real errors: syntax errors, broken comparisons and undefined names.
+# The project has no formatter or style linter on purpose.
+extend-exclude = ["build", "dist", "assets"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]

@@ -21,6 +21,7 @@ CODE_DIR = PROJECT_ROOT / "code"
 if str(CODE_DIR) not in sys.path:
     sys.path.insert(0, str(CODE_DIR))
 
+from core.crash_report import run_reporting_crashes
 from core.settings import CIRCUITOS_DIR, IS_WEB, SAVE_DIR
 
 
@@ -35,12 +36,25 @@ def build_storage_sync():
     return sync
 
 
-async def main():
+def report_crash(message: str) -> None:
+    if not IS_WEB:
+        return
+    import platform
+
+    # scripts/web_smoke.py reads this: browser consoles never see Python tracebacks.
+    platform.window.document.body.setAttribute("data-crash", message)
+
+
+async def run_game():
     # Restore saved data before the game imports read circuits or saves.
     storage_sync = build_storage_sync()
     from game import Game
 
     await Game(storage_sync=storage_sync).run()
+
+
+async def main():
+    await run_reporting_crashes(run_game, report_crash)
 
 
 if __name__ == "__main__":
