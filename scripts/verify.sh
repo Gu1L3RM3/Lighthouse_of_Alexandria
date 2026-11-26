@@ -5,17 +5,20 @@
 #   web   only the browser check of the web build
 #   test  one unit test file (name or pattern), e.g. verify.sh test test_navigation.py
 #   web-needed  exit 0 if web code changed since the base (used by CI), 1 otherwise
+#   security-needed  exit 0 if the website changed, so the web-security session is due
 # Env: HARNESS_STRICT=1 fails on skipped checks (CI, unattended runs);
 #      HARNESS_BASE overrides the ref used to find changed files (default origin/main);
 #      HARNESS_PYTHON overrides the interpreter.
 set -u
 LEVEL="${1:-full}"
-usage() { echo "usage: verify.sh [fast|full|web|test <file>|web-needed]" >&2; exit 2; }
-case "$LEVEL" in fast|full|web|web-needed) ;; test) [ -n "${2:-}" ] || usage ;; *) usage ;; esac
+usage() { echo "usage: verify.sh [fast|full|web|test <file>|web-needed|security-needed]" >&2; exit 2; }
+case "$LEVEL" in fast|full|web|web-needed|security-needed) ;; test) [ -n "${2:-}" ] || usage ;; *) usage ;; esac
 ROOT="$(git rev-parse --show-toplevel)" || exit 1
 cd "$ROOT" || exit 1
 
 WEB_PATHS='^(main\.py|web/|pygbag\.ini|requirements-e2e\.txt|scripts/(web_smoke|sandbox)\.py|code/game\.py|code/core/(touch_[a-z_]*|web_storage_sync|settings)\.py|code/core/managers/input_manager\.py|code/core/ui/)'
+# Website development only: the game, its web build and Level Studio are not in scope.
+SECURITY_PATHS='^(site/|\.github/workflows/site[^/]*\.yml$)'
 HARNESS_PATHS='^(scripts/|\.claude/)'
 
 find_python() {
@@ -64,10 +67,10 @@ changed_files() {
 # Not `grep -q`: quitting early would close the pipe on the writer.
 touched() { changed_files | grep -E "$1" >/dev/null; }
 
-if [ "$LEVEL" = web-needed ]; then
-  touched "$WEB_PATHS"
-  exit $?
-fi
+case "$LEVEL" in
+  web-needed) touched "$WEB_PATHS"; exit $? ;;
+  security-needed) touched "$SECURITY_PATHS"; exit $? ;;
+esac
 
 lint() {
   if has_modules ruff; then step lint "$PY" -m ruff check --quiet .
