@@ -8,62 +8,49 @@ a Python/Pygame educational adventure game about electric circuits.
 ```bash
 pip install -r requirements-dev.txt        # runtime + dev dependencies
 python main.py                             # launch the game
-python -m unittest discover -s code/tests  # full test suite (run before every commit)
-python tools/level_studio.py               # Level Studio: teacher web tool to edit/add levels (docs/level_studio.md)
-pyinstaller --noconfirm Alexandria.spec    # release build
+scripts/verify.sh fast                     # lint + unit tests (run before every commit)
+scripts/verify.sh full                     # done criterion: + every scene, web and harness checks
+python -m unittest discover -s code/tests  # unit tests only
+python tools/level_studio.py               # Level Studio, the teacher web tool
+pyinstaller --noconfirm Alexandria.spec    # desktop release build
 pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --build .    # own site: upload build/web
 pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --archive .  # itch.io: upload build/web.zip
 ```
-
-- Web build (pygbag): `sys.platform == "emscripten"` → fixed 1280×720 `SCALED`
-  window; desktop stays native fullscreen. Saves are mirrored to localStorage
-  by `core/web_storage_sync.py`. Runtime deps for the web go in the PEP 723
-  block at the top of `main.py`. The boot screen (lighthouse that lights up
-  while loading, "click to start" audio gate) lives in `web/alexandria.tmpl`,
-  a copy of pygbag 0.9.3's `default.tmpl`; keep its element ids, pygbag's
-  loader looks them up. It also shows a "turn your phone" notice in portrait.
-- Touch: `core/touch_gamepad.py` draws an on-screen gamepad after the first
-  touch and feeds `InputManager` like a physical controller, so new actions
-  only need a controller mapping to work on phones too. UI buttons read
-  fingers themselves through `core/touch_points.py` (polled by
-  `GestureDetector`, so quick taps and buttons nested in composite widgets work).
-  The circuit editor sets `shows_touch_gamepad = False`: on touch the held part
-  follows the finger and is placed on lift (`core/ui/touch_grid.py`), with
-  Rotate/Cancel buttons (`brush_touch_actions.py`). SDL under pygbag sends no
-  mouse events for taps, so touch handling must read `TouchPoints`, not
-  `MOUSEBUTTONDOWN`. Test web touch with Playwright + CDP `Input.dispatchTouchEvent`;
-  to open the editor directly, set `ALEX_BOOT_EDITOR_FILE` (and
-  `ALEX_BOOT_EDITOR_DEBUG=1` to keep the inventory) at the top of a scratch copy's `main.py`.
-- Circuit editor board: circuits are authored on a 20 x 10 board of 64 px cells
-  (x up to 1216, y up to 768). `core/ui/board_view.py` fits it between the top
-  bar and the sidebar (whole-pixel cells, never enlarged), so on 1280x720 it is
-  drawn at 57 px. Pointer positions go through `board.to_world`, drawing
-  through `board.to_screen_rect`; keep world and screen coordinates apart.
-- Level Studio (`tools/`, not shipped: excluded in `pygbag.ini`, never imported by the game): stdlib
-  HTTP server on 127.0.0.1 editing TMX maps (`studio/tmx_io.py`, byte-identical round trip), circuits
-  and `level.json`. The level sequence is the doors' `next_scene`; extra levels live in a stage folder
-  and reuse its scene class/validator (`studio/campaign.py`). Per-level tuning: `core/level_config.py`.
-- Prompt bars: with the on-screen pad visible, `draw_prompt_hint_row` names the
-  pad's buttons and draws the row doubled in the strip between its controls
-  (`InputManager.touch_prompt_area`), wrapping to two rows when needed.
 
 - Entry point: `main.py`; game loop and scene registration: `code/game.py`.
 - `code/scenes/` scenes, `code/entities/` game objects, `code/core/` shared ECS,
   UI, localization, maps and circuit services. Circuit JSON lives in `code/circuitos/`.
 - Tests: standard-library `unittest` in `code/tests/test_*.py`; reusable data in
   `code/tests/fixtures/`. Each test file adds `code/` to `sys.path` itself.
+- Harness tests: `pytest` in `scripts/tests/`.
 - Commits: Conventional Commits (`feat(circuits): ...`, `fix: ...`, `refactor: ...`).
-  Never commit saves or unrelated circuit JSON edits.
+  Never commit saves or unrelated circuit JSON edits; stage files by name.
+
+## Read when it applies
+
+- `docs/agents/harness.md`: the loop, skills, agents, playtesting, unattended runs.
+- `docs/agents/web.md`: web build, touch input, boot screen, circuit editor layout.
+- `docs/agents/level-studio.md`: `tools/`, stage data, `level.json`.
+- `docs/agents/web-site.md`: the game website.
+
+## Delivery
+
+- Work on a branch; `main` receives code only through a PR with the `tests` check green.
+- **A merge into `main` is a public release** (tag, GitHub Release, itch.io, Pages), except when
+  only documentation or harness files change (`paths-ignore` in `cd.yml`). Merge only when
+  the owner asks.
+- Done = `scripts/verify.sh full` passing, shown. Visible changes also need opened screenshots
+  (`playtest` skill).
 
 ## Working method: TDD
 
 Every behavior change follows red → green → refactor:
 
-1. **Red** — write the smallest failing test that states the expected behavior.
+1. **Red**: write the smallest failing test that states the expected behavior.
    Run it and confirm it fails for the right reason (not an import typo).
-2. **Green** — write the minimum production code that makes it pass.
-3. **Refactor** — clean up names and duplication with the suite green.
-4. Run the full discovery command before committing.
+2. **Green**: write the minimum production code that makes it pass.
+3. **Refactor**: clean up names and duplication with the suite green.
+4. Run `scripts/verify.sh fast` before committing.
 
 Rules:
 - Bug fixes start with a test that reproduces the bug.
@@ -78,19 +65,19 @@ Rules:
 
 ## SOLID, applied to this codebase
 
-- **Single Responsibility** — a module or class has one reason to change.
+- **Single Responsibility**: a module or class has one reason to change.
   Scenes orchestrate; systems hold per-frame logic; `core/circuit_tools`
   holds circuit math. Example: `linear_system.py` only solves `Ax = b`;
   `numeric_solver.py` only builds the MNA matrix from a circuit graph.
-- **Open/Closed** — extend through new components, systems, spawners or
+- **Open/Closed**: extend through new components, systems, spawners or
   `ElementKind` handling rather than editing unrelated branches of big
   `if` chains in scenes.
-- **Liskov Substitution** — subclasses (scenes, spawners, systems) must honor
+- **Liskov Substitution**: subclasses (scenes, spawners, systems) must honor
   the base contract: same method signatures, no surprise exceptions.
-- **Interface Segregation** — depend on the narrow surface you use. A
+- **Interface Segregation**: depend on the narrow surface you use. A
   function that needs `width`, `height` and a layer should not require a
   full scene or `TileMap`.
-- **Dependency Inversion** — pass collaborators in (constructor or argument)
+- **Dependency Inversion**: pass collaborators in (constructor or argument)
   instead of reaching for globals, so tests can substitute fakes.
   Example: `CircuitAnalysisService(solver=...)`.
 
@@ -122,3 +109,13 @@ The release is a PyInstaller bundle, so every dependency ships to players.
   `du -sh "dist/Farol de Alexandria"`.
 - Prefer compressed audio (`.ogg`) over `.wav`/`.flac` for music.
 - Keep `Alexandria.spec` `excludes` in sync with modules the game does not use.
+- New local-only folders go in `pygbag.ini` `ignoreDirs`, or players download them.
+
+## Pitfalls
+
+- Running the game or the Level Studio rewrites files in `code/circuitos/` and `code/save/`;
+  use `scripts/smoke_scenes.py`, which runs in a throwaway copy.
+- Several tests read tracked maps and circuits: an experimental level in the tree fails the suite.
+  Do harness and feature work in a worktree (`scripts/wt.sh new <name>`).
+- A green unit suite says nothing about the browser: touch, boot and crashes need
+  `scripts/verify.sh web`.

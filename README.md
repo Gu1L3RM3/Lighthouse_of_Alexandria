@@ -67,11 +67,11 @@ In the circuit editor:
 - Python `3.11+`
 - Runtime dependencies from [`requirements.txt`](requirements.txt):
   - `pygame-ce==2.5.3`
-  - `numpy==2.2.5`
   - `PyTMX==3.32`
   - `pathfinding==1.0.18`
 - Development dependencies from [`requirements-dev.txt`](requirements-dev.txt):
-  - `Pillow>=12.0,<13`
+  - `Pillow>=12.0,<13`, `ruff`, `pytest`
+- Browser checks of the web build: [`requirements-e2e.txt`](requirements-e2e.txt)
 - Optional build dependencies from [`requirements-build.txt`](requirements-build.txt):
   - `pyinstaller==6.16.0`
 
@@ -159,9 +159,17 @@ Release packages for itch.io are distributed as zip archives that include the ex
 
 - Python + `pygame-ce`
 - Custom ECS architecture
-- In-memory Modified Nodal Analysis with `numpy`
+- In-memory Modified Nodal Analysis in pure Python
 - Tiled maps via `PyTMX`
 - Grid navigation with A* from `pathfinding`
+
+## Checking changes
+
+```bash
+scripts/verify.sh full   # lint, tests, every scene headless, web build when web code changed
+```
+
+The development workflow for people and agents is described in [`docs/agents/harness.md`](docs/agents/harness.md).
 
 ## Status
 
@@ -176,8 +184,8 @@ The project is currently playable end-to-end, with:
 
 GitHub Actions workflows live in `.github/workflows/`:
 
-- `ci.yml` runs the unit test suite on every pull request and branch push.
-- `cd.yml` runs on every push to `main` (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels), deploys the web game to [GitHub Pages](https://gu1l3rm3.github.io/Lighthouse_of_Alexandria/) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`. GitHub Pages must use GitHub Actions as its publishing source; it receives the complete `build/web` directory, including the `.tar.gz` bundle used outside itch.io.
+- `ci.yml` runs lint, the unit tests, a headless boot of every scene and the harness tests on every pull request and branch push; pull requests that touch web code also check the web build in a browser.
+- `cd.yml` runs on every push to `main`, except changes limited to documentation or the agent harness (or manually via `workflow_dispatch`): it runs the tests, creates the next `vX.Y.Z` tag from Conventional Commit prefixes (`feat` → minor, `fix`/others → patch, `BREAKING CHANGE` → major), builds Windows and Linux executables with PyInstaller and the web version with pygbag 0.9.3, publishes them to [itch.io](https://gu1l3rm3.itch.io/lighthouse-of-alexandria) (`windows`, `linux`, and `html5` channels), deploys the web game to [GitHub Pages](https://gu1l3rm3.github.io/Lighthouse_of_Alexandria/) and attaches all three packages to a GitHub Release. The web build uses `web/alexandria.tmpl`, the game icon, and the exclusions in `pygbag.ini`; its release archive is `alexandria-html5.zip`. GitHub Pages must use GitHub Actions as its publishing source; it receives the complete `build/web` directory, including the `.tar.gz` bundle used outside itch.io.
 
 Required repository secret: `BUTLER_API_KEY` (from https://itch.io/user/settings/api-keys).
 
