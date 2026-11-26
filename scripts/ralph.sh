@@ -370,7 +370,7 @@ denied_commands() {
 forbidden_changes() {
   local pattern='^(\.claude/|scripts/|\.github/|ruff\.toml$)'
   [ "$HARNESS_LEVEL_DATA" = 1 ] || pattern="$pattern|^(code/circuitos/|assets/maps/)"
-  git diff --name-only "$1" HEAD | grep -E "$pattern" | paste -sd ' ' -
+  git diff --no-renames --name-only "$1" HEAD | grep -E "$pattern" | paste -sd ' ' -
 }
 
 run_cost() {

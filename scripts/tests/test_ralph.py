@@ -92,6 +92,7 @@ case "$mode" in
     if [ -n "${FAKE_TOUCH:-}" ]; then
       mkdir -p "$(dirname "$FAKE_TOUCH")"; echo tampered >> "$FAKE_TOUCH"; git add "$FAKE_TOUCH"
     fi
+    [ -z "${FAKE_MOVE:-}" ] || git mv "$FAKE_MOVE" moved-away
     git commit -q -m "feat($task): implement task"
     echo '{"result":"done","total_cost_usd":0.01,"num_turns":3}'
     exit 0 ;;

@@ -73,3 +73,15 @@ def test_an_attempt_that_changes_protected_files_is_rejected_before_judging(tmp_
     assert row["recovery_ref"].startswith("refs/ralph/T-01/")
     assert verify_count.read_text().strip() == "1"  # preflight only
     assert not (repo / path).exists()
+
+
+def test_moving_a_protected_file_away_is_rejected(tmp_path):
+    repo, env, _, verify_count = make_repo(tmp_path, "success")
+    env.update(FAKE_MOVE="scripts/ralph-settings.json", HARNESS_RETRIES="1")
+
+    run_ralph(repo, env)
+
+    row = summary_rows(env)[0]
+    assert row["result"] == "failed"
+    assert "scripts/ralph-settings.json" in row["reason"]
+    assert verify_count.read_text().strip() == "1"

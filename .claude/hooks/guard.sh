@@ -22,7 +22,9 @@ check_path() {
   # live under .claude/ or build/ is not blocked as a whole.
   case "$file" in
     "$(realpath -m -- "$ROOT")"/*) relative="${file#"$(realpath -m -- "$ROOT")"/}" ;;
-    *) relative="${file#/}" ;;
+    *)
+      [ "$UNATTENDED" != 1 ] || block "unattended sessions only write inside the project ($file)."
+      relative="${file#/}" ;;
   esac
   [ "$(basename "$file")" = ".env.example" ] && return 0
   while IFS= read -r pattern; do

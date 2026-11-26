@@ -157,3 +157,10 @@ def test_a_checkout_inside_a_dot_claude_folder_is_not_blocked_wholesale(tmp_path
 
 def test_the_guard_ships_in_this_repository():
     assert (ROOT / ".claude/hooks/guard.sh").is_file()
+
+
+def test_unattended_sessions_cannot_write_outside_the_project(repo, tmp_path):
+    outside = str(tmp_path / "elsewhere/notes.txt")
+
+    assert guard(repo, "Write", {"file_path": outside}, HARNESS_UNATTENDED="1").returncode == BLOCKED
+    assert guard(repo, "Write", {"file_path": outside}).returncode == 0
