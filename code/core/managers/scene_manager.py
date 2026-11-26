@@ -56,6 +56,9 @@ class SceneManager:
     def has_scene(self, name: str) -> bool:
         return name in self.scenes or name in self._scene_factories
 
+    def scene_names(self) -> list[str]:
+        return sorted(set(self.scenes) | set(self._scene_factories))
+
     def get_scene(self, name: str) -> BaseScene:
         if name not in self.scenes:
             if name not in self._scene_factories:
