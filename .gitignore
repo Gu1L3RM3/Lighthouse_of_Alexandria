@@ -96,3 +96,8 @@ AGENTS.md
 
 # Arquivos otimizados gerados pelo build web (pygbag)
 *-pygbag.*
+
+# Claude Code: preferencias locais, worktrees de agentes e saidas do Playwright MCP
+.claude/settings.local.json
+.claude/worktrees/
+.playwright-mcp/

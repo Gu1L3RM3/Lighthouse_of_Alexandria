@@ -1,0 +1,17 @@
+# One shell pattern per line, matched against "/<path inside the project>".
+# Claude cannot edit a matching file; .env.example is always allowed (guard.sh).
+*/.env
+*/.env.*
+*/.git/*
+*.pem
+*.key
+*.p12
+*.keystore
+*/id_rsa
+*/id_ed25519
+*/credentials.json
+*/secrets.json
+# Player saves and generated output.
+/code/save/*
+/build/*
+/dist/*
