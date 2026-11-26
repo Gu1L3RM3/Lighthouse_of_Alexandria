@@ -4,6 +4,8 @@
 # Run it in a linked worktree (scripts/wt.sh new <name>): failed attempts are reset away.
 # Every session gets HARNESS_UNATTENDED=1 and the permissions in scripts/ralph-settings.json;
 # attempts that change the harness, CI or undeclared level data are rejected.
+# When the branch changes the website, a read-only security session runs before the PR;
+# only a final "SECURITY: PASS" line lets it ship (HARNESS_SECURITY_TIMEOUT, 1800).
 # ralph.sh status
 # Shows the active run (task, attempt, elapsed time, cost versus budget), the last run's
 # attempts, blocked tasks, and saved refs. Works with a dirty tree and on any branch.
@@ -642,8 +644,54 @@ $evidence"
   fi
 done
 
+# Fails closed: a crash, a missing verdict or a changed tree all block the ship.
+run_security_session() {
+  local base output started rc verdict failure="" ref=""
+  echo "Sessão de segurança (o site mudou)..."
+  write_state security 1 1
+  HARNESS_LEVEL_DATA=0
+  base="$(git rev-parse HEAD)"
+  output="$LOG/$(date +%Y%m%d-%H%M%S)-security.json"
+  started="$(date +%s)"
+  timeout "${HARNESS_SECURITY_TIMEOUT:-1800}" claude -p \
+    "Siga .claude/skills/web-security/SKILL.md nesta branch. Base da revisão: ${HARNESS_BASE:-origin/main}. Sessão sem supervisão e somente leitura: não altere arquivos nem faça commit; no Bash, um comando por vez, sem |, &&, ; ou redirecionamento. A última linha da resposta deve ser exatamente SECURITY: PASS ou SECURITY: BLOCKED." \
+    --permission-mode "$MODE" "${extra[@]}" >"$output" 2>"${output%.json}.err"
+  rc=$?
+  verdict="$(jq -r '.result // empty' "$output" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n1 |
+    tr -d '*`' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  if [ -n "$(git status --porcelain)" ] || [ "$(git rev-parse HEAD)" != "$base" ]; then
+    failure="a sessão de segurança alterou a branch"
+    ref="$(preserve_attempt security 1 "$failure" "$base")" ||
+      die "não consegui preservar o que a sessão de segurança alterou; a árvore ficou como está"
+    reset_to_base "$base"
+  elif [ "$rc" -ne 0 ]; then
+    failure="a sessão terminou com exit $rc"
+  elif [ "$verdict" != "SECURITY: PASS" ]; then
+    failure="veredito: ${verdict:-nenhum}"
+  fi
+  record_attempt security 1 "$(( $(date +%s) - started ))" \
+    "$([ -z "$failure" ] && echo passed || echo blocked)" "$output" "$failure" "" "$ref"
+  if [ -z "$failure" ]; then
+    # ship-branch reads this to know which commit was reviewed.
+    echo "$base" >"$(git rev-parse --git-path harness-security-passed)"
+    security_result="aprovada"
+  else
+    security_result="bloqueada ($failure); veja $output"
+    security_blocked=1
+    notify "segurança bloqueou a entrega: $failure"
+  fi
+}
+
+security_result="não necessária"
+security_blocked=0
+if [ "$done_n" -gt 0 ] && scripts/verify.sh security-needed; then
+  run_security_session
+fi
+
 ship_result="não solicitado"
-if [ "$done_n" -gt 0 ] && [ "${HARNESS_SHIP:-1}" = 1 ]; then
+if [ "$security_blocked" = 1 ]; then
+  ship_result="não executado: segurança bloqueou"
+elif [ "$done_n" -gt 0 ] && [ "${HARNESS_SHIP:-1}" = 1 ]; then
   echo "Fechando a branch com /ship-branch..."
   write_state ship 1 1
   HARNESS_LEVEL_DATA=0
@@ -658,9 +706,9 @@ if [ "$done_n" -gt 0 ] && [ "${HARNESS_SHIP:-1}" = 1 ]; then
     "$([ "$ship_rc" -eq 0 ] && echo shipped || echo failed)" "$ship_log"
 fi
 
-echo "Resumo: $done_n feitas, $blocked_n travadas; ship $ship_result."
+echo "Resumo: $done_n feitas, $blocked_n travadas; segurança $security_result; ship $ship_result."
 notify "ralph terminou: $done_n feitas, $blocked_n travadas; US\$ $(run_cost); ship $ship_result"
 [ -z "$budget_note" ] || echo "Parou por $budget_note."
 echo "Custo: US\$ $(run_cost). Métricas: $SUMMARY"
 echo "Revise: git log --oneline $START..HEAD"
-[ -z "$env_stop" ] || exit 1
+[ -z "$env_stop" ] && [ "$security_blocked" = 0 ] || exit 1
