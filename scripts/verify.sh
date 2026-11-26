@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# verify.sh [fast|full|web]: the one judge of "done", quiet unless something fails.
+# verify.sh [fast|full|web|test <file>]: the one judge of "done", quiet unless something fails.
 #   fast  lint (real errors only) + unit tests; runs in the Stop hook, takes seconds
 #   full  fast + boot every scene + harness tests and web check when those areas changed
 #   web   only the browser check of the web build
+#   test  one unit test file (name or pattern), e.g. verify.sh test test_navigation.py
 #   web-needed  exit 0 if web code changed since the base (used by CI), 1 otherwise
 # Env: HARNESS_STRICT=1 fails on skipped checks (CI, unattended runs);
 #      HARNESS_BASE overrides the ref used to find changed files (default origin/main);
 #      HARNESS_PYTHON overrides the interpreter.
 set -u
 LEVEL="${1:-full}"
-case "$LEVEL" in fast|full|web|web-needed) ;; *) echo "usage: verify.sh [fast|full|web|web-needed]" >&2; exit 2 ;; esac
+usage() { echo "usage: verify.sh [fast|full|web|test <file>|web-needed]" >&2; exit 2; }
+case "$LEVEL" in fast|full|web|web-needed) ;; test) [ -n "${2:-}" ] || usage ;; *) usage ;; esac
 ROOT="$(git rev-parse --show-toplevel)" || exit 1
 cd "$ROOT" || exit 1
 
@@ -77,7 +79,9 @@ web_check() {
   else skip web "playwright/pygbag are not installed (pip install -r requirements-e2e.txt)"; fi
 }
 
-if [ "$LEVEL" = web ]; then
+if [ "$LEVEL" = test ]; then
+  step tests "$PY" -m unittest discover -s code/tests -p "$2"
+elif [ "$LEVEL" = web ]; then
   web_check
 else
   lint

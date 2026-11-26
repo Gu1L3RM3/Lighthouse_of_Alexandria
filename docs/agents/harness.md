@@ -9,6 +9,7 @@ How work gets done and checked in this repository.
 | `scripts/verify.sh fast` | ruff (real errors) + unit tests, seconds | Stop hook, while developing |
 | `scripts/verify.sh full` | fast + every scene headless + harness tests and web check when those areas changed | done criterion |
 | `scripts/verify.sh web` | web build in Chromium, desktop and phone | web and touch work |
+| `scripts/verify.sh test test_x.py` | one test file, with the right interpreter | red/green steps |
 
 `SKIPPED` means a check did not run (missing tool). `HARNESS_STRICT=1` (CI, unattended runs)
 turns that into a failure.

@@ -18,11 +18,11 @@ def repo(tmp_path):
     return repo
 
 
-def verify(repo: Path, level: str, **env: str):
+def verify(repo: Path, level: str, *args: str, **env: str):
     log = repo.parent / "calls.log"
     log.unlink(missing_ok=True)
     result = subprocess.run(
-        ["bash", "scripts/verify.sh", level],
+        ["bash", "scripts/verify.sh", level, *args],
         cwd=repo,
         env=clean_environment(
             HARNESS_PYTHON=str(repo.parent / "python"),
@@ -149,4 +149,25 @@ def test_web_needed_answers_whether_web_code_changed_without_running_checks(repo
     result, calls = verify(repo, "web-needed")
 
     assert result.returncode == expected, result.stdout
+    assert calls == ""
+
+
+def test_one_test_file_runs_with_the_projects_interpreter(repo):
+    result, calls = verify(repo, "test", "test_linear.py")
+
+    assert result.returncode == 0, result.stdout
+    assert calls.strip() == "-m unittest discover -s code/tests -p test_linear.py"
+
+
+def test_a_failing_test_file_shows_its_output(repo):
+    result, _ = verify(repo, "test", "test_linear.py", FAKE_FAIL="unittest")
+
+    assert result.returncode == 1
+    assert "boom from" in result.stdout
+
+
+def test_the_test_level_requires_a_file_name(repo):
+    result, calls = verify(repo, "test")
+
+    assert result.returncode == 2
     assert calls == ""
