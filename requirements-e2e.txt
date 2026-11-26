@@ -1,0 +1,4 @@
+# Browser check of the web build (scripts/web_smoke.py). Then: python -m playwright install chromium
+-r requirements-dev.txt
+pygbag==0.9.3
+playwright==1.65.2
