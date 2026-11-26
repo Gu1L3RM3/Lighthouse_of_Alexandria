@@ -140,3 +140,13 @@ def test_web_level_runs_only_the_web_check(repo):
 
     assert "web_smoke.py" in calls
     assert "unittest" not in calls
+
+
+@pytest.mark.parametrize(("path", "expected"), [("web/alexandria.tmpl", 0), ("code/core/linear.py", 1)])
+def test_web_needed_answers_whether_web_code_changed_without_running_checks(repo, path, expected):
+    commit(repo, path)
+
+    result, calls = verify(repo, "web-needed")
+
+    assert result.returncode == expected, result.stdout
+    assert calls == ""

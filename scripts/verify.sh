@@ -3,12 +3,13 @@
 #   fast  lint (real errors only) + unit tests; runs in the Stop hook, takes seconds
 #   full  fast + boot every scene + harness tests and web check when those areas changed
 #   web   only the browser check of the web build
+#   web-needed  exit 0 if web code changed since the base (used by CI), 1 otherwise
 # Env: HARNESS_STRICT=1 fails on skipped checks (CI, unattended runs);
 #      HARNESS_BASE overrides the ref used to find changed files (default origin/main);
 #      HARNESS_PYTHON overrides the interpreter.
 set -u
 LEVEL="${1:-full}"
-case "$LEVEL" in fast|full|web) ;; *) echo "usage: verify.sh [fast|full|web]" >&2; exit 2 ;; esac
+case "$LEVEL" in fast|full|web|web-needed) ;; *) echo "usage: verify.sh [fast|full|web|web-needed]" >&2; exit 2 ;; esac
 ROOT="$(git rev-parse --show-toplevel)" || exit 1
 cd "$ROOT" || exit 1
 
@@ -60,6 +61,11 @@ changed_files() {
 
 # Not `grep -q`: quitting early would close the pipe on the writer.
 touched() { changed_files | grep -E "$1" >/dev/null; }
+
+if [ "$LEVEL" = web-needed ]; then
+  touched "$WEB_PATHS"
+  exit $?
+fi
 
 lint() {
   if has_modules ruff; then step lint "$PY" -m ruff check --quiet .
