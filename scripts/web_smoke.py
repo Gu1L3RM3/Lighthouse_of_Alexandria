@@ -1,6 +1,7 @@
 """Build the web version and play its first screens in headless Chromium.
 
     python scripts/web_smoke.py [--out DIR]
+    python scripts/web_smoke.py --serve        # only build and serve, for manual or MCP testing
 
 Boots on a desktop and on a landscape phone (with a real touch tap), and fails
 on a Python crash, a JavaScript error, a boot that stalls, a blank canvas or a
@@ -9,6 +10,7 @@ this needs network access.
 """
 
 import argparse
+import contextlib
 import functools
 import io
 import subprocess
@@ -136,6 +138,18 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+@contextlib.contextmanager
+def serving(directory: Path, port: int = 0):
+    handler = functools.partial(QuietHandler, directory=str(directory))
+    server = ThreadingHTTPServer(("127.0.0.1", port), handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}/index.html"
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
 def _wait_for_drawn_canvas(page) -> bytes:
     for _ in range(SCREEN_TIMEOUT_MS // SETTLE_MS):
         page.wait_for_timeout(SETTLE_MS)
@@ -188,10 +202,24 @@ def play(browser, url: str, target: Target) -> PageRun:
     return run
 
 
+def serve_until_interrupted(port: int) -> int:
+    with tempfile.TemporaryDirectory() as folder:
+        web = build(Path(folder))
+        with serving(web, port) as url:
+            print(f"web: serving {url} (Ctrl+C to stop)", flush=True)
+            with contextlib.suppress(KeyboardInterrupt):
+                threading.Event().wait()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, help="screenshot folder (default: a new temp folder)")
+    parser.add_argument("--serve", action="store_true", help="build, serve and wait for Ctrl+C")
+    parser.add_argument("--port", type=int, default=0, help="port for --serve (default: any free one)")
     options = parser.parse_args(argv)
+    if options.serve:
+        return serve_until_interrupted(options.port)
     out_dir = (options.out or Path(tempfile.mkdtemp(prefix="alexandria-web-"))).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -204,24 +232,17 @@ def main(argv: list[str] | None = None) -> int:
         if leaks:
             failures += 1
             print(f"FAIL bundle: local-only folders were packed: {', '.join(leaks)}")
-        handler = functools.partial(QuietHandler, directory=str(web))
-        server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
-        threading.Thread(target=server.serve_forever, daemon=True).start()
-        url = f"http://127.0.0.1:{server.server_port}/index.html"
-        try:
-            with sync_playwright() as playwright:
-                browser = playwright.chromium.launch()
-                for target in TARGETS:
-                    run = play(browser, url, target)
-                    for suffix, png in (("", run.frame), ("-after-tap", run.after_tap)):
-                        if png:
-                            (out_dir / f"{target.name}{suffix}.png").write_bytes(png)
-                    reason = failure_reason(run)
-                    failures += bool(reason)
-                    print(f"{'FAIL' if reason else 'PASS'} {target.name}: {reason or 'booted and drawn'}")
-                browser.close()
-        finally:
-            server.shutdown()
+        with serving(web) as url, sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            for target in TARGETS:
+                run = play(browser, url, target)
+                for suffix, png in (("", run.frame), ("-after-tap", run.after_tap)):
+                    if png:
+                        (out_dir / f"{target.name}{suffix}.png").write_bytes(png)
+                reason = failure_reason(run)
+                failures += bool(reason)
+                print(f"{'FAIL' if reason else 'PASS'} {target.name}: {reason or 'booted and drawn'}")
+            browser.close()
     print(f"web: {'FAILED' if failures else 'OK'}, screenshots in {out_dir}")
     return 1 if failures else 0
 

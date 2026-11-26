@@ -1,9 +1,10 @@
 import io
 import tarfile
+import urllib.request
 
 from PIL import Image, ImageDraw
 
-from web_smoke import PageRun, bundle_leaks, changed_ratio, failure_reason, is_blank, to_page
+from web_smoke import PageRun, bundle_leaks, changed_ratio, failure_reason, is_blank, serving, to_page
 
 
 def png(color=(0, 0, 0), boxes=0) -> bytes:
@@ -73,3 +74,13 @@ def test_local_only_folders_in_the_bundle_are_reported(tmp_path):
             tar.addfile(tarfile.TarInfo(name), io.BytesIO())
 
     assert bundle_leaks(archive) == [".claude", "scripts"]
+
+
+def test_the_build_is_served_on_localhost_only(tmp_path):
+    (tmp_path / "index.html").write_text("lighthouse")
+
+    with serving(tmp_path) as url:
+        body = urllib.request.urlopen(url, timeout=5).read()
+
+    assert url.startswith("http://127.0.0.1:")
+    assert body == b"lighthouse"
