@@ -12,6 +12,7 @@ from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 from core.managers.input_manager import InputManager
 from core.ui.prompt_ui import draw_prompt_hint_row
+from core.telemetry import TelemetryService
 
 
 class MainMenuScene(BaseScene):
@@ -249,6 +250,7 @@ class MainMenuScene(BaseScene):
 
     def resume_current_scene(self):
         if self.scene_manager.can_resume_scene():
+            TelemetryService.get().record("continue_game", scene=self.scene_manager.resume_scene_name, from_save=False)
             self.scene_manager.resume_from_menu(0.45)
             return
 
@@ -263,9 +265,11 @@ class MainMenuScene(BaseScene):
         self.life_manager.set_state(current_lives=current_lives, max_lives=max_lives)
 
         if scene_name and self.scene_manager.has_scene(scene_name):
+            TelemetryService.get().record("continue_game", scene=scene_name, from_save=True)
             self.scene_manager.start_fade(scene_name, 0.45)
 
     def start_new_game(self):
+        TelemetryService.get().record("new_game")
         self.save_manager.clear_save()
         self.life_manager.reset_lives()
         self.scene_manager.start_new_journey("home_scene", 0.6)

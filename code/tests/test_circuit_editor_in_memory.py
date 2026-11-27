@@ -13,6 +13,7 @@ from core.components.dropped import Dropped
 from core.components.label_component import LabelComponent
 from core.ecs import Entity
 from core.systems.circuit_editor.input_system import InputSystem
+from core.telemetry.circuit_summary import EditTally
 from entities.circuit_editor.eletric_components import Resistor
 
 
@@ -121,6 +122,9 @@ def make_system(repository):
     system.total_values = None
     system.exit_current_tool = lambda: None
     system.set_empty_boxes_for_debug = lambda: None
+    system.edit_tally = EditTally()
+    system.last_solve_error = None
+    system.saved = False
     return system
 
 

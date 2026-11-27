@@ -5,6 +5,7 @@ from core.managers.event_manager import EventManager
 from core.managers.life_manager import LifeManager
 from core.managers.save_game_manager import SaveGameManager
 from core.managers.scene_factory import SceneFactory
+from core.telemetry import TelemetryService
 
 from core.settings import *
 
@@ -127,6 +128,7 @@ class SceneManager:
             return
         self.resume_scene_name = self.active_scene_name
         self.start_fade(self.menu_scene_name, duration)
+        self._record_overlay_open("pause")
 
     def can_resume_help_scene(self) -> bool:
         return (
@@ -142,8 +144,10 @@ class SceneManager:
             return
         self.help_resume_scene_name = self.active_scene_name
         self.start_fade(self.help_scene_name, duration)
+        self._record_overlay_open("help")
 
     def resume_from_help(self, duration: float = 0.35):
+        self._record_overlay_close("help")
         if not self.can_resume_help_scene():
             self.start_fade(self.menu_scene_name, duration)
             return
@@ -153,7 +157,21 @@ class SceneManager:
     def resume_from_menu(self, duration: float = 0.35):
         if not self.can_resume_scene():
             return
+        self._record_overlay_close("pause")
         self.start_fade(self.resume_scene_name, duration)
+
+    @staticmethod
+    def _record_overlay_open(overlay: str):
+        telemetry = TelemetryService.get()
+        telemetry.start_timer(overlay)
+        telemetry.record(f"{overlay}_open")
+
+    @staticmethod
+    def _record_overlay_close(overlay: str):
+        telemetry = TelemetryService.get()
+        duration_ms = telemetry.stop_timer(overlay)
+        if duration_ms is not None:
+            telemetry.record(f"{overlay}_close", duration_ms=duration_ms)
 
     def back_with_fade(self, duration: float = 0.5):
         self.start_fade(self.scene_preview, duration)

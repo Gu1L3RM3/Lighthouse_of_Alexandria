@@ -10,6 +10,7 @@ from core.components.animation_sprite import AnimateSprite
 from core.components.sprite import Sprite
 from core.components.health import Health
 from entities.player import Player
+from core.telemetry import TelemetryService
 
 
 class Door(Entity):
@@ -48,12 +49,18 @@ class Door(Entity):
     def try_enter(self, player: Player):
         if not self.can_player_interact(player):
             return
+        scene_manager = SceneManager.get()
+        TelemetryService.get().record(
+            "level_complete",
+            scene=scene_manager.active_scene_name,
+            next_scene=self.next_scene,
+        )
         # Ao concluir uma fase, restaura as tentativas e a vida do jogador.
         LifeManager.get().reset_lives()
         if player and player.has(Health):
             health: Health = player.get(Health)
             health.heal_full()
-        SceneManager.get().start_fade(self.next_scene)
+        scene_manager.start_fade(self.next_scene)
 
     def open(self,event):
         _ = event

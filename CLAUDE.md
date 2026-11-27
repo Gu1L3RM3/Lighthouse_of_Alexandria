@@ -32,6 +32,13 @@ pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png
 - `docs/agents/web.md`: web build, touch input, boot screen, circuit editor layout.
 - `docs/agents/level-studio.md`: `tools/`, stage data, `level.json`.
 - `docs/agents/web-site.md`: the game website.
+- `docs/agents/telemetry.md`: research telemetry contract and event table (data dictionary).
+
+## Research telemetry
+
+- Opt-in: off unless the hosting page defines `window.alexTelemetry`; no URLs or secrets in the repo.
+- Record with `TelemetryService.get().record(type, **props)`; props stay small, no player free text.
+- A new or changed event updates the table in `docs/agents/telemetry.md` in the same commit.
 
 ## Delivery
 

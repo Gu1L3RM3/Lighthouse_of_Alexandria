@@ -189,7 +189,7 @@ class GenericLevel6(BaseGenericLevel):
         self.phantom_ai_system.set_touch_triggered(True)
         player = self.entity_mn.get_player()
         if not player:
-            self.death_flow_manager.handle_player_death()
+            self.death_flow_manager.handle_player_death(cause="enemy")
             return
 
         if player.has(Freeze):
@@ -204,11 +204,11 @@ class GenericLevel6(BaseGenericLevel):
                 f"death_{dir_name}",
                 reset=True,
                 loop=False,
-                on_finish=lambda: self.death_flow_manager.handle_player_death(),
+                on_finish=lambda: self.death_flow_manager.handle_player_death(cause="enemy"),
             )
             return
 
-        self.death_flow_manager.handle_player_death()
+        self.death_flow_manager.handle_player_death(cause="enemy")
 
     def set_dialogue(self, event):
         _ = event

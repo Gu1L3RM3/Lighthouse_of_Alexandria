@@ -2,6 +2,8 @@ from core.managers.life_manager import LifeManager
 from core.managers.scene_manager import SceneManager
 from core.managers.scene_factory import SceneFactory
 from core.managers.save_game_manager import SaveGameManager
+from core.telemetry import TelemetryService
+from core.telemetry.positions import player_tile
 
 
 class DeathFlowManager:
@@ -22,7 +24,8 @@ class DeathFlowManager:
             cls._instance = DeathFlowManager()
         return cls._instance
 
-    def handle_player_death(self, duration: float = 0.5):
+    def handle_player_death(self, duration: float = 0.5, cause: str = "unknown"):
+        """`cause` is one of enemy, fall, own_bomb; it only feeds research telemetry."""
         if not self.scene_manager.active_scene_name:
             return
 
@@ -30,6 +33,16 @@ class DeathFlowManager:
         lives_after = self.life_manager.lose_life()
         is_game_over = self.life_manager.is_game_over()
         active_scene = self.scene_manager.active_scene
+        tile_x, tile_y = player_tile(active_scene)
+        TelemetryService.get().record(
+            "player_death",
+            cause=cause,
+            lives_before=lives_before,
+            lives_after=lives_after,
+            game_over=is_game_over,
+            tile_x=tile_x,
+            tile_y=tile_y,
+        )
         if is_game_over and active_scene and hasattr(active_scene, "reset_bomb_circuit_to_default"):
             try:
                 active_scene.reset_bomb_circuit_to_default()
@@ -69,6 +82,11 @@ class DeathFlowManager:
         self.death_context = None
 
         if context["is_game_over"]:
+            TelemetryService.get().record(
+                "game_over",
+                scene=context["return_scene_name"],
+                return_scene=self.game_over_return_scene,
+            )
             self.life_manager.reset_lives()
             self.scene_manager.start_new_journey(
                 start_scene_name=self.game_over_return_scene,
@@ -77,6 +95,7 @@ class DeathFlowManager:
             return
 
         return_scene_name = context["return_scene_name"]
+        TelemetryService.get().record("level_retry", scene=return_scene_name, lives=context["lives_after"])
         if not self.scene_manager.has_scene(return_scene_name):
             self.scene_manager.start_fade(self.game_over_return_scene, duration)
             return

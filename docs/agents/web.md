@@ -5,7 +5,8 @@ Read before changing the web build, touch input or editor layout.
 ## Web build (pygbag)
 
 - `sys.platform == "emscripten"` → fixed 1280x720 `SCALED` window; desktop stays native fullscreen.
-- Saves are mirrored to localStorage by `core/web_storage_sync.py`.
+- Saves are mirrored to localStorage by `core/web_storage_sync.py` (key prefix `alexandria:`, or
+  `window.ALEX_STORAGE_PREFIX`). Research telemetry: `docs/agents/telemetry.md`.
 - Runtime dependencies for the web go in the PEP 723 block at the top of `main.py`; pygbag 0.9.3
   rejects version pins there, so the browser downloads current releases, which can differ from
   `requirements.txt`.

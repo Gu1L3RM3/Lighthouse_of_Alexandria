@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.settings import CELL_SIZE
+from core.telemetry import TelemetryService
 
 
 def _clamp(value: float, min_v: float, max_v: float) -> float:
@@ -124,6 +125,13 @@ class BombManager:
         return True
 
     def update_from_resistor_results(self, resistor_results: dict | None, target_resistor: str = "R1"):
+        # Called every frame: only a new calibration is worth a research event.
+        previous = self.current_params
+        self._calibrate(resistor_results, target_resistor)
+        if self.current_params != previous:
+            TelemetryService.get().record("bomb_calibrated", **asdict(self.current_params))
+
+    def _calibrate(self, resistor_results: dict | None, target_resistor: str):
         if not resistor_results:
             self.current_params = self.default_params
             return

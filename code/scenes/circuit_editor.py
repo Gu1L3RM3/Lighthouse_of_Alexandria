@@ -15,7 +15,7 @@ from core.circuit_tools.circuit_domain import CircuitError
 from core.circuit_tools.circuit_entity_mapper import CircuitEntityMapper
 from core.circuit_tools.circuit_repository import CircuitJsonRepository
 from core.circuit_tools.storage_circuit_manager import StorageCircuitManager
-from core.settings import CELL_SIZE, path_in_circuitos
+from core.settings import CELL_SIZE, GENERIC_LEVEL_BOMB_EDITOR_FILE, path_in_circuitos
 from core.managers.scene_manager import SceneManager
 from core.managers.input_manager import InputManager
 from core.managers.language_service import LanguageService
@@ -140,6 +140,12 @@ class CircuitEditor(BaseScene):
         for entity in initial_entities:
             self.entity_mn.add_entity(entity)
         self.node_manager.rebuild(initial_entities)
+
+    def telemetry_editor_info(self) -> dict:
+        """Not a registered scene, so the session tracker asks the editor what it edits."""
+        kind = "bomb" if self.file == GENERIC_LEVEL_BOMB_EDITOR_FILE else "panel"
+        saved = bool(self.input_system is not None and self.input_system.saved)
+        return {"panel_file": self.file, "kind": kind, "saved": saved}
 
     def on_close(self):
         self.ui_manager.remove(self.eletric_list)

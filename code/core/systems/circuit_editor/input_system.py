@@ -38,6 +38,8 @@ from core.circuit_tools.numeric_solver import DcMnaSolver
 from core.managers.circuit_manager import CircuitManager
 from core.managers.input_manager import InputManager
 from core.settings import CELL_SIZE, CIRCUITOS_DIR
+from core.telemetry import TelemetryService
+from core.telemetry.circuit_summary import EditTally, summarize_circuit
 from typing import Type
 
 
@@ -89,6 +91,10 @@ class InputSystem(System):
         self.set_empty_boxes_for_debug()
 
         self.angle_deg=90
+        # One editor session: research telemetry reports these counts with each submit.
+        self.edit_tally = EditTally()
+        self.last_solve_error: str | None = None
+        self.saved = False
 
     def _log_solve_error_debug(self, message: str):
         if not self.debug_mode:
@@ -243,6 +249,7 @@ class InputSystem(System):
         if not self.can_delete(target):
             return
         self.entity_manager.remove_entity(target)
+        self.edit_tally.count("deleted")
         entities=self.entity_manager.get_entities()
         self.node_manager.refresh_after_remove(target,entities)
         if not target.has(LabelComponent):
@@ -261,6 +268,7 @@ class InputSystem(System):
                 label:LabelComponent = entity.get(LabelComponent)
                 self.storage_manager.add_component(entity.__class__.__name__,label.value)
         self.node_manager.clear_all_nodes()
+        self.edit_tally.count("cleared")
     def rotate_brush(self):
         if not self.brush or not self.brush.has(Connectable):
             return
@@ -284,6 +292,7 @@ class InputSystem(System):
         sprite.rotate(self.angle_deg)
         connectable.set_connections(self.angle_deg)
 
+        self.edit_tally.count("rotated")
         entities = self.entity_manager.get_entities()
         self.node_manager.refresh_after_entity_rotated(target, entities)
 
@@ -333,6 +342,7 @@ class InputSystem(System):
         new_entity = self.brush.copy()
         new_entity.remove(AlwaysOnTop)
         self.entity_manager.add_entity(new_entity)
+        self.edit_tally.count("placed")
         self.change_name_component()
         
         self.node_manager.handle_new_entity(new_entity, entities)
@@ -405,9 +415,11 @@ class InputSystem(System):
             CircuitManager.get().add_circuit_values(self.full_file,self.resistor_results)
             CircuitManager.get().add_total_values(self.full_file,self.total_values)
             self.set_voltage_current_resistors()
+            self.last_solve_error = None
 
             return True
         except (CircuitError, KeyError, TypeError, ValueError) as e:
+            self.last_solve_error = type(e).__name__
             self._log_solve_error_debug(
                 f"arquivo='{self.full_file}' detalhe='{e}'"
             )
@@ -423,8 +435,20 @@ class InputSystem(System):
         self.circuit_repository.save(self.json_file, document)
         self.storage_manager.save_eletric_storage()
         self.storage_manager.sync_baseline()
-        self.solve_circuit(document)
+        self.saved = True
+        solvable = self.solve_circuit(document)
+        self._record_submit(document, solvable)
         self.set_empty_boxes_for_debug()
+
+    def _record_submit(self, document, solvable: bool):
+        TelemetryService.get().record(
+            "circuit_submit",
+            panel_file=self.full_file,
+            solvable=bool(solvable),
+            error_kind=None if solvable else self.last_solve_error,
+            edits=self.edit_tally.as_dict(),
+            **summarize_circuit(document),
+        )
         
 
     def load_circuit(self):

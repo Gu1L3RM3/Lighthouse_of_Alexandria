@@ -71,7 +71,7 @@ class ControlPannel(Item):
                 "source": "control_pannel",
                 "pannel_id": self.pannel_id,
             })
-        self.event_manager.post({'type': 'panel_solved', 'pannel_id': self.pannel_id})
+        self.event_manager.post({'type': 'panel_solved', 'pannel_id': self.pannel_id, 'panel_file': self.name_file})
         if self.bomb_reward > 0:
             self.event_manager.post({'type': 'panel_bomb_reward', 'pannel_id': self.pannel_id, 'amount': self.bomb_reward})
         elif "luz" in self.action_type:

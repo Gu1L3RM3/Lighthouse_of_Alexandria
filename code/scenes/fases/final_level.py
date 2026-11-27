@@ -35,11 +35,13 @@ from core.settings import (
     path_in_circuitos,
 )
 from core.circuit_tools.legacy_circuit_aliases import INVENTORY_COMPONENT_TYPE_BY_KIND
+from core.telemetry import TelemetryService
 
 
 class FinalLevel(BaseMaxPowerLevel):
     DEFAULT_PANEL_HOLD_SECONDS = FINAL_LEVEL_DEFAULT_PANEL_HOLD_SECONDS
     FINAL_FADE_SECONDS = FINAL_LEVEL_FINAL_FADE_SECONDS
+    FINAL_NEXT_SCENE = "ending_lighthouse"
     STORAGE_TYPE_BY_KIND = dict(INVENTORY_COMPONENT_TYPE_BY_KIND)
 
     def __init__(self, screen, level_path):
@@ -309,8 +311,14 @@ class FinalLevel(BaseMaxPowerLevel):
             return
 
         if all(panel.done for panel in panels):
+            if not self._won:
+                TelemetryService.get().record(
+                    "level_complete",
+                    scene=self.scene_manager.active_scene_name,
+                    next_scene=self.FINAL_NEXT_SCENE,
+                )
             self._won = True
-            self.scene_manager.start_fade("ending_lighthouse", self.FINAL_FADE_SECONDS)
+            self.scene_manager.start_fade(self.FINAL_NEXT_SCENE, self.FINAL_FADE_SECONDS)
             return
 
         # Remove timers de paineis atualmente "errados".
@@ -355,6 +363,7 @@ class FinalLevel(BaseMaxPowerLevel):
         panel.done = False
         panel.panel_status.set_done(False)
         self.panel_timers.pop(panel_id, None)
+        TelemetryService.get().record("panel_reverted", panel_id=panel_id, panel_file=panel.name_file)
         # Ordem obrigatoria: devolver itens ao mapa e retirar do storage antes do reroll.
         self._respawn_components_for_area(area_id, panel_id)
         self._restore_panel_json(panel_id)
@@ -650,7 +659,7 @@ class FinalLevel(BaseMaxPowerLevel):
 
         player = self.entity_mn.get_player()
         if not player:
-            self.death_flow_manager.handle_player_death()
+            self.death_flow_manager.handle_player_death(cause="enemy")
             return
 
         if player.has(Freeze):
@@ -665,8 +674,8 @@ class FinalLevel(BaseMaxPowerLevel):
                 f"death_{dir_name}",
                 reset=True,
                 loop=False,
-                on_finish=lambda: self.death_flow_manager.handle_player_death(),
+                on_finish=lambda: self.death_flow_manager.handle_player_death(cause="enemy"),
             )
             return
 
-        self.death_flow_manager.handle_player_death()
+        self.death_flow_manager.handle_player_death(cause="enemy")
