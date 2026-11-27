@@ -36,9 +36,10 @@ pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png
 ## Delivery
 
 - Work on a branch; `main` receives code only through a PR with the `tests` check green.
-- **A merge into `main` is a public release** (tag, GitHub Release, itch.io, Pages), except when
-  only documentation or harness files change (`paths-ignore` in `cd.yml`). Merge only when
-  the owner asks.
+- **A merge into `main` is a public release** (tag and GitHub Release; itch.io is paused and Pages removed during the research study), except when
+  only documentation or harness files change (`paths-ignore` in `cd.yml`). The owner
+  pre-authorized automatic merges: open the PR and run `gh pr merge --squash --auto`, so it
+  lands only with CI green. Never `--admin`, never push to `main`, never force-push.
 - Website work (`site/`) also needs the security session (`web-security` skill) before it ships.
   Game changes do not.
 - Done = `scripts/verify.sh full` passing, shown. Visible changes also need opened screenshots
