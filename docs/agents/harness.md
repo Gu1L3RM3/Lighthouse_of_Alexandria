@@ -31,7 +31,7 @@ pip install -r requirements-e2e.txt && python -m playwright install chromium
 | One queued task | `/task [ID]` (`/decide <ID>` first if decisions are open) |
 | End-to-end check | `playtest` skill or the `playtester` agent |
 | Website change, before shipping | `/web-security` in a fresh session, or the `web-security-reviewer` agent |
-| Close a branch | `/ship-branch` (never merges) |
+| Close a branch | `/ship-branch` (PR + auto-merge on green CI) |
 | Repeated mistake | `/lesson <rule>` |
 
 Agents: `alexandria-scout` (map), `alexandria-implementer` (TDD in a worktree),

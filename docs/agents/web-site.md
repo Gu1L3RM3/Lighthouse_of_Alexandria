@@ -1,40 +1,25 @@
 # Game website
 
-Read before building or changing the website. Nothing is built yet: this is the starting contract.
-Plan the site with `/spec` and design it with the `frontend-design` skill.
+The research website is **not** in this public repository. It lives in a private repository
+(Next.js + Supabase + Vercel) because it holds student accounts, the admin area and research data.
 
 ## Today
 
-GitHub Pages serves the web game itself at the root
-(`https://gu1l3rm3.github.io/Lighthouse_of_Alexandria/`), published by `cd.yml` together with every
-game release. itch.io hosts the downloads and a browser copy.
+- GitHub Pages no longer serves the game, and the itch.io job in `cd.yml` is disabled (`if: false`)
+  while the study runs.
+- Every release attaches `alexandria-web.tar.gz` (the complete `build/web` directory). The private
+  site downloads a pinned release, serves it under its own origin and injects the telemetry bridge.
 
-## Decide in the first spec
+## Contract with this repository
 
-- Where the game moves (proposal: `/jogar/`, with the site at the root). localStorage saves are per
-  origin, so a new path on the same origin keeps them; check pygbag's relative asset paths.
-- Deploy: a site workflow with `paths:` filters, so site changes do not release the game. One Pages
-  deploy must publish site and game together.
-- Stack. Prefer static HTML/CSS/JS in `site/` (already excluded from the web bundle) unless the
-  content needs a generator.
-- Audience: players, teachers (Level Studio), researchers.
+- The game never contains URLs, keys or student data. Telemetry is opt-in: it only sends events
+  when the page defines `window.alexTelemetry` (see `docs/agents/telemetry.md`).
+- `window.ALEX_STORAGE_PREFIX`, when set by the page, namespaces localStorage saves per student.
+- Changing an event's name or props is a contract change: update `docs/agents/telemetry.md` and
+  tell the site's maintainers in the PR body.
 
-## Identity
+## Identity (shared with the site)
 
-Take it from the game, not from a template: night sky `#0f142a`, sea `#183151`, stone `#b0a688`,
-flame `#ebb45c`, cream `#f5e6aa`, the Press Start 2P font for headings only, pixel art drawn with
-hard edges. Sources: `web/alexandria.tmpl`, `main_menu_scene.py`, `docs/media/`,
-`docs/marketing/`. Respect the asset pack licences listed in the in-game credits.
-
-## Done means
-
-- Portuguese and English, with the same content in both.
-- Checked at 390 px and 1440 px with the Playwright MCP: no horizontal scroll, no overlap, no
-  console errors, screenshots opened.
-- Keyboard reaches every control with visible focus; text contrast at least 4.5:1; images have
-  `alt`; `prefers-reduced-motion` honoured.
-- Light: no video or large GIF on first load; images compressed and sized.
-- No secrets, trackers or third-party scripts without a decision.
-- The security session (`web-security` skill) ends in `SECURITY: PASS`. It runs only for website
-  work; its checklist covers what GitHub Pages leaves to the page itself (CSP, referrer policy).
-- A repeatable check is added to `scripts/verify.sh` and CI with the first page.
+Night sky `#0f142a`, sea `#183151`, stone `#b0a688`, flame `#ebb45c`, cream `#f5e6aa`, the Press
+Start 2P font for headings only, pixel art drawn with hard edges. Sources: `web/alexandria.tmpl`,
+`main_menu_scene.py`, `docs/media/`, `docs/marketing/`.

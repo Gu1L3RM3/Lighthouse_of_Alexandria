@@ -136,31 +136,24 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # Pages uses the tar.gz bundle; the itch.io zip only contains the APK.
-      - uses: actions/upload-pages-artifact@v4
+      # The full build/web directory (index.html + .tar.gz bundle) is what other
+      # sites host; the itch.io zip only carries the APK.
+      - name: Package web site bundle
+        run: tar -czf alexandria-web.tar.gz -C build/web .
+
+      - uses: actions/upload-artifact@v4
         with:
-          path: build/web
+          name: build-web-site
+          path: alexandria-web.tar.gz
+          if-no-files-found: error
+          retention-days: 7
 
-  publish-pages:
-    name: publish GitHub Pages
-    needs: [build, build-web]
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/configure-pages@v5
-
-      - name: Deploy web game
-        id: deployment
-        uses: actions/deploy-pages@v4
-
+  # Disabled for now: during the research study the web game is served only by the
+  # research website. Remove `if: false` to publish to itch.io again.
   publish-itch:
     name: publish itch.io
     needs: [version, build, build-web]
+    if: false
     runs-on: ubuntu-latest
     env:
       BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
@@ -212,3 +205,4 @@ jobs:
             alexandria-windows.zip
             alexandria-linux.tar.gz
             alexandria-html5.zip
+            alexandria-web.tar.gz
