@@ -30,6 +30,8 @@ from core.ui.widgets.button import Button
 from core.ui.widgets.gesture_detector import ClickType
 from core.managers.input_manager import InputManager
 from core.ui.prompt_ui import draw_prompt_hint_row
+from core.telemetry import TelemetryService
+from core.telemetry.slides import SlideTracker
 
 
 class BaseExplanationLevel(BaseScene):
@@ -75,6 +77,8 @@ class BaseExplanationLevel(BaseScene):
         self._warned_missing_explanation_images: set[str] = set()
         self._validate_dialogue_image_sequences()
         self._active_dialogue_image_widget: DialogueImageSequenceWidget | None = None
+        self._active_slides_dialogue_id: str | None = None
+        self.slide_tracker = SlideTracker(TelemetryService.get())
         self.attention_manager = AttentionManager(self.entity_mn)
         self.input_manager = InputManager.get()
         self.dialogue_hud = DialogueInteractionHUDController(
@@ -261,6 +265,7 @@ class BaseExplanationLevel(BaseScene):
             captions=captions,
         )
         self.ui_manager.add(self._active_dialogue_image_widget)
+        self._active_slides_dialogue_id = entity.name
 
     def _stop_dialogue_image_sequence(self, _event):
         if not self._active_dialogue_image_widget:
@@ -268,6 +273,8 @@ class BaseExplanationLevel(BaseScene):
         if self._active_dialogue_image_widget in self.ui_manager.widgets:
             self.ui_manager.remove(self._active_dialogue_image_widget)
         self._active_dialogue_image_widget = None
+        self._active_slides_dialogue_id = None
+        self.slide_tracker.observe(None, None)
 
     def _activate_key_if_last_dialogue(self, event):
         if not self.key or not self.last_dialogue_name:
@@ -319,8 +326,14 @@ class BaseExplanationLevel(BaseScene):
             extra_prompt_label=LanguageService.get().get_ui_label("enter"),
         )
         self.dialog_system.update(self.entity_mn, self.player, dt)
+        self._observe_slide()
         self.update_systems(dt)
         self.ui_manager.update(dt)
+
+    def _observe_slide(self):
+        widget = self._active_dialogue_image_widget
+        index = widget.dialogue.current_index if widget is not None else None
+        self.slide_tracker.observe(self._active_slides_dialogue_id, index)
 
     def render(self):
         self.screen.fill(BLACK)

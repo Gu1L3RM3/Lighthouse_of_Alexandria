@@ -1,6 +1,7 @@
 from typing import Dict
 import random
 
+from core.telemetry.panel_status import PanelStatusReporter
 from core.circuit_tools.circuit_file_service import CircuitFileService, CircuitService
 from core.circuit_tools.circuit_domain import ElementKind
 from core.components.label_component import LabelComponent
@@ -26,6 +27,7 @@ class ResistorAssociationValidatorSystem(System):
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
+        self.panel_status_reporter = PanelStatusReporter(level_path, tolerance_percent)
         self._validation_interval = 0.12
         self._validation_acc = 0.0
         self._panel_rr_index = 0
@@ -234,5 +236,12 @@ class ResistorAssociationValidatorSystem(System):
         answer = float(req_player["value"])
         target_req = float(control_pannel.solution_value)
         is_correct = self._float_equals_percent(answer, target_req, self.tolerance_percent)
+        self.panel_status_reporter.report(
+            control_pannel.pannel_id,
+            "solved" if is_correct else "wrong_answer",
+            measured=answer,
+            expected=target_req,
+            solution_type="resistance",
+        )
         if is_correct:
             control_pannel.action()

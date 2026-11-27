@@ -1,4 +1,5 @@
 from random import choice
+from core.telemetry.panel_status import PanelStatusReporter
 from core.ecs import System
 from core.managers.entity_manager import EntityManager
 from core.managers.event_manager import EventManager
@@ -26,15 +27,17 @@ class ResistorPairValidatorSystem(System):
         self._panel_rr_index = 0
         self.debug = True
         self._panel_status_cache: dict[int, str] = {}
+        self.panel_status_reporter = PanelStatusReporter(level_path, tolerance_percent)
         self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
 
     def _log(self, message: str):
         _ = message
 
-    def _set_panel_status(self, panel_id: int, status: str, details: str = ""):
+    def _set_panel_status(self, panel_id: int, status: str, details: str = "", **measurement):
         if self._panel_status_cache.get(panel_id) == status:
             return
         self._panel_status_cache[panel_id] = status
+        self.panel_status_reporter.report(panel_id, status, **measurement)
         message = f"panel={panel_id} status={status}"
         if details:
             message += f" | {details}"
@@ -206,6 +209,9 @@ class ResistorPairValidatorSystem(System):
                     f"medido={measured_values} esperado={solution_values} "
                     f"tipo={solution_type} tol={self.tolerance_percent}%"
                 ),
+                measured=measured_values,
+                expected=solution_values,
+                solution_type=solution_type,
             )
             control_pannel.action()
         else:
@@ -216,4 +222,7 @@ class ResistorPairValidatorSystem(System):
                     f"medido={measured_values} esperado={solution_values} "
                     f"tipo={solution_type} tol={self.tolerance_percent}%"
                 ),
+                measured=measured_values,
+                expected=solution_values,
+                solution_type=solution_type,
             )

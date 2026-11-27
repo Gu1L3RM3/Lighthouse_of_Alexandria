@@ -1,6 +1,7 @@
 from random import choice
 import math
 
+from core.telemetry.panel_status import PanelStatusReporter
 from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
@@ -37,6 +38,7 @@ class MaxPowerTransferValidatorSystem(System):
         self.event_manager = EventManager.get()
         self.circuit_manager = CircuitManager.get()
         self.tolerance_percent = tolerance_percent
+        self.panel_status_reporter = PanelStatusReporter(level_path, tolerance_percent)
         self.debug = False
         self.gabarito_debug = False
         self._last_validation_state: dict[int, bool] = {}
@@ -547,6 +549,13 @@ class MaxPowerTransferValidatorSystem(System):
             previous_state = self._last_validation_state.get(panel_id)
             if previous_state is None or previous_state != all_ok:
                 self._last_validation_state[panel_id] = all_ok
+                self.panel_status_reporter.report(
+                    panel_id,
+                    "solved" if all_ok else "wrong_answer",
+                    measured={name: value for name, value, _, _ in check_details},
+                    expected={name: value for name, _, value, _ in check_details},
+                    solution_type=cp.solution_type,
+                )
                 self._log(
                     f"Painel {cp.pannel_id}: medido P={ans_p:.3g}W V={ans_v:.3g}V I={ans_i:.3g}A R={ans_r:.3g} Ohm "
                     f"| esperado P={expected['power']:.3g}W V={expected['voltage']:.3g}V I={expected['current']:.3g}A "

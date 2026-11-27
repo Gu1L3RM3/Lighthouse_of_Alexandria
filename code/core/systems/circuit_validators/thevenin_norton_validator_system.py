@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from copy import deepcopy
 from random import choice, shuffle
+from core.telemetry.panel_status import PanelStatusReporter
 from core.ecs import System
 from core.managers.event_manager import EventManager
 from core.managers.circuit_manager import CircuitManager
@@ -48,6 +49,7 @@ class TheveninNortonValidatorSystem(System):
         self.debug_panel_logs = True
         self.runtime_status_logs = False
         self._panel_status_cache: dict[int, str] = {}
+        self.panel_status_reporter = PanelStatusReporter(level_path, tolerance_percent)
         self.circuits = circuit_service or CircuitFileService(CELL_SIZE)
         self.entity_mapper = entity_mapper or CircuitEntityMapper()
 
@@ -64,10 +66,12 @@ class TheveninNortonValidatorSystem(System):
     def _log(self, message: str):
         _ = message
 
-    def _set_panel_status(self, panel_id: int, status: str):
+    def _set_panel_status(self, panel_id: int, status: str, **measurement):
         if self._panel_status_cache.get(panel_id) == status:
             return
         self._panel_status_cache[panel_id] = status
+        # Reasons such as "mismatch_vth expected=.. got=.." carry values: only the first word is the status.
+        self.panel_status_reporter.report(panel_id, status.split(" ", 1)[0], **measurement)
         if self.runtime_status_logs or status == "solved":
             self._log(f"panel={panel_id} status={status}")
 
@@ -609,6 +613,14 @@ class TheveninNortonValidatorSystem(System):
     # =========================================================
     # RUNTIME VALIDATION
     # =========================================================
+    @staticmethod
+    def _expected_equivalent(cp: ControlPannel) -> dict | None:
+        solution_value = cp.solution_value
+        if not isinstance(solution_value, dict):
+            return None
+        expected = solution_value.get("expected", {})
+        return {key: expected.get(key) for key in ("source_kind", "source_value", "resistance_value")}
+
     def _validate_equivalent_values(self, cp: ControlPannel, player_values: dict) -> tuple[bool, str]:
         solution_value = cp.solution_value
         if not isinstance(solution_value, dict):
@@ -678,11 +690,16 @@ class TheveninNortonValidatorSystem(System):
             return
 
         valid, reason = self._validate_equivalent_values(cp, player_values)
+        measurement = {
+            "measured": player_values,
+            "expected": self._expected_equivalent(cp),
+            "solution_type": cp.solution_type,
+        }
         if valid:
-            self._set_panel_status(cp.pannel_id, "solved")
+            self._set_panel_status(cp.pannel_id, "solved", **measurement)
             cp.action()
         else:
-            self._set_panel_status(cp.pannel_id, reason or "validation_failed")
+            self._set_panel_status(cp.pannel_id, reason or "validation_failed", **measurement)
 
     def update(self, entity_mn, dt):
         self._validation_acc += max(0.0, float(dt))

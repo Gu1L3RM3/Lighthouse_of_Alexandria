@@ -10,6 +10,8 @@ from core.components.position import Position
 from core.components.team import Team
 from core.components.velocity import Velocity
 from core.ecs import System
+from core.telemetry import TelemetryService
+from core.telemetry.positions import player_tile
 from core.settings import (
     GENERIC_LEVEL_BOMB_EDITOR_FILE,
     GENERIC_LEVEL_BOMB_ENEMY_HIT_MARGIN,
@@ -30,6 +32,7 @@ class GenericLevelBombSystem(System):
 
     def place_bomb(self):
         if not self.scene.bomb_manager.consume_bomb():
+            TelemetryService.get().record("bomb_unavailable")
             self.scene.audio_manager.play_ui("sfx/ui_back.ogg", volume=0.9)
             return
 
@@ -48,6 +51,16 @@ class GenericLevelBombSystem(System):
                 "radius": float(params.explosion_radius),
                 "damage": float(params.damage),
             }
+        )
+        tile_x, tile_y = player_tile(self.scene)
+        TelemetryService.get().record(
+            "bomb_placed",
+            remaining=self.scene.bomb_manager.remaining_bombs,
+            delay=float(params.explosion_delay),
+            radius=float(params.explosion_radius),
+            damage=float(params.damage),
+            tile_x=tile_x,
+            tile_y=tile_y,
         )
         self.scene.audio_manager.play_sfx("sfx/lighthouse_ignite.ogg", volume=0.58)
 
@@ -98,6 +111,8 @@ class GenericLevelBombSystem(System):
         self.scene.camera.start_shake(duration=0.22, intensity=shake_intensity)
         self.scene.audio_manager.play_sfx("sfx/bombs/explosion_01.ogg", volume=0.45)
 
+        enemies_hit = 0
+        enemies_killed = 0
         enemies = self.scene.entity_mn.get_entities_with(Position, Team, Health)
         for enemy in enemies:
             team: Team = enemy.get(Team)
@@ -106,24 +121,41 @@ class GenericLevelBombSystem(System):
             enemy_pos: Position = enemy.get(Position)
             if (enemy_pos.center_pos() - center).length_squared() > enemy_radius_sq:
                 continue
-            self.damage_enemy(enemy, damage)
+            enemies_hit += 1
+            if self.damage_enemy(enemy, damage):
+                enemies_killed += 1
 
+        webs_destroyed = 0
         if hasattr(self.scene, "spider_web_system"):
             try:
-                self.scene.spider_web_system.destroy_traps_in_radius(self.scene.entity_mn, center, radius)
+                webs_destroyed = int(
+                    self.scene.spider_web_system.destroy_traps_in_radius(self.scene.entity_mn, center, radius) or 0
+                )
             except Exception:
                 pass
 
-        if self.scene.player and self.scene.player.has(Position):
-            if (self.scene.player.get(Position).center_pos() - center).length_squared() <= radius_sq:
-                self.trigger_player_death()
+        self_hit = bool(
+            self.scene.player
+            and self.scene.player.has(Position)
+            and (self.scene.player.get(Position).center_pos() - center).length_squared() <= radius_sq
+        )
+        TelemetryService.get().record(
+            "bomb_exploded",
+            enemies_hit=enemies_hit,
+            enemies_killed=enemies_killed,
+            webs_destroyed=webs_destroyed,
+            self_hit=self_hit,
+        )
+        if self_hit:
+            self.trigger_player_death()
 
-    def damage_enemy(self, enemy, damage: float):
+    def damage_enemy(self, enemy, damage: float) -> bool:
+        """Returns True when the hit killed the enemy."""
         health: Health = enemy.get(Health)
         died = health.take_damage(damage)
         if not died:
             self.play_enemy_hit_feedback(enemy)
-            return
+            return False
         was_phantom = enemy.has(PhantomAI)
 
         if enemy.has(PathFollower):
@@ -150,8 +182,9 @@ class GenericLevelBombSystem(System):
                     loop=False,
                     on_finish=lambda eid=enemy.id: self.scene.event_manager.post({"type": "kill_entity", "id": eid}),
                 )
-                return
+                return True
         self.scene.event_manager.post({"type": "kill_entity", "id": enemy.id})
+        return True
 
     def play_enemy_hit_feedback(self, enemy):
         if not enemy.has(AnimateSprite):
@@ -193,7 +226,7 @@ class GenericLevelBombSystem(System):
 
         player = self.scene.entity_mn.get_player()
         if not player:
-            self.scene.death_flow_manager.handle_player_death()
+            self.scene.death_flow_manager.handle_player_death(cause="own_bomb")
             return
 
         if player.has(Freeze):
@@ -209,7 +242,7 @@ class GenericLevelBombSystem(System):
                 f"death_{dir_name}",
                 reset=True,
                 loop=False,
-                on_finish=lambda: self.scene.death_flow_manager.handle_player_death(),
+                on_finish=lambda: self.scene.death_flow_manager.handle_player_death(cause="own_bomb"),
             )
             return
-        self.scene.death_flow_manager.handle_player_death()
+        self.scene.death_flow_manager.handle_player_death(cause="own_bomb")

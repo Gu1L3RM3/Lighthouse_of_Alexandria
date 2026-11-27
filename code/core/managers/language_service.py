@@ -1,4 +1,5 @@
 from core.settings import DEFAULT_LANGUAGE
+from core.telemetry import TelemetryService
 from core.repositories.language_preferences_repository import LanguagePreferencesRepository
 
 
@@ -184,6 +185,8 @@ class LanguageService:
 
     def set_language(self, language: str) -> str:
         normalized = self._normalize_language(language)
+        if normalized != self.current_language:
+            TelemetryService.get().record("language_change", **{"from": self.current_language, "to": normalized})
         self.current_language = normalized
         self.repository.save_language(normalized)
         return normalized

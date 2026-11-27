@@ -363,7 +363,7 @@ class BaseGenericLevel(BaseScene):
         if self.player and self.player.has(Velocity):
             self.player.get(Velocity).vxy = (0, 0)
         anim:AnimateSprite = self.player.get(AnimateSprite)
-        anim.play('fall', reset=True, loop=False, on_finish=self.death_flow_manager.handle_player_death)
+        anim.play('fall', reset=True, loop=False, on_finish=lambda: self.death_flow_manager.handle_player_death(cause="fall"))
 
     def update_storage_circuit(self,event):
         value = event['value']
