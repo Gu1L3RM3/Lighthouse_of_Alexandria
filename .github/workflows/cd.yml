@@ -126,6 +126,8 @@ jobs:
 
       - name: Build web archive
         run: |
+          # Telemetry reports this as game_version (read from the project root).
+          echo "${{ needs.version.outputs.version }}" > VERSION
           python -m pygbag --template web/alexandria.tmpl --icon assets/images/icon/game_icon_64.png --build --archive .
           mv build/web.zip alexandria-html5.zip
 
