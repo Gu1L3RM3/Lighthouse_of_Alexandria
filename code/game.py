@@ -3,7 +3,7 @@ import pygame
 import time
 import os
 from functools import partial
-from core.settings               import FPS, ASSETS_DIR, IS_WEB, WEB_RESOLUTION, AUDIO_FREQUENCY, AUDIO_BUFFER_SAMPLES
+from core.settings               import FPS, ASSETS_DIR, IS_WEB, WEB_RESOLUTION, AUDIO_FREQUENCY, AUDIO_BUFFER_SAMPLES, BUNDLE_ROOT, PROJECT_ROOT
 from core.managers.event_manager import EventManager
 from core.managers.scene_manager import SceneManager
 from core.managers.life_manager  import LifeManager
@@ -15,6 +15,11 @@ from core.managers.resource_manager import ResourceManager
 from core.touch_gamepad import TouchGamepad
 from core.touch_points import TouchPoints
 from core.circuit_tools.inventory_repository import InventoryRepository
+from core.telemetry import TelemetryService
+from core.telemetry.activity import has_player_input
+from core.telemetry.event_listeners import install_event_listeners
+from core.telemetry.session_info import read_game_version, record_session_start
+from core.telemetry.session_tracker import SessionTracker
 from scenes.home_scene           import HomeScene
 from scenes.home_after_scene     import HomeAfterScene
 from scenes.main_menu_scene      import MainMenuScene
@@ -41,6 +46,7 @@ from pathlib import Path
 
 
 STORAGE_SYNC_INTERVAL_SECONDS = 1.0
+TELEMETRY_INTERVAL_SECONDS = 1.0
 
 
 class FrameProfiler:
@@ -109,12 +115,17 @@ class FrameProfiler:
 
 
 class Game:
-    def __init__(self, storage_sync=None):
+    def __init__(self, storage_sync=None, telemetry: TelemetryService | None = None, visibility_reader=None, viewport=None):
         # pygame.init() opens the mixer, so its settings must be given beforehand.
         pygame.mixer.pre_init(AUDIO_FREQUENCY, -16, 2, AUDIO_BUFFER_SAMPLES)
         pygame.init()
         self.storage_sync = storage_sync
         self._storage_sync_elapsed = 0.0
+        # Installed before any scene is built: scenes and managers record through TelemetryService.get().
+        self.telemetry = telemetry or TelemetryService()
+        TelemetryService.set_instance(self.telemetry)
+        self.visibility_reader = visibility_reader
+        self._telemetry_elapsed = 0.0
         if IS_WEB:
             self.screen_width, self.screen_height = WEB_RESOLUTION
             self.screen = pygame.display.set_mode(WEB_RESOLUTION, pygame.SCALED)
@@ -131,6 +142,9 @@ class Game:
 
         self.event_manager = EventManager.get()
         self.scene_manager = SceneManager.get()
+        self.telemetry.scene_provider = lambda: self.scene_manager.active_scene_name
+        install_event_listeners(self.event_manager, self.telemetry)
+        self.session_tracker = SessionTracker(self.telemetry)
         self.life_manager = LifeManager.get()
         self.audio_manager = AudioManager.get()
         self.save_manager = SaveGameManager.get()
@@ -183,6 +197,14 @@ class Game:
         #self.scene_manager.change('fase_5')
         self._last_scene_name = self.scene_manager.active_scene_name
         self.audio_manager.on_scene_changed(self._last_scene_name)
+        record_session_start(
+            self.telemetry,
+            game_version=read_game_version([BUNDLE_ROOT, PROJECT_ROOT]),
+            language=self.language_service.get_current_language(),
+            is_web=IS_WEB,
+            viewport=viewport or self.screen.get_size(),
+            input_source=self.input_manager.last_input_source,
+        )
 
         
     def _set_window_icon(self):
@@ -251,6 +273,7 @@ class Game:
                 getattr(self.scene_manager.active_scene, "shows_touch_gamepad", True)
             )
             events = self.input_manager.process_events(events)
+            had_player_input = has_player_input(events)
             self.profiler.mark("events")
             filtered_events = []
 
@@ -275,6 +298,12 @@ class Game:
             self.profiler.mark("input")
             scene.update(dt)
             self.input_manager.apply_mouse_visibility()
+            self.session_tracker.observe_frame(
+                self.scene_manager.active_scene_name,
+                self.scene_manager.active_scene,
+                had_player_input,
+                self.input_manager.last_input_source,
+            )
             self.profiler.mark("update")
 
             scene.render()
@@ -290,6 +319,7 @@ class Game:
             self.profiler.mark("flip")
             self.profiler.end_frame()
             self._persist_storage_periodically(dt)
+            self._report_telemetry_periodically(dt)
             # Yields to the browser event loop under pygbag; a no-op cost on desktop.
             await asyncio.sleep(0)
 
@@ -319,7 +349,24 @@ class Game:
         self._storage_sync_elapsed = 0.0
         self.storage_sync.persist_changes()
 
+    def _report_telemetry_periodically(self, dt: float):
+        self._telemetry_elapsed += dt
+        if self._telemetry_elapsed < TELEMETRY_INTERVAL_SECONDS:
+            return
+        self._telemetry_elapsed = 0.0
+        if self.visibility_reader is not None:
+            self.session_tracker.observe_visibility(self.visibility_reader())
+        self.telemetry.flush()
+
+    def _finish_telemetry(self):
+        try:
+            self.session_tracker.finish()
+        except Exception:
+            pass
+        self.telemetry.flush_all()
+
     def _shutdown(self):
+        self._finish_telemetry()
         self.scene_manager.active_scene.end()
         if self.storage_sync is not None:
             self.storage_sync.persist_changes()

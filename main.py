@@ -29,11 +29,33 @@ def build_storage_sync():
     if not IS_WEB:
         return None
     import platform  # pygbag's module, exposes the browser `window`
+    from core.telemetry.browser import read_storage_prefix
     from core.web_storage_sync import WebStorageSync
 
-    sync = WebStorageSync(CIRCUITOS_DIR.parent, [CIRCUITOS_DIR, SAVE_DIR], platform.window.localStorage)
+    sync = WebStorageSync(
+        CIRCUITOS_DIR.parent,
+        [CIRCUITOS_DIR, SAVE_DIR],
+        platform.window.localStorage,
+        key_prefix=read_storage_prefix(platform.window),
+    )
     sync.restore()
     return sync
+
+
+def build_telemetry_options() -> dict:
+    """Research telemetry stays off unless the hosting page defines `window.alexTelemetry`."""
+    if not IS_WEB:
+        return {}
+    import platform
+    from core.telemetry import TelemetryService
+    from core.telemetry.browser import create_transport, read_viewport_size, read_visibility_state
+
+    window = platform.window
+    return {
+        "telemetry": TelemetryService(transport=create_transport(sys.platform, window)),
+        "visibility_reader": lambda: read_visibility_state(window),
+        "viewport": read_viewport_size(window),
+    }
 
 
 def report_crash(message: str) -> None:
@@ -50,7 +72,7 @@ async def run_game():
     storage_sync = build_storage_sync()
     from game import Game
 
-    await Game(storage_sync=storage_sync).run()
+    await Game(storage_sync=storage_sync, **build_telemetry_options()).run()
 
 
 async def main():

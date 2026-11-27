@@ -7,8 +7,10 @@ DATA_PATTERN = "*.json"
 
 
 class WebStorageSync:
-    def __init__(self, root: Path, data_dirs: list[Path], storage):
+    def __init__(self, root: Path, data_dirs: list[Path], storage, key_prefix: str = KEY_PREFIX):
         self.root = Path(root)
+        # A hosting page can give each student a prefix, so people sharing a browser keep separate saves.
+        self.key_prefix = key_prefix
         self.data_dirs = [Path(data_dir) for data_dir in data_dirs]
         self.storage = storage
         self._known_mtimes: dict[Path, int] = {}
@@ -16,9 +18,9 @@ class WebStorageSync:
     def restore(self) -> None:
         for index in range(self.storage.length):
             key = self.storage.key(index)
-            if not key.startswith(KEY_PREFIX):
+            if not key.startswith(self.key_prefix):
                 continue
-            path = self.root / key[len(KEY_PREFIX):]
+            path = self.root / key[len(self.key_prefix):]
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(self.storage.getItem(key), encoding="utf-8")
         self._known_mtimes = self._scan_mtimes()
@@ -40,4 +42,4 @@ class WebStorageSync:
         }
 
     def _key(self, path: Path) -> str:
-        return KEY_PREFIX + path.relative_to(self.root).as_posix()
+        return self.key_prefix + path.relative_to(self.root).as_posix()
